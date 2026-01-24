@@ -1,0 +1,344 @@
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
+#include "raylib.h"
+#include "raymath.h"
+#include "../include/num_redefs.h"
+#include "geo.h"
+
+// Swap triangle indices
+void SwapTriIds(u16 *a, u16 *b) {
+	u16 temp = *a;
+	*a = *b;
+	*b = temp;
+} 
+
+// Compute a triangle's normal vector
+Vector3 TriNormal(Tri tri) {
+	Vector3 u = Vector3Subtract(tri.vertices[1], tri.vertices[0]);
+	Vector3 v = Vector3Subtract(tri.vertices[2], tri.vertices[0]);
+	return Vector3Normalize(Vector3CrossProduct(u, v));
+};
+
+// Compute a triangle's centroid vector
+Vector3 TriCentroid(Tri tri) {
+	return (Vector3) { 
+		.x = (tri.vertices[0].x + tri.vertices[1].x + tri.vertices[2].x) * 0.33f,
+		.y = (tri.vertices[0].y + tri.vertices[1].y + tri.vertices[2].y) * 0.33f,
+		.z = (tri.vertices[0].z + tri.vertices[1].z + tri.vertices[2].z) * 0.33f
+	};
+}
+
+// Calculate length of a box in each axis
+Vector3 BoxExtent(BoundingBox box) {
+	return Vector3Subtract(box.max, box.min);
+}
+
+// Compute surface area of box
+float BoxSurfaceArea(BoundingBox box) {
+	Vector3 extent = BoxExtent(box); 
+	return (extent.x * extent.y + extent.y * extent.z + extent.z * extent.x);
+}
+
+// Find center point of box
+Vector3 BoxCenter(BoundingBox box) {
+	Vector3 extent = BoxExtent(box);
+	return Vector3Subtract(box.max, Vector3Scale(extent, 0.5f));
+}
+
+// Return a box with min as [float max] and max as [float min]
+BoundingBox EmptyBox() {
+	return (BoundingBox) { .min = Vector3Scale(Vector3One(), FLT_MAX), .max = Vector3Scale(Vector3One(), -FLT_MAX) };
+}
+
+// Grow a box to fit a point in space
+BoundingBox BoxExpandToPoint(BoundingBox box, Vector3 point) {
+	return (BoundingBox) { .min = Vector3Min(box.min, point), .max = Vector3Max(box.max, point) };
+}
+
+// Create a primitive array from mesh
+Tri *MeshToTris(Mesh mesh, u16 *tri_count) {
+	// Get triangle count
+	u16 count = mesh.triangleCount;
+	*tri_count = count;
+	
+	// Create array
+	Tri *tris = calloc(count, sizeof(Tri));
+
+	// Populate array
+	for(u16 i = 0; i < count; i++) {
+		// Create empty tri
+		Tri tri = (Tri) {0};
+
+		// Get mesh indices
+		u16 indices[3] = {0};
+		memcpy(indices, mesh.indices + i * 3, sizeof(u16) * 3);
+
+		// Get XYZ values for each vertex
+		for(short j = 0; j < 3; j++) {
+			u16 id = indices[j];
+
+			tri.vertices[j] = (Vector3) { 
+				.x = mesh.vertices[id * 3 + 0],
+				.y = mesh.vertices[id * 3 + 1],
+				.z = mesh.vertices[id * 3 + 2] 
+			};
+		}
+
+		// Calculate normal vector
+		tri.normal = TriNormal(tri);
+
+		// Copy triangle to array
+		tris[i] = tri;
+	}
+
+	// Return array
+	return tris;
+}
+
+// Create a primitive array from model (with indexing)
+Tri *ModelToTris(Model model, u16 *tri_count, u16 **tri_ids) {
+	u16 count = 0;
+
+	// Intialize arrays
+	Tri *tris = NULL;
+	u16 *ids = NULL;
+
+	// Iterate through meshes
+	for(u16 i = 0; i < model.meshCount; i++) {
+		// Create temporary array for mesh triangles
+		u16 temp_count = 0;
+		Tri *temp_tris = MeshToTris(model.meshes[i], &temp_count);
+
+		// Increment count by mesh's tri count
+		count += temp_count; 
+
+		// Resize arrays
+		tris = realloc(tris, sizeof(Tri) * count);
+		ids = realloc(ids, sizeof(u16) * count);
+
+		// Set ids
+		for(u16 j = 0; j < temp_count; j++) {
+			u16 id = count - temp_count + j; 
+			ids[id] = id;
+		}
+
+		// Copy temp tris to primary array
+		memcpy(tris + count - temp_count, temp_tris, sizeof(Tri) * temp_count);
+
+		// Free temporary array
+		free(temp_tris);
+	}
+
+	// Set id and count values 
+	*tri_ids = ids;
+	*tri_count = count;
+
+	// Return triangle array
+	return tris;
+}
+
+// Calculate cost of a node
+float BvhNodeCost(BvhNode *node) {
+	return BoxSurfaceArea(node->bounds) * node->tri_count;
+}
+
+// Grow bounding box of a node using it's contained primitives
+void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id) {
+	BvhNode *node = &bvh->nodes[node_id];
+
+	node->bounds = EmptyBox();
+	
+	for(u16 i = 0; i < node->tri_count; i++) {
+		u16 tri_id = sect->tri_ids[node->first_tri + i];
+		Tri *tri = &sect->tris[tri_id];
+
+		for(short j = 0; j < 3; j++) {
+			node->bounds.min = (Vector3) {
+				fminf(node->bounds.min.x, tri->vertices[j].x),
+				fminf(node->bounds.min.y, tri->vertices[j].y),
+				fminf(node->bounds.min.z, tri->vertices[j].z)
+			};
+
+			node->bounds.max = (Vector3) {
+				fmaxf(node->bounds.max.x, tri->vertices[j].x),
+				fmaxf(node->bounds.max.y, tri->vertices[j].y),
+				fmaxf(node->bounds.max.z, tri->vertices[j].z)
+			};
+		}
+	}
+}
+
+// Start BVH tree construction
+void BvhConstruct(MapSection *sect) {
+	BvhTree *bvh = sect->bvh;
+
+	// Reset count
+	bvh->count = 0;
+
+	// Initalize empty node to use as root
+	BvhNode root = (BvhNode) {0};
+	root.bounds = EmptyBox();
+
+	// Grow bounds of root to contain all section geoemetry  
+	for(u16 i = 0; i < sect->tri_count; i++) {
+		Tri *tri = &sect->tris[sect->tri_ids[i]];
+
+		for(short j = 0; j < 3; j++) 
+			root.bounds = BoxExpandToPoint(root.bounds, tri->vertices[j]);
+	}
+
+	// Assign root to array, increment node count 
+	root.tri_count = sect->tri_count;
+	bvh->nodes[bvh->count++] = root;
+
+	// Start recursive node splitting
+	BvhNodeSubdivide(sect, sect->bvh, 0);
+
+	// When done splitting, trim array to save some memory
+	bvh->capacity = bvh->count;
+	bvh->nodes = realloc(bvh->nodes, sizeof(BvhNode) * bvh->capacity);
+}
+
+// Compute optimal plane for node subdivision  
+float FindBestSplit(MapSection *sect, BvhNode *node, short *axis, float *split_pos) {
+	float best_cost = FLT_MAX;	
+
+	for(short a = 0; a < 3; a++) {
+		float vmin = FLT_MAX, vmax = -FLT_MAX;
+
+		for(u16 i = 0; i < node->tri_count; i++) {
+			Tri tri = sect->tris[sect->tri_ids[node->first_tri + i]];
+			float3 centroid = Vector3ToFloatV(TriCentroid(tri));
+
+			vmin = fminf(vmin, centroid.v[a]);
+			vmax = fmaxf(vmax, centroid.v[a]);
+		}
+
+		if(vmin == vmax) continue;
+
+		Bin bins[BVH_BIN_COUNT] = {0};
+		for(short i = 0; i < BVH_BIN_COUNT; i++) bins[i].bounds = EmptyBox();
+
+		float scale = BVH_BIN_COUNT / (vmax - vmin);
+
+		for(u16 i = 0; i < node->tri_count; i++) {
+			Tri tri = sect->tris[sect->tri_ids[node->first_tri + i]];
+			float3 centroid = Vector3ToFloatV(TriCentroid(tri));
+
+			int bin_id = fmin(BVH_BIN_COUNT - 1, (int)((centroid.v[a] - vmin) * scale));
+
+			bins[bin_id].count++;	
+
+			for(short j = 0; j < 3; j++)
+				bins[bin_id].bounds = BoxExpandToPoint(bins[bin_id].bounds, tri.vertices[j]);
+		}
+
+		float area_lft[BVH_BIN_COUNT - 1], area_rgt[BVH_BIN_COUNT - 1];
+		u16 count_lft[BVH_BIN_COUNT - 1], count_rgt[BVH_BIN_COUNT - 1];
+
+		BoundingBox bounds_lft = EmptyBox(), bounds_rgt = EmptyBox();
+		u32 sum_lft = 0, sum_rgt = 0;
+
+		for(short i = 0; i < BVH_BIN_COUNT - 1; i++) {
+			short id_lft = i;
+			sum_lft += bins[id_lft].count;
+			count_lft[i] = sum_lft; 
+			bounds_lft.min = Vector3Min(bins[id_lft].bounds.min, bounds_lft.min);
+			bounds_lft.max = Vector3Max(bins[id_lft].bounds.max, bounds_lft.max);
+
+			short id_rgt = BVH_BIN_COUNT - 2 - i;
+			sum_rgt += bins[BVH_BIN_COUNT - 1 - i].count;
+			count_rgt[id_rgt] = sum_rgt;
+			bounds_rgt.min = Vector3Min(bins[BVH_BIN_COUNT - 1 - i].bounds.min, bounds_rgt.min);
+			bounds_rgt.max = Vector3Max(bins[BVH_BIN_COUNT - 1 - i].bounds.max, bounds_rgt.max);
+			area_rgt[id_rgt] = BoxSurfaceArea(bounds_rgt);
+		}
+
+		scale = (vmax - vmin) / BVH_BIN_COUNT;
+
+		for(short i = 0; i < BVH_BIN_COUNT - 1; i++) {
+			float cost = (count_lft[i] * area_lft[i] + count_rgt[i] * area_rgt[i]) / BoxSurfaceArea(node->bounds);
+
+			if(cost < best_cost) {
+				*axis = a;
+				*split_pos = vmin + scale * (i + 1); 
+				best_cost = cost;
+			}
+		}
+	}
+
+	return best_cost;
+}
+
+// Recursively split BVH nodes 
+void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
+	BvhNode *node = &sect->bvh->nodes[node_id];
+
+	// Base case:
+	// Node has too few tris to continue splitting
+	if(node->tri_count <= MAX_TRIS_PER_NODE) return;
+
+	// Determine split position and axis
+	short split_axis = -1;
+	float split_pos = 0;
+	float best_cost = FindBestSplit(sect, node, &split_axis, &split_pos);
+
+	// Base case:
+	// Cost of splitting exceeds cost of leaving as is
+	float parent_cost = BvhNodeCost(node);
+	if(best_cost > parent_cost) return;
+
+	// In-place partition
+	u16 i = node->first_tri;
+	u16 j = i + node->tri_count - 1;
+	while(i <= j) {
+		Tri tri = sect->tris[sect->tri_ids[i]];
+		float3 centroid = Vector3ToFloatV(TriCentroid(tri));
+
+		if(centroid.v[split_axis] < split_pos) i++;
+		else SwapTriIds(&sect->tri_ids[i], &sect->tri_ids[j--]);
+	}
+
+	u16 count_lft = i - node->first_tri;
+
+	// Base case: 
+	// Cancel subdivision if either side is empty
+	if(count_lft == 0 || count_lft == node->tri_count) return;
+
+	// Resize node array if needed
+	if(bvh->count + 2 >= bvh->capacity) {
+		bvh->capacity = bvh->capacity << 1;
+		bvh->nodes = realloc(bvh->nodes, sizeof(BvhNode) * sect->bvh->capacity);
+	}
+
+	// Create child nodes	
+	u16 child_lft = bvh->count++, child_rgt = bvh->count++;
+
+	bvh->nodes[child_lft] = (BvhNode) {
+		.first_tri = node->first_tri,	
+		.tri_count = count_lft,
+		.child_lft = 0, 
+		.child_rgt = 0
+	};
+
+	bvh->nodes[child_rgt] = (BvhNode) {
+		.first_tri = i,
+		.tri_count = node->tri_count - count_lft,
+		.child_lft = 0,
+		.child_rgt = 0
+	};
+
+	// Remove tris from parent node
+	node->tri_count = 0;
+
+	// Update child node bounds
+	BvhNodeUpdateBounds(sect, bvh, child_lft);
+	BvhNodeUpdateBounds(sect, bvh, child_rgt);
+	
+	// Continue splitting with left and right child nodes 
+	BvhNodeSubdivide(sect, bvh, child_lft);
+	BvhNodeSubdivide(sect, bvh, child_rgt);
+}
+

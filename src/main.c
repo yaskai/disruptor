@@ -1,27 +1,36 @@
 #include "raylib.h"
 #include "config.h"
+#include "game.h"
 
 int main() {
 	Config conf = (Config) {0};
 	ConfigInit(&conf);
 	ConfigRead(&conf, "options.conf");
 
-	SetTraceLogLevel(LOG_NONE);
-	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+	Game game = (Game) {0};
+	GameInit(&game, &conf);
 
-	InitWindow(conf.window_width, conf.window_height, "Raylib Project");
-	//SetTargetFPS(60);
+	SetTraceLogLevel(LOG_ERROR);
+	SetConfigFlags(FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT);
 
-	while(!WindowShouldClose()) {
+	InitWindow(conf.window_width, conf.window_height, "PR4");
+
+	// Disable exit key
+	SetExitKey(KEY_NULL);
+	bool exit = false;
+
+	while(!exit) {
+		exit = ((game.flags & FLAG_EXIT_REQUEST) || WindowShouldClose());
+
 		float delta_time = GetFrameTime();
-
-		BeginDrawing();
-		ClearBackground(BLACK);
-
-		EndDrawing();
+		GameUpdate(&game, delta_time);
+		GameDraw(&game);
 	}
 
 	CloseWindow();
+
+	ConfigClose(&conf);
+	GameClose(&game);
 
 	return 0;
 }

@@ -87,8 +87,6 @@ void OptionTableInsert(OptionTable *table, Option entry) {
 }
 
 Option *OptionTableSearch(OptionTable *table, char *key) {
-	printf("Search() -> %s\n", key);
-
 	Option *option = NULL;
 
 	char str_key[64] = { '\0' };
@@ -99,7 +97,6 @@ Option *OptionTableSearch(OptionTable *table, char *key) {
 
 	while(attempt < table->capacity) {
 		if(streq(table->entries[id].key, str_key)) {
-			printf("option found -> %s\n", str_key);
 			option = &table->entries[id];
 			break;
 		}
@@ -120,14 +117,19 @@ void ConfigInit(Config *conf) {
 	Option opt_wh = OptionCreate("height", &conf->window_height, VAL_INT);
 	OptionTableInsert(&conf->option_tables[OPT_BLOCK_WINDOW], opt_wh);
 
+	/*
 	for(u8 i = 0; i < conf->option_tables[0].capacity; i++) {
 		puts("--------------------");
 		printf("%d: %s\n", i, conf->option_tables[0].entries[i].key);
 	}
+	*/
 }
 
 void ConfigClose(Config *conf) {
-
+	for(u8 i = 0; i < OPTION_BLOCK_COUNT; i++) { 
+		if(conf->option_tables[i].entries) 
+			free(conf->option_tables[i].entries);
+	}
 }
 
 void ConfigRead(Config *conf, char *path) {
@@ -144,7 +146,7 @@ void ConfigRead(Config *conf, char *path) {
 	u8 block = 0;
 	char line[128];
 	while(fgets(line, sizeof(line), pF)) {
-		ConfigParseLine(conf, line, block, 1);
+		ConfigParseLine(conf, line, block, 0);
 	}
 
 	// Close file
@@ -196,7 +198,6 @@ void ConfigParseLine(Config *conf, char *line, u8 block, u8 print) {
 			sscanf(val, "%d", &i);
 
 			option->val = i;
-			*option->control = i;
 
 		} break;
 
@@ -210,9 +211,13 @@ void ConfigParseLine(Config *conf, char *line, u8 block, u8 print) {
 			bool b = 0;
 			b = (streq(val, "true"));
 
+			if(b) option->val = 1;
+
 		} break;
 
 		case VAL_STRING: {
+			i32 i = atoi(val);
+			option->val = i;
 
 		} break;
 
@@ -220,6 +225,8 @@ void ConfigParseLine(Config *conf, char *line, u8 block, u8 print) {
 
 		} break;
 	}
+
+	*option->control = option->val;
 }
 
 void ConfigPrintComment(char *comment) {
