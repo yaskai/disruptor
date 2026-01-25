@@ -35,6 +35,9 @@ void GameRenderSetup(Game *game) {
 	// Load render textures
 	game->render_target3D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
 	game->render_target2D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
+
+	EntHandlerInit(&game->ent_handler);
+	PlayerInit(&game->camera, &game->input_handler);
 }
 
 void GameLoadTestScene(Game *game, char *path) {
@@ -67,6 +70,8 @@ void GameUpdate(Game *game, float dt) {
 		game->flags |= FLAG_EXIT_REQUEST;
 
 	PollInput(&game->input_handler);
+
+	UpdateEntities(&game->ent_handler, dt);
 }
 
 void GameDraw(Game *game) {
@@ -76,8 +81,15 @@ void GameDraw(Game *game) {
 	// 3D Rendering
 	BeginMode3D(game->camera);
 
-	//DrawModel(game->test_section.model, Vector3Zero(), 1, WHITE);
-	DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
+	DrawModel(game->test_section.model, Vector3Zero(), 1, DARKGRAY);
+	DrawModelWires(game->test_section.model, Vector3Zero(), 1, GREEN);
+
+	/*
+	for(u16 i = 0; i < game->test_section.bvh.count; i++) {
+		BvhNode *node = &game->test_section.bvh.nodes[i];
+		DrawBoundingBox(node->bounds, ColorAlpha(WHITE, 0.5f));
+	}
+	*/
 
 	EndMode3D();
 

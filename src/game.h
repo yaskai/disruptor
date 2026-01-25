@@ -3,6 +3,7 @@
 #include "config.h"
 #include "input_handler.h"
 #include "geo.h"
+#include "ent.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -11,6 +12,8 @@
 
 typedef struct {
 	MapSection test_section;
+
+	EntityHandler ent_handler;
 
 	RenderTexture2D render_target3D;
 	RenderTexture2D render_target2D;

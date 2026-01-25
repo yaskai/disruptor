@@ -23,17 +23,19 @@ typedef struct {
 #define INPUT_ACTION_COUNT	16
 
 // Action indices
-#define ACTION_MOVE_UP		0;
-#define ACTION_MOVE_LEFT	1;
-#define ACTION_MOVE_DOWN	2;
-#define ACTION_MOVE_RIGHT	3;
-#define ACTION_JUMP			4;
+#define ACTION_MOVE_UP		0
+#define ACTION_MOVE_LEFT	1
+#define ACTION_MOVE_DOWN	2
+#define ACTION_MOVE_RIGHT	3
+#define ACTION_JUMP			4
 
 typedef struct {
-	InputAction actions[16];
+	InputAction actions[INPUT_ACTION_COUNT];
 
 	Vector2 mouse_position;
 	Vector2 mouse_delta;
+
+	float mouse_sensitivity;
 
 	u8 input_method;
 

@@ -361,6 +361,8 @@ void MapSectionInit(MapSection *sect, Model model) {
 	sect->tris = ModelToTris(model, &sect->tri_count, &sect->tri_ids);
 
 	BvhConstruct(sect);
+
+	sect->flags = (MAP_SECT_LOADED);
 }
 
 // Unload map section data
