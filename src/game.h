@@ -12,7 +12,8 @@
 typedef struct {
 	MapSection test_section;
 
-	RenderTexture2D render_target;
+	RenderTexture2D render_target3D;
+	RenderTexture2D render_target2D;
 
 	InputHandler input_handler;
 

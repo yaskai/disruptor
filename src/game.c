@@ -14,8 +14,12 @@ void GameInit(Game *game, Config *conf) {
 }
 
 void GameClose(Game *game) {
-	if(IsTextureValid(game->render_target.texture))
-		UnloadRenderTexture(game->render_target);
+	// Unload render textures
+	if(IsTextureValid(game->render_target3D.texture))
+		UnloadRenderTexture(game->render_target3D);
+
+	if(IsTextureValid(game->render_target2D.texture))
+		UnloadRenderTexture(game->render_target2D);
 }
 
 void GameRenderSetup(Game *game) {
@@ -28,7 +32,9 @@ void GameRenderSetup(Game *game) {
 		.projection = CAMERA_PERSPECTIVE
 	};
 
-	game->render_target = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
+	// Load render textures
+	game->render_target3D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
+	game->render_target2D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
 }
 
 void GameLoadTestScene(Game *game, char *path) {
