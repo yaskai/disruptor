@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
@@ -172,10 +173,14 @@ void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id) {
 
 // Start BVH tree construction
 void BvhConstruct(MapSection *sect) {
-	BvhTree *bvh = sect->bvh;
+	BvhTree *bvh = &sect->bvh;
 
 	// Reset count
 	bvh->count = 0;
+
+	// Allocate memory for nodes
+	bvh->capacity = BVH_TREE_START_CAPACITY;
+	bvh->nodes = calloc(bvh->capacity, sizeof(BvhNode));
 
 	// Initalize empty node to use as root
 	BvhNode root = (BvhNode) {0};
@@ -194,14 +199,20 @@ void BvhConstruct(MapSection *sect) {
 	bvh->nodes[bvh->count++] = root;
 
 	// Start recursive node splitting
-	BvhNodeSubdivide(sect, sect->bvh, 0);
+	BvhNodeSubdivide(sect, &sect->bvh, 0);
 
 	// When done splitting, trim array to save some memory
 	bvh->capacity = bvh->count;
 	bvh->nodes = realloc(bvh->nodes, sizeof(BvhNode) * bvh->capacity);
 }
 
-// Compute optimal plane for node subdivision  
+// Unload BVH tree
+void BvhClose(BvhTree *bvh) {
+	if(bvh->nodes) free(bvh->nodes);
+	bvh->count = 0;
+}
+
+// Compute optimal axis and position for node subdivision  
 float FindBestSplit(MapSection *sect, BvhNode *node, short *axis, float *split_pos) {
 	float best_cost = FLT_MAX;	
 
@@ -274,7 +285,7 @@ float FindBestSplit(MapSection *sect, BvhNode *node, short *axis, float *split_p
 
 // Recursively split BVH nodes 
 void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
-	BvhNode *node = &sect->bvh->nodes[node_id];
+	BvhNode *node = &sect->bvh.nodes[node_id];
 
 	// Base case:
 	// Node has too few tris to continue splitting
@@ -310,11 +321,12 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 	// Resize node array if needed
 	if(bvh->count + 2 >= bvh->capacity) {
 		bvh->capacity = bvh->capacity << 1;
-		bvh->nodes = realloc(bvh->nodes, sizeof(BvhNode) * sect->bvh->capacity);
+		bvh->nodes = realloc(bvh->nodes, sizeof(BvhNode) * sect->bvh.capacity);
 	}
 
 	// Create child nodes	
-	u16 child_lft = bvh->count++, child_rgt = bvh->count++;
+	u16 child_lft = bvh->count++;
+	u16 child_rgt = bvh->count++;
 
 	bvh->nodes[child_lft] = (BvhNode) {
 		.first_tri = node->first_tri,	
@@ -340,5 +352,26 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 	// Continue splitting with left and right child nodes 
 	BvhNodeSubdivide(sect, bvh, child_lft);
 	BvhNodeSubdivide(sect, bvh, child_rgt);
+}
+
+// Initialize map section,
+// Load geometry, materials, construct BVH, etc.  
+void MapSectionInit(MapSection *sect, Model model) {
+	sect->model = model;
+	sect->tris = ModelToTris(model, &sect->tri_count, &sect->tri_ids);
+
+	BvhConstruct(sect);
+}
+
+// Unload map section data
+void MapSectionClose(MapSection *sect) {
+	if(sect->tris) 
+		free(sect->tris);	
+
+	if(sect->tri_ids)
+		free(sect->tri_ids);
+
+	BvhClose(&sect->bvh);	
+	UnloadModel(sect->model);	
 }
 

@@ -12,11 +12,15 @@ int main() {
 
 	SetTraceLogLevel(LOG_ERROR);
 	SetConfigFlags(FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT);
-
 	InitWindow(conf.window_width, conf.window_height, "PR4");
+
+	GameRenderSetup(&game);
+	GameLoadTestScene(&game, "resources/maps/test1");
 
 	// Disable exit key
 	SetExitKey(KEY_NULL);
+	DisableCursor();
+
 	bool exit = false;
 
 	while(!exit) {

@@ -65,6 +65,8 @@ typedef struct {
 
 } Bin;
 
+#define BVH_TREE_START_CAPACITY	1024
+
 typedef struct {
 	// Node array
 	BvhNode *nodes;
@@ -74,14 +76,19 @@ typedef struct {
 
 } BvhTree;
 
-typedef struct {
-	Model model;
+#define MAP_SECT_LOADED	0x01
+#define MAP_SECT_QUEUED	0x02
 
-	BvhTree *bvh;
+typedef struct {
+	BvhTree bvh;
+
+	Model model;
 
 	Tri *tris;
 	u16 *tri_ids;
 	u16 tri_count;
+
+	u8 flags;
 
 } MapSection;
 
@@ -94,10 +101,20 @@ void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id);
 // Start BVH tree construction
 void BvhConstruct(MapSection *sect);
 
+// Unload BVH tree
+void BvhClose(BvhTree *bvh);
+
 // Compute optimal axis and position for node subdivision  
 float FindBestSplit(MapSection *sect, BvhNode *node, short *axis, float *split_pos);
 
 // Recursively split BVH nodes 
 void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id);
+
+// Initialize map section,
+// Load geometry, materials, construct BVH, etc.  
+void MapSectionInit(MapSection *sect, Model model);
+
+// Unload map section data
+void MapSectionClose(MapSection *sect);
 
 #endif
