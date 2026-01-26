@@ -65,6 +65,38 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 	comp_transform->position = Vector3Add(comp_transform->position, Vector3Scale(direction, new_travel_dist));
 }
 
+void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, float gravity, float dt) {
+	if(CheckGround(comp_transform, sect)) {
+		comp_transform->velocity.y = 0;
+		return;
+	}
+
+	comp_transform->velocity.y -= gravity * dt;
+	comp_transform->position.y += comp_transform->velocity.y * dt;
+}
+
+bool CheckGround(comp_Transform *comp_transform, MapSection *sect) {
+	if(comp_transform->velocity.y > 0)
+		return false;
+
+	float feet_y = BoxCenter(comp_transform->bounds).y - BoxExtent(comp_transform->bounds).y * 0.5f;
+
+	Ray ray = (Ray) { .position = comp_transform->position, .direction = Vector3Scale(UP, -1) };
+
+	Vector3 ground_point = ray.position;
+	float ground_dist = FLT_MAX;
+	BvhTracePoint(ray, sect, 0, &ground_dist, &ground_point, false);
+
+	if(ground_point.y > feet_y) {
+		float delta = ground_point.y - feet_y;
+		comp_transform->position.y += delta;
+		
+		return true;
+	}
+	
+	return false;
+}
+
 void EntHandlerInit(EntityHandler *handler) {
 	handler->count = 0;
 	handler->capacity = 128;
@@ -79,6 +111,9 @@ void UpdateEntities(EntityHandler *handler, float dt) {
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
 
+		if(!(ent->flags & ENT_ACTIVE))
+			continue;
+
 		if(update_fn[ent->behavior_id])	
 			update_fn[ent->behavior_id](ent, dt);
 	}
@@ -88,9 +123,11 @@ void RenderEntities(EntityHandler *handler) {
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
 
+		if(!(ent->flags & ENT_ACTIVE))
+			continue;
+
 		if(draw_fn[ent->behavior_id])	
 			draw_fn[ent->behavior_id](ent);
 	}
-
 }
 

@@ -33,7 +33,9 @@ void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section)
 void PlayerUpdate(Entity *player, float dt) {
 	player->comp_transform.bounds = BoxTranslate(player->comp_transform.bounds, player->comp_transform.position);
 
-	PlayerInput(player, ptr_input, dt);	
+	PlayerInput(player, ptr_input, dt);
+
+	ApplyGravity(&player->comp_transform, ptr_sect, GRAV_DEFAULT, dt);
 }
 
 void PlayerDraw(Entity *player) {
@@ -101,6 +103,6 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	BvhTracePoint(view_ray, ptr_sect, 0, &player_debug_data.view_length, &player_debug_data.view_dest, false);	
 
 	DrawLine3D(player->comp_transform.position, player_debug_data.view_dest, GREEN);
-	DrawSphere(player_debug_data.view_dest, 2, GREEN);
+	DrawSphere(player_debug_data.view_dest, 4, GREEN);
 }
 
