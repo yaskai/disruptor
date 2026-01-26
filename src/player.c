@@ -7,7 +7,8 @@
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
 #define PLAYER_SPEED 30.0f
-#define PLAYER_MAX_VEL 2.5f
+#define PLAYER_MAX_VEL 1.85f
+#define PLAYER_MAX_ACCEL 2.0f;
 
 Camera3D *ptr_cam;
 InputHandler *ptr_input;
@@ -86,13 +87,13 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 		movement = Vector3Add(movement, player->comp_transform.forward);
 
 	if(input->actions[ACTION_MOVE_DOWN].state == INPUT_ACTION_DOWN)	
-		movement = Vector3Subtract(movement, player->comp_transform.forward);
+		movement = Vector3Subtract(movement, Vector3Scale(player->comp_transform.forward, 0.65f));
 
 	if(input->actions[ACTION_MOVE_RIGHT].state == INPUT_ACTION_DOWN)
-		movement = Vector3Add(movement, right);
+		movement = Vector3Add(movement, Vector3Scale(right, 0.85f));
 
 	if(input->actions[ACTION_MOVE_LEFT].state == INPUT_ACTION_DOWN)	
-		movement = Vector3Subtract(movement, right);
+		movement = Vector3Subtract(movement, Vector3Scale(right, 0.85f));
 	
 	movement.y = 0;
 	movement = Vector3Normalize(movement);
@@ -100,7 +101,6 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 
 	player->comp_transform.velocity = Vector3Add(player->comp_transform.velocity, movement);
 
-	/*
 	if(movement.x == 0) {
 		//player->comp_transform.velocity.x += -player->comp_transform.velocity.x * 50.0f * dt;
 		player->comp_transform.velocity.x *= 0.9999f * dt;
@@ -112,7 +112,6 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 		player->comp_transform.velocity.z *= 0.9999f * dt;
 		if(fabsf(player->comp_transform.velocity.z) <= EPSILON) player->comp_transform.velocity.z = 0;
 	}
-	*/
 
 
 	if(input->actions[ACTION_JUMP].state == INPUT_ACTION_PRESSED) {

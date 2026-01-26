@@ -123,7 +123,7 @@ void GameDraw(Game *game) {
 			//DrawModel(game->test_section.model, Vector3Zero(), 1, DARKGRAY);
 			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
 
-			MapSectionDisplayNormals(&game->test_section);
+			//MapSectionDisplayNormals(&game->test_section);
 
 			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
 				BvhNode *node = &game->test_section.bvh.nodes[i];
