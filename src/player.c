@@ -12,10 +12,17 @@ Camera3D *ptr_cam;
 InputHandler *ptr_input;
 MapSection *ptr_sect;
 
-///Ray ray;
-//Vector3 point;
-
 void PlayerInput(Entity *player, InputHandler *input, float dt);
+
+typedef struct {
+	Vector3 view_dir, view_dest;
+	float view_length;
+
+	Vector3 move_dir, move_dest;
+	float move_length;
+
+} PlayerDebugData;
+PlayerDebugData player_debug_data = { 0 };
 
 void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section) {
 	ptr_cam = camera;
@@ -24,17 +31,12 @@ void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section)
 }
 
 void PlayerUpdate(Entity *player, float dt) {
+	player->comp_transform.bounds = BoxTranslate(player->comp_transform.bounds, player->comp_transform.position);
+
 	PlayerInput(player, ptr_input, dt);	
-
-	//ray = (Ray) { .position = player->comp_transform.position, .direction = player->comp_transform.forward }; 
-	//point = Vector3Add(ray.position, Vector3Scale(ray.direction, FLT_MAX * 0.25f));	
-
-	//BvhTracePoint(ray, ptr_sect, 0, FLT_MAX, &point);	
 }
 
 void PlayerDraw(Entity *player) {
-	//DrawRay(ray, RED);
-	//DrawSphere(point, 10, ColorAlpha(RED, 1.0f));
 }
 
 void PlayerInput(Entity *player, InputHandler *input, float dt) {
@@ -76,7 +78,8 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 	movement = Vector3Normalize(movement);
 	movement = Vector3Scale(movement, PLAYER_SPEED * dt);
 
-	player->comp_transform.position = Vector3Add(player->comp_transform.position, movement);	
+	Vector3 wish_point = Vector3Add(player->comp_transform.position, movement);	
+	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, dt);
 
 	ptr_cam->position = player->comp_transform.position;
 	ptr_cam->target = Vector3Add(ptr_cam->position, player->comp_transform.forward);
@@ -86,5 +89,18 @@ void PlayerDamage(Entity *player, short amount) {
 }
 
 void PlayerDie(Entity *player) {
+}
+
+void PlayerDisplayDebugInfo(Entity *player) {
+	DrawBoundingBox(player->comp_transform.bounds, RED);
+
+	Ray view_ray = (Ray) { .position = player->comp_transform.position, .direction = player->comp_transform.forward };	
+	player_debug_data.view_dest = Vector3Add(view_ray.position, Vector3Scale(view_ray.direction, FLT_MAX * 0.25f));	
+
+	player_debug_data.view_length = FLT_MAX;
+	BvhTracePoint(view_ray, ptr_sect, 0, &player_debug_data.view_length, &player_debug_data.view_dest, false);	
+
+	DrawLine3D(player->comp_transform.position, player_debug_data.view_dest, GREEN);
+	DrawSphere(player_debug_data.view_dest, 2, GREEN);
 }
 

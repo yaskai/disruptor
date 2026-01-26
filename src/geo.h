@@ -17,6 +17,19 @@ Vector3 TriNormal(Tri tri);
 // Compute a triangle's centroid vector
 Vector3 TriCentroid(Tri tri);
 
+// Plane struct, used for volume to surface collision
+typedef struct {
+	Vector3 normal;
+	float d;
+
+} Plane;
+
+// Get plane from tri
+Plane TriToPlane(Tri tri);
+
+// Calculate signed distance from point to a plane
+float PlaneDistance(Plane plane, Vector3 point);
+
 // Calculate length of a box in each axis
 Vector3 BoxExtent(BoundingBox box);
 
@@ -31,6 +44,9 @@ BoundingBox EmptyBox();
 
 // Grow a box to fit a point in space
 BoundingBox BoxExpandToPoint(BoundingBox box, Vector3 point);
+
+// Translate a box to a new position
+BoundingBox BoxTranslate(BoundingBox box, Vector3 point);
 
 // Create a primitive array from mesh
 Tri *MeshToTris(Mesh mesh, u16 *tri_count);
@@ -117,7 +133,15 @@ void MapSectionInit(MapSection *sect, Model model);
 // Unload map section data
 void MapSectionClose(MapSection *sect);
 
+void BvhTraceNodes(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, BvhNode *node_hit);
+
 // Trace a point through world space
-void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, Vector3 *point);
+void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root_cast);
+
+void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, Vector3 *point, Vector3 **hits);
+
+void BvhBoxSweep(BoundingBox box, MapSection *sect, u16 node_id, float smallest_dist, Vector3 start, Vector3 *point);
+
+void MapSectionDisplayNormals(MapSection *sect);
 
 #endif

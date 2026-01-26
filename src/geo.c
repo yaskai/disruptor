@@ -31,6 +31,21 @@ Vector3 TriCentroid(Tri tri) {
 	};
 }
 
+// Get plane from tri
+Plane TriToPlane(Tri tri) {
+	Vector3 n = Vector3CrossProduct(Vector3Subtract(tri.vertices[1], tri.vertices[0]), Vector3Subtract(tri.vertices[2], tri.vertices[0]));
+	n = Vector3Normalize(n);
+
+	float d = -Vector3DotProduct(tri.vertices[0], n);
+	
+	return (Plane) { .normal = n, .d = d };
+}
+
+// Calculate signed distance from point to a plane
+float PlaneDistance(Plane plane, Vector3 point) {
+	return Vector3DotProduct(plane.normal, point) - plane.d;
+}
+
 // Calculate length of a box in each axis
 Vector3 BoxExtent(BoundingBox box) {
 	return Vector3Subtract(box.max, box.min);
@@ -56,6 +71,12 @@ BoundingBox EmptyBox() {
 // Grow a box to fit a point in space
 BoundingBox BoxExpandToPoint(BoundingBox box, Vector3 point) {
 	return (BoundingBox) { .min = Vector3Min(box.min, point), .max = Vector3Max(box.max, point) };
+}
+
+// Translate a box to a new position
+BoundingBox BoxTranslate(BoundingBox box, Vector3 point) {
+	Vector3 extent = BoxExtent(box);	
+	return (BoundingBox) { .min = Vector3Add(point, Vector3Scale(extent, -0.5f)), .max = Vector3Add(point, Vector3Scale(extent, 0.5f)) };
 }
 
 // Create a primitive array from mesh
@@ -289,7 +310,7 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 
 	// Base case:
 	// Node has too few tris to continue splitting
-	if(node->tri_count <= MAX_TRIS_PER_NODE) return;
+	//if(node->tri_count <= MAX_TRIS_PER_NODE) return;
 
 	// Determine split position and axis
 	short split_axis = -1;
@@ -375,15 +396,42 @@ void MapSectionClose(MapSection *sect) {
 		free(sect->tri_ids);
 
 	BvhClose(&sect->bvh);	
-	UnloadModel(sect->model);	
+	UnloadModel(sect->model);
+}
+
+void BvhTraceNodes(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, BvhNode *node_hit) {
+	BvhNode *node = &sect->bvh.nodes[node_id];
+	
+	RayCollision coll = GetRayCollisionBox(ray, node->bounds);	
+	if(!coll.hit) return;
+	
+	if(coll.distance <= smallest_dist) {
+		smallest_dist = coll.distance;
+		node_hit = node;
+	}
+
+	bool leaf = (node->tri_count > 0 && node->child_rgt + node->child_lft == 0);
+	if(leaf) return;
+
+	BvhTraceNodes(ray, sect, node->child_lft, smallest_dist, node_hit);
+	BvhTraceNodes(ray, sect, node->child_rgt, smallest_dist, node_hit);
 }
 
 // Trace a point through world space
-void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, Vector3 *point) {
+void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root_cast) {
 	BvhNode *node = &sect->bvh.nodes[node_id];
 
-	RayCollision coll = GetRayCollisionBox(ray, node->bounds);	
-	if(!coll.hit) return;
+	RayCollision coll;
+
+	if(!skip_root_cast) {
+		coll = GetRayCollisionBox(ray, node->bounds);
+
+		if(!coll.hit)
+			return;
+
+		if(coll.distance > *smallest_dist)
+			return;
+	};
 
 	for(u16 i = 0; i < node->tri_count; i++) {
 		u16 tri_id = sect->tri_ids[node->first_tri + i];
@@ -392,8 +440,8 @@ void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, 
 		coll = GetRayCollisionTriangle(ray, tri->vertices[0], tri->vertices[1], tri->vertices[2]);
 		if(!coll.hit) continue;
 
-		if(coll.distance < smallest_dist) {
-			smallest_dist = coll.distance;
+		if(coll.distance < *smallest_dist) {
+			*smallest_dist = coll.distance;
 			*point = coll.point;
 		}
 	}
@@ -401,7 +449,64 @@ void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, 
 	bool leaf = (node->tri_count > 0);
 	if(leaf) return;
 
-	BvhTracePoint(ray, sect, node->child_lft, smallest_dist, point);
-	BvhTracePoint(ray, sect, node->child_rgt, smallest_dist, point);
+	RayCollision hit_l = GetRayCollisionBox(ray, sect->bvh.nodes[node->child_lft].bounds);	
+	RayCollision hit_r = GetRayCollisionBox(ray, sect->bvh.nodes[node->child_rgt].bounds);
+
+	if(!(hit_l.hit + hit_r.hit)) return;
+
+	float dl = (hit_l.hit) ? hit_l.distance : FLT_MAX;
+	float dr = (hit_r.hit) ? hit_r.distance : FLT_MAX;
+
+	if(dl < dr) {
+		BvhTracePoint(ray, sect, node->child_lft, smallest_dist, point, true);
+		BvhTracePoint(ray, sect, node->child_rgt, smallest_dist, point, true);
+		return;
+	}
+
+	BvhTracePoint(ray, sect, node->child_rgt, smallest_dist, point, true);
+	BvhTracePoint(ray, sect, node->child_lft, smallest_dist, point, true);
+}
+
+void BvhBoxSweep(BoundingBox box, MapSection *sect, u16 node_id, float smallest_dist, Vector3 start, Vector3 *point) {
+	BvhNode *node = &sect->bvh.nodes[node_id];
+
+	bool node_hit = CheckCollisionBoxes(box, node->bounds);
+	if(!node_hit) return;
+
+	for(u16 i = 0; i < node->tri_count; i++) {
+		u16 tri_id = sect->tri_ids[node->first_tri + i];
+		Tri *tri = &sect->tris[tri_id];
+
+		for(short j = 0; j < 3; j++) {
+			Vector3 p = tri->vertices[j];
+
+			if( p.x >= box.min.x && p.x <= box.max.x &&
+			    p.y >= box.min.y && p.y <= box.max.y &&
+			    p.z >= box.min.z && p.z <= box.min.z) {
+				
+				float dist = Vector3Distance(start, p);
+
+				if(dist < smallest_dist) {
+					smallest_dist = dist;
+					*point = p;
+				}
+			}
+		}
+	}
+
+	bool leaf = (node->tri_count > 0 || node->child_rgt + node->child_lft == 0);
+	if(leaf) return;
+
+	BvhBoxSweep(box, sect, node->child_lft, smallest_dist, start, point);
+	BvhBoxSweep(box, sect, node->child_rgt, smallest_dist, start, point);
+}
+
+void MapSectionDisplayNormals(MapSection *sect) {
+	for(u16 i = 0; i < sect->tri_count; i++) {
+		Tri tri = sect->tris[i];
+		Vector3 centroid = TriCentroid(tri);
+
+		DrawLine3D(centroid, Vector3Add(centroid, Vector3Scale(tri.normal, 4)), SKYBLUE);
+	}
 }
 

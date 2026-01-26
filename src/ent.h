@@ -20,6 +20,8 @@ typedef struct  {
 
 } comp_Transform;
 
+void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSection *sect, float dt);
+
 typedef struct {
 	BoundingBox hit_box;
 
@@ -85,6 +87,9 @@ void EntHandlerClose(EntityHandler *handler);
 void UpdateEntities(EntityHandler *handler, float dt);
 void RenderEntities(EntityHandler *handler);
 
+#define PLAYER_BOX_LENGTH	10
+#define PLAYER_BOX_HEIGHT	20
+
 void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section);
 
 void PlayerUpdate(Entity *player, float dt);
@@ -92,5 +97,7 @@ void PlayerDraw(Entity *player);
 
 void PlayerDamage(Entity *player, short amount);
 void PlayerDie(Entity *player);
+
+void PlayerDisplayDebugInfo(Entity *player);
 
 #endif

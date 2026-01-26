@@ -10,6 +10,15 @@
 
 void VirtCameraControls(Camera3D *cam, float dt);
 
+Color colors[] = {
+	PINK,
+	BLUE,
+	GREEN,
+	SKYBLUE,
+	GRAY,
+	MAGENTA
+};
+
 void GameInit(Game *game, Config *conf) {
 	game->conf = conf;	
 
@@ -36,10 +45,10 @@ void GameRenderSetup(Game *game) {
 	};
 
 	game->camera_debug = (Camera3D) {
-		.position = (Vector3) { 300, 300, 300 },
+		.position = (Vector3) { -300, 200, -300 },
 		.target = (Vector3) { 0, 0, 0 },
 		.up = (Vector3) {0, 1, 0},
-		.fovy = 90,
+		.fovy = 50,
 		.projection = CAMERA_PERSPECTIVE
 	};
 
@@ -85,7 +94,11 @@ void GameLoadTestScene(Game *game, char *path) {
 		.flags = (ENT_ACTIVE)
 	};
 
+	player.comp_transform.bounds.max = (Vector3) { PLAYER_BOX_LENGTH, PLAYER_BOX_HEIGHT, PLAYER_BOX_LENGTH };
+	player.comp_transform.bounds.min = Vector3Scale(player.comp_transform.bounds.max, -1);
+
 	player.comp_transform.position.y = 30;
+
 	game->ent_handler.ents[game->ent_handler.count++] = player;
 }
 
@@ -107,10 +120,30 @@ void GameDraw(Game *game) {
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
 
-			DrawModel(game->test_section.model, Vector3Zero(), 1, DARKGRAY);
-			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
+			//DrawModel(game->test_section.model, Vector3Zero(), 1, DARKGRAY);
+			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
+
+			MapSectionDisplayNormals(&game->test_section);
+
+			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
+				BvhNode *node = &game->test_section.bvh.nodes[i];
+
+				bool is_leaf = node->tri_count > 0;
+				if(!is_leaf) continue;
+
+				//DrawBoundingBox(node->bounds, SKYBLUE);
+
+				Color color = colors[i % 6];
+				for(u16 j = 0; j < node->tri_count; j++) {
+					u16 tri_id = node->first_tri + j;
+					Tri *tri = &game->test_section.tris[tri_id];
+
+					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], color);
+				}
+			}
 
 			RenderEntities(&game->ent_handler);
+
 		EndMode3D();
 	EndTextureMode();
 	
@@ -118,28 +151,23 @@ void GameDraw(Game *game) {
 	BeginTextureMode(game->render_target_debug);
 	ClearBackground(ColorAlpha(BLACK, 0.5f));
 		BeginMode3D(game->camera_debug);
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 0.1f));
-			DrawModelWires(game->test_section.model, Vector3Zero(), 1, RAYWHITE);
+			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));
+			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
 
-			Ray ray = (Ray) {
-				.position = game->ent_handler.ents[0].comp_transform.position, 
-				.direction = game->ent_handler.ents[0].comp_transform.forward
-			};
-
-			Vector3 point = Vector3Add(ray.position, Vector3Scale(ray.direction, FLT_MAX * 0.25f));	
-			BvhTracePoint(ray, &game->test_section, 0, FLT_MAX, &point);	
-
-			DrawRay(ray, GREEN);
-			DrawSphere(point, 5, GREEN);
+			PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
 
 		EndMode3D();
 	EndTextureMode();
 
 	// 2D Rendering
+
+	// Draw to buffers:
+	// Main
 	Rectangle rt_src = (Rectangle) { 0, 0, game->render_target3D.texture.width, -game->render_target3D.texture.height };
 	Rectangle rt_dst = (Rectangle) { 0, 0, game->render_target3D.texture.width,  game->render_target3D.texture.height };
 	DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
 
+	// Debug
 	rt_src = (Rectangle) { 0, 0, game->render_target_debug.texture.width, -game->render_target_debug.texture.height };
 	rt_dst = (Rectangle) { 0, 0, game->render_target_debug.texture.width,  game->render_target_debug.texture.height };
 	DrawTexturePro(game->render_target_debug.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
