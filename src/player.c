@@ -85,6 +85,14 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 
 	ptr_cam->position = player->comp_transform.position;
 	ptr_cam->target = Vector3Add(ptr_cam->position, player->comp_transform.forward);
+
+	if(input->actions[ACTION_JUMP].state == INPUT_ACTION_PRESSED) {
+		if(CheckGround(&player->comp_transform, ptr_sect)) {
+			player->comp_transform.position.y++;	
+			player->comp_transform.on_ground = false;
+			player->comp_transform.velocity.y = 200;
+		}
+	}
 }
 
 void PlayerDamage(Entity *player, short amount) {

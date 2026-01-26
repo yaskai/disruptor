@@ -18,13 +18,16 @@ typedef struct  {
 
 	float pitch, yaw, roll;
 
+	short on_ground;
+
 } comp_Transform;
 
 void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSection *sect, float dt);
 
-#define GRAV_DEFAULT 300.0f
+#define GRAV_DEFAULT 700.0f
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, float gravity, float dt);
-bool CheckGround(comp_Transform *comp_transform, MapSection *sect);
+short CheckGround(comp_Transform *comp_transform, MapSection *sect);
+short CheckCeiling(comp_Transform *comp_transform, MapSection *sect);
 
 typedef struct {
 	BoundingBox hit_box;

@@ -10,6 +10,8 @@ void InputInit(InputHandler *handler) {
 	handler->actions[ACTION_MOVE_RIGHT].key = KEY_D;
 	handler->actions[ACTION_MOVE_UP].key 	= KEY_W;
 	handler->actions[ACTION_MOVE_DOWN].key 	= KEY_S;
+
+	handler->actions[ACTION_JUMP].key = KEY_SPACE;
 }
 
 void PollInput(InputHandler *handler) {

@@ -66,20 +66,25 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 }
 
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, float gravity, float dt) {
-	if(CheckGround(comp_transform, sect)) {
+	comp_transform->on_ground = CheckGround(comp_transform, sect);
+
+	if(comp_transform->on_ground) {
 		comp_transform->velocity.y = 0;
-		return;
+		//return;
 	}
 
 	comp_transform->velocity.y -= gravity * dt;
 	comp_transform->position.y += comp_transform->velocity.y * dt;
 }
 
-bool CheckGround(comp_Transform *comp_transform, MapSection *sect) {
-	if(comp_transform->velocity.y > 0)
-		return false;
+short CheckGround(comp_Transform *comp_transform, MapSection *sect) {
+	if(comp_transform->velocity.y > 0) {
+		CheckCeiling(comp_transform, sect);
+		return 0;
+	}
 
-	float feet_y = BoxCenter(comp_transform->bounds).y - BoxExtent(comp_transform->bounds).y * 0.5f;
+	float half_height = BoxExtent(comp_transform->bounds).y * 0.5f;
+	float feet_y = BoxCenter(comp_transform->bounds).y - half_height;
 
 	Ray ray = (Ray) { .position = comp_transform->position, .direction = Vector3Scale(UP, -1) };
 
@@ -87,14 +92,36 @@ bool CheckGround(comp_Transform *comp_transform, MapSection *sect) {
 	float ground_dist = FLT_MAX;
 	BvhTracePoint(ray, sect, 0, &ground_dist, &ground_point, false);
 
-	if(ground_point.y > feet_y) {
+	if(ground_point.y > feet_y && ground_dist <= half_height) {
 		float delta = ground_point.y - feet_y;
 		comp_transform->position.y += delta;
-		
-		return true;
+
+		return 1;
 	}
 	
-	return false;
+	return 0;
+}
+
+short CheckCeiling(comp_Transform *comp_transform, MapSection *sect) {
+	float half_height = BoxExtent(comp_transform->bounds).y * 0.5f;
+	float head_y = BoxCenter(comp_transform->bounds).y + half_height;
+
+	Ray ray = (Ray) { .position = comp_transform->position, .direction = UP };
+
+	Vector3 celing_point = ray.position;
+	float ceiling_dist = FLT_MAX;
+	BvhTracePoint(ray, sect, 0, &ceiling_dist, &celing_point, false);
+
+	if(ceiling_dist < head_y && ceiling_dist <= half_height) {
+		float delta = head_y - celing_point.y;
+		
+		comp_transform->position.y -= delta;
+		comp_transform->velocity.y *= -0.95f; 
+		
+		return 1;
+	}
+
+	return 0;
 }
 
 void EntHandlerInit(EntityHandler *handler) {
