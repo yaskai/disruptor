@@ -45,10 +45,10 @@ void GameRenderSetup(Game *game) {
 	};
 
 	game->camera_debug = (Camera3D) {
-		.position = (Vector3) { -300, 200, -300 },
+		.position = (Vector3) { -1500, 1000, -1500 },
 		.target = (Vector3) { 0, 0, 0 },
 		.up = (Vector3) {0, 1, 0},
-		.fovy = 50,
+		.fovy = 10,
 		.projection = CAMERA_PERSPECTIVE
 	};
 
@@ -96,9 +96,7 @@ void GameLoadTestScene(Game *game, char *path) {
 
 	player.comp_transform.bounds.max = (Vector3) { PLAYER_BOX_LENGTH, PLAYER_BOX_HEIGHT, PLAYER_BOX_LENGTH };
 	player.comp_transform.bounds.min = Vector3Scale(player.comp_transform.bounds.max, -1);
-
 	player.comp_transform.position.y = 30;
-
 	game->ent_handler.ents[game->ent_handler.count++] = player;
 }
 
@@ -120,11 +118,10 @@ void GameDraw(Game *game) {
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
 
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, DARKGRAY);
-			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
+			DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
+			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
 
-			//MapSectionDisplayNormals(&game->test_section);
-
+			/*
 			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
 				BvhNode *node = &game->test_section.bvh.nodes[i];
 
@@ -141,6 +138,7 @@ void GameDraw(Game *game) {
 					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], color);
 				}
 			}
+			*/
 
 			RenderEntities(&game->ent_handler);
 
@@ -164,7 +162,7 @@ void GameDraw(Game *game) {
 	// Draw to buffers:
 	// Main
 	Rectangle rt_src = (Rectangle) { 0, 0, game->render_target3D.texture.width, -game->render_target3D.texture.height };
-	Rectangle rt_dst = (Rectangle) { 0, 0, game->render_target3D.texture.width,  game->render_target3D.texture.height };
+	Rectangle rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
 
 	// Debug
@@ -193,3 +191,4 @@ void VirtCameraControls(Camera3D *cam, float dt) {
 	cam->position = Vector3Add(cam->position, movement);
 	cam->target = Vector3Add(cam->target, movement);
 }
+
