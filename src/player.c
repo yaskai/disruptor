@@ -141,7 +141,7 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 
 		if(fabs(cam_tilt) > EPSILON) cam_roll_targ = Vector3RotateByAxisAngle(UP, player->comp_transform.forward, cam_tilt);
 	}
-	ptr_cam->up = Vector3Lerp(ptr_cam->up, cam_roll_targ, 4 * dt);
+	ptr_cam->up = Vector3Lerp(ptr_cam->up, cam_roll_targ, 0.1f);
 
 	if(Vector3Length(movement) > 0)
 		player_accel = Clamp(player_accel + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
