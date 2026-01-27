@@ -118,10 +118,9 @@ void GameDraw(Game *game) {
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
 
-			DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
-			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
+			//DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
+			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
 
-			/*
 			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
 				BvhNode *node = &game->test_section.bvh.nodes[i];
 
@@ -136,9 +135,12 @@ void GameDraw(Game *game) {
 					Tri *tri = &game->test_section.tris[tri_id];
 
 					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], color);
+					
+					DrawLine3D(tri->vertices[2], tri->vertices[0], BLACK);
+					DrawLine3D(tri->vertices[1], tri->vertices[0], BLACK);
+					DrawLine3D(tri->vertices[0], tri->vertices[2], BLACK);
 				}
 			}
-			*/
 
 			RenderEntities(&game->ent_handler);
 
@@ -147,7 +149,7 @@ void GameDraw(Game *game) {
 	
 	// 3D Rendering, debug
 	BeginTextureMode(game->render_target_debug);
-	ClearBackground(ColorAlpha(BLACK, 0.5f));
+	ClearBackground(ColorAlpha(BLACK, 0.85f));
 		BeginMode3D(game->camera_debug);
 			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));
 			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
@@ -169,6 +171,9 @@ void GameDraw(Game *game) {
 	rt_src = (Rectangle) { 0, 0, game->render_target_debug.texture.width, -game->render_target_debug.texture.height };
 	rt_dst = (Rectangle) { 0, 0, game->render_target_debug.texture.width,  game->render_target_debug.texture.height };
 	DrawTexturePro(game->render_target_debug.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+
+	int fps = GetFPS();
+	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 
 	EndDrawing();
 }

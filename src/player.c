@@ -6,7 +6,7 @@
 #include "geo.h"
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
-#define PLAYER_SPEED 235.0f
+#define PLAYER_SPEED 205.0f
 #define PLAYER_MAX_VEL 15.5f
 
 #define PLAYER_MAX_ACCEL 8.5f
@@ -21,6 +21,8 @@ MapSection *ptr_sect;
 void PlayerInput(Entity *player, InputHandler *input, float dt);
 
 float cam_bob, cam_tilt;
+
+BoxPoints box_points;
 
 typedef struct {
 	Vector3 view_dir, view_dest;
@@ -64,6 +66,8 @@ void PlayerUpdate(Entity *player, float dt) {
 	if(!player->comp_transform.on_ground) cam_bob = 0;
 	ptr_cam->position.y += cam_bob;
 	ptr_cam->target.y += cam_bob;
+
+	box_points = BoxGetPoints(player->comp_transform.bounds);
 }
 
 void PlayerDraw(Entity *player) {
@@ -177,5 +181,7 @@ void PlayerDisplayDebugInfo(Entity *player) {
 
 	//DrawLine3D(player->comp_transform.position, player_debug_data.view_dest, GREEN);
 	//DrawSphere(player_debug_data.view_dest, 4, GREEN);
+
+	for(short i = 0; i < 8; i++) DrawSphere(box_points.v[i], 2, PURPLE);
 }
 

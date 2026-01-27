@@ -48,6 +48,16 @@ BoundingBox BoxExpandToPoint(BoundingBox box, Vector3 point);
 // Translate a box to a new position
 BoundingBox BoxTranslate(BoundingBox box, Vector3 point);
 
+// Get a box with it's points clamped to the back side of a plane
+BoundingBox BoxFitToSurface(BoundingBox box, Vector3 point, Vector3 normal);
+
+typedef struct {
+	Vector3 v[8];
+	
+} BoxPoints; 
+
+BoxPoints BoxGetPoints(BoundingBox box);
+
 // Create a primitive array from mesh
 Tri *MeshToTris(Mesh mesh, u16 *tri_count);
 
@@ -133,12 +143,27 @@ void MapSectionInit(MapSection *sect, Model model);
 // Unload map section data
 void MapSectionClose(MapSection *sect);
 
+typedef struct {
+	Vector3 point;
+	Vector3 normal;
+
+	float distance;
+
+	u16 node_id;
+	u16 tri_id;
+	
+	bool hit;
+
+} BvhTraceData;
+
+BvhTraceData TraceDataEmpty();
+
 void BvhTraceNodes(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, BvhNode *node_hit);
 
 // Trace a point through world space
 void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root_cast);
 
-void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, Vector3 *point, Vector3 **hits);
+void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, bool skip_root_cast, BvhTraceData *data);
 
 void BvhBoxSweep(BoundingBox box, MapSection *sect, u16 node_id, float smallest_dist, Vector3 start, Vector3 *point);
 
