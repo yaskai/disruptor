@@ -45,28 +45,47 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 	Vector3 start = comp_transform->position;
 
 	Vector3 move_dir = Vector3Subtract(wish_point, start);
+	Vector3 move = move_dir;
 	float move_len = Vector3Length(move_dir);
 	move_dir = Vector3Normalize(move_dir);
-
-	BvhTraceData tr = TraceDataEmpty();
-	Ray ray = (Ray) { .position = start, .direction = move_dir };
-	BvhTracePointEx(ray, sect, bvh, 0, false, &tr);
-
-	if(!tr.hit || tr.distance > move_len) {
-		comp_transform->position = wish_point;
-		return;
-	}
-
 	Vector3 pos = start;
-	float allowed = Vector3Distance(start, tr.point);
-	Vector3 travel = Vector3Scale(move_dir, allowed);
+
+	Vector3 clip[MAX_CLIPS];
+	u8 clip_count = 0;
 
 	for(short i = 0; i < SLIDE_STEPS; i++) {
-			
-		if(Vector3Length(travel) <= EPSILON)
+		move_dir = Vector3Normalize(move);
+		move_len = Vector3Length(move);
+
+		if(move_len <= EPSILON)
 			break;
 
+		BvhTraceData tr = TraceDataEmpty();
+		Ray ray = (Ray) { .position = start, .direction = move_dir };
+		BvhTracePointEx(ray, sect, &sect->bvh[0], 0, false, &tr);
+
+		BvhTraceData tr1 = TraceDataEmpty();
+		BvhTracePointEx(ray, sect, &sect->bvh[1], 0, false, &tr1);
+
+		if(tr1.distance < tr.distance) {
+			tr = tr1;
+		}
+
+		if(!tr.hit || tr.distance > move_len) {
+			pos = Vector3Add(pos, move);
+			break;
+		}
+
+		pos = Vector3Add(pos, Vector3Scale(move_dir, tr.distance));
+
+		float vn = Vector3DotProduct(move, tr.normal);
+		if(vn < 0.0f) 
+			move = Vector3Subtract(move, Vector3Scale(tr.normal, vn));
+
+		pos = Vector3Add(pos, Vector3Scale(tr.normal, 0.001f));
 	}
+
+	comp_transform->position = pos;
 }
 
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float gravity, float dt) {
