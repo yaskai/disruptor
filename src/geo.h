@@ -17,6 +17,9 @@ Vector3 TriNormal(Tri tri);
 // Compute a triangle's centroid vector
 Vector3 TriCentroid(Tri tri);
 
+// Return a triangle translated to new position
+Tri TriTranslate(Tri tri, Vector3 point);
+
 // Plane struct, used for volume to surface collision
 typedef struct {
 	Vector3 normal;
@@ -51,12 +54,26 @@ BoundingBox BoxTranslate(BoundingBox box, Vector3 point);
 // Get a box with it's points clamped to the back side of a plane
 BoundingBox BoxFitToSurface(BoundingBox box, Vector3 point, Vector3 normal);
 
+float BoxGetSurfaceDepth(BoundingBox box, Vector3 point, Vector3 normal);
+
+Vector3 BoxSurfaceDelta(BoundingBox box, Vector3 point, Vector3 normal);
+
 typedef struct {
 	Vector3 v[8];
 	
 } BoxPoints; 
 
 BoxPoints BoxGetPoints(BoundingBox box);
+
+typedef struct {
+	Vector3 n[6]; 	
+
+} BoxNormals;
+
+BoxNormals BoxGetFaceNormals(BoundingBox box);
+
+// Get furthest point in a box within line
+Vector3 BoxGetEdge(BoundingBox box, Vector3 normal);
 
 // Create a primitive array from mesh
 Tri *MeshToTris(Mesh mesh, u16 *tri_count);
@@ -147,7 +164,11 @@ typedef struct {
 	Vector3 point;
 	Vector3 normal;
 
+	Vector3 contact;
+
 	float distance;
+
+	float contact_dist;
 
 	u16 node_id;
 	u16 tri_id;
@@ -161,12 +182,14 @@ BvhTraceData TraceDataEmpty();
 void BvhTraceNodes(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, BvhNode *node_hit);
 
 // Trace a point through world space
-void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root_cast);
+void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root);
 
-void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, bool skip_root_cast, BvhTraceData *data);
+void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, bool skip_root, BvhTraceData *data);
 
-void BvhBoxSweep(BoundingBox box, MapSection *sect, u16 node_id, float smallest_dist, Vector3 start, Vector3 *point);
+void BvhBoxSweep(Ray ray, MapSection *sect, u16 node_id, BoundingBox *box, BvhTraceData *data);
 
 void MapSectionDisplayNormals(MapSection *sect);
+
+float BoundsToRadius(BoundingBox bounds);
 
 #endif

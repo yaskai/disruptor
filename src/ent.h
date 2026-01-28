@@ -16,6 +16,8 @@ typedef struct  {
 	
 	Vector3 forward;
 
+	float radius;
+
 	float pitch, yaw, roll;
 
 	short on_ground;
@@ -97,7 +99,20 @@ void RenderEntities(EntityHandler *handler);
 #define PLAYER_BOX_LENGTH	10
 #define PLAYER_BOX_HEIGHT	20
 
-void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section);
+typedef struct {
+	BoundingBox sweep_box;
+
+	Vector3 view_dir, view_dest;
+	Vector3 move_dir, move_dest;
+
+	float view_length;
+	float move_length;
+
+	float accel;
+
+} PlayerDebugData;
+
+void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section, PlayerDebugData *debug_data);
 
 void PlayerUpdate(Entity *player, float dt);
 void PlayerDraw(Entity *player);

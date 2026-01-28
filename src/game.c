@@ -10,6 +10,8 @@
 
 void VirtCameraControls(Camera3D *cam, float dt);
 
+float *plr_accel;
+
 Color colors[] = {
 	PINK,
 	BLUE,
@@ -18,6 +20,8 @@ Color colors[] = {
 	GRAY,
 	MAGENTA
 };
+
+PlayerDebugData player_data = {0};
 
 void GameInit(Game *game, Config *conf) {
 	game->conf = conf;	
@@ -55,7 +59,7 @@ void GameRenderSetup(Game *game) {
 	// Load render textures
 	game->render_target3D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
 	game->render_target2D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
-	game->render_target_debug = LoadRenderTexture(game->conf->window_width * 0.5f, game->conf->window_height * 0.5f);
+	game->render_target_debug = LoadRenderTexture(game->conf->window_width * 0.35f, game->conf->window_height * 0.35f);
 
 	EntHandlerInit(&game->ent_handler);
 }
@@ -84,7 +88,7 @@ void GameLoadTestScene(Game *game, char *path) {
 	game->test_section = (MapSection) {0};
 	MapSectionInit(&game->test_section, model);
 
-	PlayerInit(&game->camera, &game->input_handler, &game->test_section);
+	PlayerInit(&game->camera, &game->input_handler, &game->test_section, &player_data);
 
 	Entity player = (Entity) {
 		.comp_transform = (comp_Transform) {0},
@@ -96,6 +100,7 @@ void GameLoadTestScene(Game *game, char *path) {
 
 	player.comp_transform.bounds.max = (Vector3) { PLAYER_BOX_LENGTH, PLAYER_BOX_HEIGHT, PLAYER_BOX_LENGTH };
 	player.comp_transform.bounds.min = Vector3Scale(player.comp_transform.bounds.max, -1);
+	player.comp_transform.radius = BoundsToRadius(player.comp_transform.bounds);
 	player.comp_transform.position.y = 30;
 	game->ent_handler.ents[game->ent_handler.count++] = player;
 }
@@ -118,9 +123,15 @@ void GameDraw(Game *game) {
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
 
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
-			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
+			DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
+			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
 
+			//DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
+			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
+
+			//DrawBoundingBox(game->test_section.bvh.nodes[0].bounds, WHITE);
+
+			/*
 			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
 				BvhNode *node = &game->test_section.bvh.nodes[i];
 
@@ -141,6 +152,7 @@ void GameDraw(Game *game) {
 					DrawLine3D(tri->vertices[0], tri->vertices[2], BLACK);
 				}
 			}
+			*/
 
 			RenderEntities(&game->ent_handler);
 
@@ -151,12 +163,17 @@ void GameDraw(Game *game) {
 	BeginTextureMode(game->render_target_debug);
 	ClearBackground(ColorAlpha(BLACK, 0.85f));
 		BeginMode3D(game->camera_debug);
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));
+			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 0.1f));
 			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
+			DrawBoundingBox(game->test_section.bvh.nodes[0].bounds, WHITE);
 
 			PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
 
 		EndMode3D();
+
+		// 2D
+		//DrawText(TextFormat("accel: %.02f", player_data.accel), 0, 40, 32, RAYWHITE);
+
 	EndTextureMode();
 
 	// 2D Rendering

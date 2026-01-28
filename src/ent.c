@@ -38,58 +38,25 @@ DrawFunc draw_fn[4] = {
 	NULL
 };
 
-#define SLIDE_STEPS 4
+#define MAX_CLIPS 3
 
 void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSection *sect, float dt) {
-	Vector3 travel_dir = Vector3Subtract(wish_point, comp_transform->position);
-	float travel_dist = Vector3Length(travel_dir);
-	travel_dir = Vector3Normalize(travel_dir);
+	BoundingBox box = comp_transform->bounds;
+	Vector3 box_center = BoxCenter(box);
 
-	Ray ray = (Ray) { .position = comp_transform->position, .direction = travel_dir }; 
+	// Get direction and distance of full movement
+	Vector3 move_dir = Vector3Subtract(wish_point, comp_transform->position);
+	float move_len = Vector3Length(move_dir);
+	move_dir = Vector3Normalize(move_dir);
 
-	BvhTraceData trace_data = TraceDataEmpty();
-	BvhTracePointEx(ray, sect, 0, false, &trace_data);
-
-	if(!trace_data.hit || trace_data.distance > travel_dist) {
-		comp_transform->position = wish_point;
+	if(move_len <= EPSILON)
 		return;
-	}
 
-	Vector3 pos = comp_transform->position;
-
-	float travel_remaining = travel_dist;
-	Vector3 movement = Vector3Scale(travel_dir, travel_remaining);
-
-	for(short i = 0; i < SLIDE_STEPS; i++) {
-		float move_amount = Vector3Length(movement); 
-
-		if(move_amount <= EPSILON)
-			break;
-	
-		Vector3 dir = Vector3Normalize(movement);
-
-		Ray ray = (Ray) { .position = pos, .direction = dir };
-		trace_data = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, 0, false, &trace_data);
-		
-		if(!trace_data.hit || trace_data.distance > move_amount) {
-			pos = Vector3Add(pos, movement);
-			break;
-		} 
-
-		pos = trace_data.point;
-		float wall_dot = Vector3DotProduct(trace_data.normal, movement); 
-
-		if(wall_dot < 0.0f) {
-			Vector3 trim = Vector3Scale(trace_data.normal, wall_dot);
-			movement = Vector3Subtract(movement, trim);
-
-		} else break;
-
-		pos = Vector3Add(pos, Vector3Scale(trace_data.normal, 0.01f));
-	}
-
-	comp_transform->position = pos;
+	// Sweep box
+	Ray ray = { .position = box_center, .direction = move_dir };
+	BvhTraceData tr = TraceDataEmpty();
+	BoundingBox sweep_box = BoxTranslate(box, wish_point);
+	BvhBoxSweep(ray, sect, 0, &sweep_box, &tr);
 }
 
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, float gravity, float dt) {

@@ -31,6 +31,12 @@ Vector3 TriCentroid(Tri tri) {
 	};
 }
 
+// Return a triangle translated to a new point
+Tri TriTranslate(Tri tri, Vector3 movement) {
+	for(short i = 0; i < 3; i++) tri.vertices[i] = Vector3Add(tri.vertices[i], movement);
+	return tri;
+}
+
 // Get plane from tri
 Plane TriToPlane(Tri tri) {
 	Vector3 n = Vector3CrossProduct(Vector3Subtract(tri.vertices[1], tri.vertices[0]), Vector3Subtract(tri.vertices[2], tri.vertices[0]));
@@ -79,25 +85,109 @@ BoundingBox BoxTranslate(BoundingBox box, Vector3 point) {
 	return (BoundingBox) { .min = Vector3Add(point, Vector3Scale(extent, -0.5f)), .max = Vector3Add(point, Vector3Scale(extent, 0.5f)) };
 }
 
-
 // Get a box with it's points clamped to the back side of a plane
 BoundingBox BoxFitToSurface(BoundingBox box, Vector3 point, Vector3 normal) {
+	//box = BoxTranslate(box, point);
+	normal = Vector3Normalize(normal);
+
+	Vector3 center = BoxCenter(box);
+
+	float max_depth = 0.0f;
+	BoxPoints points = BoxGetPoints(box);
+
+	for(u8 i = 0; i < 8; i++) {
+		Vector3 to_point = Vector3Subtract(points.v[i], point);	
+		float dot = Vector3DotProduct(to_point, normal); 
+
+		if(dot > max_depth) {
+			max_depth = dot;
+		}
+	}
+
+	if(max_depth > 0.0f) {
+		Vector3 offset = Vector3Scale(normal, -max_depth);
+		box = BoxTranslate(box, Vector3Subtract(center, offset));
+	}
+
+	return box;
+}
+
+float BoxGetSurfaceDepth(BoundingBox box, Vector3 point, Vector3 normal) {
+	normal = Vector3Normalize(normal);
+
+	Vector3 center = BoxCenter(box);
+
+	float max_depth = 0.0f;
+	BoxPoints points = BoxGetPoints(box);
+
+	for(u8 i = 0; i < 8; i++) {
+		Vector3 to_point = Vector3Subtract(points.v[i], point);	
+		float dot = Vector3DotProduct(to_point, normal); 
+
+		if(dot > max_depth) 
+			max_depth = dot;
+	}
+
+	return max_depth;
+}
+
+Vector3 BoxSurfaceDelta(BoundingBox box, Vector3 point, Vector3 normal) {
+	normal = Vector3Normalize(normal);
+
 	Vector3 center = BoxCenter(box);
 	Vector3 offset = Vector3Zero();
 
 	BoxPoints points = BoxGetPoints(box);
+	float max_depth = 0.0f;
+
 	for(u8 i = 0; i < 8; i++) {
-		Vector3 to_point = Vector3Normalize(Vector3Subtract(point, points.v[i]));	
+		Vector3 to_point = Vector3Subtract(points.v[i], point);	
 		float dot = Vector3DotProduct(to_point, normal); 
 
-		if(dot > 0.0f) {
-			Vector3 relation = Vector3Subtract(center, points.v[i]);
+		if(dot > max_depth) 
+			max_depth = dot;
+	}
 
-			//offset = Vector3Max(offset, Vector3Subtract(, Vector3 v2))
+	if(max_depth > 0.0f)
+		offset = Vector3Scale(normal, -max_depth);
+
+	return offset;
+}
+
+// Get furthest point a box face within line
+Vector3 BoxGetEdge(BoundingBox box, Vector3 normal) {
+	Vector3 edge;	
+
+	BoxNormals norms = BoxGetFaceNormals(box);
+
+	Vector3 face_dir = norms.n[0];
+	float d = -FLT_MAX;
+
+	for(u8 i = 0; i < 6; i++) {
+		float dot = Vector3DotProduct(normal, norms.n[i]);
+
+		if(dot > d) {
+			d = dot;
+			face_dir = norms.n[i];
 		}
-	}	
+	}
 
-	return (BoundingBox) {0};
+	return edge;
+}
+
+BoxNormals BoxGetFaceNormals(BoundingBox box) {
+	BoxNormals normals = {0};
+
+	for(u8 i = 0; i < 3; i++) {
+		float x = (1 << i & 0x01) ? 1 : 0;
+		float y = (1 << i & 0x02) ? 1 : 0;
+		float z = (1 << i & 0x04) ? 1 : 0;
+
+		normals.n[i] = (Vector3) { x, y, z }; 
+		normals.n[3 + i] = Vector3Scale(normals.n[i], -1);
+	}
+
+	return normals;
 }
 
 BoxPoints BoxGetPoints(BoundingBox box) {
@@ -437,7 +527,9 @@ BvhTraceData TraceDataEmpty() {
 		.distance = FLT_MAX,
 		.node_id = 0,
 		.tri_id = 0,
-		.hit = false
+		.hit = false,
+		.contact_dist = FLT_MAX,
+		.contact = Vector3Zero()
 	};
 }
 
@@ -460,12 +552,12 @@ void BvhTraceNodes(Ray ray, MapSection *sect, u16 node_id, float smallest_dist, 
 }
 
 // Trace a point through world space
-void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root_cast) {
+void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root) {
 	BvhNode *node = &sect->bvh.nodes[node_id];
 
 	RayCollision coll;
 
-	if(!skip_root_cast) {
+	if(!skip_root) {
 		coll = GetRayCollisionBox(ray, node->bounds);
 
 		if(!coll.hit)
@@ -509,12 +601,12 @@ void BvhTracePoint(Ray ray, MapSection *sect, u16 node_id, float *smallest_dist,
 	BvhTracePoint(ray, sect, node->child_lft, smallest_dist, point, true);
 }
 
-void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, bool skip_root_cast, BvhTraceData *data) {
+void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, bool skip_root, BvhTraceData *data) {
 	BvhNode *node = &sect->bvh.nodes[node_id];
 
 	RayCollision coll;
 
-	if(!skip_root_cast) {
+	if(!skip_root) {
 		coll = GetRayCollisionBox(ray, node->bounds);
 
 		if(!coll.hit)
@@ -562,38 +654,49 @@ void BvhTracePointEx(Ray ray, MapSection *sect, u16 node_id, bool skip_root_cast
 	BvhTracePointEx(ray, sect, node->child_lft, true, data);
 }
 
-void BvhBoxSweep(BoundingBox box, MapSection *sect, u16 node_id, float smallest_dist, Vector3 start, Vector3 *point) {
+void BvhBoxSweep(Ray ray, MapSection *sect, u16 node_id, BoundingBox *box, BvhTraceData *data) {
 	BvhNode *node = &sect->bvh.nodes[node_id];
+	RayCollision coll;
 
-	bool node_hit = CheckCollisionBoxes(box, node->bounds);
-	if(!node_hit) return;
+	coll = GetRayCollisionBox(ray, node->bounds);	
+
+	if(!coll.hit) return;
+	//if(coll.distance > data->contact_dist) return;
 
 	for(u16 i = 0; i < node->tri_count; i++) {
-		u16 tri_id = sect->tri_ids[node->first_tri + i];
+		u16 tri_id = sect->tri_ids[node->first_tri + i];	
 		Tri *tri = &sect->tris[tri_id];
 
-		for(short j = 0; j < 3; j++) {
-			Vector3 p = tri->vertices[j];
+		coll = GetRayCollisionTriangle(ray, tri->vertices[0], tri->vertices[1], tri->vertices[2]);
+		if(!coll.hit) continue;
 
-			if( p.x >= box.min.x && p.x <= box.max.x &&
-			    p.y >= box.min.y && p.y <= box.max.y &&
-			    p.z >= box.min.z && p.z <= box.min.z) {
-				
-				float dist = Vector3Distance(start, p);
+		if(Vector3DotProduct(tri->normal, ray.direction) > 0) continue;
 
-				if(dist < smallest_dist) {
-					smallest_dist = dist;
-					*point = p;
-				}
-			}
+		//Vector3 h = Vector3Scale(BoxExtent(*box), 0.5f);
+		//float offset = fabsf(tri->normal.x)*h.x + fabsf(tri->normal.y)*h.y + fabsf(tri->normal.z)*h.z; 
+		
+		float offset = Vector3Length(BoxSurfaceDelta(*box, coll.point, coll.normal));
+		float contact_dist = coll.distance - offset;
+
+		if(coll.distance < data->distance) {
+			data->normal = tri->normal;
+			data->distance = contact_dist; 
+			data->tri_id = tri_id;
+			data->node_id = node_id;
+			data->hit = true;
+			data->point = coll.point;
+			data->contact = Vector3Subtract(coll.point, Vector3Scale(tri->normal, offset));
+
+			*box = BoxTranslate(*box, coll.point);
+			*box = BoxFitToSurface(*box, coll.point, data->normal);
 		}
 	}
 
-	bool leaf = (node->tri_count > 0 || node->child_rgt + node->child_lft == 0);
+	bool leaf = (node->tri_count > 0);
 	if(leaf) return;
 
-	BvhBoxSweep(box, sect, node->child_lft, smallest_dist, start, point);
-	BvhBoxSweep(box, sect, node->child_rgt, smallest_dist, start, point);
+	BvhBoxSweep(ray, sect, node->child_lft, box, data);
+	BvhBoxSweep(ray, sect, node->child_rgt, box, data);
 }
 
 void MapSectionDisplayNormals(MapSection *sect) {
@@ -603,5 +706,10 @@ void MapSectionDisplayNormals(MapSection *sect) {
 
 		DrawLine3D(centroid, Vector3Add(centroid, Vector3Scale(tri.normal, 4)), SKYBLUE);
 	}
+}
+
+float BoundsToRadius(BoundingBox bounds) {
+	Vector3 h = Vector3Scale(BoxExtent(bounds), 0.5f);
+	return sqrtf(h.x*h.x + h.z*h.z);
 }
 

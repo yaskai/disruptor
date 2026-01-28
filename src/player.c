@@ -6,13 +6,16 @@
 #include "geo.h"
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
-#define PLAYER_SPEED 205.0f
+#define PLAYER_SPEED 240.0f
 #define PLAYER_MAX_VEL 15.5f
 
-#define PLAYER_MAX_ACCEL 8.5f
+#define PLAYER_MAX_ACCEL 10.5f
 float player_accel;
+float player_accel_forward;
+float player_accel_side;
 
-#define PLAYER_FRICTION 18.75f 
+#define PLAYER_FRICTION 15.25f 
+#define PLAYER_AIR_FRICTION 14.85f
 
 Camera3D *ptr_cam;
 InputHandler *ptr_input;
@@ -24,20 +27,14 @@ float cam_bob, cam_tilt;
 
 BoxPoints box_points;
 
-typedef struct {
-	Vector3 view_dir, view_dest;
-	float view_length;
+PlayerDebugData *player_debug_data = { 0 };
 
-	Vector3 move_dir, move_dest;
-	float move_length;
-
-} PlayerDebugData;
-PlayerDebugData player_debug_data = { 0 };
-
-void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section) {
+void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section, PlayerDebugData *debug_data) {
 	ptr_cam = camera;
 	ptr_input = input;
 	ptr_sect = test_section;
+
+	player_debug_data = debug_data;
 }
 
 void PlayerUpdate(Entity *player, float dt) {
@@ -45,14 +42,19 @@ void PlayerUpdate(Entity *player, float dt) {
 
 	PlayerInput(player, ptr_input, dt);
 
-	player->comp_transform.velocity.x = Clamp(player->comp_transform.velocity.x, -PLAYER_MAX_VEL, PLAYER_MAX_VEL);
-	player->comp_transform.velocity.z = Clamp(player->comp_transform.velocity.z, -PLAYER_MAX_VEL, PLAYER_MAX_VEL);
+	// **
+	// Apply friction
+	float friction = (player->comp_transform.on_ground) ? PLAYER_FRICTION : PLAYER_AIR_FRICTION;
 
-	player->comp_transform.velocity.x += -player->comp_transform.velocity.x * (PLAYER_FRICTION * (player_accel * 0.095f)) * dt;
+	player->comp_transform.velocity.x += -player->comp_transform.velocity.x * (friction) * dt;
 	if(fabsf(player->comp_transform.velocity.x) <= EPSILON) player->comp_transform.velocity.x = 0;
 
-	player->comp_transform.velocity.z += -player->comp_transform.velocity.z * (PLAYER_FRICTION * (player_accel * 0.095f)) * dt;
+	player->comp_transform.velocity.z += -player->comp_transform.velocity.z * (friction) * dt;
 	if(fabsf(player->comp_transform.velocity.z) <= EPSILON) player->comp_transform.velocity.z = 0;
+
+	player->comp_transform.velocity.x = Clamp(player->comp_transform.velocity.x, -PLAYER_MAX_VEL, PLAYER_MAX_VEL);
+	player->comp_transform.velocity.z = Clamp(player->comp_transform.velocity.z, -PLAYER_MAX_VEL, PLAYER_MAX_VEL);
+	// **
 
 	Vector3 horizontal_velocity = (Vector3) { player->comp_transform.velocity.x, 0, player->comp_transform.velocity.z };
 	Vector3 wish_point = Vector3Add(player->comp_transform.position, horizontal_velocity);	
@@ -71,6 +73,7 @@ void PlayerUpdate(Entity *player, float dt) {
 }
 
 void PlayerDraw(Entity *player) {
+	PlayerDisplayDebugInfo(player);
 }
 
 void PlayerInput(Entity *player, InputHandler *input, float dt) {
@@ -123,34 +126,47 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 	float len_forward = Vector3Length(move_forward);
 	float len_side = Vector3Length(move_side);
 
-	if(Vector3Length(move_forward) > 0)
-		cam_bob = Lerp(cam_bob, (1.95f + len_forward * 0.5f) * sinf(t * 12 + (len_forward * 0.85f)) + 1.0f, player_accel * dt);
-	else {
-		cam_bob = Lerp(cam_bob, 0, (1.0f / ((player_accel + 1) / PLAYER_MAX_ACCEL)) * dt);
+	if(len_forward > 0) {
+		player_accel_forward = Clamp(player_accel_forward + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
+		//cam_bob = Lerp(cam_bob, (1.95f + len_forward * 0.75f) * sinf(t * 12 + (len_forward * 0.95f)) + 1.0f, player_accel_forward * dt);
+		float bob_targ = (2 * len_forward) * sinf(t * 12 + (len_forward) * 5.95f) + 1;
+		cam_bob = Lerp(cam_bob, bob_targ, 10 * dt);
+	} else {
+		cam_bob = Lerp(cam_bob, 0, 10 * dt);
 		if(cam_bob <= EPSILON) cam_bob = 0;
 	}
 
 	Vector3 cam_roll_targ = UP;
 	if(len_side) {
+		player_accel_side = Clamp(player_accel_side + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
+
 		float side_vel = Vector3DotProduct(movement, right);
 
-		float tilt_max = fmaxf(0.1f, len_side);
+		float tilt_max = Clamp(len_side, 0, 0.08f);
 
-		cam_tilt = (side_vel * len_side * player_accel) * dt;
+		cam_tilt = (side_vel * len_side * player_accel_side);
 		cam_tilt = Clamp(cam_tilt, -tilt_max, tilt_max);
 
 		if(fabs(cam_tilt) > EPSILON) cam_roll_targ = Vector3RotateByAxisAngle(UP, player->comp_transform.forward, cam_tilt);
+	} else {
+
 	}
+
 	ptr_cam->up = Vector3Lerp(ptr_cam->up, cam_roll_targ, 0.1f);
 
+	/*
 	if(Vector3Length(movement) > 0)
 		player_accel = Clamp(player_accel + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
 	else {
-		player_accel = Clamp(player_accel - (PLAYER_FRICTION * 0.0075f) * dt, 0, PLAYER_MAX_ACCEL);
+		player_accel = Clamp(player_accel - (PLAYER_FRICTION * 30.75f) * dt, 0, PLAYER_MAX_ACCEL);
 	}
+	*/
 
+	Vector3 vel_forward = Vector3Scale(move_forward, (PLAYER_SPEED * player_accel_forward) * dt);
+	Vector3 vel_side = Vector3Scale(move_side, (PLAYER_SPEED * player_accel_side) * dt);
+	Vector3 horizontal_velocity = Vector3Add(vel_forward, vel_side);
 
-	Vector3 horizontal_velocity = Vector3Add(player->comp_transform.velocity, Vector3Scale(movement, (PLAYER_SPEED * player_accel) * dt));
+	//Vector3 horizontal_velocity = Vector3Add(player->comp_transform.velocity, Vector3Scale(movement, (PLAYER_SPEED * player_accel) * dt));
 	
 	player->comp_transform.velocity.x += horizontal_velocity.x * dt;
 	player->comp_transform.velocity.z += horizontal_velocity.z * dt;
@@ -174,14 +190,40 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	DrawBoundingBox(player->comp_transform.bounds, RED);
 
 	Ray view_ray = (Ray) { .position = player->comp_transform.position, .direction = player->comp_transform.forward };	
-	player_debug_data.view_dest = Vector3Add(view_ray.position, Vector3Scale(view_ray.direction, FLT_MAX * 0.25f));	
+	player_debug_data->view_dest = Vector3Add(view_ray.position, Vector3Scale(view_ray.direction, FLT_MAX * 0.25f));	
 
-	player_debug_data.view_length = FLT_MAX;
-	BvhTracePoint(view_ray, ptr_sect, 0, &player_debug_data.view_length, &player_debug_data.view_dest, false);	
+	player_debug_data->view_length = FLT_MAX;
+	BvhTracePoint(view_ray, ptr_sect, 0, &player_debug_data->view_length, &player_debug_data->view_dest, false);	
 
 	//DrawLine3D(player->comp_transform.position, player_debug_data.view_dest, GREEN);
 	//DrawSphere(player_debug_data.view_dest, 4, GREEN);
 
 	for(short i = 0; i < 8; i++) DrawSphere(box_points.v[i], 2, PURPLE);
+
+	player_debug_data->accel = player_accel;	
+
+	Vector3 horizontal_velocity = (Vector3) { player->comp_transform.velocity.x, 0, player->comp_transform.velocity.z };
+
+	Ray move_ray = (Ray) { .position = player->comp_transform.position, .direction = Vector3Normalize(horizontal_velocity) };
+	player_debug_data->move_dir = move_ray.direction;
+
+	BoundingBox sweep_box = player->comp_transform.bounds;
+	BvhTraceData sweep_data = TraceDataEmpty();
+	//sweep_data.distance = Vector3Length(horizontal_velocity);
+
+	BvhBoxSweep(view_ray, ptr_sect, 0, &sweep_box, &sweep_data);
+	DrawBoundingBox(sweep_box, GREEN);
+	DrawRay(view_ray, GREEN);
+
+	sweep_box = player->comp_transform.bounds;
+	sweep_data = TraceDataEmpty();
+	BvhBoxSweep(move_ray, ptr_sect, 0, &sweep_box, &sweep_data);
+	DrawBoundingBox(sweep_box, SKYBLUE);
+	DrawRay(move_ray, RED);
+
+	/*
+	Vector3 view_edge = BoxGetEdge(ptr_sect->bvh.nodes[0].bounds, view_ray.direction);	
+	DrawSphere(view_edge, 10, PURPLE);
+	*/
 }
 
