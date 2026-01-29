@@ -60,8 +60,8 @@ void PlayerUpdate(Entity *player, float dt) {
 	Vector3 horizontal_velocity = (Vector3) { player->comp_transform.velocity.x, 0, player->comp_transform.velocity.z };
 	Vector3 wish_point = Vector3Add(player->comp_transform.position, horizontal_velocity);	
 
-	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh[1], dt);
-	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh[0], GRAV_DEFAULT, dt);
+	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh, dt);
+	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh, GRAV_DEFAULT, dt);
 
 	ptr_cam->position = Vector3Add(player->comp_transform.position, Vector3Scale(player->comp_transform.forward, 0.0f));
 	ptr_cam->target = Vector3Add(ptr_cam->position, player->comp_transform.forward);
@@ -168,7 +168,7 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 	player->comp_transform.velocity.z += horizontal_velocity.z * dt;
 
 	if(input->actions[ACTION_JUMP].state == INPUT_ACTION_PRESSED) {
-		if(CheckGround(&player->comp_transform, ptr_sect, &ptr_sect->bvh[0]) && !CheckCeiling(&player->comp_transform, ptr_sect, &ptr_sect->bvh[0])) {
+		if(CheckGround(&player->comp_transform, ptr_sect, &ptr_sect->bvh) && !CheckCeiling(&player->comp_transform, ptr_sect, &ptr_sect->bvh)) {
 			player->comp_transform.position.y++;	
 			player->comp_transform.on_ground = false;
 			player->comp_transform.velocity.y = 200;
@@ -195,7 +195,7 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	player_debug_data->view_dest = Vector3Add(view_ray.position, Vector3Scale(view_ray.direction, FLT_MAX * 0.25f));	
 
 	player_debug_data->view_length = FLT_MAX;
-	BvhTracePoint(view_ray, ptr_sect, &ptr_sect->bvh[0], 0, &player_debug_data->view_length, &player_debug_data->view_dest, false);	
+	BvhTracePoint(view_ray, ptr_sect, &ptr_sect->bvh, 0, &player_debug_data->view_length, &player_debug_data->view_dest, false);	
 
 	//DrawLine3D(player->comp_transform.position, player_debug_data.view_dest, GREEN);
 	//DrawSphere(player_debug_data.view_dest, 4, GREEN);

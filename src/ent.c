@@ -44,6 +44,7 @@ DrawFunc draw_fn[4] = {
 void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSection *sect, BvhTree *bvh, float dt) {
 	float y_dir = (comp_transform->velocity.y >= 0) ? 1.5f : -1;
 	float y_offset = -(BoxExtent(comp_transform->bounds).y * (0.235f * y_dir));
+	y_offset *= 0.5f;
 
 	Vector3 wish_move = Vector3Subtract(wish_point, comp_transform->position);
 	Vector3 pos = comp_transform->position;
@@ -57,7 +58,8 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 		Ray ray = (Ray) { .position = Vector3Add(pos, Vector3Scale(UP, y_offset)), .direction = Vector3Normalize(vel) };
 
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, bvh, 0, false, &tr);
+		//BvhTracePointEx(ray, sect, bvh, 0, false, &tr);
+		BvhBoxSweep(ray, sect, bvh, 0, &comp_transform->bounds, &tr);
 
 		if(!tr.hit || tr.distance > Vector3Length(wish_move)) {
 			pos = Vector3Add(pos, vel);
@@ -80,7 +82,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 			}
 		}
 
-		//pos = Vector3Subtract(pos, Vector3Scale(tr.normal, 0.01f));
+		pos = Vector3Subtract(pos, Vector3Scale(tr.normal, 0.01f));
 	}
 
 	

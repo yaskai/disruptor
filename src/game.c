@@ -117,6 +117,7 @@ void GameUpdate(Game *game, float dt) {
 }
 
 void GameDraw(Game *game) {
+
 	// 3D Rendering, main
 	BeginDrawing();
 	BeginTextureMode(game->render_target3D);
@@ -132,8 +133,8 @@ void GameDraw(Game *game) {
 			//DrawBoundingBox(game->test_section.bvh[0].nodes[0].bounds, WHITE);
 			//DrawBoundingBox(game->test_section.bvh[1].nodes[0].bounds, ORANGE);
 
-			for(u16 i = 0; i < game->test_section.bvh[0].count; i++) {
-				BvhNode *node = &game->test_section.bvh[0].nodes[i];
+			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
+				BvhNode *node = &game->test_section.bvh.nodes[i];
 
 				bool is_leaf = node->tri_count > 0;
 				if(!is_leaf) continue;
@@ -141,7 +142,7 @@ void GameDraw(Game *game) {
 				//DrawBoundingBox(node->bounds, GREEN);
 
 				for(u16 j = 0; j < node->tri_count; j++) {
-					u16 tri_id = game->test_section.bvh[0].tri_ids[node->first_tri + j];
+					u16 tri_id = game->test_section.tri_ids[node->first_tri + j];
 					Tri tri = game->test_section.tris[tri_id];
 
 					Color color = colors[tri_id % 6];

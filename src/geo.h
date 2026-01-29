@@ -111,14 +111,8 @@ typedef struct {
 	// Node array
 	BvhNode *nodes;
 
-	u16 *tri_ids;
-
-	Vector3 fit_volume;
-
 	u16 count;
 	u16 capacity;
-
-	short use_fit_volume;	
 
 } BvhTree;
 
@@ -126,7 +120,7 @@ typedef struct {
 #define MAP_SECT_QUEUED	0x02
 
 typedef struct {
-	BvhTree bvh[3];
+	BvhTree bvh;
 
 	Model model;
 
@@ -191,7 +185,7 @@ void BvhTracePoint(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, float *
 
 void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, bool skip_root, BvhTraceData *data);
 
-void BvhBoxSweep(Ray ray, MapSection *sect, u16 node_id, BoundingBox *box, BvhTraceData *data);
+void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox *box, BvhTraceData *data);
 
 void MapSectionDisplayNormals(MapSection *sect);
 
