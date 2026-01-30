@@ -16,7 +16,9 @@ float player_accel_forward;
 float player_accel_side;
 
 #define PLAYER_FRICTION 15.25f 
-#define PLAYER_AIR_FRICTION 14.85f
+#define PLAYER_AIR_FRICTION 15.05f
+
+#define PLAYER_BASE_JUMP_FORCE 180
 
 Camera3D *ptr_cam;
 InputHandler *ptr_input;
@@ -58,12 +60,12 @@ void PlayerUpdate(Entity *player, float dt) {
 	// **
 
 	Vector3 horizontal_velocity = (Vector3) { player->comp_transform.velocity.x, 0, player->comp_transform.velocity.z };
-	Vector3 wish_point = Vector3Add(player->comp_transform.position, horizontal_velocity);	
+	Vector3 wish_point = Vector3Add(player->comp_transform.position, horizontal_velocity);
 
 	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh, dt);
 	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh, GRAV_DEFAULT, dt);
 
-	ptr_cam->position = Vector3Add(player->comp_transform.position, Vector3Scale(player->comp_transform.forward, 0.0f));
+	ptr_cam->position = Vector3Add(player->comp_transform.position, Vector3Scale(UP, 0.0f));
 	ptr_cam->target = Vector3Add(ptr_cam->position, player->comp_transform.forward);
 
 	if(!player->comp_transform.on_ground) cam_bob = 0;
@@ -128,13 +130,14 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 		float bob_targ = (3 * (len_forward + len_side)) * sinf(t * 12 + (len_forward) * 5.95f) + 1;
 		cam_bob = Lerp(cam_bob, bob_targ, 10 * dt);
 	} else {
+		player_accel_forward = Clamp(player_accel_forward - (PLAYER_FRICTION) * dt, 1.0f, PLAYER_MAX_ACCEL);
 		cam_bob = Lerp(cam_bob, 0, 10 * dt);
 		if(cam_bob <= EPSILON) cam_bob = 0;
 	}
 
 	Vector3 cam_roll_targ = UP;
 	if(len_side) {
-		player_accel_side = Clamp(player_accel_side + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
+		player_accel_side = Clamp(player_accel_side + (PLAYER_SPEED * 0.25f) * dt, 0.9f, PLAYER_MAX_ACCEL);
 
 		float side_vel = Vector3DotProduct(movement, right);
 
@@ -145,33 +148,23 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 
 		if(fabs(cam_tilt) > EPSILON) cam_roll_targ = Vector3RotateByAxisAngle(UP, player->comp_transform.forward, cam_tilt);
 	} else {
-
+		player_accel_side = Clamp(player_accel_side - (PLAYER_FRICTION) * dt, 0.0f, PLAYER_MAX_ACCEL);
 	}
 
 	ptr_cam->up = Vector3Lerp(ptr_cam->up, cam_roll_targ, 0.1f);
-
-	/*
-	if(Vector3Length(movement) > 0)
-		player_accel = Clamp(player_accel + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
-	else {
-		player_accel = Clamp(player_accel - (PLAYER_FRICTION * 30.75f) * dt, 0, PLAYER_MAX_ACCEL);
-	}
-	*/
 
 	Vector3 vel_forward = Vector3Scale(move_forward, (PLAYER_SPEED * player_accel_forward) * dt);
 	Vector3 vel_side = Vector3Scale(move_side, (PLAYER_SPEED * player_accel_side) * dt);
 	Vector3 horizontal_velocity = Vector3Add(vel_forward, vel_side);
 
-	//Vector3 horizontal_velocity = Vector3Add(player->comp_transform.velocity, Vector3Scale(movement, (PLAYER_SPEED * player_accel) * dt));
-	
 	player->comp_transform.velocity.x += horizontal_velocity.x * dt;
 	player->comp_transform.velocity.z += horizontal_velocity.z * dt;
 
 	if(input->actions[ACTION_JUMP].state == INPUT_ACTION_PRESSED) {
-		if(CheckGround(&player->comp_transform, ptr_sect, &ptr_sect->bvh) && !CheckCeiling(&player->comp_transform, ptr_sect, &ptr_sect->bvh)) {
-			player->comp_transform.position.y++;	
+		if(player->comp_transform.on_ground && !CheckCeiling(&player->comp_transform, ptr_sect, &ptr_sect->bvh)) {
+			player->comp_transform.position.y += 0.01f;	
 			player->comp_transform.on_ground = false;
-			player->comp_transform.velocity.y = 200;
+			player->comp_transform.velocity.y = PLAYER_BASE_JUMP_FORCE + player_accel_forward * 2.5f;
 		}
 	}
 
@@ -195,12 +188,22 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	player_debug_data->view_dest = Vector3Add(view_ray.position, Vector3Scale(view_ray.direction, FLT_MAX * 0.25f));	
 
 	player_debug_data->view_length = FLT_MAX;
-	BvhTracePoint(view_ray, ptr_sect, &ptr_sect->bvh, 0, &player_debug_data->view_length, &player_debug_data->view_dest, false);	
 
-	//DrawLine3D(player->comp_transform.position, player_debug_data.view_dest, GREEN);
+	BvhTraceData tr = TraceDataEmpty();
+	//BvhTracePoint(view_ray, ptr_sect, &ptr_sect->bvh, 0, &player_debug_data->view_length, &player_debug_data->view_dest, false);	
+	BvhTracePointEx(view_ray, ptr_sect, &ptr_sect->bvh, 0, false, &tr);
+	player_debug_data->view_dest = tr.point;
+
+	//DrawLine3D(player->comp_transform.position, player_debug_data->view_dest, GREEN);
 	//DrawSphere(player_debug_data.view_dest, 4, GREEN);
 
-	for(short i = 0; i < 8; i++) DrawSphere(box_points.v[i], 2, PURPLE);
+	/*
+	Tri view_tri = ptr_sect->tris[tr.tri_id]; 
+	DrawTriangle3D(view_tri.vertices[0], view_tri.vertices[1], view_tri.vertices[2], ColorAlpha(SKYBLUE, 0.5f));
+	DrawTriangle3D(view_tri.vertices[2], view_tri.vertices[1], view_tri.vertices[0], ColorAlpha(SKYBLUE, 0.5f));
+	*/
+
+	for(short i = 0; i < 8; i++) DrawSphere(box_points.v[i], 2, RED);
 
 	player_debug_data->accel = player_accel;	
 
@@ -212,22 +215,17 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	/*
 	BoundingBox sweep_box = player->comp_transform.bounds;
 	BvhTraceData sweep_data = TraceDataEmpty();
-	//sweep_data.distance = Vector3Length(horizontal_velocity);
-
-	BvhBoxSweep(view_ray, ptr_sect, 0, &sweep_box, &sweep_data);
+	BvhBoxSweep(view_ray, ptr_sect, &ptr_sect->bvh, 0, &sweep_box, &sweep_data);
+	sweep_box = BoxTranslate(sweep_box, sweep_data.point);
 	DrawBoundingBox(sweep_box, GREEN);
 	DrawRay(view_ray, GREEN);
 
 	sweep_box = player->comp_transform.bounds;
 	sweep_data = TraceDataEmpty();
-	BvhBoxSweep(move_ray, ptr_sect, 0, &sweep_box, &sweep_data);
+	BvhBoxSweep(move_ray, ptr_sect, &ptr_sect->bvh, 0, &sweep_box, &sweep_data);
+	sweep_box = BoxTranslate(sweep_box, sweep_data.point);
 	DrawBoundingBox(sweep_box, SKYBLUE);
 	DrawRay(move_ray, RED);
-	*/
-
-	/*
-	Vector3 view_edge = BoxGetEdge(ptr_sect->bvh.nodes[0].bounds, view_ray.direction);	
-	DrawSphere(view_edge, 10, PURPLE);
 	*/
 }
 

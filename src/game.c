@@ -195,7 +195,7 @@ void GameDraw(Game *game) {
 	
 	// 3D Rendering, debug
 	BeginTextureMode(game->render_target_debug);
-	ClearBackground(ColorAlpha(BLACK, 0.85f));
+	ClearBackground(ColorAlpha(BLACK, 0.95f));
 		BeginMode3D(game->camera_debug);
 			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 0.1f));
 			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
@@ -225,6 +225,8 @@ void GameDraw(Game *game) {
 				}
 			}
 			*/
+			
+			RenderEntities(&game->ent_handler);
 
 		EndMode3D();
 

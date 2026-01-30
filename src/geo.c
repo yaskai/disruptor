@@ -696,6 +696,68 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 	BvhBoxSweep(ray, sect, bvh, node->child_lft, box, data);
 }
 
+void BvhBoxSweepNoInvert(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox *box, BvhTraceData *data) {
+	BvhNode *node = &bvh->nodes[node_id];
+
+	RayCollision coll;
+
+	if(node_id == 0) {
+		coll = GetRayCollisionBox(ray, node->bounds);
+
+		if(!coll.hit)
+			return;
+
+		if(coll.distance > data->distance)
+			return;
+	};
+
+	for(u16 i = 0; i < node->tri_count; i++) {
+		u16 tri_id = sect->tri_ids[node->first_tri + i];
+		Tri tri = sect->tris[tri_id];
+
+		// No invert!
+		//if(Vector3DotProduct(tri.normal, ray.direction) > 0) tri.normal = Vector3Negate(tri.normal);
+
+		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);
+		if(!coll.hit) continue;
+
+		Vector3 h = Vector3Scale(BoxExtent(*box), 0.5f);
+		float diff = ( fabsf(tri.normal.x) * h.x +  fabsf(tri.normal.y) * h.y + fabsf(tri.normal.z) * h.z ); 
+		
+		coll.distance -= diff;
+		coll.point = Vector3Subtract(coll.point, Vector3Scale(ray.direction, diff));
+
+		if(coll.distance < data->distance) {
+			data->point = coll.point;
+			data->normal = tri.normal;
+			data->distance = coll.distance;
+			data->tri_id = tri_id;
+			data->node_id = node_id;
+			data->hit = true;
+		}
+	}
+
+	bool leaf = (node->tri_count > 0);
+	if(leaf) return;
+
+	RayCollision hit_l = GetRayCollisionBox(ray, bvh->nodes[node->child_lft].bounds);	
+	RayCollision hit_r = GetRayCollisionBox(ray, bvh->nodes[node->child_rgt].bounds);
+
+	if(!(hit_l.hit + hit_r.hit)) return;
+
+	float dl = (hit_l.hit) ? hit_l.distance : FLT_MAX;
+	float dr = (hit_r.hit) ? hit_r.distance : FLT_MAX;
+
+	if(dl < dr) {
+		BvhBoxSweepNoInvert(ray, sect, bvh, node->child_lft, box, data);
+		BvhBoxSweepNoInvert(ray, sect, bvh, node->child_rgt, box, data);
+		return;
+	}
+
+	BvhBoxSweepNoInvert(ray, sect, bvh, node->child_rgt, box, data);
+	BvhBoxSweepNoInvert(ray, sect, bvh, node->child_lft, box, data);
+}
+
 void MapSectionDisplayNormals(MapSection *sect) {
 	for(u16 i = 0; i < sect->tri_count; i++) {
 		Tri tri = sect->tris[i];

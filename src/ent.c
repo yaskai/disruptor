@@ -42,10 +42,6 @@ DrawFunc draw_fn[4] = {
 #define SLIDE_STEPS 4
 
 void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSection *sect, BvhTree *bvh, float dt) {
-	float y_dir = (comp_transform->velocity.y >= 0) ? 1.5f : -1;
-	float y_offset = -(BoxExtent(comp_transform->bounds).y * (0.235f * y_dir));
-	y_offset *= 0.5f;
-
 	Vector3 wish_move = Vector3Subtract(wish_point, comp_transform->position);
 	Vector3 pos = comp_transform->position;
 	Vector3 vel = wish_move;
@@ -53,12 +49,13 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 	Vector3 clips[MAX_CLIPS] = {0};
 	short clip_count = 0;
 
+	float y_offset = -(BoxExtent(comp_transform->bounds).y) * 0.25f;
+	if(!comp_transform->on_ground) y_offset = 0;
+
 	for(short i = 0; i < SLIDE_STEPS; i++) {
-		//Ray ray = (Ray) { .position = pos, .direction = Vector3Normalize(vel) };
 		Ray ray = (Ray) { .position = Vector3Add(pos, Vector3Scale(UP, y_offset)), .direction = Vector3Normalize(vel) };
 
 		BvhTraceData tr = TraceDataEmpty();
-		//BvhTracePointEx(ray, sect, bvh, 0, false, &tr);
 		BvhBoxSweep(ray, sect, bvh, 0, &comp_transform->bounds, &tr);
 
 		if(!tr.hit || tr.distance > Vector3Length(wish_move)) {
@@ -85,70 +82,66 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 		pos = Vector3Subtract(pos, Vector3Scale(tr.normal, 0.01f));
 	}
 
-	
-	//comp_transform->velocity = (Vector3) { vel.x, comp_transform->velocity.y, vel.z };
 	comp_transform->position = pos;
 }
 
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float gravity, float dt) {
-	comp_transform->on_ground = CheckGround(comp_transform, sect, bvh);
+	comp_transform->on_ground = CheckGround(comp_transform, sect, bvh, dt);
+
+	if(!comp_transform->on_ground) 
+		CheckCeiling(comp_transform, sect, bvh);
 
 	comp_transform->velocity.y -= gravity * dt;
 	comp_transform->position.y += comp_transform->velocity.y * dt;
-
-	if(comp_transform->on_ground && fabsf(comp_transform->velocity.y) >= EPSILON) {
-		comp_transform->velocity.y = 0;
-	}
 }
 
-short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh) {
-	if(comp_transform->velocity.y > 0) {
-		CheckCeiling(comp_transform, sect, bvh);
+short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float dt) {
+	if(comp_transform->velocity.y >= 1) return 0;
+
+	Vector3 offset = (Vector3) { comp_transform->velocity.x, 0, comp_transform->velocity.z };
+	offset = Vector3Scale(offset, dt);
+
+	Ray ray = (Ray) { .position = comp_transform->position, .direction = DOWN };
+
+	BvhTraceData tr = TraceDataEmpty();
+	BvhBoxSweepNoInvert(ray, sect, bvh, 0, &comp_transform->bounds, &tr);
+
+	// No surface
+	if(tr.distance > EPSILON) 
+		return 0;
+
+	float dot = Vector3DotProduct(tr.normal, DOWN);
+	if(dot > 0.0f) return 0;
+
+	float diff = tr.point.y - comp_transform->position.y;
+	if(diff <= -0.1f) {
+		comp_transform->velocity.y = 0;
 		return 0;
 	}
 
-	float half_height = BoxExtent(comp_transform->bounds).y * 0.5f;
-	float feet_y = BoxCenter(comp_transform->bounds).y - half_height;
+	// Surface found and is floor
+	comp_transform->position.y = tr.point.y;
+	comp_transform->velocity.y = 0;
 
-	Ray ray = (Ray) { .position = comp_transform->position, .direction = Vector3Scale(UP, -1) };
-
-	Vector3 ground_point = ray.position;
-	float ground_dist = FLT_MAX;
-	BvhTracePoint(ray, sect, bvh, 0, &ground_dist, &ground_point, false);
-
-	if(ground_point.y > feet_y && ground_dist <= half_height) {
-		if(comp_transform->velocity.y <= 0) {
-			float delta = ground_point.y - feet_y;
-			comp_transform->position.y = (ray.position.y + delta);
-			return 1;
-		}
-	}
-	
-	return 0;
+	return 1;
 }
 
 short CheckCeiling(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh) {
-	float half_height = BoxExtent(comp_transform->bounds).y * 0.5f;
-	float head_y = BoxCenter(comp_transform->bounds).y + half_height;
-
 	Ray ray = (Ray) { .position = comp_transform->position, .direction = UP };
+	
+	BvhTraceData tr = TraceDataEmpty();	
+	BvhBoxSweepNoInvert(ray, sect, bvh, 0, &comp_transform->bounds, &tr);
 
-	Vector3 celing_point = ray.position;
-	float ceiling_dist = FLT_MAX;
-	BvhTracePoint(ray, sect, bvh, 0, &ceiling_dist, &celing_point, false);
+	if(tr.distance > EPSILON)
+		return 0;
 
-	if(ceiling_dist < head_y && ceiling_dist <= half_height) {
-		float delta = head_y - celing_point.y;
-		
-		if(comp_transform->velocity.y > 0) {
-			comp_transform->position.y -= delta;
-			comp_transform->velocity.y *= -0.5f; 
-		}
-		
-		return 1;
-	}
+	float dot = Vector3DotProduct(tr.normal, UP);
+	if(dot > 0.0f) return 0;
 
-	return 0;
+	comp_transform->position.y = tr.point.y;
+	comp_transform->velocity.y = 0;
+
+	return 1;
 }
 
 void EntHandlerInit(EntityHandler *handler) {

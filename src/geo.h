@@ -4,6 +4,9 @@
 #ifndef GEO_H_
 #define GEO_H_
 
+#define UP 		(Vector3) {  0,  1,  0 }
+#define DOWN 	(Vector3) {  0, -1,  0 } 
+
 // Triangle primitive struct
 typedef struct {
 	Vector3 vertices[3];
@@ -186,6 +189,7 @@ void BvhTracePoint(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, float *
 void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, bool skip_root, BvhTraceData *data);
 
 void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox *box, BvhTraceData *data);
+void BvhBoxSweepNoInvert(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox *box, BvhTraceData *data);
 
 void MapSectionDisplayNormals(MapSection *sect);
 

@@ -6,8 +6,6 @@
 #ifndef ENT_H_
 #define ENT_H_
 
-#define UP (Vector3) {0, 1, 0}
-
 typedef struct  {
 	BoundingBox bounds;
 
@@ -28,7 +26,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 
 #define GRAV_DEFAULT 800.0f
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float gravity, float dt);
-short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh);
+short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float dt);
 short CheckCeiling(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh);
 
 typedef struct {
