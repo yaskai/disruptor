@@ -124,7 +124,7 @@ void GameDraw(Game *game) {
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
 
-			DrawModel(game->test_section.model, Vector3Zero(), 1, DARKGREEN);
+			DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
 			DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
 
 			//DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
@@ -206,8 +206,8 @@ void GameDraw(Game *game) {
 			PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
 
 			/*
-			for(u16 i = 0; i < game->test_section.bvh[1].count; i++) {
-				BvhNode *node = &game->test_section.bvh[1].nodes[i];
+			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
+				BvhNode *node = &game->test_section.bvh.nodes[i];
 
 				bool is_leaf = node->tri_count > 0;
 				if(!is_leaf) continue;
@@ -219,7 +219,11 @@ void GameDraw(Game *game) {
 					u16 tri_id = node->first_tri + j;
 					Tri *tri = &game->test_section.tris[tri_id];
 
-					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 0.5f));
+					float dot = Vector3DotProduct(
+						tri->normal,
+						Vector3Normalize(Vector3Subtract(game->camera_debug.target, game->camera_debug.position)));
+
+					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 1.0f));
 					
 					//DrawLine3D(tri->vertices[2], tri->vertices[0], BLACK);
 					//DrawLine3D(tri->vertices[1], tri->vertices[0], BLACK);

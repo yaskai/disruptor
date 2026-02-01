@@ -7,16 +7,16 @@
 #include "geo.h"
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
-#define PLAYER_SPEED 240.0f
-#define PLAYER_MAX_VEL 15.5f
+#define PLAYER_SPEED 130.0f
+#define PLAYER_MAX_VEL 8.5f
 
-#define PLAYER_MAX_ACCEL 10.5f
+#define PLAYER_MAX_ACCEL 13.5f
 float player_accel;
 float player_accel_forward;
 float player_accel_side;
 
-#define PLAYER_FRICTION 15.25f 
-#define PLAYER_AIR_FRICTION 15.05f
+#define PLAYER_FRICTION 11.25f 
+#define PLAYER_AIR_FRICTION 9.05f
 
 #define PLAYER_BASE_JUMP_FORCE 180
 
@@ -124,10 +124,10 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 	float len_forward = Vector3Length(move_forward);
 	float len_side = Vector3Length(move_side);
 
-	if(len_forward > 0) {
-		player_accel_forward = Clamp(player_accel_forward + (PLAYER_SPEED * 0.25f) * dt, 1.0f, PLAYER_MAX_ACCEL);
+	if(len_forward + len_side > 0) {
+		player_accel_forward = Clamp(player_accel_forward + (PLAYER_SPEED) * dt, 1.0f, PLAYER_MAX_ACCEL);
 		//cam_bob = Lerp(cam_bob, (1.95f + len_forward * 0.75f) * sinf(t * 12 + (len_forward * 0.95f)) + 1.0f, player_accel_forward * dt);
-		float bob_targ = (3 * (len_forward + len_side)) * sinf(t * 12 + (len_forward) * 5.95f) + 1;
+		float bob_targ = (3 * (len_forward + (len_side * 0.5f))) * sinf(t * 12 + (len_forward) * 5.95f) + 1;
 		cam_bob = Lerp(cam_bob, bob_targ, 10 * dt);
 	} else {
 		player_accel_forward = Clamp(player_accel_forward - (PLAYER_FRICTION) * dt, 1.0f, PLAYER_MAX_ACCEL);
@@ -212,14 +212,12 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	Ray move_ray = (Ray) { .position = player->comp_transform.position, .direction = Vector3Normalize(horizontal_velocity) };
 	player_debug_data->move_dir = move_ray.direction;
 
-	/*
 	BoundingBox sweep_box = player->comp_transform.bounds;
 	BvhTraceData sweep_data = TraceDataEmpty();
-	BvhBoxSweep(view_ray, ptr_sect, &ptr_sect->bvh, 0, &sweep_box, &sweep_data);
-	sweep_box = BoxTranslate(sweep_box, sweep_data.point);
-	DrawBoundingBox(sweep_box, GREEN);
-	DrawRay(view_ray, GREEN);
+	BvhTracePointEx(view_ray, ptr_sect, &ptr_sect->bvh, 0, false, &sweep_data);
+	DrawLine3D(player->comp_transform.position, tr.point, GREEN);
 
+	/*
 	sweep_box = player->comp_transform.bounds;
 	sweep_data = TraceDataEmpty();
 	BvhBoxSweep(move_ray, ptr_sect, &ptr_sect->bvh, 0, &sweep_box, &sweep_data);
