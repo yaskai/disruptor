@@ -8,9 +8,9 @@
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
 #define PLAYER_SPEED 130.0f
-#define PLAYER_MAX_VEL 8.5f
+#define PLAYER_MAX_VEL 200.5f
 
-#define PLAYER_MAX_ACCEL 13.5f
+#define PLAYER_MAX_ACCEL 15.5f
 float player_accel;
 float player_accel_forward;
 float player_accel_side;
@@ -63,9 +63,14 @@ void PlayerUpdate(Entity *player, float dt) {
 	Vector3 wish_point = Vector3Add(player->comp_transform.position, horizontal_velocity);
 
 	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh[1], dt);
-	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh[0], GRAV_DEFAULT, dt);
+	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh[1], GRAV_DEFAULT, dt);
 
-	ptr_cam->position = Vector3Add(player->comp_transform.position, Vector3Scale(UP, 6.0f));
+	/*
+	PlayerMove(player, dt);
+	player->comp_transform.position = Vector3Add(player->comp_transform.position, Vector3Scale(player->comp_transform.velocity, 100 * dt));
+	*/
+
+	ptr_cam->position = Vector3Add(player->comp_transform.position, Vector3Scale(UP, 1.0f));
 	ptr_cam->target = Vector3Add(ptr_cam->position, player->comp_transform.forward);
 
 	if(!player->comp_transform.on_ground) cam_bob = 0;
@@ -137,7 +142,7 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 
 	Vector3 cam_roll_targ = UP;
 	if(len_side) {
-		player_accel_side = Clamp(player_accel_side + (PLAYER_SPEED * 0.25f) * dt, 0.9f, PLAYER_MAX_ACCEL);
+		player_accel_side = Clamp(player_accel_side + (PLAYER_SPEED) * dt, 0.9f, PLAYER_MAX_ACCEL);
 
 		float side_vel = Vector3DotProduct(movement, right);
 

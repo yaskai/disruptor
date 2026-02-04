@@ -626,7 +626,7 @@ void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTr
 		u16 tri_id = bvh->tri_ids[node->first_tri + i];
 		Tri tri = sect->tris[tri_id];
 
-		if(Vector3DotProduct(tri.normal, ray.direction) > 0) tri.normal = Vector3Negate(tri.normal);
+		//if(Vector3DotProduct(tri.normal, ray.direction) > 0) tri.normal = Vector3Negate(tri.normal);
 
 		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);
 		if(!coll.hit) continue;
@@ -840,6 +840,7 @@ float BoundsToRadius(BoundingBox bounds) {
 	return sqrtf(h.x*h.x + h.z*h.z);
 }
 
+// Calculate Minkowski Difference from normal of shape A and half extents of shape B
 float MinkowskiDiff(Vector3 normal, Vector3 h) {
 	return fabsf(normal.x) * h.x +  fabsf(normal.y) * h.y + fabsf(normal.z) * h.z; 
 }

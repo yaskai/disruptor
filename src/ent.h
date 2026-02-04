@@ -118,4 +118,6 @@ void PlayerDie(Entity *player);
 
 void PlayerDisplayDebugInfo(Entity *player);
 
+void PlayerMove(Entity *player, float dt);
+
 #endif

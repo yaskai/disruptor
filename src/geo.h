@@ -146,6 +146,12 @@ void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id);
 
 #define BODY_VOLUME_MEDIUM (Vector3) { 14, 20, 14 }
 
+enum BVH_SHAPES : u8 {
+	BVH_POINT		= 0,	
+	BVH_BOX_MED 	= 1,
+	BVH_BOX_BIG		= 2
+};
+
 // Start BVH tree construction
 void BvhConstruct(MapSection *sect, BvhTree *bvh, Vector3 volume);
 
@@ -213,6 +219,7 @@ void MapSectionDisplayNormals(MapSection *sect);
 
 float BoundsToRadius(BoundingBox bounds);
 
+// Calculate Minkowski Difference from normal of shape A and half extents of shape B
 float MinkowskiDiff(Vector3 normal, Vector3 h);
 
 #endif

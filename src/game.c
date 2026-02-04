@@ -208,34 +208,6 @@ void GameDraw(Game *game) {
 			//DrawBoundingBox(game->test_section.bvh.nodes[0].bounds, WHITE);
 
 			PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
-
-			/*
-			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
-				BvhNode *node = &game->test_section.bvh.nodes[i];
-
-				bool is_leaf = node->tri_count > 0;
-				if(!is_leaf) continue;
-
-				//DrawBoundingBox(node->bounds, SKYBLUE);
-
-				Color color = colors[i % 6];
-				for(u16 j = 0; j < node->tri_count; j++) {
-					u16 tri_id = node->first_tri + j;
-					Tri *tri = &game->test_section.tris[tri_id];
-
-					float dot = Vector3DotProduct(
-						tri->normal,
-						Vector3Normalize(Vector3Subtract(game->camera_debug.target, game->camera_debug.position)));
-
-					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 1.0f));
-					
-					//DrawLine3D(tri->vertices[2], tri->vertices[0], BLACK);
-					//DrawLine3D(tri->vertices[1], tri->vertices[0], BLACK);
-					//DrawLine3D(tri->vertices[0], tri->vertices[2], BLACK);
-				}
-			}
-			*/
-			
 			RenderEntities(&game->ent_handler);
 
 		EndMode3D();

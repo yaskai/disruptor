@@ -41,6 +41,7 @@ DrawFunc draw_fn[4] = {
 #define MAX_CLIPS 6
 #define SLIDE_STEPS 4
 
+
 Vector3 ClipVelocity(Vector3 in, Vector3 normal, float overbounce) {
 	float3 out = Vector3ToFloatV(in), in3 = out;
 	float3 n = Vector3ToFloatV(normal);
@@ -79,7 +80,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 		BvhTraceData tr = TraceDataEmpty();
 		BvhTracePointEx(ray, sect, bvh, 0, &tr);
 
-		if(!tr.hit || tr.distance > Vector3Length(wish_move)) {
+		if(tr.distance > Vector3Length(wish_move)) {
 			pos = Vector3Add(pos, vel);
 			break;
 		}
@@ -89,7 +90,6 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 
 		float allowed = (tr.distance - 0.001f);
 
-		//if(allowed < 0) allowed = 0;
 		if(fabsf(allowed) < 0.01f) {
 			allowed = 0;
 		}
@@ -102,7 +102,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 		vel = wish_move;
 		for(short j = 0; j < clip_count; j++) {
 			float into = Vector3DotProduct(vel, clips[j]);	
-			if(into < 0) {
+			if(into < 0.0f) {
 				vel = Vector3Subtract(vel, Vector3Scale(clips[j], into));	
 			}
 		}
@@ -111,6 +111,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 	}
 
 	comp_transform->position = pos;
+	//CheckGround(comp_transform, sect, bvh, dt);
 }
 
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float gravity, float dt) {
@@ -123,6 +124,44 @@ void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh
 	comp_transform->position.y += comp_transform->velocity.y * dt;
 }
 
+#define STEP_SIZE 2.50f
+short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float dt) {
+	if(comp_transform->velocity.y >= 0.1f) return 0;
+
+	Vector3 offset = (Vector3) { comp_transform->velocity.x, 0, comp_transform->velocity.z };
+	offset = Vector3Scale(offset, Vector3Length(offset) * dt);
+
+	float ent_height = bvh->shape.y * 0.5f;
+
+	Ray ray = (Ray) { .position = comp_transform->position, .direction = DOWN };
+	ray.position = Vector3Subtract(ray.position, offset);
+
+	BvhTraceData tr = TraceDataEmpty();
+	BvhTracePointEx(ray, sect, bvh, 0, &tr);
+
+	if(!tr.hit || tr.distance > ent_height) {
+		return 0;
+	}
+
+	float diff = fabsf((comp_transform->position.y) - (tr.point.y + ent_height));
+	diff = ceilf(diff);
+	//printf("diff: %f\n", diff);
+
+	if(diff >= STEP_SIZE - EPSILON) {
+		comp_transform->position.y += ((STEP_SIZE * ent_height * 2)) * dt;
+		//comp_transform->position.y += STEP_SIZE;
+		//comp_transform->position.y = Lerp(comp_transform->position.y, comp_transform->position.y + STEP_SIZE, dt);
+		comp_transform->velocity.y += (diff * ent_height);
+		//comp_transform->position.y += diff * dt; 
+	} else {
+		comp_transform->position.y = tr.point.y + ent_height;
+		comp_transform->velocity.y = 0;
+	}	
+
+	return 1;
+}
+
+/*
 short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float dt) {
 	if(comp_transform->velocity.y >= 1) return 0;
 
@@ -136,7 +175,7 @@ short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh
 	BvhBoxSweepNoInvert(ray, sect, bvh, 0, &comp_transform->bounds, &tr);
 
 	// No surface
-	if(tr.distance > 0.1f) 
+	if(tr.distance >= EPSILON) 
 		return 0;
 
 	//float dot = Vector3DotProduct(tr.normal, DOWN);
@@ -148,14 +187,21 @@ short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh
 		return 0;
 	}
 
+	if(diff >= STEP_SIZE) {
+		comp_transform->position.y += STEP_SIZE * dt;
+	}
+
 	// Surface found and is floor
 	comp_transform->position.y = tr.point.y;
 	comp_transform->velocity.y = 0;
 
 	return 1;
 }
+*/
 
 short CheckCeiling(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh) {
+	if(comp_transform->velocity.y > 0) return 0;
+
 	Ray ray = (Ray) { .position = comp_transform->position, .direction = UP };
 	
 	BvhTraceData tr = TraceDataEmpty();	
@@ -168,7 +214,7 @@ short CheckCeiling(comp_Transform *comp_transform, MapSection *sect, BvhTree *bv
 	if(dot > 0.0f) return 0;
 
 	comp_transform->position.y = tr.point.y;
-	comp_transform->velocity.y = 0;
+	comp_transform->velocity.y *= -0.5f;
 
 	return 1;
 }
