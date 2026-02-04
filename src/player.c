@@ -71,7 +71,7 @@ void PlayerUpdate(Entity *player, float dt) {
 
 
 	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh[1], dt);
-	if(player->comp_transform.velocity.y == 0 && y_vel_prev <= -300.0f) {
+	if(player->comp_transform.velocity.y == 0 && y_vel_prev <= -325.0f) {
 		land_frame = true;
 	}
 
@@ -153,7 +153,7 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 	}
 
 	if(land_frame)
-		cam_bob = -10;
+		cam_bob -= 18.5f;
 
 	Vector3 cam_roll_targ = UP;
 	if(len_side) {
@@ -171,11 +171,18 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 		player_accel_side = Clamp(player_accel_side - (PLAYER_FRICTION) * dt, 0.0f, PLAYER_MAX_ACCEL);
 	}
 
-	ptr_cam->up = Vector3Lerp(ptr_cam->up, cam_roll_targ, 0.1f);
-
 	// Slight tilt when player lands on ground
 	if(land_frame) 
-		ptr_cam->up = Vector3RotateByAxisAngle(ptr_cam->up, player->comp_transform.forward, 0.0001f * y_vel_prev);
+		cam_roll_targ = Vector3RotateByAxisAngle(ptr_cam->up, player->comp_transform.forward, 35);
+
+	ptr_cam->up = Vector3Lerp(ptr_cam->up, cam_roll_targ, 0.1f);
+
+	/*
+	if(land_frame) 
+		cam_roll_targ = Vector3RotateByAxisAngle(ptr_cam->up, player->comp_transform.forward, 15 + (y_vel_prev) / 1000);
+		//ptr_cam->up = Vector3RotateByAxisAngle(ptr_cam->up, player->comp_transform.forward, 15 + (y_vel_prev) / 1000);
+		//ptr_cam->up = Vector3RotateByAxisAngle(ptr_cam->up, player->comp_transform.forward, 0.00005f * y_vel_prev);
+	*/
 
 	Vector3 vel_forward = Vector3Scale(move_forward, (PLAYER_SPEED * player_accel_forward) * dt);
 	Vector3 vel_side = Vector3Scale(move_side, (PLAYER_SPEED * player_accel_side) * dt);
