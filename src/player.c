@@ -70,12 +70,12 @@ void PlayerUpdate(Entity *player, float dt) {
 	Vector3 wish_point = Vector3Add(player->comp_transform.position, horizontal_velocity);
 
 
-	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh[1], dt);
+	ApplyMovement(&player->comp_transform, wish_point, ptr_sect, &ptr_sect->bvh[0], dt);
 	if(player->comp_transform.velocity.y == 0 && y_vel_prev <= -335.0f) {
 		land_frame = true;
 	}
 
-	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh[1], GRAV_DEFAULT, dt);
+	ApplyGravity(&player->comp_transform, ptr_sect, &ptr_sect->bvh[0], GRAV_DEFAULT, dt);
 
 	/*
 	PlayerMove(player, dt);

@@ -144,7 +144,7 @@ float BvhNodeCost(BvhNode *node);
 // Grow bounding box of a node using it's contained primitives
 void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id);
 
-#define BODY_VOLUME_MEDIUM (Vector3) { 14, 20, 14 }
+#define BODY_VOLUME_MEDIUM (Vector3) { 12, 20, 12 }
 
 enum BVH_SHAPES : u8 {
 	BVH_POINT		= 0,	
@@ -197,7 +197,7 @@ void BvhTracePoint(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, float *
 
 void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data);
 
-void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox *box, BvhTraceData *data);
+void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox box, BvhTraceData *data);
 void BvhBoxSweepNoInvert(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox *box, BvhTraceData *data);
 
 typedef struct {
@@ -222,12 +222,10 @@ float BoundsToRadius(BoundingBox bounds);
 // Calculate Minkowski Difference from normal of shape A and half extents of shape B
 float MinkowskiDiff(Vector3 normal, Vector3 h);
 
+#define BVH_INTERSECT_MAX_NODES 8
 typedef struct {
-	u16 hit_nodes[8];
-	u16 hit_tris[32];
-
-	u16 node_count;
-	u16 tri_count;
+	u16 nodes[BVH_INTERSECT_MAX_NODES];
+	u16 count;
 
 } IntersectData;
 
