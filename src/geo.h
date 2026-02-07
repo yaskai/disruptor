@@ -108,6 +108,12 @@ typedef struct {
 
 } Bin;
 
+typedef struct {
+	Vector3 vertices[18];
+	Plane planes[12]; 
+	
+} Hull;
+
 #define BVH_TREE_START_CAPACITY	1024
 
 typedef struct {
@@ -128,11 +134,15 @@ typedef struct {
 typedef struct {
 	BvhTree bvh[3];
 
+	Hull *hulls;
+
 	Model model;
 
 	Tri *tris;
 	u16 *tri_ids;
 	u16 tri_count;
+
+	u16 hull_count;
 
 	u8 flags;
 

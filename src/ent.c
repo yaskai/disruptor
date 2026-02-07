@@ -92,7 +92,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 			break;
 		}
 
-		float allowed = (tr.contact_dist - 0.01f);
+		float allowed = (tr.contact_dist - 0.001f);
 
 		if(fabsf(allowed) < 0.01f) {
 			allowed = 0;
@@ -136,6 +136,7 @@ void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh
 	}
 }
 
+/*
 short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect, BvhTree *bvh, float dt) {
 	if(comp_transform->velocity.y > 0.0f) return 0;
 
@@ -173,7 +174,45 @@ short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect,
 
 	return 1;
 }
+*/
 
+short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect, BvhTree *bvh, float dt) {
+	if(comp_transform->velocity.y > 0.1f) return 0;
+
+	Vector3 h_vel = (Vector3) { comp_transform->velocity.x, 0, comp_transform->velocity.z };
+	Vector3 offset = Vector3Scale(h_vel, dt);
+
+	float ent_height = BoxExtent(comp_transform->bounds).y;
+	float feet = (ent_height * 0.5f) - 1;
+
+	Ray ray = (Ray) { .position = pos, .direction = DOWN };
+	ray.position = Vector3Add(ray.position, offset);
+
+	BvhTraceData tr = TraceDataEmpty();
+	BvhBoxSweep(ray, sect, &sect->bvh[0], 0, comp_transform->bounds, &tr);
+
+	if(tr.contact_dist >= 1.0f) {
+		return 0;
+	}
+
+	if(tr.normal.y == 0) return 0;
+
+	float into_slope = Vector3DotProduct(h_vel, tr.normal);
+	float slope_y = (into_slope) / tr.normal.y;
+
+	if(fabsf(tr.normal.y) == 1.0f) slope_y = 0;
+
+	comp_transform->on_ground = 1;
+	comp_transform->velocity.y = 0;
+
+	float change = (tr.contact.y - slope_y) - (comp_transform->position.y);
+	comp_transform->position.y = (tr.contact.y - slope_y);
+
+	comp_transform->last_ground_surface = tr.tri_id; 
+	//comp_transform->position.y += change;
+
+	return 1;
+}
 short CheckCeiling(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh) {
 	if(comp_transform->velocity.y < 0) return 0;
 
