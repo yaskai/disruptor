@@ -41,7 +41,7 @@ DrawFunc draw_fn[4] = {
 #define MAX_CLIPS 6
 #define SLIDE_STEPS 4
 
-#define STEP_SIZE 2.50f
+#define STEP_SIZE 8.0f
 
 // *
 float ground_diff = 0;
@@ -92,7 +92,7 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 			break;
 		}
 
-		float allowed = (tr.contact_dist - 0.1f);
+		float allowed = (tr.contact_dist - 0.01f);
 
 		if(fabsf(allowed) < 0.01f) {
 			allowed = 0;
@@ -110,79 +110,66 @@ void ApplyMovement(comp_Transform *comp_transform, Vector3 wish_point, MapSectio
 				vel = Vector3Subtract(vel, Vector3Scale(clips[j], into));	
 				comp_transform->velocity =
 					Vector3Subtract(comp_transform->velocity, Vector3Scale(clips[j], into * dt));	
-
 					//Vector3Subtract(comp_transform->velocity, Vector3Scale(comp_transform->velocity, 0.1f * dt));	
 			}
 		}
 
-		//pos = Vector3Add(pos, Vector3Scale(tr.normal, 0.01f));
+		pos = Vector3Add(pos, Vector3Scale(tr.normal, 0.01f));
 	}
 
 	comp_transform->position = pos;
-
-	float ent_height = bvh->shape.y * 0.5f;
-	Vector3 h_vel = (Vector3) { comp_transform->velocity.x, 0, comp_transform->velocity.z };
-
-	Ray ray = (Ray) { .position = pos, .direction = DOWN };
-	ray.position = Vector3Subtract(ray.position, Vector3Scale(h_vel, dt));
-
-	BvhTraceData tr = TraceDataEmpty();
-	//BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr);
-	BvhBoxSweep(ray, sect, &sect->bvh[0], 0, comp_transform->bounds, &tr);
-	
-	float ground_start = comp_transform->position.y - ent_height;
-	float ground_end = tr.contact.y;
-	float diff = ground_end - ground_start;	
-
-	// * for debug purposes
-	ground_diff = ground_end - ground_start;
-
-	if(tr.contact_dist > ent_height || comp_transform->velocity.y > 0.0f)
-		return;
-
-	// Find slope offset
-	float into_slope = Vector3DotProduct(h_vel, tr.normal);
-	float slope_y = (into_slope) / tr.normal.y;
-
-	// Set grounded true, clear vertical velocity, set new Y position
-	comp_transform->on_ground = 1;
-	comp_transform->velocity.y = 0;
-	comp_transform->position.y = tr.contact.y - slope_y;
+	comp_transform->on_ground = CheckGround(comp_transform, pos, sect, bvh, dt);
 }
 
 void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float gravity, float dt) {
-	//comp_transform->on_ground = CheckGround(comp_transform, sect, bvh, dt);
+	if(!comp_transform->on_ground)
+		comp_transform->air_time += dt;
+	else 
+		comp_transform->air_time = 0;
+
+	comp_transform->on_ground = CheckGround(comp_transform, comp_transform->position, sect, bvh, dt);
 	CheckCeiling(comp_transform, sect, bvh);
 
-	comp_transform->velocity.y -= gravity * dt;
-	comp_transform->position.y += comp_transform->velocity.y * dt;
+	if(!comp_transform->on_ground) {
+		comp_transform->velocity.y -= gravity * dt;
+		comp_transform->position.y += comp_transform->velocity.y * dt;
+	}
 }
 
-short CheckGround(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh, float dt) {
-	if(comp_transform->velocity.y >= 0.1f) return 0;
+short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect, BvhTree *bvh, float dt) {
+	if(comp_transform->velocity.y > 0.0f) return 0;
 
-	Vector3 offset = (Vector3) { comp_transform->velocity.x, 0, comp_transform->velocity.z };
-	offset = Vector3Scale(offset, Vector3Length(offset) * dt);
+	Vector3 h_vel = (Vector3) { comp_transform->velocity.x, 0, comp_transform->velocity.z };
+	Vector3 offset = Vector3Scale(h_vel, dt);
 
-	//float ent_height = bvh->shape.y * 0.5f;
-	float ent_height = BoxExtent(comp_transform->bounds).y * 0.5f;
+	float ent_height = BoxExtent(comp_transform->bounds).y;
+	float feet = (ent_height * 0.5f) - 1;
 
-	Ray ray = (Ray) { .position = comp_transform->position, .direction = DOWN };
-	ray.position = Vector3Subtract(ray.position, Vector3Scale(offset, 2));
+	Ray ray = (Ray) { .position = pos, .direction = DOWN };
+	ray.position = Vector3Add(ray.position, offset);
 
 	BvhTraceData tr = TraceDataEmpty();
-	//BvhTracePointEx(ray, sect, bvh, 0, &tr);
-	BvhBoxSweep(ray, sect, bvh, 0, comp_transform->bounds, &tr);
+	BvhBoxSweep(ray, sect, &sect->bvh[0], 0, comp_transform->bounds, &tr);
 
-	if(!tr.hit || tr.contact_dist > ent_height) {
+	if(tr.contact_dist >= 1.0f) {
 		return 0;
 	}
 
-	float delta = tr.contact.y - comp_transform->position.y;
+	if(tr.normal.y == 0) return 0;
 
-	//comp_transform->position.y = tr.contact.y + ent_height;
-	comp_transform->position.y -= delta;
+	float into_slope = Vector3DotProduct(h_vel, tr.normal);
+	float slope_y = (into_slope) / tr.normal.y;
+
+	if(fabsf(tr.normal.y) == 1.0f) slope_y = 0;
+
+	comp_transform->on_ground = 1;
 	comp_transform->velocity.y = 0;
+
+	float change = (tr.contact.y - slope_y) - (comp_transform->position.y);
+	comp_transform->position.y = (tr.contact.y - slope_y);
+
+	comp_transform->last_ground_surface = tr.tri_id; 
+	//comp_transform->position.y += change;
 
 	return 1;
 }

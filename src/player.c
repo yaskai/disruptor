@@ -5,6 +5,7 @@
 #include "raymath.h"
 #include "ent.h"
 #include "geo.h"
+#include "player_gun.h"
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
 #define PLAYER_SPEED 130.0f
@@ -195,6 +196,7 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 		if(player->comp_transform.on_ground && !CheckCeiling(&player->comp_transform, ptr_sect, &ptr_sect->bvh[0])) {
 			player->comp_transform.position.y += 0.01f;	
 			player->comp_transform.on_ground = 0;
+			player->comp_transform.air_time = 1;
 			player->comp_transform.velocity.y = PLAYER_BASE_JUMP_FORCE + player_accel_forward * 2.5f;
 		}
 	}
@@ -220,18 +222,20 @@ void PlayerDisplayDebugInfo(Entity *player) {
 
 	player_debug_data->view_length = FLT_MAX;
 
+	/*
 	BvhTraceData tr = TraceDataEmpty();
 	BvhTracePointEx(view_ray, ptr_sect, &ptr_sect->bvh[1], 0, &tr);
 	player_debug_data->view_dest = tr.point;
+	*/
 
 	// Draw box points
-	for(short i = 0; i < 8; i++)
+	for(short i = 0; i < 8; i++) {
 		DrawSphere(box_points.v[i], 2, RED);
+	}
 
 	player_debug_data->accel = player_accel;	
 
-	Vector3 horizontal_velocity = (Vector3) { player->comp_transform.velocity.x, 0, player->comp_transform.velocity.z };
-
+	/*
 	Ray move_ray = (Ray) { .position = player->comp_transform.position, .direction = Vector3Normalize(horizontal_velocity) };
 	player_debug_data->move_dir = move_ray.direction;
 
@@ -253,5 +257,9 @@ void PlayerDisplayDebugInfo(Entity *player) {
 		DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(GREEN, 0.25f));
 		DrawTriangle3D(tri->vertices[2], tri->vertices[1], tri->vertices[0], ColorAlpha(GREEN, 0.25f));
 	}
+	*/
+
+	float feet = player->comp_transform.position.y - (BoxExtent(player->comp_transform.bounds).y * 0.5f);	
+	DrawSphere((Vector3) { player->comp_transform.position.x, feet, player->comp_transform.position.z }, 3, PINK);	
 }
 

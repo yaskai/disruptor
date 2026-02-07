@@ -62,6 +62,9 @@ void GameRenderSetup(Game *game) {
 	game->render_target2D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
 	game->render_target_debug = LoadRenderTexture(game->conf->window_width * 0.35f, game->conf->window_height * 0.35f);
 
+	game->player_gun = (PlayerGun) {0};
+	PlayerGunInit(&game->player_gun);
+
 	EntHandlerInit(&game->ent_handler);
 }
 
@@ -103,6 +106,8 @@ void GameLoadTestScene(Game *game, char *path) {
 	player.comp_transform.bounds.min = Vector3Scale(player.comp_transform.bounds.max, -1);
 	player.comp_transform.radius = BoundsToRadius(player.comp_transform.bounds);
 	player.comp_transform.position.y = 30;
+	player.comp_transform.on_ground = true;
+	player.comp_transform.air_time = 0;
 	game->ent_handler.ents[game->ent_handler.count++] = player;
 }
 
@@ -113,6 +118,7 @@ void GameUpdate(Game *game, float dt) {
 	VirtCameraControls(&game->camera_debug, dt);
 
 	PollInput(&game->input_handler);
+	PlayerGunUpdate(&game->player_gun, dt);
 
 	UpdateEntities(&game->ent_handler, dt);
 }
@@ -125,77 +131,19 @@ void GameDraw(Game *game) {
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
 
-			DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
+			DrawModel(game->test_section.model, Vector3Zero(), 1, WHITE);
 			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
 
-			//PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
-
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, GRAY);
-			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLUE);
-
-			//DrawBoundingBox(game->test_section.bvh[0].nodes[0].bounds, WHITE);
-			//DrawBoundingBox(game->test_section.bvh[1].nodes[0].bounds, ORANGE);
-
-			/*
-			for(u16 i = 0; i < game->test_section.bvh.count; i++) {
-				BvhNode *node = &game->test_section.bvh.nodes[i];
-
-				bool is_leaf = node->tri_count > 0;
-				if(!is_leaf) continue;
-
-				//DrawBoundingBox(node->bounds, GREEN);
-
-				for(u16 j = 0; j < node->tri_count; j++) {
-					u16 tri_id = game->test_section.tri_ids[node->first_tri + j];
-					Tri tri = game->test_section.tris[tri_id];
-
-					Color color = colors[tri_id % 6];
-					DrawTriangle3D(tri.vertices[0], tri.vertices[1], tri.vertices[2], ColorAlpha(color, 1.0f));
-					DrawLine3D(tri.vertices[2], tri.vertices[0], BLACK);
-					DrawLine3D(tri.vertices[1], tri.vertices[0], BLACK);
-					DrawLine3D(tri.vertices[0], tri.vertices[2], BLACK);
-				}
-			}
-			*/
-
-			/*
-			for(u16 i = 0; i < game->test_section.bvh[1].count; i++) {
-				BvhNode *node = &game->test_section.bvh[1].nodes[i];
-
-				bool is_leaf = node->tri_count > 0;
-				if(!is_leaf) continue;
-
-				DrawBoundingBox(node->bounds, SKYBLUE);
-
-				for(u16 j = 0; j < node->tri_count; j++) {
-					u16 tri_id = game->test_section.bvh[1].tri_ids[node->first_tri + j];
-					Tri tri = game->test_section.tris[tri_id];
-
-					if(game->test_section.bvh[1].use_fit_volume) {
-						Vector3 h = Vector3Scale(game->test_section.bvh[1].fit_volume, 0.5f);
-
-						Vector3 extend = (Vector3) {
-							fabsf(tri.normal.x) * h.x, 
-							fabsf(tri.normal.y) * h.y, 
-							fabsf(tri.normal.z) * h.z 
-						};
-
-						tri = TriTranslate(tri, extend);
-					}
-
-					Color color = colors[tri_id % 6];
-
-					//DrawTriangle3D(tri.vertices[0], tri.vertices[1], tri.vertices[2], ColorAlpha(color, 0.5f));
-					
-					//DrawLine3D(tri->vertices[2], tri->vertices[0], BLACK);
-					//DrawLine3D(tri->vertices[1], tri->vertices[0], BLACK);
-					//DrawLine3D(tri->vertices[0], tri->vertices[2], BLACK);
-				}
-			}
-			*/
+			PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
 			RenderEntities(&game->ent_handler);
 
 		EndMode3D();
+
+	EndTextureMode();
+
+	BeginTextureMode(game->render_target2D);
+	ClearBackground(BLANK);
+		PlayerGunDraw(&game->player_gun);
 	EndTextureMode();
 	
 	// 3D Rendering, debug
@@ -224,6 +172,10 @@ void GameDraw(Game *game) {
 	Rectangle rt_src = (Rectangle) { 0, 0, game->render_target3D.texture.width, -game->render_target3D.texture.height };
 	Rectangle rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+
+	rt_src = (Rectangle) { 0, 0, game->render_target2D.texture.width, -game->render_target2D.texture.height };
+	rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
+	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
 
 	// Debug
 	rt_src = (Rectangle) { 0, 0, game->render_target_debug.texture.width, -game->render_target_debug.texture.height };

@@ -698,21 +698,10 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 
 		float diff = MinkowskiDiff(tri.normal, h);
 
-		/*
-		Vector3 centroid = TriCentroid(tri);
-		for(short j = 0; j < 3; j++) {
-			Vector3 to_centroid = Vector3Normalize(Vector3Subtract(centroid, tri.vertices[j]));
-			tri.vertices[j] = Vector3Subtract(tri.vertices[j], Vector3Scale(to_centroid, diff));
-		}
-		*/
-
 		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);
 		if(!coll.hit) continue;
-
-		//coll.point = Vector3Add(ray.position, Vector3Scale(ray.direction, coll.distance - diff));
-		//coll.distance -= diff;
 		
-		if(coll.distance > data->distance) return;
+		if(coll.distance > data->distance) continue;
 
 		data->point = coll.point;
 		data->normal = tri.normal;
@@ -728,8 +717,16 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 	bool leaf = (node->tri_count > 0);
 	if(leaf) return;
 
-	RayCollision hit_l = GetRayCollisionBox(ray, bvh->nodes[node->child_lft].bounds);	
-	RayCollision hit_r = GetRayCollisionBox(ray, bvh->nodes[node->child_rgt].bounds);
+	BoundingBox box_l = bvh->nodes[node->child_lft].bounds;
+	box_l.min = Vector3Subtract(box_l.min, h);
+	box_l.max = Vector3Add(box_l.max, h);
+
+	BoundingBox box_r = bvh->nodes[node->child_rgt].bounds;
+	box_r.min = Vector3Subtract(box_r.min, h);
+	box_r.max = Vector3Add(box_r.max, h);
+
+	RayCollision hit_l = GetRayCollisionBox(ray, box_l);	
+	RayCollision hit_r = GetRayCollisionBox(ray, box_r);
 
 	if(!(hit_l.hit + hit_r.hit)) return;
 

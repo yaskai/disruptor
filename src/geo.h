@@ -233,4 +233,7 @@ IntersectData IntersectDataEmpty();
 
 void BvhBoxIntersect(BoundingBox box, MapSection *sect, BvhTree *bvh, u16 node_id, IntersectData *data);
 
+Vector3 ClosestBoxPoint(BoundingBox box, Vector3 point);
+
 #endif
+
