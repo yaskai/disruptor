@@ -12,6 +12,8 @@ typedef struct {
 	Vector3 vertices[3];
 	Vector3 normal;
 
+	u16 hull_id;
+
 } Tri;
 
 // Compute a triangle's normal vector
@@ -75,14 +77,39 @@ typedef struct {
 
 BoxNormals BoxGetFaceNormals(BoundingBox box);
 
+typedef struct {
+	Vector3 vertices[18];
+	Plane planes[16]; 
+
+	Vector3 position;
+
+	short vertex_count;
+	short plane_count;
+	
+} Hull;
+
+typedef struct {
+	Vector3 point;
+	Vector3 normal;
+
+	float t;
+
+	u16 hull_id;
+
+	bool hit;
+
+} HullTraceData;
+
+HullTraceData HullTraceDataEmpty();
+void TraceHull(Ray ray, Vector3 half_extents, HullTraceData *data, Hull *hull);
+
 // Create a primitive array from mesh
-Tri *MeshToTris(Mesh mesh, u16 *tri_count);
+Tri *MeshToTris(Mesh mesh, u16 *tri_count, u16 hull_id, Hull *hull);
 
 // Create a primitive array from model (with indexing)
-Tri *ModelToTris(Model model, u16 *tri_count, u16 **tri_ids);
+Tri *ModelToTris(Model model, u16 *tri_count, u16 **tri_ids, u16 *hull_count, Hull **hulls);
 
 #define MAX_TRIS_PER_NODE	4
-
 // BVH node struct
 // Size of 32 bytes reduces cache misses
 typedef struct {
@@ -100,19 +127,21 @@ typedef struct {
 
 } BvhNode;
 
-#define BVH_BIN_COUNT	16
+typedef struct {
+	BoundingBox bounds;
 
+	u16 hull_id;
+
+	u16 child_lft, child_rgt;
+
+} HullBvhNode;
+
+#define BVH_BIN_COUNT	16
 typedef struct {
 	BoundingBox bounds;
 	u16 count;
 
 } Bin;
-
-typedef struct {
-	Vector3 vertices[18];
-	Plane planes[12]; 
-	
-} Hull;
 
 #define BVH_TREE_START_CAPACITY	1024
 
@@ -143,7 +172,6 @@ typedef struct {
 	u16 tri_count;
 
 	u16 hull_count;
-
 	u8 flags;
 
 } MapSection;
@@ -242,8 +270,6 @@ typedef struct {
 IntersectData IntersectDataEmpty();
 
 void BvhBoxIntersect(BoundingBox box, MapSection *sect, BvhTree *bvh, u16 node_id, IntersectData *data);
-
-Vector3 ClosestBoxPoint(BoundingBox box, Vector3 point);
 
 #endif
 

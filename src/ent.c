@@ -134,9 +134,11 @@ void ApplyGravity(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh
 		comp_transform->velocity.y -= gravity * dt;
 		comp_transform->position.y += comp_transform->velocity.y * dt;
 	}
+
+	if(comp_transform->position.y < 30)
+		comp_transform->position.y = 30;
 }
 
-/*
 short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect, BvhTree *bvh, float dt) {
 	if(comp_transform->velocity.y > 0.0f) return 0;
 
@@ -151,6 +153,7 @@ short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect,
 
 	BvhTraceData tr = TraceDataEmpty();
 	BvhBoxSweep(ray, sect, &sect->bvh[0], 0, comp_transform->bounds, &tr);
+	//BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr);
 
 	if(tr.contact_dist >= 1.0f) {
 		return 0;
@@ -174,8 +177,8 @@ short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect,
 
 	return 1;
 }
-*/
 
+/*
 short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect, BvhTree *bvh, float dt) {
 	if(comp_transform->velocity.y > 0.1f) return 0;
 
@@ -208,11 +211,13 @@ short CheckGround(comp_Transform *comp_transform, Vector3 pos, MapSection *sect,
 	float change = (tr.contact.y - slope_y) - (comp_transform->position.y);
 	comp_transform->position.y = (tr.contact.y - slope_y);
 
-	comp_transform->last_ground_surface = tr.tri_id; 
+	//comp_transform->last_ground_surface = tr.tri_id; 
 	//comp_transform->position.y += change;
 
 	return 1;
 }
+*/
+
 short CheckCeiling(comp_Transform *comp_transform, MapSection *sect, BvhTree *bvh) {
 	if(comp_transform->velocity.y < 0) return 0;
 

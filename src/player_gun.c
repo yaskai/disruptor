@@ -8,17 +8,18 @@ float gun_rot = 0;
 float p, y, r;
 Matrix mat = {0};
 
-#define REVOLVER_REST (Vector3) { -1.05f, -2.05f, 3.5f }
+#define REVOLVER_REST (Vector3) { -0.75f, -1.95f, 6.25f }
 #define REVOLVER_ANGLE_REST 2.5f
 
 float recoil = 0;
+bool recoil_add = false;
 
 void PlayerGunInit(PlayerGun *player_gun) {
 	player_gun->cam = (Camera3D) {
 		.position = (Vector3) { 0, 0, -1 },
 		.target = (Vector3) { 0, 0, 1 },
 		.up = (Vector3) {0, 1, 0},
-		.fovy = 70,
+		.fovy = 54,
 		.projection = CAMERA_PERSPECTIVE
 	};
 
@@ -31,16 +32,21 @@ void PlayerGunInit(PlayerGun *player_gun) {
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 	player_gun->model.transform = mat;
-	mat = MatrixRotateX(-(recoil + gun_rot) * DEG2RAD);
 
-	recoil -= ((recoil * 0.99f) * 10 * dt); 
-	if(recoil <= 0.1f) recoil = 0;
+	float recoil_angle = Clamp(recoil + gun_rot, -1, 60.0f);
+	mat = MatrixRotateX(-recoil_angle * DEG2RAD);
+	mat = MatrixMultiply(mat, MatrixRotateY(REVOLVER_ANGLE_REST * DEG2RAD));
 
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && recoil <= 5.0f) {
-		recoil += 120 + (GetRandomValue(10, 30) * 0.1f);
+	recoil -= ((recoil * (1 - EPSILON)) * 11.5f) * dt; 
+	if(recoil <= -EPSILON) recoil = 0;
+
+	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && recoil <= 1.0f) {
+		recoil_add = false;
+		recoil += 80 + (GetRandomValue(50, 100) * 0.1f);
 	}
 
-	gun_pos.z = REVOLVER_REST.z - (recoil * 0.025f);
+	gun_pos.z = REVOLVER_REST.z - (recoil * 0.0485f);
+	//gun_pos.z = Lerp(gun_pos.z, REVOLVER_REST.z - (recoil * 0.085f), 20*dt);
 }
 
 void PlayerGunDraw(PlayerGun *player_gun) {

@@ -36,12 +36,18 @@ BoxPoints box_points;
 
 PlayerDebugData *player_debug_data = { 0 };
 
+Hull test_hull;
+
 void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section, PlayerDebugData *debug_data) {
 	ptr_cam = camera;
 	ptr_input = input;
 	ptr_sect = test_section;
 
 	player_debug_data = debug_data;
+
+	Mesh test_mesh = GenMeshCube(30, 30, 30);
+	u16 tri_count = 0;
+	MeshToTris(test_mesh, &tri_count, 0, &test_hull);
 }
 
 void PlayerUpdate(Entity *player, float dt) {
@@ -202,7 +208,7 @@ void PlayerInput(Entity *player, InputHandler *input, float dt) {
 	}
 
 	if(IsKeyPressed(KEY_R)) {
-		player->comp_transform.position = (Vector3) { 0, 30, 0 };
+		player->comp_transform.position = (Vector3) { 0, 40, 0 };
 		player->comp_transform.velocity = Vector3Zero();
 		player->comp_transform.on_ground = true;
 	} 
@@ -222,10 +228,37 @@ void PlayerDisplayDebugInfo(Entity *player) {
 
 	player_debug_data->view_length = FLT_MAX;
 
-	/*
 	BvhTraceData tr = TraceDataEmpty();
-	BvhTracePointEx(view_ray, ptr_sect, &ptr_sect->bvh[1], 0, &tr);
+	//BvhTracePointEx(view_ray, ptr_sect, &ptr_sect->bvh[1], 0, &tr);
+
+	BoundingBox vbox = player->comp_transform.bounds;
+
+	BvhBoxSweep(view_ray, ptr_sect, &ptr_sect->bvh[0], 0, vbox, &tr);
 	player_debug_data->view_dest = tr.point;
+
+	if(tr.hit) {
+		DrawLine3D(player->comp_transform.position, tr.point, GREEN);
+		BoundingBox box = BoxTranslate(vbox, tr.contact);
+		DrawBoundingBox(box, GREEN);
+
+	} else 
+		DrawRay(view_ray, GREEN);
+
+	/*
+	if(tr.hit) {
+		Tri *tri = &ptr_sect->tris[tr.tri_id];
+		//DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(GREEN, 0.25f));
+		//DrawTriangle3D(tri->vertices[2], tri->vertices[1], tri->vertices[0], ColorAlpha(GREEN, 0.25f));
+
+		u16 hull_id = tri->hull_id;
+		Hull *hull = &ptr_sect->hulls[hull_id];
+
+		for(short i = 0; i < hull->vertex_count; i++) {
+			//DrawSphereEx(hull->vertices[i], 2, , int slices, Color color)
+			DrawSphere(hull->vertices[i], 1.5f, SKYBLUE);
+			//DrawPoint3D(hull->vertices[i], SKYBLUE);
+		}
+	}
 	*/
 
 	// Draw box points
@@ -259,7 +292,9 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	}
 	*/
 
+	/*
 	float feet = player->comp_transform.position.y - (BoxExtent(player->comp_transform.bounds).y * 0.5f);	
 	DrawSphere((Vector3) { player->comp_transform.position.x, feet, player->comp_transform.position.z }, 3, PINK);	
+	*/
 }
 

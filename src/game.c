@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <float.h>
 #include "raylib.h"
@@ -24,6 +25,11 @@ Color colors[] = {
 
 PlayerDebugData player_data = {0};
 
+u32  hull_point_count = 0;
+Model *hull_point_meshes = NULL;
+
+Material mat_default;
+
 void GameInit(Game *game, Config *conf) {
 	game->conf = conf;	
 
@@ -37,6 +43,9 @@ void GameClose(Game *game) {
 
 	if(IsTextureValid(game->render_target2D.texture))
 		UnloadRenderTexture(game->render_target2D);
+
+	for(int i = 0; i < hull_point_count; i++) 
+		UnloadModel(hull_point_meshes[i]);
 }
 
 void GameRenderSetup(Game *game) {
@@ -66,6 +75,9 @@ void GameRenderSetup(Game *game) {
 	PlayerGunInit(&game->player_gun);
 
 	EntHandlerInit(&game->ent_handler);
+
+	mat_default = LoadMaterialDefault();
+	mat_default.maps[MATERIAL_MAP_DIFFUSE].color = ColorAlpha(BLUE, 0.25f);
 }
 
 void GameLoadTestScene(Game *game, char *path) {
@@ -105,10 +117,34 @@ void GameLoadTestScene(Game *game, char *path) {
 	player.comp_transform.bounds.max = BODY_VOLUME_MEDIUM;
 	player.comp_transform.bounds.min = Vector3Scale(player.comp_transform.bounds.max, -1);
 	player.comp_transform.radius = BoundsToRadius(player.comp_transform.bounds);
-	player.comp_transform.position.y = 30;
+	player.comp_transform.position.y = 70;
 	player.comp_transform.on_ground = true;
 	player.comp_transform.air_time = 0;
 	game->ent_handler.ents[game->ent_handler.count++] = player;
+
+	/*
+	hull_point_count = 0;
+	for(u16 i = 0; i < game->test_section.hull_count; i++) {
+		Hull *hull = &game->test_section.hulls[i];
+		hull_point_count += hull->vertex_count;
+	}
+
+	hull_point_meshes = calloc(hull_point_count, sizeof(Model));
+	hull_point_count = 0;
+
+	for(u16 i = 0; i < game->test_section.hull_count; i++) {
+		Hull *hull = &game->test_section.hulls[i];
+
+		for(short j = 0; j < hull->vertex_count; j++) {
+			Vector3 v = hull->vertices[j];
+
+			Mesh mesh = GenMeshSphere(2, 8, 16);
+			Model model = LoadModelFromMesh(mesh);
+			model.transform = MatrixTranslate(v.x, v.y, v.z);	
+			hull_point_meshes[hull_point_count++] = model;
+		}
+	}
+	*/
 }
 
 void GameUpdate(Game *game, float dt) {
@@ -124,7 +160,6 @@ void GameUpdate(Game *game, float dt) {
 }
 
 void GameDraw(Game *game) {
-
 	// 3D Rendering, main
 	BeginDrawing();
 	BeginTextureMode(game->render_target3D);
@@ -132,11 +167,34 @@ void GameDraw(Game *game) {
 		BeginMode3D(game->camera);
 
 			DrawModel(game->test_section.model, Vector3Zero(), 1, WHITE);
-			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, BLACK);
+			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, GREEN);
 
-			PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
+			//PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
 			RenderEntities(&game->ent_handler);
 
+			/*
+			for(u16 i = 0; i < game->test_section.tri_count; i++) {
+				Tri *tri = &game->test_section.tris[i];
+
+				Color color = colors[tri->hull_id % 6];
+				//DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 0.5f));
+			}
+			*/
+
+			/*
+			for(u16 i = 0; i < hull_point_count; i++) {
+				DrawModel(hull_point_meshes[i], Vector3Zero(), 1, BLUE);	
+			}
+			*/
+
+			for(u16 i = 0; i < game->test_section.hull_count; i++) {
+				Hull *hull = &game->test_section.hulls[i];
+		
+				DrawMesh(game->test_section.model.meshes[i], mat_default, game->test_section.model.transform);
+			}
+
+			//DrawModelPoints(game->test_section.model, Vector3Zero(), 1, BLUE);
+			
 		EndMode3D();
 
 	EndTextureMode();
