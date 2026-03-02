@@ -17,7 +17,7 @@ float bug_cooldown = 0;
 
 bool bug_target_picked = false;
 
-float bug_y_vel_prev = 0;
+float bug_z_vel_prev = 0;
 
 void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHandler *handler, u8 *bounce, float dt) {
 	EntGrid *grid = &handler->grid;
@@ -92,7 +92,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	(*bounce)++;
 
-	Vector3 hdir = (Vector3) { ct->velocity.x, 0, ct->velocity.z };
+	Vector3 hdir = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 	hdir = Vector3Normalize(hdir);
 	ct->forward = hdir;	
 
@@ -123,24 +123,24 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	Vector3 to_enemy = Vector3Subtract( enemy_ent->comp_transform.position, ct->position );	
 	float d = Vector3Length(to_enemy);
-	to_enemy.y = 0;
+	to_enemy.z = 0;
 	to_enemy = Vector3Normalize(to_enemy);
 
 	ct->velocity.x = to_enemy.x * d;	
-	ct->velocity.z = to_enemy.z * d;	
+	ct->velocity.y = to_enemy.y * d;	
 
-	ct->velocity.y += (d*0.05f);
+	ct->velocity.z += (d*0.05f);
 
 	if(d <= 250.0f) {
-		ct->velocity.y += 300;
+		ct->velocity.z += 300;
 
 		if(*bounce >= BUG_MAX_BOUNCES && !big_bounce_used) {
 			(*bounce)--;
 			big_bounce_used = true;
 		}
 		
-		if(fabsf(enemy_ent->comp_transform.position.y - ct->position.y) <= 16) {
-			ct->position.y = enemy_ent->comp_transform.position.y;
+		if(fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 16) {
+			ct->position.z = enemy_ent->comp_transform.position.z;
 		}
 	}
 }
@@ -166,7 +166,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	//pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.50001f, 0);
 	//if(fabsf(ct->velocity.y) <= 2.0f) {
 	if(*bounce >= BUG_MAX_BOUNCES) {
-		ct->velocity.y = 0;
+		ct->velocity.z = 0;
 		return 1;
 	}
 	(*bounce)++;
@@ -262,6 +262,9 @@ void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	ent->model = LoadModel("resources/models/weapons/bug_00.glb");
 	model_dead = LoadModel("resources/models/weapons/bug_dead_00.glb");
 
+	//ent->model.transform = MatrixRotateZ(90*DEG2RAD);
+	//model_dead.transform = MatrixRotateZ(90*DEG2RAD);
+
 	ent->comp_transform.bounds = (BoundingBox) {
 		.min = (Vector3) { -4, -4, -4 },
 		.max = (Vector3) {  4,  4,  4 }
@@ -278,7 +281,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
-	bug_y_vel_prev = ct->velocity.y;
+	bug_z_vel_prev = ct->velocity.z;
 
 	if(ai->state == BUG_DEFAULT) {
 		ct->position = player_ent->comp_transform.position;
@@ -307,7 +310,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
 		if(!ct->on_ground) {
-			ct->velocity.y -= 900.0f * dt;
+			ct->velocity.z -= 900.0f * dt;
 		}
 
 		pmTraceData pm = (pmTraceData) {0};
@@ -415,8 +418,9 @@ void BugDraw(Entity *ent) {
 	if(ent->comp_ai.state == 0)
 		return;
 
-	float angle = atan2f(-ent->comp_transform.forward.x, -ent->comp_transform.forward.z);
+	float angle = atan2f(-ent->comp_transform.forward.x, ent->comp_transform.forward.y);
 	ent->model.transform = MatrixRotateY(angle);
+	ent->model.transform = MatrixMultiply(ent->model.transform, MatrixRotateX(90*DEG2RAD));
 
 	if(ent->comp_ai.state == STATE_DEAD) {
 		model_dead.transform = ent->model.transform;

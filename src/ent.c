@@ -15,6 +15,8 @@
 
 #define STEP_SIZE 8.0f
 
+Vector3 debug_bullet_dest;
+
 typedef void (*OnHitFunc)(Entity *ent, short damage);
 OnHitFunc on_hit_funcs[] = {
 	&OnHitPlayer,
@@ -92,7 +94,7 @@ void EntGridInit(EntityHandler *handler) {
 
 	EntGrid grid = (EntGrid) {0};
 
-	grid.size = (Coords) { .c = 34, .r = 12, .t = 34 };
+	grid.size = (Coords) { .c = 34, .r = 34, .t = 12 };
 
 	grid.cell_count = grid.size.c * grid.size.r * grid.size.t;
 	grid.cells = calloc(grid.cell_count, sizeof(EntGridCell));
@@ -400,6 +402,8 @@ void RenderEntities(EntityHandler *handler, float dt) {
 		//DrawBoundingBox(ent->comp_transform.bounds, RED);
 	}
 
+	DrawSphere(debug_bullet_dest, 10, RED);
+
 	RenderProjectiles(handler);
 }
 
@@ -430,7 +434,7 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 
 	if(!strcmp(spawn_point->tag, "player_start")) {
 		handler->player_start = spawn_point->position;
-		handler->player_start.y += BODY_VOLUME_MEDIUM.y * 0.5f;
+		handler->player_start.z += BODY_VOLUME_MEDIUM.z * 0.5f;
 
 		u16 player_id = handler->count++;
 		handler->player_id = player_id;
@@ -486,7 +490,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 			ent.model = base_ent_models[ENT_TURRET];
 
 			//ent.comp_transform.position.y -= 20;
-			ent.comp_transform.position.y -= 12;
+			ent.comp_transform.position.z -= 12;
 
 			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
 			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
@@ -524,14 +528,14 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 			ent.curr_anim = 0;
 			//ent.anim_frame = GetRandomValue(0, 200);
 
-			ent.comp_transform.position.y += 20;
+			ent.comp_transform.position.z += 20;
 
 			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
 			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 			
 			float angle = atan2f(ent.comp_transform.forward.x, ent.comp_transform.forward.z);
-			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateY(angle+90*DEG2RAD));
+			//ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateY(angle+90*DEG2RAD));
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.25f;
@@ -1698,6 +1702,8 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 		OnHitEnt(hit_ent, 3);
 	}
 
+	debug_bullet_dest = dest;
+
 	return dest;
 }
 
@@ -1966,7 +1972,7 @@ u8 proj_CheckGround(comp_Transform *ct, Vector3 position, MapSection *sect, shor
 
 	ct->ground_normal = tr.normal;
 	pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.00001f, 0);
-	if(fabsf(ct->velocity.y) < STOP_EPS) ct->velocity.y = 0;
+	if(fabsf(ct->velocity.z) < STOP_EPS) ct->velocity.z = 0;
 
 	return 1;
 }
@@ -2017,7 +2023,7 @@ void ProjectileUpdate(Projectile *projectile, EntityHandler *handler, MapSection
 		}
 	}
 
-	ct->velocity.y -= 800.0f * dt;
+	ct->velocity.z -= 800.0f * dt;
 
 	pmTraceData pm = (pmTraceData) {0};
 	proj_TraceMove(projectile, ct->position, ct->velocity, &pm, dt, sect, BVH_BOX_SMALL);
@@ -2044,7 +2050,7 @@ void ProjectileThrow(Entity *ent, Vector3 pos, Vector3 dir, float force, u8 type
 	ct->bounds = BoxTranslate(ct->bounds, ct->position);
 	
 	Vector3 vel = Vector3Scale(dir, force + GetRandomValue(-60, 60));
-	vel.y += 200 + GetRandomValue(-50, 50);
+	vel.z += 200 + GetRandomValue(-50, 50);
 	ct->velocity = vel;
 
 	projectile.health.amount = 100;
@@ -2076,7 +2082,7 @@ void ProjectileImpact(Projectile *projectile, EntityHandler *handler, i16 ent_id
 
 	OnHitEnt(ent, (short)damage);
 
-	Vector3 knockback = (Vector3) { projectile->ct.velocity.x, 0, projectile->ct.velocity.z };
+	Vector3 knockback = (Vector3) { projectile->ct.velocity.x, projectile->ct.velocity.z, 0 };
 	knockback = Vector3Scale(knockback, 0.33f);
 
 	ent->comp_transform.velocity = Vector3Add(ent->comp_transform.velocity, knockback);

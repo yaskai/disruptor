@@ -9,7 +9,7 @@
 void vEffectsInit(vEffect_Manager *manager) {
 	*manager = (vEffect_Manager) {0};
 
-	manager->trail_model = LoadModelFromMesh(GenMeshCylinder(1.0f, 1.0f, 5));
+	manager->trail_model = LoadModelFromMesh(GenMeshCylinder(1.0f, 1.0f, 5.0f));
 	manager->trail_model.transform = MatrixIdentity();
 
 	manager->trail_material = LoadMaterialDefault();
@@ -32,16 +32,18 @@ void vEffectsRun(vEffect_Manager *manager, float dt) {
 		float alpha = trail->timer;
 		alpha = Clamp(alpha, 0.0f, 0.5f);
 
-		trail->point_A.y += trail->timer * dt;
-		trail->point_B.y += trail->timer * dt;
+		trail->point_A.z += trail->timer * dt;
+		trail->point_B.z += trail->timer * dt;
 
 		Vector3 axis = Vector3Zero();
 		float angle = 0;
 		QuaternionToAxisAngle(trail->q, &axis, &angle);
 	
-		Vector3 scale = (Vector3) { 0.7f, trail->length, 0.7f };
+		//Vector3 scale = (Vector3) { 0.7f, trail->length, 0.7f };
+		Vector3 scale = (Vector3) { 0.7f, 0.7f, trail->length };
 
-		DrawModelEx(manager->trail_model, trail->point_A, axis, angle*RAD2DEG, scale, ColorAlpha(RAYWHITE, alpha));
+		Vector3 center = Vector3Scale(Vector3Add(trail->point_A, trail->point_B), 0.5f);
+		DrawModelEx(manager->trail_model, center, axis, angle*RAD2DEG, scale, ColorAlpha(RAYWHITE, alpha));
 	}
 
 	for(u8 i = 0; i < V_EFFECT_MAX_IMPACT_DECALS; i++) {

@@ -10,13 +10,19 @@ float gun_rot = 0;
 float p, y, r;
 Matrix mat = {0};
 
+#define LOCAL_UP (Vector3) { 0, 1, 0 }
+
 #define REVOLVER_REST (Vector3) { -0.75f, -2.35f, 6.25f }
+//#define REVOLVER_REST (Vector3) { -0.75f, 6.25f, -2.35f }
 #define REVOLVER_ANGLE_REST 2.5f
 
 #define PISTOL_REST (Vector3) { -1.15f, -2.65f, 6.25f }
+//#define PISTOL_REST (Vector3) { -1.15f, 6.25f, -2.35f }
 #define PISTOL_ANGLE_REST 0.1f
 
 #define DISRUPTOR_REST (Vector3) {  -1.75f, -1.35f, 6.25f  }
+//#define DISRUPTOR_REST (Vector3) { -1.75f, 6.25f, -1.35f }
+//#define DISRUPTOR_REST (Vector3) { 1.75f, 6.25f, -1.35f }
 #define DISRUPTOR_REST_ANGLE_REST 2.5f
 
 #define DISRUPTOR_THROW_FORCE 350.0f
@@ -42,7 +48,7 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 	player_gun->cam = (Camera3D) {
 		.position = (Vector3) { 0, 0, -1 },
 		.target = (Vector3) { 0, 0, 1 },
-		.up = (Vector3) {0, 1, 0},
+		.up = LOCAL_UP,
 		.fovy = 54,
 		.projection = CAMERA_PERSPECTIVE
 	};
@@ -51,8 +57,14 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 	models[WEAP_SHOTGUN] 	= LoadModel("resources/models/weapons/pistol_00.glb");
 	models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00.glb");
 	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_00.glb");
-
 	//player_gun->model = LoadModel("resources/models/weapons/rev_00.glb");
+	
+	/*
+	for(int i = 0; i < 4; i++) {
+		Matrix mat = MatrixRotateX(90*DEG2RAD);
+		models[i].transform = mat;
+	}
+	*/
 
 	gun_pos = REVOLVER_REST;
 	gun_rot = REVOLVER_ANGLE_REST;
@@ -156,6 +168,7 @@ void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt) {
 		PlayerShoot(player_gun, gun_refs.handler, gun_refs.sect);
 	}
 
+	//models[WEAP_DISRUPTOR].transform = MatrixMultiply(mat, MatrixRotateX(90*DEG2RAD));
 	models[WEAP_DISRUPTOR].transform = mat;
 }
 
@@ -209,12 +222,12 @@ void PlayerShootPistol(PlayerGun *player_gun, EntityHandler *handler, MapSection
 	comp_Transform *ct = &gun_refs.player->comp_transform;
 
 	Vector3 trace_start = ct->position;
-	trace_start.y -= 4;
+	trace_start.z -= 4;
 
 	Vector3 dir = ct->forward;
 	float offset = GetRandomValue(-10, 10) * 0.001f;	
 
-	Vector3 right = Vector3CrossProduct(ct->forward, UP);
+	Vector3 right = Vector3CrossProduct(UP, ct->forward);
 	dir = Vector3Add(dir, Vector3Scale(right, offset));
 
 	offset = GetRandomValue(-10, 10) * 0.001f;
@@ -256,7 +269,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	comp_Transform *ct = &gun_refs.player->comp_transform;
 
 	Vector3 trace_start = ct->position;
-	//trace_start.y -= 4;
+	//trace_start.z -= 4;
 
 	bool trace_hit = false;
 	Vector3 point = TraceBullet(
@@ -269,6 +282,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	);
 
 	Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
+	//Vector3 trail_start = trace_start;
 	Vector3 right = Vector3CrossProduct(ct->forward, UP);
 	trail_start = Vector3Add(trail_start, Vector3Scale(right, 3.5f));
 
@@ -299,7 +313,7 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 	bug_ent->flags |= ENT_COLLIDERS;
 
 	ct->position = player_ent->comp_transform.position;
-	ct->position.y += 10;
+	ct->position.z += 10;
 
 	ct->forward = player_ent->comp_transform.forward;
 	
@@ -307,24 +321,25 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 
 	float updot = Vector3DotProduct(UP, ct->forward);
 
-	Vector3 throw_dir = (Vector3) { ct->forward.x, 0, ct->forward.z };
+	Vector3 throw_dir = (Vector3) { ct->forward.x, ct->forward.y, 0 };
 	throw_dir = Vector3Normalize(throw_dir);
 
-	if(ct->forward.y < 1.0f && ct->forward.y > 0) {
+	if(ct->forward.z < 1.0f && ct->forward.z > 0) {
 		ct->velocity = Vector3Scale(throw_dir, DISRUPTOR_THROW_FORCE);
-		ct->velocity.y += 250 + (((ct->forward.y) * (DISRUPTOR_THROW_FORCE)) * updot);
+		ct->velocity.z += 250 + (((ct->forward.z) * (DISRUPTOR_THROW_FORCE)) * updot);
 	} else {
 		Vector3 throw_dir = (Vector3) { ct->forward.x, ct->forward.y, ct->forward.z };
 		throw_dir = Vector3Normalize(throw_dir);
 
 		ct->velocity = Vector3Scale(throw_dir, DISRUPTOR_THROW_FORCE);
-		ct->velocity.y += 250;
+		ct->velocity.z += 250;
 	}
 
 	if(Vector3DotProduct(player_ent->comp_transform.velocity, ct->forward) > 0)
 		ct->velocity = Vector3Add(ct->velocity, Vector3Scale(ct->forward, Vector3Length(player_ent->comp_transform.velocity) * 0.5f));
 
-	float angle = atan2f(-ct->forward.x, -ct->forward.z);
+	float angle = atan2f(-ct->forward.x, -ct->forward.y);
 	bug_ent->model.transform = MatrixRotateY(angle);
+	bug_ent->model.transform = MatrixMultiply(bug_ent->model.transform, MatrixRotateX(90*DEG2RAD));
 }
 

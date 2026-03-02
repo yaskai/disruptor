@@ -236,11 +236,13 @@ void LoadMapFile(BrushPool *brush_pool, char *path, Model *map_model, SpawnList 
 			);
 
 			// Adjust points for +Y = up
+			/*
 			for(short j = 0; j < 3; j++) {
 				Matrix mat;
 				mat = MatrixRotateX(-90 * DEG2RAD);
 				points[j] = Vector3Transform(points[j], mat);
 			}
+			*/
 
 			// Get texture name
 			char *tex_str = last_par + 1;
@@ -294,9 +296,11 @@ void LoadMapFile(BrushPool *brush_pool, char *path, Model *map_model, SpawnList 
 				sscanf(val, "%d %d %d", &x, &y, &z);
 
 				curr_entspawn->position = (Vector3) { x, y, z }; 
+				/*
 				Matrix mat;
 				mat = MatrixRotateX(-90 * DEG2RAD);
 				curr_entspawn->position = Vector3Transform(curr_entspawn->position, mat);
+				*/
 
 				//sscanf(val, "%d %d %d", &curr_entspawn->position.x, &curr_entspawn->position.z, &curr_entspawn->position.y);
 				//curr_entspawn->position.z *= -1;
@@ -522,12 +526,13 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	}
 	
 	Model model = LoadModel(path_list.paths[model_id]);
+	model.transform = MatrixRotateX(90*DEG2RAD);
 	sect.model = model;
 
 	//TriPool tri_pools[3] = {0};
 	//tri_pools[0].arr = ModelToTris(model, &tri_pools[0].count, &tri_pools[0].ids);
 	//tri_pools[0].arr = ModelToTris(model, &tri_pools[0].count, &tri_pools[0].ids);
-	sect._tris[0].arr = ModelToTris(model, &sect._tris[0].count, &sect._tris[0].ids);
+	//sect._tris[0].arr = ModelToTris(model, &sect._tris[0].count, &sect._tris[0].ids);
 	if(GetLogState()) printf("model tri_count: %d\n", sect._tris[0].count);
 
 	// 2. Load .map file, collision, physics, ai logic, etc. 
@@ -549,6 +554,10 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	BrushPool brush_pools[3] = {0};
 	LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], &model, spawn_list);
+
+	sect._tris[0].arr = TrisFromBrushPool(&brush_pools[0], &sect._tris[0].count);
+	sect._tris[0].ids = calloc(sect._tris[0].count, sizeof(u16));
+	for(u16 j = 0; j < sect._tris[0].count; j++) sect._tris[0].ids[j] = j;
 
 	// 3. Build expanded geometry for character to world collsions 
 	for(short i = 1; i < 3; i++) {
@@ -1013,6 +1022,9 @@ void DrawMap(MapSection *sect) {
 		DrawMesh(sect->model.meshes[rmesh_list.ids[i]], sect->model.materials[1], sect->model.transform);	
 	}
 	*/
+
+	Matrix mat = MatrixRotateX(90*DEG2RAD);
+	sect->model.transform = mat;
 	DrawModel(sect->model, Vector3Zero(), 1, WHITE);
 }
 

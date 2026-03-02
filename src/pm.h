@@ -9,7 +9,7 @@
 // Player movement functions 
 // labeled "pm_<Function>"
 
-#define FLOOR_NORMAL_Y 0.7f
+#define FLOOR_NORMAL_Z 0.7f
 
 // Main movement loop
 void pm_Move(comp_Transform *ct, InputHandler *input, float dt);
@@ -75,7 +75,7 @@ int pm_NudgePositionEx(comp_Transform *ct, u16 node_id);
 
 void pm_AirFriction(comp_Transform *ct, float dt);
 
-#define PM_STEP_Y 4.0f
+#define PM_STEP_Z 18.0f
 
 #define BLOCK_GROUND 	0x01
 #define BLOCK_STEP	 	0x02

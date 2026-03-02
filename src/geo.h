@@ -5,8 +5,8 @@
 #ifndef GEO_H_
 #define GEO_H_
 
-#define UP 		(Vector3) {  0,  1,  0 }
-#define DOWN 	(Vector3) {  0, -1,  0 } 
+#define UP 		(Vector3) {  0,  0,  1 }
+#define DOWN 	(Vector3) {  0,  0, -1 } 
 
 // Triangle primitive struct
 typedef struct {
@@ -192,7 +192,9 @@ float BvhNodeCost(BvhNode *node);
 void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id);
 
 #define BODY_VOLUME_SMALL (Vector3) { 8, 8, 8 }
-#define BODY_VOLUME_MEDIUM (Vector3) { 28, 64, 28 }
+//#define BODY_VOLUME_MEDIUM (Vector3) { 28, 64, 28 }
+//#define BODY_VOLUME_MEDIUM (Vector3) { 32, 32, 56 }
+#define BODY_VOLUME_MEDIUM (Vector3) { 28, 28, 64 }
 
 enum BVH_SHAPES : u8 {
 	BVH_POINT		= 0,	

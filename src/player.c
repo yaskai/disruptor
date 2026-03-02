@@ -39,8 +39,8 @@ short nudged_this_frame = 0;
 
 #define PLAYER_BASE_JUMP_FORCE 620.0f
 
-Vector2 FlatVec2(Vector3 vec3) { return (Vector2) { vec3.x, vec3.z }; }
-Vector3 clipY(Vector3 vec) { return Vector3Normalize((Vector3) { vec.x, 0, vec.z }); }
+Vector2 FlatVec2(Vector3 vec3) { return (Vector2) { vec3.x, vec3.y }; }
+Vector3 clipZ(Vector3 vec) { return Vector3Normalize((Vector3) { vec.x, vec.y, 0 }); }
 
 Camera3D *ptr_cam;
 InputHandler *ptr_input;
@@ -275,8 +275,8 @@ void pm_Move(comp_Transform *ct, InputHandler *input, float dt) {
 		ct->last_safe_pos = ct->position;
 	*/
 
-	land_frame = (ct->on_ground == 1 && last_pm.start_vel.y <= -300);
-	y_vel_prev = last_pm.start_vel.y;
+	land_frame = (ct->on_ground == 1 && last_pm.start_vel.z <= -300);
+	y_vel_prev = last_pm.start_vel.z;
 	last_pm = pm;
 
 	ct->on_ground = pm_CheckGround(ct, ct->position);
@@ -286,7 +286,7 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	// Update pitch, yaw, roll	
 	// (in the case of the player, these are the same for both player entity and the camera)
 	ct->pitch -= input->mouse_delta.y;
-	ct->yaw += input->mouse_delta.x;
+	ct->yaw -= input->mouse_delta.x;
 
 	// Clamp pitch to *almost* 90 degrees in both directions, 
 	// prevents jitter/direction flipping
@@ -295,8 +295,8 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	// Get look direction from angles  
 	Vector3 look = (Vector3) {
 		.x = cosf(ct->yaw) * cosf(ct->pitch),
-		.y = sinf(ct->pitch),
-		.z = sinf(ct->yaw) * cosf(ct->pitch)
+		.y = (sinf(ct->yaw) * cosf(ct->pitch)),
+		.z = sinf(ct->pitch),
 	};
 
 	ct->targ_look = Vector3Normalize(look);
@@ -309,7 +309,7 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	ct->forward = forward;			
 	ptr_cam->target = Vector3Add(ptr_cam->position, ct->forward);
 
-	forward = clipY(forward);
+	forward = clipZ(forward);
 	forward = Vector3Normalize(forward);
 	right = Vector3CrossProduct(forward, UP);
 
@@ -340,7 +340,7 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	cam_input_side = Vector3Length(Vector3Normalize(wish_side)) * (input_side[0] - input_side[1]);
 
 	// Add both vectors and renormalize to get direction
-	Vector3 sum = clipY(Vector3Add(wish_forw, wish_side));
+	Vector3 sum = clipZ(Vector3Add(wish_forw, wish_side));
 
 	return Vector3Normalize(sum);
 } 
@@ -360,7 +360,7 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 	ct->ground_normal = tr.normal;
 	//pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.00001f, 0);
 	pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.0f, 0);
-	if(fabsf(ct->velocity.y) < STOP_EPS) ct->velocity.y = 0;
+	if(fabsf(ct->velocity.z) < STOP_EPS) ct->velocity.z = 0;
 
 	return 1;
 }
@@ -372,12 +372,12 @@ void pm_GroundFriction(comp_Transform *ct, float dt) {
 	// If horizontal velocity is smaller than 1 just set to 0,
 	// prevents infinite small movements all the time
 	Vector3 vel = ct->velocity;
-	vel.y = 0;
+	vel.z = 0;
 
 	float speed = Vector3Length(vel);
-	if(speed < 1.0f) {
+	if(speed < 0.01f) {
 		ct->velocity.x = 0;
-		ct->velocity.z = 0;
+		ct->velocity.y = 0;
 		return;
 	}
 
@@ -388,7 +388,7 @@ void pm_GroundFriction(comp_Transform *ct, float dt) {
 	vel = Vector3Scale(vel, new_speed / speed);
 	
 	ct->velocity.x = vel.x;
-	ct->velocity.z = vel.z;
+	ct->velocity.y = vel.y;
 }
 
 void pm_Accelerate(comp_Transform *ct, Vector3 wish_dir, float wish_speed, float accel, float dt) {
@@ -411,7 +411,7 @@ void pm_ApplyGravity(comp_Transform *ct, float dt) {
 		//ct->velocity.y = 0;
 		return;
 	}
-	ct->velocity.y -= (PLAYER_GRAV * dt); 
+	ct->velocity.z -= (PLAYER_GRAV * dt); 
 }
 
 #define MIN_TRACE_DIST (0.0333f)
@@ -581,7 +581,7 @@ void pm_GroundMove(comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt,
 		return;
 	}
 
-	wish_vel.y = 0;
+	wish_vel.z = 0;
 
 	// Check for wall block
 	Ray wall_ray = (Ray) { .position = start, .direction = Vector3Normalize(wish_vel) }; 
@@ -598,7 +598,7 @@ void pm_GroundMove(comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt,
 
 	// Step up
 	Vector3 step_start = start;
-	step_start.y += PM_STEP_Y;
+	step_start.z += PM_STEP_Z;
 	
 	pmTraceData step_up;
 	pm_TraceMove(ct, step_start, wish_vel, &step_up, dt);
@@ -606,7 +606,7 @@ void pm_GroundMove(comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt,
 	// Check for ground
 	Ray ground_ray = (Ray) { .position = step_up.end_pos, .direction = DOWN };
 	tr = TraceDataEmpty();
-	BvhTracePointEx(ground_ray, ptr_sect, &ptr_sect->bvh[BVH_BOX_MED], 0, &tr, PM_STEP_Y + GROUND_EPS);
+	BvhTracePointEx(ground_ray, ptr_sect, &ptr_sect->bvh[BVH_BOX_MED], 0, &tr, PM_STEP_Z + GROUND_EPS);
 	// No ground below trace, exit
 	if(!tr.hit || tr.normal.y < 1.0f) {
 		return;
@@ -630,9 +630,9 @@ void pm_GroundMove(comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt,
 }
 
 u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 blocked) {
-	if(normal.y >= FLOOR_NORMAL_Y)  	// Floor
+	if(normal.z >= FLOOR_NORMAL_Z)  	// Floor
 		blocked |= BLOCK_GROUND;		
-	else if(fabsf(normal.y) <= 0.01f)	// Wall or step
+	else if(fabsf(normal.z) <= 0.01f)	// Wall or step
 		blocked |= BLOCK_STEP; 		
 
 	float backoff = Vector3DotProduct(in, normal) * bounce;
@@ -650,11 +650,11 @@ u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 bl
 void pm_Jump(comp_Transform *ct, InputHandler *input) {
 	if(!ct->on_ground) return;
 
-	Vector3 horizontal_velocity = (Vector3) { ct->velocity.x, 0, ct->velocity.z };
+	Vector3 horizontal_velocity = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 
 	if(input->actions[ACTION_JUMP].state == 2) {
 		ct->on_ground = false;
-		ct->velocity.y += (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.2f);
+		ct->velocity.z += (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.2f);
 	}
 }
 
@@ -791,8 +791,8 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	ptr_cam->up = Vector3Lerp(ptr_cam->up, tilt_targ, dt * 10);
 
 	if(!ct->on_ground) cam_bob = 0;
-	ptr_cam->position.y += cam_bob;
-	ptr_cam->target.y += cam_bob;
+	ptr_cam->position.z += cam_bob;
+	ptr_cam->target.z += cam_bob;
 }
 
 void PlayerDebugText(Entity *player) {
@@ -821,12 +821,12 @@ void pm_AirFriction(comp_Transform *ct, float dt) {
 	// If horizontal velocity is smaller than 1 just set to 0,
 	// prevents infinite small movements all the time
 	Vector3 vel = ct->velocity;
-	vel.y = 0;
+	vel.z = 0;
 
 	float speed = Vector3Length(vel);
 	if(speed < 1.0f) {
 		ct->velocity.x = 0;
-		ct->velocity.z = 0;
+		ct->velocity.y = 0;
 		return;
 	}
 
@@ -837,7 +837,7 @@ void pm_AirFriction(comp_Transform *ct, float dt) {
 	vel = Vector3Scale(vel, new_speed / speed);
 	
 	ct->velocity.x = vel.x;
-	ct->velocity.z = vel.z;
+	ct->velocity.y = vel.y;
 }
 
 void OnHitPlayer(Entity *ent, short damage) {
@@ -849,6 +849,7 @@ void OnHitPlayer(Entity *ent, short damage) {
 
 void SpawnPlayer(Entity *ent, Vector3 position) {
 	ent->comp_transform.position = position;
+	ent->comp_transform.position.z += 20;
 
 	ent->comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
 	ent->comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);

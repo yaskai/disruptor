@@ -66,7 +66,7 @@ void GameRenderSetup(Game *game) {
 	game->camera = (Camera3D) {
 		.position = (Vector3) { 30, 30, 30 },
 		.target = (Vector3) { 0, 0, 0 },
-		.up = (Vector3) {0, 1, 0},
+		.up = UP,
 		.fovy = 90,
 		.projection = CAMERA_PERSPECTIVE
 	};
@@ -74,7 +74,7 @@ void GameRenderSetup(Game *game) {
 	game->camera_debug = (Camera3D) {
 		.position = (Vector3) { -1500, 1000, -1500 },
 		.target = (Vector3) { 0, 0, 0 },
-		.up = (Vector3) {0, 1, 0},
+		.up = UP,
 		.fovy = 90,
 		.projection = CAMERA_PERSPECTIVE
 	};
