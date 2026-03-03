@@ -12,7 +12,6 @@
 // ----------------------------------------------------------------------------------------------------------------------------
 void EntDebugText();
 
-void LoadEntityBaseModels();
 
 typedef struct {
 	i16 c;	// x, column
@@ -22,7 +21,7 @@ typedef struct {
 } Coords;
 
 #define ENT_GRID_CELL_EXTENTS (Vector3) { 255, 255, 255 } 
-#define MAX_ENTS_PER_CELL	16
+#define MAX_ENTS_PER_CELL	32
 typedef struct {
 	BoundingBox aabb;
 
@@ -197,6 +196,8 @@ typedef struct {
 } Projectile;
 
 typedef struct {
+	Model base_ent_models[16];
+
 	Entity *ents;
 	Projectile *projectiles;
 
@@ -219,6 +220,8 @@ typedef struct {
 	u16 bug_id;
 
 } EntityHandler;
+
+void LoadEntityBaseModels(EntityHandler *handler);
 
 void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager);
 void EntHandlerClose(EntityHandler *handler);
@@ -313,6 +316,8 @@ void AiMaintainerMakeNewSchedule(Entity *ent, EntityHandler *handler, MapSection
 
 typedef struct {
 	Vector3 point;	
+	Vector3 normal;
+
 	float dist;
 
 	i16 hit_ent;

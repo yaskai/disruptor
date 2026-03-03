@@ -12,7 +12,7 @@
 #define FLOOR_NORMAL_Z 0.7f
 
 // Main movement loop
-void pm_Move(comp_Transform *ct, InputHandler *input, float dt);
+void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler *handler, float dt);
 
 // Get input velocity and look direction
 // In Quake: first half of "PM_Air_Move()"
@@ -81,7 +81,7 @@ void pm_AirFriction(comp_Transform *ct, float dt);
 #define BLOCK_STEP	 	0x02
 u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 blocked);
 
-#define BASE_JUMP_FORCE 180.0f
+#define BASE_JUMP_FORCE 260.0f
 void pm_Jump(comp_Transform *ct, InputHandler *input);
 
 #endif

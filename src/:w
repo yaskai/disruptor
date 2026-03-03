@@ -133,14 +133,11 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	ct->velocity.z += (d*0.05f);
 
 	if(d <= 250.0f) {
-		if(enemy_ent->id != handler->player_id) {
-			ct->velocity.z += 300 + (10*(*bounce));
-			if(*bounce >= BUG_MAX_BOUNCES && !big_bounce_used) {
-				(*bounce)--;
-				big_bounce_used = true;
-			}
-		} else {
-			ct->velocity.z += 150 + (0.1f*(*bounce));
+		ct->velocity.z += 300 + (10*(*bounce));
+
+		if(*bounce >= BUG_MAX_BOUNCES && !big_bounce_used) {
+			(*bounce)--;
+			big_bounce_used = true;
 		}
 		
 		if(fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 16) {
@@ -409,35 +406,12 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				DisruptEntity(handler, enemy_ent->id, sect);	
 				ent->flags |= BUG_DISRUPTED_ENEMY;
 			}
+
 		}
 
 		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->task_data.target_entity > -1 && ai->task_data.target_entity < handler->count) {
 			Entity *stick_ent = &handler->ents[ai->task_data.target_entity];			
 			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
-
-			if(stick_ent->comp_ai.state == STATE_DEAD) {
-				ai->state = BUG_LAUNCHED;
-				ai->task_data.target_entity = -1;
-				
-
-				ent->flags &= ~BUG_DISRUPTED_ENEMY;
-				bug_bounce = 0;
-				bug_target_picked = false;
-
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-
-				if(ai->task_data.target_entity == -1) {
-					/*
-					ct->velocity.x += GetRandomValue(-200, 200);
-					ct->velocity.y += GetRandomValue(-200, 200);
-					ct->velocity.z += 400;
-					*/
-
-					ai->task_data.target_entity = handler->player_id;
-					bug_target_picked = true;
-					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-				}
-			}
 		}
 
 		launch_timer -= dt;

@@ -2834,24 +2834,22 @@
 }
 // entity 1
 {
-"classname" "player_start"
-"origin" "-672 64 40"
-"enum_id" "0"
-"angle" "0"
-}
-// entity 2
-{
-"classname" "turret_spawn"
+"classname" "info_turret_spawn"
 "origin" "1036 -164 446"
 "enum_id" "1"
 "angle" "-90"
 }
+// entity 2
+{
+"classname" "info_player_start"
+"origin" "-656 80 40"
+}
 // entity 3
 {
-"classname" "turret_spawn"
-"origin" "860 -28 46"
-"angle" "90"
-"enum_id" "1"
+"classname" "info_maintainer_spawn"
+"origin" "880 -48 40"
+"enum_id" "2"
+"angle" "0"
 }
 // entity 4
 {

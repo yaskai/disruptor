@@ -27,11 +27,10 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitBug,
 };
 
-Model base_ent_models[16] = {0};
-void LoadEntityBaseModels() {
+void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
-	base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
-	base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer.glb", prefix));	 
+	handler->base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
+	handler->base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer.glb", prefix));	 
 }
 
 int base_ent_anims_count[16] = {0};
@@ -49,7 +48,7 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager) {
 	handler->ents = calloc(handler->capacity, sizeof(Entity));
 	handler->player_id = 0;
 
-	LoadEntityBaseModels();
+	LoadEntityBaseModels(handler);
 	LoadEntityBaseAnims();
 
 	handler->ai_tick = 0;
@@ -85,135 +84,9 @@ void EntHandlerClose(EntityHandler *handler) {
 		free(handler->grid.cells);
 
 	for(int i = 0; i < 16; i++) {
-		UnloadModel(base_ent_models[i]);
+		UnloadModel(handler->base_ent_models[i]);
 		UnloadModelAnimations(base_ent_anims[i], base_ent_anims[i]->frameCount);
 	}
-}
-
-void EntGridInit(EntityHandler *handler) {
-	printf("grid init\n");
-
-	EntGrid grid = (EntGrid) {0};
-
-	grid.size = (Coords) { .c = 48, .r = 48, .t = 12 };
-
-	grid.cell_count = grid.size.c * grid.size.r * grid.size.t;
-	grid.cells = calloc(grid.cell_count, sizeof(EntGridCell));
-
-	printf("cols: %d\n", grid.size.c);
-	printf("rows: %d\n", grid.size.r);
-	printf("tabs: %d\n", grid.size.t);
-	printf("cell count: %d\n", (grid.size.c * grid.size.r * grid.size.t));
-
-	Vector3 origin = (Vector3) {
-		(-grid.size.c * ENT_GRID_CELL_EXTENTS.x) * 0.5f,
-		(-grid.size.r * ENT_GRID_CELL_EXTENTS.y) * 0.5f, 
-		(-grid.size.t * ENT_GRID_CELL_EXTENTS.z) * 0.5f 
-	};  
-	grid.origin = origin;
-
-	for(u16 i = 0; i < grid.cell_count; i++) {
-		Coords coords = CellIdToCoords(i, &grid); 
-
-		BoundingBox box = (BoundingBox) { .min = Vector3Scale(ENT_GRID_CELL_EXTENTS, -0.5f), .max = Vector3Scale(ENT_GRID_CELL_EXTENTS,  0.5f) };
-		grid.cells[i].aabb = BoxTranslate(box, CoordsToVec3(coords, &grid));
-		
-		grid.cells[i].ent_count = 0;
-		for(u8 j = 0; j < MAX_ENTS_PER_CELL; j++) grid.cells[i].ents[j] = 0;
-	}
-
-	handler->grid = grid;
-}
-
-void UpdateGrid(EntityHandler *handler) {
-	EntGrid *grid = &handler->grid;
-
-	for(u16 i = 0; i < handler->count; i++) {
-		Entity *ent = &handler->ents[i];
-		comp_Transform *ct = &ent->comp_transform;
-
-		i16 src_id = ent->cell_id; 	
-
-		Coords dest_coords = Vec3ToCoords(ct->position, grid);
-		if(!CoordsInBounds(dest_coords, grid)) {
-			puts("dest coords out of bounds");
-			continue;
-		}
-
-		i16 dest_id = CellCoordsToId(dest_coords, grid);
-
-		EntGridCell *dest_cell = &grid->cells[dest_id];
-
-		if(src_id == -1) {
-			ent->cell_id = dest_id;
-			dest_cell->ents[dest_cell->ent_count++] = ent->id;
-			continue;
-		}
-	
-		EntGridCell *src_cell = &grid->cells[src_id];
-			
-		if(src_id == dest_id)
-			continue;
-
-		for(u8 j = 0; j < src_cell->ent_count; j++) {
-			if(src_cell->ents[j] == ent->id) { 
-				for(u8 n = j; n < src_cell->ent_count-1; n++)
-					src_cell->ents[n] = src_cell->ents[n+1];
-
-				src_cell->ent_count--;
-				break;
-			}
-		}
-
-		if(dest_cell->ent_count - 1 >= MAX_ENTS_PER_CELL)
-			continue;
-
-		ent->cell_id = dest_id;
-		dest_cell->ents[dest_cell->ent_count++] = ent->id;
-	}
-}
-
-int16_t CellCoordsToId(Coords coords, EntGrid *grid) {
-	//return (coords.c + coords.r * + coords.t * grid->size.c * grid->size.r);
-	return (
-		coords.c + 
-		coords.r * grid->size.c + 
-		coords.t * grid->size.c * grid->size.r
-	);
-}
-
-Coords CellIdToCoords(int16_t id, EntGrid *grid) {
-	return (Coords) {
-		.c = id % grid->size.c,						// x,
-		.r = (id / grid->size.c) % grid->size.r,	// y,
-		.t = id / (grid->size.c * grid->size.r)		// z
-	};
-}
-
-Coords Vec3ToCoords(Vector3 v, EntGrid *grid) {
-	Vector3 local = Vector3Subtract(v, grid->origin);
-
-	return (Coords) {
-		.c = (i16)((local.x + (ENT_GRID_CELL_EXTENTS.x*0.5f)) / ENT_GRID_CELL_EXTENTS.x),
-		.r = (i16)((local.y + (ENT_GRID_CELL_EXTENTS.y*0.5f)) / ENT_GRID_CELL_EXTENTS.y),
-		.t = (i16)((local.z + (ENT_GRID_CELL_EXTENTS.z*0.5f)) / ENT_GRID_CELL_EXTENTS.z)
-	};
-}
-
-Vector3 CoordsToVec3(Coords coords, EntGrid *grid) {
-	//return Vector3Scale((Vector3) { coords.c, coords.r, coords.t }, ENT_GRID_CELL_EXTENTS.x);
-	Vector3 local = (Vector3) {
-		coords.c * ENT_GRID_CELL_EXTENTS.x,
-		coords.r * ENT_GRID_CELL_EXTENTS.y,
-		coords.t * ENT_GRID_CELL_EXTENTS.z
-	};
-	return Vector3Add(local, grid->origin);
-}
-
-bool CoordsInBounds(Coords coords, EntGrid *grid) {
-	return ( coords.c > -1 && coords.c < grid->size.c &&
-			 coords.r > -1 && coords.r < grid->size.r &&
-			 coords.t > -1 && coords.t < grid->size.t );
 }
 
 // **
@@ -420,181 +293,6 @@ void RenderEntities(EntityHandler *handler, float dt) {
 	*/
 }
 
-void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph) {
-	if(!strcmp(spawn_point->tag, "worldspawn")) {
-		return;
-	}
-
-	if(nav_graph) {
-		if(!strcmp(spawn_point->tag, "nav_node")) {
-			if(nav_graph->node_count + 1 >= nav_graph->node_cap) {
-				nav_graph->node_cap = nav_graph->node_cap << 1;
-				nav_graph->nodes = realloc(nav_graph->nodes, sizeof(NavNode) * nav_graph->node_cap);
-			}
-
-			NavNode node = (NavNode) {
-				.position = spawn_point->position,
-				.id = nav_graph->node_count,
-				.edge_count = 0
-			};
-			memset(node.edges, 0, sizeof(u16) * MAX_EDGES_PER_NODE);
-			nav_graph->nodes[nav_graph->node_count] = node;
-			nav_graph->node_count++;
-
-			return;
-		}
-	}
-
-	if(!strcmp(spawn_point->tag, "player_start")) {
-		handler->player_start = spawn_point->position;
-		handler->player_start.z += BODY_VOLUME_MEDIUM.z * 0.5f;
-
-		u16 player_id = handler->count++;
-		handler->player_id = player_id;
-
-		u16 bug_id = handler->count++;
-		handler->bug_id = bug_id;
-
-		return;
-	}
-
-	if(!strcmp(spawn_point->tag, "func_group")) {
-		puts("skip func_group");
-		return;
-	}
-
-	if(!spawn_point->ent_type)
-		return;
-
-	handler->ents[handler->count] = SpawnEntity(spawn_point, handler);
-}
-
-Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
-	Entity ent = (Entity) { .id = handler->count, .cell_id = -1 };
-
-	ent.comp_transform.position = spawn_point->position;
-
-	/*
-	ent.comp_transform.forward.x = sinf(-spawn_point->angle * DEG2RAD);
-	ent.comp_transform.forward.y = 0;
-	ent.comp_transform.forward.z = -cosf(-spawn_point->angle * DEG2RAD);
-	ent.comp_transform.forward = Vector3Normalize(ent.comp_transform.forward);
-	*/
-
-	ent.comp_transform.start_angle = spawn_point->angle;
-	float rad = (-spawn_point->angle) * DEG2RAD;
-
-	ent.comp_transform.forward.x = sinf(rad);
-	ent.comp_transform.forward.y = cosf(rad);
-	ent.comp_transform.forward.z = 0;
-	ent.comp_transform.forward = Vector3Normalize(ent.comp_transform.forward);
-
-	ent.comp_ai = (comp_Ai) {0};
-	ent.comp_ai.component_valid = false;
-
-	ent.comp_health = (comp_Health) {0};
-	ent.comp_health.amount = 100;
-
-	// * TODO:
-	// Entity type specific stuff
-	ent.type = spawn_point->ent_type;
-	switch(ent.type) {
-		case ENT_TURRET: {
-			ent.model = base_ent_models[ENT_TURRET];
-
-			//ent.comp_transform.position.y -= 20;
-			ent.comp_transform.position.z -= 20;
-
-			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
-			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
-			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
-
-			float angle = atan2f(ent.comp_transform.forward.z, ent.comp_transform.forward.x);
-			//ent.model.transform = MatrixRotateY(-(angle+90)*DEG2RAD);
-			//ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateX(90*DEG2RAD));
-
-			ent.model.transform = MatrixRotateX(90*DEG2RAD);
-			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(-spawn_point->angle*DEG2RAD));
-
-			ent.comp_ai.component_valid = true;
-			ent.comp_ai.sight_cone = 0.55f;
-
-			ent.comp_ai.curr_schedule = SCHED_SENTRY;
-			ent.comp_ai.task_data.task_id = TASK_LOOK_AT_ENTITY;
-
-			ent.comp_transform.targ_look = ent.comp_transform.forward;
-			
-			ent.comp_weapon = (comp_Weapon) {
-				.travel_type = WEAPON_TRAVEL_HITSCAN,
-				.id = WEAP_TURRET,
-				.cooldown = 1,
-			};
-
-			ent.comp_health.amount = 100;
-			ent.comp_health.on_hit = 1;
-
-			ent.comp_health.bug_point = BUG_POINT_TURRET;
-
-		} break;
-
-		case ENT_MAINTAINER: {
-			ent.model = base_ent_models[ENT_MAINTAINER];
-			//ent.model = LoadModelFromMesh(base_ent_models[ENT_MAINTAINER].meshes[0]);
-			ent.animations = base_ent_anims[ENT_MAINTAINER];
-
-			ent.curr_anim = 0;
-			//ent.anim_frame = GetRandomValue(0, 200);
-
-			ent.comp_transform.position.z += 20;
-
-			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
-			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
-			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
-			
-			float angle = atan2f(ent.comp_transform.forward.x, ent.comp_transform.forward.z);
-			//ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateY(angle+90*DEG2RAD));
-
-			ent.comp_ai.component_valid = true;
-			ent.comp_ai.sight_cone = 0.25f;
-			//ent.comp_ai.curr_schedule = SCHED_CHASE_PLAYER;
-			//ent.comp_ai.curr_schedule = SCHED_PATROL;
-			//ent.comp_ai.task_data.task_id = TASK_MAKE_PATROL_PATH;
-			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
-			//ent.comp_ai.task_data.timer = 0.1f;
-
-			ent.comp_ai.curr_schedule = SCHED_MAINTAINER_ATTACK;
-			ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
-
-			ent.comp_health.amount = 3;
-			ent.comp_health.on_hit = 2;
-
-			ent.comp_health.bug_point = BUG_POINT_MAINTAINER;
-			
-			//ent.comp_ai.wish_dir = (Vector3) { -1, 0, 0 };
-
-		} break;
-
-		case ENT_REGULATOR: {
-
-		} break;
-	}
-
-	ent.comp_health.bug_box = (BoundingBox) {
-		.min = Vector3Scale(BODY_VOLUME_SMALL, -0.75f),	
-		.max = Vector3Scale(BODY_VOLUME_SMALL,  0.75f)
-	};
-
-	ent.comp_transform.start_forward = ent.comp_transform.forward;
-	ent.flags = (ENT_ACTIVE | ENT_COLLIDERS);
-
-	ent.comp_ai.navgraph_id = -1;
-	ent.comp_ai.speed = 50;
-	ent.comp_ai.wish_dir = Vector3Zero();
-
-	handler->count++;
-
-	return ent;
-}
 
 void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	if((ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
@@ -714,7 +412,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 
 	Vector3 trace_start = ct->position;
 	trace_start.z += 12;
-	//trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 24));
+	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
 
 	Vector3 dir = ct->forward;
 	float offset = GetRandomValue(-10, 10) * 0.001f;	
@@ -728,7 +426,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	dir = Vector3Normalize(dir);
 
 	bool hit = false;
-	Vector3 bullet_dest = TraceBullet(handler, sect, ct->position, dir, ent->id, &hit);
+	Vector3 bullet_dest = TraceBullet(handler, sect, trace_start, dir, ent->id, &hit);
 
 	//Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
 	Vector3 trail_start = trace_start;
@@ -767,11 +465,13 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ai->curr_schedule = SCHED_IDLE;
 		float angle = sinf(GetTime()*20) * PI;
 		ent->comp_transform.forward = Vector3RotateByAxisAngle(ent->comp_transform.forward, UP, angle);
-		ent->model.transform = MatrixRotateY(angle); 
+		ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(angle)); 
 	}
 
 	if(ai->input_mask & AI_INPUT_SEE_GLITCHED)
 		ai->curr_schedule = SCHED_FIX_FRIEND;
+
+	ent->comp_health.hit_box = BoxTranslate(ent->comp_health.hit_box, ent->comp_transform.position);
 
 	EntMove(ent, sect, handler, dt);
 	//ent->anim_frame = (ent->anim_frame + 1) % ent->animations[ent->curr_anim].frameCount;
@@ -782,7 +482,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 
 	if(ai->state == STATE_DEAD) {
 		Vector3 pos = ent->comp_transform.position;		
-		pos.y -= 25;
+		pos.z -= 20;
 
 		DrawModelEx(
 			ent->model,
@@ -796,15 +496,13 @@ void MaintainerDraw(Entity *ent, float dt) {
 	}
 	
 	Vector3 pos = ent->comp_transform.position;
-	pos.y -= 10;
+	//pos.z -= 10;
 	DrawModel(ent->model, pos, 0.1f, LIGHTGRAY);
 
-	/*
-	Vector3 center = BoxCenter(ent->comp_transform.bounds);
-	center.y += 10;
-	Vector3 forward = ent->comp_transform.forward;
-	DrawBoundingBox(ent->comp_transform.bounds, PURPLE);
-	*/
+	//Vector3 center = BoxCenter(ent->comp_transform.bounds);
+	//center.y += 10;
+	//Vector3 forward = ent->comp_transform.forward;
+	DrawBoundingBox(ent->comp_health.hit_box, PURPLE);
 }
 
 void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, Ai_TaskData *task_data, MapSection *sect, float dt) {
@@ -1160,8 +858,12 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 	dir = Vector3Normalize(dir);
 	ct->forward = dir;
 
+	/*
 	float angle = atan2f(ct->forward.x, ct->forward.z);
 	ent->model.transform = MatrixRotateY(angle + 90 * DEG2RAD);
+	*/
+	float angle = atan2f(ct->forward.x, ct->forward.y);
+	ent->model.transform = MatrixRotateZ(angle + 90 * DEG2RAD);
 	ai->wish_dir = Vector3Add(Vector3Scale(ai->wish_dir, 0.1f), dir); 
 	ai->wish_dir = Vector3Normalize(ai->wish_dir);
  
@@ -1491,7 +1193,7 @@ void AiMaintainerAttackSchedule(Entity *ent, EntityHandler *handler, MapSection 
 		task->known_target_position = handler->ents[handler->player_id].comp_transform.position;
 
 		if(task->task_id == TASK_THROW_PROJECTILE) {
-			ProjectileThrow(ent, ct->position, ct->forward, 700, 0, handler);
+			//ProjectileThrow(ent, ct->position, ct->forward, 700, 0, handler);
 
 			task->task_id = TASK_WAIT_TIME;
 			task->timer = 50;
@@ -1500,11 +1202,11 @@ void AiMaintainerAttackSchedule(Entity *ent, EntityHandler *handler, MapSection 
 		}
 
 		ct->forward = (Vector3Subtract(task->known_target_position, ct->position));
-		ct->forward.y = 0;
+		ct->forward.z = 0;
 		ct->forward = Vector3Normalize(ct->forward);
 
-		float angle = atan2f(ct->forward.x, ct->forward.z);
-		ent->model.transform = MatrixRotateY(angle+90*DEG2RAD);
+		float angle = atan2f(-ct->forward.x, ct->forward.y);
+		ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(angle+(90*DEG2RAD)*-1));
 	}
 
 	task->task_id = TASK_THROW_PROJECTILE;
@@ -1547,8 +1249,9 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 
 	float t = 0.0f;
 
-	float ent_hit_dist = FLT_MAX;
+	float ent_hit_dist = max_dist;
 	Vector3 ent_hit_point = ray.position;
+	Vector3 ent_hit_norm = Vector3Zero();
 
 	while(CoordsInBounds(cell, grid) && t < max_dist) {
 		i16 cell_id = CellCoordsToId(cell, grid);
@@ -1560,14 +1263,22 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 			// Skip collision checks with shooting entity  
 			if(ent->id == sender)
 				continue;
+
+			if(!(ent->flags & ENT_COLLIDERS))
+				continue;
+
+			Vector3 to_ent = Vector3Subtract(ent->comp_transform.position, ray.position);
+			if(Vector3DotProduct(to_ent, ray.direction) < 0) 
+				continue;
 			
 			// * NOTE:
 			// Change from transform bounds to actual damage hit box later 
 			RayCollision coll = GetRayCollisionBox(ray, ent->comp_transform.bounds);
 				
-			if(coll.hit && coll.distance < ent_hit_dist) {
+			if(coll.hit && coll.distance < ent_hit_dist && coll.distance < max_dist) {
 				ent_hit_dist = coll.distance;
 				ent_hit_point = coll.point;
+				ent_hit_norm = coll.normal;
 
 				trace_data->hit_ent = ent->id;
 			}
@@ -1597,6 +1308,7 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 	}
 
 	trace_data->dist = ent_hit_dist;
+	trace_data->normal = ent_hit_norm;
 	trace_data->point = ent_hit_point;
 
 	return ent_hit_point;
@@ -1626,9 +1338,9 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 	int step_y = (dir.y > 0) ? 1 : -1;
 	int step_z = (dir.z > 0) ? 1 : -1;
 
-	float td_x = fabsf(ENT_GRID_CELL_EXTENTS.x / dir.x); 
-	float td_y = fabsf(ENT_GRID_CELL_EXTENTS.y / dir.y); 
-	float td_z = fabsf(ENT_GRID_CELL_EXTENTS.z / dir.z); 
+	float td_x = fabsf((ENT_GRID_CELL_EXTENTS.x) / dir.x); 
+	float td_y = fabsf((ENT_GRID_CELL_EXTENTS.y) / dir.y); 
+	float td_z = fabsf((ENT_GRID_CELL_EXTENTS.z) / dir.z); 
 
 	Vector3 cell_min = CoordsToVec3(cell, grid);
 	Vector3 cell_max = Vector3Add(cell_min, ENT_GRID_CELL_EXTENTS);
@@ -1665,7 +1377,7 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 			// Change from transform bounds to actual damage hit box later 
 			RayCollision coll = GetRayCollisionBox(ray, ent->comp_transform.bounds);
 				
-			if(coll.hit && coll.distance < ent_hit_dist) {
+			if(coll.hit && coll.distance <= ent_hit_dist) {
 				ent_hit_dist = coll.distance;
 				ent_hit_point = coll.point;
 
@@ -1698,8 +1410,6 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 		}
 	}
 	
-	//dest = (ent_hit_dist < tr.distance) ? ent_hit_point : tr.point;	
-
 	bool ent_first = (ent_hit_dist < tr.distance);
 	if(ent_first) {
 		dest = ent_hit_point;	
@@ -1817,6 +1527,8 @@ void OnHitEnt(Entity *ent, short damage) {
 	if(health->amount <= 0) {
 		ent->comp_ai.state = STATE_DEAD;
 		ent->comp_ai.curr_schedule = SCHED_DEAD;
+
+		ent->flags &= ~ENT_COLLIDERS;
 	}
 
 	if(health->on_hit > -1) {

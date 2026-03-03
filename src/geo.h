@@ -10,11 +10,17 @@
 #define DOWN 	(Vector3) {  0,  0, -1 } 
 
 // Triangle primitive struct
+#define COLL_BLOCK_ALL		0x01
+#define COLL_BLOCK_BULLETS	0x02
+#define COLL_BLOCK_ENTS		0x04
+#define COLL_BLOCK_PLAYER	0x08
 typedef struct {
 	Vector3 vertices[3];
 	Vector3 normal;
 
 	u16 hull_id;
+		
+	u8 collision_flags;
 
 } Tri;
 
@@ -198,6 +204,7 @@ void BvhNodeUpdateBounds(MapSection *sect, BvhTree *bvh, u16 node_id);
 #define BODY_VOLUME_SMALL (Vector3) { 8, 8, 8 }
 //#define BODY_VOLUME_MEDIUM (Vector3) { 28, 64, 28 }
 //#define BODY_VOLUME_MEDIUM (Vector3) { 32, 32, 56 }
+//#define BODY_VOLUME_MEDIUM (Vector3) { 32, 32, 76 }
 #define BODY_VOLUME_MEDIUM (Vector3) { 28, 28, 64 }
 
 enum BVH_SHAPES : u8 {

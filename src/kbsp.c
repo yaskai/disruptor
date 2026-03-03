@@ -221,7 +221,7 @@ bool Bsp_RecursiveTrace(Bsp_Hull *hull, int node_num, Vector3 point_A, Vector3 p
 	return Bsp_RecursiveTrace(hull, node->children[1 - side], mid, point_B, intersection);
 }
 
-#define	DIST_EPSILON	(0.03125)
+#define	DIST_EPSILON	(0.003125)
 Bsp_TraceData Bsp_TraceDataEmpty() {
 	Bsp_TraceData data = {0};
 	data.all_solid = true;
@@ -331,7 +331,6 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 	}
 
 	// Shouldn't happen but does sometimes
-	/*
 	while(Bsp_PointContents(hull, node_num, mid) == CONTENTS_SOLID) {
 		frac -= 0.1f;
 
@@ -351,7 +350,6 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 
 		mid = (Vector3) { m.v[0], m.v[1], m.v[2] };
 	}
-	*/
 
 	trace->fraction = mid_frac;
 	trace->point = mid;

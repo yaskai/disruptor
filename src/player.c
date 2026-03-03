@@ -26,7 +26,7 @@ float player_accel_side;
 float cam_input_forward, cam_input_side;
 
 bool land_frame = false;
-float y_vel_prev;
+float z_vel_prev;
 
 #define FALLDAMAGE_THRESHOLD 800.0f
 #define FALLDAMAGE_MULTIPLIER -0.095f
@@ -36,8 +36,6 @@ short nudged_this_frame = 0;
 #define PLAYER_FRICTION 16.25f 
 #define PLAYER_AIR_FRICTION 0.75f
 #define PLAYER_HURT_FRICTION 40.0f
-
-#define PLAYER_BASE_JUMP_FORCE 1420.0f
 
 Vector2 FlatVec2(Vector3 vec3) { return (Vector2) { vec3.x, vec3.y }; }
 Vector3 clipZ(Vector3 vec) { return Vector3Normalize((Vector3) { vec.x, vec.y, 0 }); }
@@ -71,6 +69,100 @@ float death_timer = 0;
 // **
 // -----------------------------------------------------------------------------
 
+void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
+	comp_Transform *ct = &ent->comp_transform;
+
+	Bsp_Hull *bsp = &ptr_sect->bsp[1];
+	EntGrid *grid = &handler->grid;
+
+	*pm = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1, .origin = start, .block = 0, .clip_count = 0 };
+
+	Vector3 dest = start;
+	Vector3 vel = wish_vel;
+
+	pm->start_vel = wish_vel;
+
+	float t_remain = dt;
+
+	Vector3 clips[MAX_CLIPS] = {0};
+	u8 num_clips = 0;
+
+	for(short i = 0; i < MAX_BUMPS; i++) {
+		// End slide trace if velocity too low
+		if(Vector3LengthSqr(vel) <= STOP_EPS)
+			break;
+		
+		// Scale slide movement by time remaining
+		Vector3 move = Vector3Scale(vel, t_remain);
+
+		// Upate ray
+		Ray ray = (Ray) { .position = dest, .direction = Vector3Normalize(move) };
+
+		// Trace geometry 
+		Bsp_TraceData tr = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(bsp, bsp->first_node, 0, 1, dest, Vector3Add(dest, move), &tr);
+
+		// Determine how much of movement was obstructed
+		float fraction = tr.fraction;
+		fraction = Clamp(fraction, 0.0f, 1.0f);
+
+		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };
+		Vector3 ent_point = TraceEntities(ray, handler, Vector3Length(move), ent->id, &ent_tr);
+
+		float ent_frac = 1.0f ;
+		bool use_ent = (ent_tr.hit_ent > -1 && ent_tr.hit_ent < handler->count);
+		if(use_ent) {
+			ent_frac = (ent_tr.dist / Vector3Length(move));
+			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
+			fraction = ent_frac;
+		}
+
+		pm->fraction = fraction;
+
+		// Update destination
+		//dest = Vector3Add(dest, Vector3Scale(move, fraction - 0.01f));
+		dest = Vector3Add(dest, Vector3Scale(move, fraction));
+
+		// No obstruction, do full movement 
+		if(fraction >= 1.0f) 
+			break;
+
+		if(use_ent) {
+			fraction -= 0.01f;
+			if(fraction < 0) fraction = 0;
+		}
+
+		// Add clip plane
+		if(num_clips < MAX_CLIPS) {
+			clips[num_clips] = (use_ent) ? ent_tr.normal : (Vector3) { tr.plane.normal[0], tr.plane.normal[1], tr.plane.normal[2] }; 
+			num_clips++;
+		} else 
+			break;
+
+		// Update velocity by each clip plane
+		for(short j = 0; j < num_clips; j++) {
+			float into = Vector3DotProduct(vel, clips[j]);
+
+			if(into < 0) {
+				pm_ClipVelocity(vel, clips[j], &vel, 1.0005f, pm->block);
+			}
+		}
+
+		// Add small offset to prevent tunneling through surfaces
+		//dest = Vector3Add(dest, Vector3Scale(tr.normal, 0.1f)); 
+
+		// Update remaining time
+		t_remain *= (1 - fraction);
+	}
+
+	pm->move_dist = Vector3Distance(start, dest);
+	pm->end_vel = vel;
+	pm->end_pos = dest;
+
+	pm->clip_count = num_clips;
+	memcpy(pm->clips, clips, sizeof(Vector3) * num_clips);
+}
+
 void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section, PlayerDebugData *debug_data, EntityHandler *ent_handler) {
 	ptr_cam = camera;
 	ptr_input = input;
@@ -96,10 +188,10 @@ void PlayerUpdate(Entity *player, float dt) {
 	land_frame = false;
 
 	// Update position + velocity
-	pm_Move(&player->comp_transform, ptr_input, dt);
+	pm_Move(player, &player->comp_transform, ptr_input, ptr_ent_handler, dt);
 	if(land_frame) {
 		//printf("land frame!\n");
-		if(y_vel_prev < -FALLDAMAGE_THRESHOLD) player->comp_health.amount -= (short)(y_vel_prev * FALLDAMAGE_MULTIPLIER);
+		if(z_vel_prev < -FALLDAMAGE_THRESHOLD) player->comp_health.amount -= (short)(z_vel_prev * FALLDAMAGE_MULTIPLIER);
 	}
 
 	// Update camera
@@ -179,7 +271,7 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	DrawRay(clip_ray, GREEN);
 }
 
-void pm_Move(comp_Transform *ct, InputHandler *input, float dt) {
+void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler *handler, float dt) {
 	// 1. Categorize position
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 	
@@ -216,7 +308,8 @@ void pm_Move(comp_Transform *ct, InputHandler *input, float dt) {
 
 	// 6. Movement tracing 
 	pmTraceData pm = (pmTraceData) {0};
-	pm_TraceMove(ct, ct->position, ct->velocity, &pm, dt);
+	//pm_TraceMove(ct, ct->position, ct->velocity, &pm, dt);
+	pm_TraceMoveEx(ent, ct->position, ct->velocity, &pm, dt, handler);
 
 	// Step trace
 	//if(ct->on_ground)
@@ -266,8 +359,8 @@ void pm_Move(comp_Transform *ct, InputHandler *input, float dt) {
 		ct->last_safe_pos = ct->position;
 	*/
 
-	land_frame = (ct->on_ground == 1 && last_pm.start_vel.z <= -300);
-	y_vel_prev = last_pm.start_vel.z;
+	land_frame = (ct->on_ground == 1 && last_pm.start_vel.z <= -600);
+	z_vel_prev = last_pm.start_vel.z;
 	last_pm = pm;
 
 	ct->on_ground = pm_CheckGround(ct, ct->position);
@@ -407,7 +500,7 @@ void pm_Accelerate(comp_Transform *ct, Vector3 wish_dir, float wish_speed, float
 	ct->velocity = Vector3Add(ct->velocity, Vector3Scale(wish_dir, accel_speed));
 }
 
-#define PLAYER_GRAV 600.0f
+#define PLAYER_GRAV 980.0f
 void pm_ApplyGravity(comp_Transform *ct, float dt) {
 	if(ct->on_ground) {
 		//ct->velocity.y = 0;
@@ -623,7 +716,8 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 
 	if(input->actions[ACTION_JUMP].state == 2) {
 		ct->on_ground = false;
-		ct->velocity.z += (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.2f);
+		//ct->velocity.z += (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.2f);
+		ct->velocity.z = (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.33f);
 	}
 }
 
@@ -752,7 +846,7 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	Vector3 tilt_targ = UP;
 
 	if(land_frame) {
-		cam_bob += (18.5f * y_vel_prev * 0.00125f);
+		cam_bob += (18.5f * z_vel_prev * 0.00125f);
 		tilt_input += 0.5f;
 	}
 
@@ -820,8 +914,8 @@ void SpawnPlayer(Entity *ent, Vector3 position) {
 	ent->comp_transform.position = position;
 	ent->comp_transform.position.z += 20;
 
-	ent->comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
-	ent->comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
+	ent->comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  1.0f);
+	ent->comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -1.0f);
 	ent->comp_transform.on_ground = true;
 
 	ent->comp_health.amount = 100;

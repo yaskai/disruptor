@@ -1,13 +1,14 @@
 ---- qbsp / ericw-tools 2.0.0-alpha10 ----
 
 --- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
 
-Input file: /home/kai/projects/disruptor/resources/maps/05/test05.map
-Output file: /home/kai/projects/disruptor/resources/maps/05/test05.bsp
+Input file: /home/kai/projects/disruptor/./resources/maps/05/test05.map
+Output file: /home/kai/projects/disruptor/./resources/maps/05/test05.bsp
 
 INFO: using built-in palette.
 WARNING: No wad or _wad key exists in the worldmodel
-    136 entities
+    134 entities
      14 unique textures
     270 texinfos
     550 unique planes
@@ -40,17 +41,16 @@ Processing hull 0...
 INFO: calculating BSP for 309 brushes with 1903 sides
       309 brushes
     1,903 visible faces
-    3,897 nodes
-    2,969 expensive split nodes
-      928 mid-split nodes
-    3,898 leaves
-    1,919 SOLID leafs
-    1,979 EMPTY leafs
-    3,898 leafs total
+    859 nodes
+    859 expensive split nodes
+    860 leaves
+    394 SOLID leafs
+    466 EMPTY leafs
+    860 leafs total
     22 max tree height
-    15 avg tree height
-    15,413 tree portals
-    963 outside leaves
+    12 avg tree height
+    4,272 tree portals
+    196 outside leaves
     0 detail filled leafs
       309 brushes
       759 visible faces
@@ -89,8 +89,8 @@ INFO: calculating BSP for 309 brushes with 1903 sides
     3,856 faces
 Processing hull 1...
 Processing hull 2...
-Writing /home/kai/projects/disruptor/resources/maps/05/test05.bsp as Quake BSP bsp29
-Wrote /home/kai/projects/disruptor/resources/maps/05/test05.bsp
+Writing ./resources/maps/05/test05.bsp as Quake BSP bsp29
+Wrote ./resources/maps/05/test05.bsp
 
 count   lump name    byte size 
       1 models               64
@@ -107,8 +107,8 @@ count   lump name    byte size
      14 textures             60
         lightdata             0
         visdata               0
-        entdata            7760
+        entdata            7579
 
-0.323s seconds elapsed
+0.298s seconds elapsed
 
 

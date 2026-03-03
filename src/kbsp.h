@@ -134,4 +134,3 @@ Bsp_TraceData Bsp_TraceDataEmpty();
 bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_frac, Vector3 p1, Vector3 p2, Bsp_TraceData *trace);
 
 #endif
-
