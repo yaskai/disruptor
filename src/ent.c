@@ -368,8 +368,8 @@ void TurretDraw(Entity *ent) {
 	Vector3 forward = ent->comp_transform.forward;
 
 	DrawLine3D(center, Vector3Add(center, Vector3Scale(forward, 60)), PURPLE);
-	DrawBoundingBox(ct->bounds, RED);
 	*/
+	DrawBoundingBox(ct->bounds, RED);
 	
 	//DrawModel(ent->model, ent->comp_transform.position, 1, WHITE);
 }
@@ -1268,7 +1268,7 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 				continue;
 
 			Vector3 to_ent = Vector3Subtract(ent->comp_transform.position, ray.position);
-			if(Vector3DotProduct(to_ent, ray.direction) < EPSILON) 
+			if(Vector3DotProduct(to_ent, ray.direction) < 0) 
 				continue;
 			
 			// * NOTE:

@@ -6,7 +6,9 @@
 #include "pm.h"
 #include "kbsp.h"
 
-#define BUG_MAX_BOUNCES 12
+#define BUG_MAX_BOUNCES 8
+#define BUG_MAX_VEL 500.0f
+#define BUG_GRAV	970.0f
 
 u8 bug_bounce = 0;
 float launch_timer = 0;
@@ -133,14 +135,19 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	to_enemy.z = 0;
 	to_enemy = Vector3Normalize(to_enemy);
 
-	ct->velocity.x = to_enemy.x * d;	
-	ct->velocity.y = to_enemy.y * d;	
+	if(d > 130 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 48)) {
+		ct->velocity.x = to_enemy.x * d * (1.2f + (GetRandomValue(0, 10) * 0.1f));	
+		ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 10) * 0.1f));	
+	} else {
+		ct->velocity.x = to_enemy.x * d;	
+		ct->velocity.y = to_enemy.y * d;	
+	}
 
 	ct->velocity.z += (d*0.05f);
 
 	if(d <= 250.0f) {
 		if(enemy_ent->id != handler->player_id) {
-			ct->velocity.z += 300 + (10*(*bounce));
+			ct->velocity.z += 300 + (1.5f*(*bounce));
 			if(*bounce >= BUG_MAX_BOUNCES && !big_bounce_used) {
 				(*bounce)--;
 				big_bounce_used = true;
@@ -155,6 +162,11 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		}
 		*/
 	}
+
+	/*
+	if(ct->velocity.z > 350)
+		ct->velocity.z = 350;
+	*/
 }
 
 u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection *sect, u8 *bounce, EntityHandler *handler, float dt) {
@@ -185,9 +197,10 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 		return 0;
 	}
 
-	if(handler->ents[handler->player_id].comp_transform.position.z - ct->position.z > 1000) {
+	if(handler->ents[handler->player_id].comp_transform.position.z - ct->position.z > 700 && launch_timer <= 0) {
 		ent->comp_health.amount = 0;
-		ent->comp_ai.state = BUG_DEFAULT;
+		ent->comp_ai.state = STATE_DEAD;
+		bug_cooldown = 5;
 		return 0;
 	}
 
@@ -346,9 +359,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		launch_timer -= dt;
 
 		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
-		if(!ct->on_ground) {
-			ct->velocity.z -= 900.0f * dt;
-		}
+		// Apply gravity
+		if(!ct->on_ground) 
+			ct->velocity.z -= BUG_GRAV * dt;
 
 		pmTraceData pm = (pmTraceData) {0};
 		//pm_AirFriction(ct, dt);
@@ -357,6 +370,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		bug_TraceMove(ct, ct->position, ct->velocity, &pm, dt, sect, handler);
 		ct->velocity = pm.end_vel;
 		ct->position = pm.end_pos;
+		
+		ct->velocity.z = Clamp(ct->velocity.z, -BUG_MAX_VEL, BUG_MAX_VEL);
+		//ct->velocity = Vector3ClampValue(ct->velocity, -BUG_MAX_VEL, BUG_MAX_VEL);
 
 		EntGrid *grid = &handler->grid;
 		Coords coords = Vec3ToCoords(ct->position, grid);
@@ -377,7 +393,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->comp_ai.state == STATE_DEAD)
 				continue;
 
-			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && ct->position.z >= enemy_ent->comp_transform.position.z + 16) {
+			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && ct->position.z >= enemy_ent->comp_transform.position.z) {
 				ct->on_ground = true;
 				ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
 				ai->task_data.target_entity = enemy_ent->id;
@@ -460,6 +476,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	// Pickup
 	if(CheckCollisionBoxes(ct->bounds, player_ent->comp_transform.bounds) && launch_timer <= 0) {
 		ai->state = BUG_DEFAULT;
+
 	}
 
 	if(ai->state == STATE_DEAD) {

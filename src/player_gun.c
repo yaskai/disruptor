@@ -5,6 +5,8 @@
 #include "ent.h"
 #include "v_effect.h"
 
+#define USE_MWHEEL (false)
+
 Vector3 gun_pos = {0};
 float gun_rot = 0;
 float p, y, r;
@@ -82,11 +84,16 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
-	int scroll = GetMouseWheelMove();
+	int scroll = 0;
+
+	if(USE_MWHEEL)
+		scroll = GetMouseWheelMove();
+
 	if(IsKeyPressed(KEY_Q)) 
-		scroll--;
+		scroll = -1;
+
 	if(IsKeyPressed(KEY_E))
-		scroll++;
+		scroll = +1;
 
 	gun_refs.player->comp_weapon.id = (gun_refs.player->comp_weapon.id + scroll) % 2;
 	player_gun->current_gun = gun_refs.player->comp_weapon.id;

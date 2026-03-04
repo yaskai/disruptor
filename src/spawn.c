@@ -89,10 +89,14 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 			ent.model = handler->base_ent_models[ENT_TURRET];
 
 			//ent.comp_transform.position.y -= 20;
-			ent.comp_transform.position.z -= 20;
+			ent.comp_transform.position.z -= 18;
 
-			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  1.0f);
-			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -1.0f);
+			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
+			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
+					
+			ent.comp_transform.bounds.min.z *= 0.5f;
+			//ent.comp_transform.bounds.max.z *= 0.5f;
+
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 
 			// * NOTE:

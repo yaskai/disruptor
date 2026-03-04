@@ -33,7 +33,7 @@ float z_vel_prev;
 
 short nudged_this_frame = 0;
 
-#define PLAYER_FRICTION 16.25f 
+#define PLAYER_FRICTION 14.25f 
 #define PLAYER_AIR_FRICTION 0.75f
 #define PLAYER_HURT_FRICTION 40.0f
 
@@ -109,12 +109,16 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };
 		Vector3 ent_point = TraceEntities(ray, handler, Vector3Length(move), ent->id, &ent_tr);
 
-		float ent_frac = 1.0f ;
-		bool use_ent = (ent_tr.hit_ent > -1 && ent_tr.hit_ent < handler->count);
+		float ent_frac = 1.0f;
+		bool use_ent = (ent_tr.hit_ent != -1);
 		if(use_ent) {
 			ent_frac = (ent_tr.dist / Vector3Length(move));
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
-			fraction = ent_frac;
+			
+			use_ent = ent_frac < fraction;
+
+			if(use_ent)
+				fraction = ent_frac;
 		}
 
 		pm->fraction = fraction;
@@ -842,7 +846,7 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	cam_bob = Lerp(cam_bob, bob_targ, dt * 10);
 	
 	float tilt_input = cam_input_side * 0.1f;
-	tilt_input = Clamp(tilt_input, -0.025f, 0.025f);
+	tilt_input = Clamp(tilt_input, -0.028f, 0.028f);
 	Vector3 tilt_targ = UP;
 
 	if(land_frame) {
@@ -850,8 +854,8 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 		tilt_input += 0.5f;
 	}
 
-	if(tilt_input != 0.0f) tilt_targ = Vector3RotateByAxisAngle(UP, ct->forward, tilt_input);
-	ptr_cam->up = Vector3Lerp(ptr_cam->up, tilt_targ, dt * 10);
+	if(fabsf(tilt_input) >= EPSILON) tilt_targ = Vector3RotateByAxisAngle(UP, ct->forward, tilt_input);
+	ptr_cam->up = Vector3Lerp(ptr_cam->up, tilt_targ, dt * 7.5f);
 
 	if(!ct->on_ground) cam_bob = 0;
 	ptr_cam->position.z += cam_bob;

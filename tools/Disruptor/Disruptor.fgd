@@ -71,3 +71,165 @@
 
 // Pickup, ammo, revolver
 
+@baseclass = Angle [ 
+	angle(integer) : "Direction (0-360 yaw, or -1 for up/-2 for down)"
+]
+@baseclass = Appearflags [
+	spawnflags(Flags) =
+	[
+		256 : "Not on Easy" : 0
+		512 : "Not on Normal" : 0
+		1024 : "Not on Hard+" : 0
+		2048 : "Not in Deathmatch" : 0
+		4096 : "Only in Coop" : 0
+		8192 : "Not in Coop" : 0
+	]
+]
+
+@baseclass = Targetname [ 
+	targetname(target_source) : "Name" 
+	impulse(integer) : "Can activate with this impulse" : 0
+]
+@baseclass = Target [ 
+	target(target_destination) : "Target: activate anything with a matching targetname" 
+	target2(target_destination) : "Target 2: activate anything with a matching targetname" 
+	target3(target_destination) : "Target 3: activate anything with a matching targetname" 
+	target4(target_destination) : "Target 4: activate anything with a matching targetname" 
+	killtarget(target_destination) : "Killtarget: REMOVE anything with a matching targetname"
+	delay(string) : "Delay before activating targets" : "0"
+]
+
+@baseclass = Deathtype [ deathtype(string) : "Obituary message. Printed after dead player's name, so format accordingly (ie 'was burnt to a crisp')" ]
+@baseclass size(16 16 16) = Bounds [ size(string) : "Bounds size, centered (x y z)" ]
+
+@baseclass = Phong [
+	_phong(integer) : "Use phong smoothing" : 0
+	_phong_angle(integer) : "Phong angle" : 88
+]
+
+@baseclass base(Phong) color(0 120 180) = Func []
+
+@baseclass = FuncInvis [
+	spawnflags(flags) = [
+		128 : "Start Invisible" : 0
+	]
+]
+@baseclass = AltTarget [
+	spawnflags(flags) = [
+		16384 : "Alt Target Pattern" : 0
+	]
+]
+
+//
+// lights.qc
+//
+@baseclass base() color(255 255 80) size(-8 -8 -8, 8 8 8) = Light [
+	light(integer) : "Brightness" : 300
+	_color(string) : "Color" : "1 1 1"
+	wait(string) : "Fade distance multiplier" : "1"
+	mangle(string) : "Spotlight aim (yaw pitch roll, neg. pitch is down)"
+	angle(integer) : "Spotlight cone angle"
+	_softangle(integer) : "Spotlight inner cone angle"
+	_dirt(integer) : "Override dirt"
+	message(string) : "override the style string directly for the assigned style (clashes will overwrite each other)"
+	target(string) : "Entity to aim at"
+	delay(choices) : "Attenuation" =
+	[
+		0 : "Linear falloff (Default)"
+		1 : "Inverse distance falloff"
+		2 : "Inverse distance squared"
+		3 : "No falloff"
+		4 : "Local minlight"
+		5 : "Inverse distance squared B"
+	]
+	style(Choices) : "Appearance" : 0 =
+	[
+		0 : "Normal"
+		10: "Fluorescent flicker"
+		2 : "Slow, strong pulse"
+		11: "Slow pulse, black"
+		5 : "Gentle pulse, no black"
+		1 : "Flicker A"
+		6 : "Flicker B"
+		3 : "Candle A"
+		7 : "Candle B"
+		8 : "Candle C"
+		4 : "Fast strobe"
+		9 : "Slow strobe"
+	]
+]
+@baseclass base(Light, Targetname) = LightTriggerable [
+	spawnflags(flags) = [
+		1 : "Start off" : 0
+	]
+]
+@baseclass base() = Flame [
+	volume(string) : "Crackle Volume" : "1"
+	distance(choices) : "Crackle Range" : 0 =
+	[
+		0 : "Ambient"
+		1 : "Monster Idle"
+		2 : "Monster Bark"
+		3 : "Global (plz no)"
+	]
+	spawnflags(flags) = [
+		2 : "Silent" : 0
+	]
+]
+@PointClass base(LightTriggerable) = light : "Invisible light source" []
+@PointClass base(LightTriggerable) = light_fluoro : "Humming fluorescent light source" []
+@PointClass base(Light) = light_fluorospark : "Sparking flickering light source" []
+@PointClass base(Light) size(24 24 24) = light_globe : "Globe light" []
+@PointClass base(Light, Flame) size(-4 -4 -12, 4 4 20) model({ "path": ":progs/flame.mdl" }) = 
+	light_torch_small_walltorch : "Small walltorch" []
+@PointClass base(Light, Flame) size(-8 -8 -12, 8 8 20) model({ "path": ":progs/flame2.mdl" }) = 
+	light_flame_large_yellow : "Large yellow flame" []
+@PointClass base(Light, Flame) size(-4 -4 -12, 4 4 20) model({ "path": ":progs/flame2.mdl" }) = 
+	light_flame_small_yellow : "Small yellow flame"  []
+@PointClass base(Light, Flame) size(-4 -4 -12, 4 4 20) model({ "path": ":progs/flame2.mdl" }) = 
+	light_flame_small_white : "Small white flame (same as light_flame_small_yellow)" []
+@PointClass base(LightTriggerable) size(-4 -4 0, 4 4 16) model({ "path": ":progs/candle2.mdl" }) = 
+	light_candle : "Animated candle. Trigger to turn on or off.
+If triggered to turn on and off, all candles with a matching targetname will ignite or go out as well.
+Choose size with 'width' and 'height' (leave either at 0 for random selection)."
+[
+	width(choices) : "Width" : 0 =
+	[
+		0: "Random"
+		1: "Narrow"
+		2: "Medium"
+		3: "Thick"
+	]
+	height(choices) : "Height" : 0 =
+	[
+		0: "Random"
+		1: "Short"
+		2: "Medium"
+		3: "Tall"
+	]
+	distance(string) : "Float distance (rough)" : "16"
+	speed(string) : "Float speed modifier (<1 = slower, >1 = faster)" : "1.0"
+]
+@PointClass base(Appearflags, Targetname) color(128 210 128) = target_lightstyle : 
+"Target : Lightstyle
+Changes a global lightstyle when triggered. Will auto-fire at spawn if it has no targetname.
+
+Cycles through 'message' and then all the 'noise' keys if triggered repeatedly."
+[
+	message(string) : "Brightness pattern"
+	noise(string) : "Brightness pattern (2nd)"
+	noise1(string) : "Brightness pattern (3rd)"
+	noise2(string) : "Brightness pattern (4th)"
+	noise3(string) : "Brightness pattern (5th)"
+	noise4(string) : "Brightness pattern (6th)"
+	style(integer) : "Lightstyle to change (0-63)" : 0
+	count(integer) : "Limit uses" : 0
+	delay(string) : "Delay before activation" : "0"
+	target(target_destination) : "Target: acts on all with matching targetname" 
+	target2(target_destination) : "Target 2: acts on all with matching targetname" 
+	target3(target_destination) : "Target 3: acts on all with matching targetname" 
+	target4(target_destination) : "Target 4: acts on all with matching targetname" 
+	spawnflags(flags) = [
+		1 : "Go at map start" : 0
+	]
+]

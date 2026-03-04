@@ -23,7 +23,6 @@ int main() {
 	//GameLoadTestScene1(&game, "resources/maps/test1");
 	//GameLoadTestScene1(&game, "resources/maps/test03");
 	//GameLoadTestScene1(&game, "resources/maps/05");
-	//GameLoadTestScene1(&game, "resources/maps/666");
 	GameLoadTestScene1(&game, "resources/maps/06");
 
 	// Disable exit key
