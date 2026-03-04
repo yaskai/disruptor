@@ -145,7 +145,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	ct->velocity.z += (d*0.05f);
 
-	if(d <= 250.0f) {
+	if(d <= 265.0f) {
 		if(enemy_ent->id != handler->player_id) {
 			ct->velocity.z += 300 + (1.5f*(*bounce));
 			if(*bounce >= BUG_MAX_BOUNCES && !big_bounce_used) {
