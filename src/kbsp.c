@@ -118,6 +118,17 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	return data;
 }
 
+void UnloadBsp(Bsp_Data *data) {
+	if(data->planes)
+		free(data->planes);
+
+	if(data->clipnodes)
+		free(data->clipnodes);
+
+	if(data->models)
+		free(data->models);
+}
+
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {
 	Bsp_Hull hull = (Bsp_Hull) {0};
 

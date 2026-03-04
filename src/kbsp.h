@@ -91,6 +91,7 @@ typedef struct {
 } Bsp_Data;
 
 Bsp_Data LoadBsp(char *path, bool print_output);
+void UnloadBsp(Bsp_Data *data);
 
 typedef struct {
 	Bsp_Plane *planes;
