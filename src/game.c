@@ -371,7 +371,7 @@ void GameDraw(Game *game, float dt) {
 	rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
 
-	PlayerDebugText(&game->ent_handler.ents[game->ent_handler.player_id]);
+	//PlayerDebugText(&game->ent_handler.ents[game->ent_handler.player_id]);
 
 	if(IsKeyPressed(KEY_T))
 		debug_draw_flags ^= DEBUG_DRAW_BIG;
