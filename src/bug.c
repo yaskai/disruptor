@@ -376,7 +376,12 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->comp_ai.state == STATE_DEAD)
 				continue;
 
-			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && ct->position.z >= enemy_ent->comp_transform.position.z) {
+
+			bool height_check = (ct->position.z >= enemy_ent->comp_transform.position.z);
+			if(bug_bounce == 0)
+				height_check = true;
+
+			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check) {
 				ct->on_ground = true;
 				ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
 				ai->task_data.target_entity = enemy_ent->id;

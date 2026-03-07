@@ -119,7 +119,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
 
-		if(!ent->type)
+		if(ent->type <= 0)
 			continue;
 
 		if(!(ent->flags & ENT_ACTIVE))
@@ -1535,6 +1535,9 @@ void OnHitEnt(Entity *ent, short damage) {
 	if(health->on_hit > -1) {
 		on_hit_funcs[health->on_hit](ent, damage);
 	}
+
+	if(ent->type == ENT_PLAYER)
+		OnHitPlayer(ent, damage);
 }
 
 void OnHitTurret(Entity *ent, short damage) {

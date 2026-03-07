@@ -26,6 +26,7 @@ float player_accel_side;
 float cam_input_forward, cam_input_side;
 
 bool land_frame = false;
+bool hurt_frame = false;
 float z_vel_prev;
 
 #define FALLDAMAGE_THRESHOLD 800.0f
@@ -183,6 +184,9 @@ void PlayerUpdate(Entity *player, float dt) {
 	player->comp_transform.bounds = BoxTranslate(player->comp_transform.bounds, player->comp_transform.position);
 	land_frame = false;
 
+	if(player->comp_health.damage_cooldown <= 0)
+		hurt_frame = false;
+
 	player_dead = (player->comp_health.amount <= 0);
 	if(player_dead)	{
 		player->comp_ai.state = STATE_DEAD;
@@ -305,6 +309,7 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 
 	//float wish_speed = PLAYER_SPEED;
 	float wish_speed = (ct->on_ground) ? PLAYER_GROUND_SPEED : PLAYER_AIR_SPEED;
+	if(hurt_frame) wish_speed *= 0.5f;
 	if(wish_speed > PLAYER_MAX_SPEED) {
 		wish_speed = PLAYER_MAX_SPEED;
 	} 
@@ -838,6 +843,15 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	if(fabsf(tilt_input) >= EPSILON) tilt_targ = Vector3RotateByAxisAngle(UP, ct->forward, tilt_input);
 	ptr_cam->up = Vector3Lerp(ptr_cam->up, tilt_targ, dt * 7.5f);
 
+	if(hurt_frame) {
+		//short side = (GetRandomValue(0, 1)) ? -1 : 1;  
+		short side = 1;
+		tilt_input = 0.075f * side;
+
+		tilt_targ = Vector3RotateByAxisAngle(UP, ct->forward, tilt_input);
+		ptr_cam->up = tilt_targ;
+	}
+
 	if(!ct->on_ground) cam_bob = 0;
 	ptr_cam->position.z += cam_bob;
 	ptr_cam->target.z += cam_bob;
@@ -894,6 +908,7 @@ void OnHitPlayer(Entity *ent, short damage) {
 	comp_Transform *ct = &ent->comp_transform;
 
 	health->amount -= damage; 
+	hurt_frame = true;
 }
 
 void SpawnPlayer(Entity *ent, Vector3 position) {

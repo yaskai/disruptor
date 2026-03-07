@@ -8,14 +8,14 @@ Output file: /home/kai/projects/disruptor/./resources/maps/06/test06.bsp
 
 INFO: using built-in palette.
 WARNING: No wad or _wad key exists in the worldmodel
-     10 entities
+     13 entities
      11 unique textures
-    373 texinfos
-    816 unique planes
+    379 texinfos
+    818 unique planes
 
 INFO: world extents calculated to 4168 units
-      948 brushes
-    5,675 sides
+      992 brushes
+    5,939 sides
        91 side bevels
 
             0 texture frames added
@@ -31,58 +31,58 @@ WARNING: unable to find texture tiles_01
 WARNING: unable to find texture wall_stone03_c
 WARNING: unable to find texture conc_slabs01_c
 Processing hull 0...
-    948 SOLID brushes
-    948 brushes total
-    5,675 visible sides
-INFO: calculating BSP for 948 brushes with 5675 sides
-      948 brushes
-    5,675 visible faces
-    2,707 nodes
-    2,707 expensive split nodes
-    2,708 leaves
-    1,333 SOLID leafs
-    1,375 EMPTY leafs
-    2,708 leafs total
+    992 SOLID brushes
+    992 brushes total
+    5,939 visible sides
+INFO: calculating BSP for 992 brushes with 5939 sides
+      992 brushes
+    5,939 visible faces
+    2,876 nodes
+    2,876 expensive split nodes
+    2,877 leaves
+    1,406 SOLID leafs
+    1,471 EMPTY leafs
+    2,877 leafs total
     20 max tree height
     14 avg tree height
-    13,049 tree portals
-    266 outside leaves
+    13,833 tree portals
+    299 outside leaves
     0 detail filled leafs
-      948 brushes
-    3,027 visible faces
-    2,648 non-visible faces
-    3,083 nodes
-      698 non-visible nodes
-    3,083 expensive split nodes
-    3,084 leaves
-    1,548 SOLID leafs
-    1,536 EMPTY leafs
-    3,084 leafs total
+      992 brushes
+    3,185 visible faces
+    2,754 non-visible faces
+    3,220 nodes
+      713 non-visible nodes
+    3,220 expensive split nodes
+    3,221 leaves
+    1,615 SOLID leafs
+    1,606 EMPTY leafs
+    3,221 leafs total
     20 max tree height
     14 avg tree height
-    14,564 tree portals
-    459 outside leaves
+    15,187 tree portals
+    467 outside leaves
     0 detail filled leafs
-    14,564 tree portals
-    10,872 sides visible
-    5,436 makefaces
-    1,310 merged
-      729 subdivided
-    783 nodes pruned
-    1,077 player-occupiable leaves
-    1,077 clusters of leaves
-    2,595 vis portals
-    1,077 EMPTY leafs
-    1,224 SOLID leafs
-    2,301 leafs total
+    15,187 tree portals
+    11,388 sides visible
+    5,694 makefaces
+    1,377 merged
+      728 subdivided
+    801 nodes pruned
+    1,139 player-occupiable leaves
+    1,139 clusters of leaves
+    2,766 vis portals
+    1,139 EMPTY leafs
+    1,281 SOLID leafs
+    2,420 leafs total
     20 max tree height
     14 avg tree height
-     3,974 edges added by tjunctions
-     4,802 faces optimized through MWT
-    13,581 triangles computed from MWT
-       995 faces created via optimization of MWT triangles
-    12,686 edges
-     5,850 faces
+     4,053 edges added by tjunctions
+     4,993 faces optimized through MWT
+    14,042 triangles computed from MWT
+       989 faces created via optimization of MWT triangles
+    13,104 edges
+     6,034 faces
 Processing hull 1...
 Processing hull 2...
 Writing ./resources/maps/06/test06.bsp as Quake BSP bsp29
@@ -91,20 +91,20 @@ Wrote ./resources/maps/06/test06.bsp
 count   lump name    byte size 
       1 models               64
     505 planes            10100
-   6536 vertexes          78432
-   2300 nodes             55200
-    242 texinfos           9680
-   5850 faces            117000
-   3817 clipnodes         30536
-   1078 leafs             30184
-   7075 marksurfaces      14150
-  12687 edges             50748
-  25334 surfedges        101336
+   6781 vertexes          81372
+   2419 nodes             58056
+    244 texinfos           9760
+   6034 faces            120680
+   4020 clipnodes         32160
+   1140 leafs             31920
+   7319 marksurfaces      14638
+  13105 edges             52420
+  26162 surfedges        104648
      11 textures             48
         lightdata             0
         visdata               0
-        entdata             593
+        entdata             865
 
-1.243s seconds elapsed
+1.324s seconds elapsed
 
 

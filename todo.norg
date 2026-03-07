@@ -172,6 +172,8 @@ ___
 ___
 * *Other*
 
+** (x) git repo readme.md
+
 ** text box objects (for use in alpha to explain certain missing planned features)
 
 ** game state serialization
