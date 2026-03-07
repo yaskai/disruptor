@@ -63,6 +63,7 @@ ___
 ** gates & switches
 ** force fields
 ** breakable boxes
+** pickup items (health + ammo)
 
 ___
 * *Audio*
@@ -141,7 +142,7 @@ ___
 
 ** (-) bullet trails
 *** (x) turret 
-*** (-) player guns
+*** (-) player guns (using the same as turret for now but should be changed)
 
 ** (-) bullet hole decals
 *** (x) struct 

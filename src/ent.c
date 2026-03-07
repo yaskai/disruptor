@@ -312,9 +312,8 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 		if(ent->comp_weapon.ammo > 0)
 			ent->comp_transform.forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
 		else {
-			ent->comp_transform.targ_look = ent->comp_transform.forward;		
+			//ent->comp_transform.targ_look = ent->comp_transform.forward;		
 			ent->comp_ai.task_data.task_id = TASK_WAIT_TIME;
-			
 		}
 
 	} else
@@ -580,7 +579,11 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	// ** Check if player is visible **	
 	//
 	// Clear 'see player' flag
+	bool prev_seen_player = (ai->input_mask & AI_INPUT_SEE_PLAYER);
 	ai->input_mask &= ~AI_INPUT_SEE_PLAYER;
+
+	if(prev_seen_player && !(ai->input_mask & AI_INPUT_SEE_PLAYER))
+		ai->input_mask |= AI_INPUT_LOST_PLAYER;
 
 	Entity *player_ent = &handler->ents[handler->player_id];
 	Vector3 to_player = Vector3Normalize(Vector3Subtract(player_ent->comp_transform.position, ct->position));
@@ -598,11 +601,21 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 		// Player hitbox collision closer than possible surface collision.
 		// No obstruction, player is visible 
-		if(player_coll.distance < tr.distance)
+		if(player_coll.distance < tr.distance) {
 			ai->input_mask |= AI_INPUT_SEE_PLAYER;
+			ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
+		}
 	}
-	
+
+	if(ai->task_data.target_entity == handler->player_id && (ai->input_mask & AI_INPUT_SEE_PLAYER)) {
+		ai->task_data.known_target_position = player_ent->comp_transform.position;
+	}
 	// ***
+
+	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
+	bool in_hearing_range = (Vector3DistanceSqr(ent->comp_transform.position, player_ent->comp_transform.position) < ai->hear_distance);
+	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f)
+		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
 }
 
 void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, Ai_TaskData *task_data, float dt) {
@@ -1072,7 +1085,7 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		return;
 	}
 
-	if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
+	if(ai->input_mask & AI_INPUT_SEE_PLAYER || ai->input_mask & AI_INPUT_HEAR_PLAYER) {
 		task->task_id = TASK_LOOK_AT_ENTITY;
 		task->target_entity = handler->player_id;
 	} else {
@@ -1084,15 +1097,14 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 	}
 
 	if(task->task_id == TASK_LOOK_AT_ENTITY) {
-		Vector3 look_point;
+		Vector3 look_point = Vector3Add(ct->position, ct->forward);
 
 		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
 			look_point = handler->ents[task->target_entity].comp_transform.position;
-			ai->task_data.known_target_position = look_point;
+			//ai->task_data.known_target_position = look_point;
 
 			Vector3 target_vel = handler->ents[task->target_entity].comp_transform.velocity;
 			look_point = Vector3Add(look_point, target_vel);
-
 		} else if(ai->input_mask & AI_INPUT_LOST_PLAYER) {
 			look_point = ai->task_data.known_target_position;
 		}
@@ -1196,7 +1208,7 @@ void AiMaintainerAttackSchedule(Entity *ent, EntityHandler *handler, MapSection 
 	Ai_TaskData *task = &ai->task_data;
 
 	if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
-		task->known_target_position = handler->ents[handler->player_id].comp_transform.position;
+		//task->known_target_position = handler->ents[handler->player_id].comp_transform.position;
 
 		if(task->task_id == TASK_THROW_PROJECTILE) {
 			//ProjectileThrow(ent, ct->position, ct->forward, 700, 0, handler);

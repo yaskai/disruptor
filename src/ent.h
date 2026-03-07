@@ -131,6 +131,9 @@ typedef struct {
 	u8 ammo_type;
 	u8 ammo;
 
+	u8 clip_size;
+	u8 in_clip;
+
 } comp_Weapon;
 
 #define ENT_ACTIVE		0x01

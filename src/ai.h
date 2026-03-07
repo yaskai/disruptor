@@ -125,6 +125,8 @@ typedef struct {
 
 	int curr_navnode_id;
 
+	float hear_distance;
+
 	float disrupt_timer;
 
 	u16 self_ent_id;

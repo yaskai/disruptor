@@ -120,7 +120,9 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(-spawn_point->angle*DEG2RAD));
 
 			ent.comp_ai.component_valid = true;
-			ent.comp_ai.sight_cone = 0.55f;
+
+			ent.comp_ai.sight_cone = 0.1f;
+			ent.comp_ai.hear_distance = 300.0f;
 
 			ent.comp_ai.curr_schedule = SCHED_SENTRY;
 			ent.comp_ai.task_data.task_id = TASK_LOOK_AT_ENTITY;
