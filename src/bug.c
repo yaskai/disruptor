@@ -64,6 +64,9 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 				if(enemy_ai->state == STATE_DEAD)
 					continue;
+
+				if(!(enemy_ent->flags & ENT_ACTIVE))
+					continue;
 				
 				if(!enemy_ai->component_valid)
 					continue;

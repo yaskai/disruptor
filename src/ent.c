@@ -15,6 +15,8 @@
 
 #define STEP_SIZE 8.0f
 
+float grid_tick = 0.0f;
+
 Vector3 debug_bullet_dest;
 Vector3 debug_bullet_norm;
 
@@ -99,10 +101,17 @@ void UpdateRenderList(EntityHandler *handler, MapSection *sect) {
 	render_list.count = 0;
 }
 
+float prev_pos_tick = 0.0f;
+
 void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
-	for(u16 i = 0; i < handler->count; i++) {
-		Entity *ent = &handler->ents[i];
-		ent->comp_transform.prev_pos = ent->comp_transform.position;
+	prev_pos_tick -= dt;
+	if(prev_pos_tick < 0.0f) {
+		for(u16 i = 0; i < handler->count; i++) {
+			Entity *ent = &handler->ents[i];
+			ent->comp_transform.prev_pos = ent->comp_transform.position;
+		}
+
+		prev_pos_tick = 4*dt;
 	}
 
 	Entity *player_ent = &handler->ents[handler->player_id];
@@ -146,18 +155,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 			ent->comp_health.bug_box,
 			Vector3Add(ent->comp_transform.position, ent->comp_health.bug_point)	
 		);
-
 		ent->comp_health.damage_cooldown -= dt;
-
-		// * NOTE: 
-		// Commmenting this out, using same system as player for entities that move
-		// handling in entity type specific functions...  MaintainerUpdate(), RegulatorUpdate(), etc.
-		/*
-		if(i != handler->bug_id) {
-			ent->comp_transform.position = Vector3Add(ent->comp_transform.position, Vector3Scale(ent->comp_transform.velocity, dt));
-			ent->comp_transform.bounds = BoxTranslate(ent->comp_transform.bounds, ent->comp_transform.position);
-		}
-		*/
 
 		comp_Health *health = &ent->comp_health;
 		if(health->component_valid) {
@@ -249,14 +247,22 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	}
 
 	handler->ai_tick -= dt;
-	if(handler->ai_tick <= 0.0f) {
+	if(handler->ai_tick < 0.0f) {
+		// Do next ai update in ~10 frames
+		handler->ai_tick = (10*dt);
+
 		AiSystemUpdate(handler, sect, dt);
-		handler->ai_tick = 0.0116f;
 	}
 
 	ManageProjectiles(handler, sect, dt);
 
-	UpdateGrid(handler);
+	grid_tick -= dt;
+	if(grid_tick < 0.0f) {
+		// Do next grid update in ~2 frames
+		grid_tick = (2*dt);
+
+		UpdateGrid(handler);
+	}
 }
 
 void RenderEntities(EntityHandler *handler, float dt) {
@@ -293,7 +299,7 @@ void RenderEntities(EntityHandler *handler, float dt) {
 	}
 
 	//DrawSphere(debug_bullet_dest, 10, RED);
-	DrawLine3D(debug_bullet_dest, Vector3Add(debug_bullet_dest, Vector3Scale(debug_bullet_norm, 20)), PURPLE);
+	//DrawLine3D(debug_bullet_dest, Vector3Add(debug_bullet_dest, Vector3Scale(debug_bullet_norm, 20)), PURPLE);
 
 	RenderProjectiles(handler);
 
@@ -1100,7 +1106,7 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 	if(task->task_id == TASK_FIRE_WEAPON) {
 		if(ent->comp_weapon.ammo <= 0) {
 			task->task_id = TASK_RELOAD_WEAPON;
-			task->timer = 75.0f;
+			task->timer = 0.01f;
 			printf("reload start\n");
 		}
 		return;
@@ -1111,7 +1117,7 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 			ent->comp_weapon.ammo = 60;
 			ent->comp_weapon.cooldown = 10.45f;
 			task->task_id = TASK_WAIT_TIME;
-			task->timer = 1.1f;
+			task->timer = 0.01f;
 			printf("reload done\n");
 		}
 
@@ -1151,7 +1157,7 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 			ent->comp_weapon.cooldown = 0.05f;
 		} else if(ai->input_mask & AI_INPUT_LOST_PLAYER) {
 			task->task_id = TASK_WAIT_TIME;
-			task->timer = 15.0f;
+			task->timer = 25.0f;
 		}
 		
 		/*
@@ -1313,6 +1319,9 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 
 			// Skip collision checks with shooting entity  
 			if(ent->id == sender)
+				continue;
+
+			if(!(ent->flags & ENT_ACTIVE))
 				continue;
 
 			if(!(ent->flags & ENT_COLLIDERS))
@@ -1645,6 +1654,8 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
+	ct->bounds = BoxTranslate(ct->bounds, ct->position);
+
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 	pm_ApplyGravity(ct, dt);
 
@@ -1655,13 +1666,14 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 	pm_GroundFriction(ct, dt);
 	pm_Accelerate(ct, wish_dir, wish_speed, 20.0f, dt);
 
+	if(Vector3LengthSqr(ct->velocity) <= 1.0f)
+		return;
+
 	pmTraceData move_data = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1 };
 	pm_TraceMove(ct, ct->position, ct->velocity, &move_data, dt);
 
 	ct->position = move_data.end_pos;
 	ct->velocity = move_data.end_vel;
-
-	ct->bounds = BoxTranslate(ct->bounds, ct->position);
 }
 
 void proj_TraceMove(Projectile *proj, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, MapSection *sect, short bvh_id) {

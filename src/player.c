@@ -208,7 +208,7 @@ void PlayerUpdate(Entity *player, float dt) {
 			ptr_cam->position.z = player->comp_transform.position.z + 12;
 		} else {
 			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 12, dt * 17.5f);
-			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + 12)) <= 0.55f) 
+			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + 12)) <= 0.75f) 
 				step_frame = false;
 		}
 
@@ -225,6 +225,9 @@ void PlayerUpdate(Entity *player, float dt) {
 
 	if(!player_dead)
 		cam_Adjust(&player->comp_transform, dt);
+
+	if(!player->comp_transform.on_ground)
+		step_frame = false;
 }
 
 void PlayerDraw(Entity *player) {
@@ -452,7 +455,7 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 
 	ct->ground_normal = (Vector3) { tr.plane.normal[0], tr.plane.normal[1], tr.plane.normal[2] };
 	//pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.00001f, 0);
-	//pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.0f, 0);
+	pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.0f, 0);
 	if(fabsf(ct->velocity.z) < STOP_EPS) ct->velocity.z = 0;
 
 	return 1;
@@ -629,7 +632,6 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 	if(!use_step) {
 		return;
 	}
-	step_frame = true;
 
 	// Press step down
 	Vector3 down_vel = Vector3Scale(DOWN, PM_STEP_Z);
@@ -651,7 +653,7 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 	);
 
 	bool use_down = false;
-	if(down_pm.block & BLOCK_GROUND && down_dist > dist_base)
+	if(down_pm.block & BLOCK_GROUND && (down_dist > dist_base + EPSILON) && (down_pm.end_pos.z > base_pm.end_pos.z + EPSILON))
 		use_down = true;
 
 	if(tr.start_solid && tr.all_solid)
@@ -661,8 +663,11 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 		step_pm.end_pos.z = down_pm.end_pos.z;
 
 	} else { 
-		step_pm.end_vel.z += down_vel.z;
+		//step_pm.end_vel.z += down_vel.z;
 	}
+
+	if(step_pm.end_pos.z > base_pm.end_pos.z + 0.1f)
+		step_frame = true;
 
 	*pm = step_pm;
 }
@@ -813,11 +818,14 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 
 	// * NOTE:
 	// okay for now...
-	float bob_input = (cam_input_forward + (cam_input_side * 0.5f));
+	float bob_input = 0.0f;
+	if(ct->on_ground)
+		bob_input += (cam_input_forward + (cam_input_side * 0.5f));
+
 	if(step_frame)
 		bob_input *= 0.1f;
 
-	float bob_targ = (5 * bob_input * sinf(t * 13 + (cam_input_forward)) + 1);	
+	float bob_targ = (4.5f * bob_input * sin(t * 15.5f + (cam_input_forward)));	
 	cam_bob = Lerp(cam_bob, bob_targ, dt * 10);
 	
 	float tilt_input = cam_input_side * 0.1f;

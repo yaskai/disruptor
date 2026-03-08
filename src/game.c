@@ -399,8 +399,8 @@ void GameDraw(Game *game, float dt) {
 		DrawTexture(qr_img, 0, 0, WHITE);
 	}
 
-	//int fps = GetFPS();
-	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	int fps = GetFPS();
+	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 
 	//EntDebugText();
 
