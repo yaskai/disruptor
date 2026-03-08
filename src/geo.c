@@ -476,10 +476,13 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 	float split_pos = 0;
 	float best_cost = FindBestSplit(sect, bvh, node, &split_axis, &split_pos);
 
+	if(split_axis == -1)
+		return;
+
 	// Base case:
 	// Cost of splitting exceeds cost of leaving as is
 	float parent_cost = BvhNodeCost(node);
-	if(best_cost >= parent_cost)
+	if(best_cost >= parent_cost || node->tri_count <= MAX_TRIS_PER_NODE)
 		return;
 
 	// In-place partition
@@ -501,12 +504,13 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 
 	// Base case: 
 	// Cancel subdivision if either side is empty
-	if(count_lft == 0 || count_lft == node->tri_count) return;
+	if(count_lft <= 0 || count_lft == node->tri_count) return;
 
 	// Resize node array if needed
 	if(bvh->count + 2 >= bvh->capacity) {
 		bvh->capacity = (bvh->capacity << 1);
-		bvh->nodes = realloc(bvh->nodes, sizeof(BvhNode) * bvh->capacity);
+		BvhNode *realloc_ptr = realloc(bvh->nodes, sizeof(BvhNode) * bvh->capacity); 
+		bvh->nodes = realloc_ptr;
 	}
 
 	// Create child nodes	

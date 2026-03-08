@@ -111,6 +111,8 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 		float fraction = tr.fraction;
 		fraction = Clamp(fraction, 0.0f, 1.0f);
 
+		// Repeat trace steps for entity collisions,
+		// if entity hit is closer, use that collision for clipping plane 
 		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };
 		Vector3 ent_point = TraceEntities(ray, handler, Vector3Length(move), ent->id, &ent_tr);
 
@@ -126,10 +128,7 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 				fraction = ent_frac;
 		}
 
-		pm->fraction = fraction;
-
-		// Update destination
-		//dest = Vector3Add(dest, Vector3Scale(move, fraction - 0.01f));
+		// Update destination, move to point
 		dest = Vector3Add(dest, Vector3Scale(move, fraction));
 
 		// No obstruction, do full movement 
@@ -157,7 +156,7 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 		t_remain *= (1 - fraction);
 	}
 
-
+	// Set movement data values
 	pm->move_dist = Vector3Distance(start, dest);
 	pm->fraction = (pm->move_dist / Vector3Length(wish_vel));
 
@@ -177,10 +176,6 @@ void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section,
 }
 
 void PlayerUpdate(Entity *player, float dt) {
-	// Update camera
-	//if(!player_dead)
-		//cam_Adjust(&player->comp_transform, dt);
-
 	player->comp_transform.bounds = BoxTranslate(player->comp_transform.bounds, player->comp_transform.position);
 	land_frame = false;
 
@@ -367,6 +362,7 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 
 }
 
+// Take input, apply to velocity
 Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	// Update pitch, yaw, roll	
 	// (in the case of the player, these are the same for both player entity and the camera)
