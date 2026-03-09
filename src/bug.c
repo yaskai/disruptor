@@ -243,7 +243,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		Vector3 ent_point = TraceEntities(ray, handler, Vector3Length(move), handler->bug_id, &ent_tr);
 		float ent_frac = 1.0f;
 
-		bool use_ent = (ent_tr.hit_ent > -1 && ent_tr.hit_ent < handler->count);
+		bool use_ent = (ent_tr.hit_ent > -1 && ent_tr.hit_ent < handler->count && ent_tr.hit_ent != handler->player_id);
 		if(use_ent) {
 			ent_frac = (ent_tr.dist / Vector3Length(move));
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
@@ -311,6 +311,11 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
+
+	EntGrid *grid = &handler->grid;
+	Coords coords = Vec3ToCoords(ct->position, grid);
+	if(!CoordsInBounds(coords, grid))
+		ai->state = STATE_DEAD;
 
 	bug_z_vel_prev = ct->velocity.z;
 
@@ -429,8 +434,6 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		
 		// Check if there is an enemy to disrupt
 		if(!(ent->flags & BUG_DISRUPTED_ENEMY)) {
-			EntGrid *grid = &handler->grid;
-			Coords coords = Vec3ToCoords(ct->position, grid);
 			i16 cell_id = CellCoordsToId(coords, grid);
 			EntGridCell *cell = &grid->cells[cell_id];
 

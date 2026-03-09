@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "config.h"
@@ -15,6 +17,12 @@ int main() {
 	SetTraceLogLevel(LOG_NONE);
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_BORDERLESS_WINDOWED_MODE | FLAG_MSAA_4X_HINT);
 	SetConfigFlags(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT);
+
+	if(conf.window_width == atoi("auto"))
+		conf.window_width = GetScreenWidth();
+	if(conf.window_height == atoi("auto"))
+		conf.window_height = GetScreenHeight();
+	
 	InitWindow(conf.window_width, conf.window_height, "DISRUPTOR");
 
 	GameRenderSetup(&game);

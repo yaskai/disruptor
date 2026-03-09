@@ -197,6 +197,9 @@ void ConfigParseLine(Config *conf, char *line, u8 block, u8 print) {
 			i32 i = 0; 
 			sscanf(val, "%d", &i);
 
+			if(!strcmp(val, "auto"))
+				i = atoi("auto");
+
 			option->val = i;
 
 		} break;
