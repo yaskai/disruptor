@@ -84,14 +84,16 @@ void UpdateGrid(EntityHandler *handler) {
 		}
 		*/
 
-		for(u8 j = 0; j < src_cell->ent_count; j++) {
-			if(src_cell->ents[j] == ent->id && !CheckCollisionBoxes(src_cell->aabb, ct->bounds)) { 
-				for(u8 n = j; n < src_cell->ent_count-1; n++) {
-					src_cell->ents[n] = src_cell->ents[n+1];
-				}
+		if(!CheckCollisionBoxes(src_cell->aabb, ct->bounds)) {
+			for(u8 j = 0; j < src_cell->ent_count; j++) {
+				if(src_cell->ents[j] == ent->id) { 
+					for(u8 n = j; n < src_cell->ent_count-1; n++) {
+						src_cell->ents[n] = src_cell->ents[n+1];
+					}
 
-				src_cell->ent_count--;
-				break;
+					src_cell->ent_count--;
+					break;
+				}
 			}
 		}
 

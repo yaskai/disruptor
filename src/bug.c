@@ -80,10 +80,16 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 					continue;
 				// **
 
+				/*
 				Vector3 to_enemy = Vector3Subtract(
 					Vector3Add(
 						Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_health.bug_point),
 						Vector3Scale(enemy_ent->comp_transform.velocity, 1)),
+					ct->position
+				);	
+				*/
+				Vector3 to_enemy = Vector3Subtract(
+					Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_health.bug_point),
 					ct->position
 				);	
 
@@ -92,6 +98,16 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 				// Too far
 				if(dist > 250.0f)
 					continue;
+
+				if(to_enemy.z <= -60.0f)
+					continue;
+
+				BvhTraceData tr = TraceDataEmpty();
+				Ray ray = (Ray) { .position = ct->position, .direction = Vector3Normalize(to_enemy) };
+				BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, dist);
+				if(tr.distance < dist) {
+					continue;
+				}
 
 				// Set target to closest candidate
 				if(dist < closest) {
@@ -384,7 +400,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->comp_ai.state == STATE_DEAD)
 				continue;
 
-			bool height_check = (ct->position.z >= enemy_ent->comp_transform.position.z);
+			bool height_check = (ct->position.z >= enemy_ent->comp_transform.position.z - 16);
 			if(bug_bounce == 0) {
 				height_check = true;
 			}
@@ -400,24 +416,26 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				break;
 			}
 
-			// **
-			// Purpose of this block is to reduce likelihood of Bug overshooting it's target.
-			// Works in most cases
-			Vector3 hvel = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
-			Vector3 self_xy = (Vector3) { ct->position.x, ct->position.y, 0 }; 
-			Vector3 targ_xy = (Vector3) { enemy_ent->comp_transform.position.x, enemy_ent->comp_transform.position.y, 0 }; 
-			if(Vector3Distance(self_xy, targ_xy) <= 18.0f && height_check) {
-				Vector3 to_targ = Vector3Subtract(targ_xy, self_xy);
+			if(bug_target_picked) {
+				// **
+				// Purpose of this block is to reduce likelihood of Bug overshooting it's target.
+				// Works in most cases
+				Vector3 hvel = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
+				Vector3 self_xy = (Vector3) { ct->position.x, ct->position.y, 0 }; 
+				Vector3 targ_xy = (Vector3) { enemy_ent->comp_transform.position.x, enemy_ent->comp_transform.position.y, 0 }; 
+				if(Vector3Distance(self_xy, targ_xy) <= 18.0f && height_check) {
+					Vector3 to_targ = Vector3Subtract(targ_xy, self_xy);
 
-				float into = Vector3DotProduct(to_targ, Vector3Normalize(hvel));
-				if(into < 0) {
-					ct->velocity = Vector3Subtract(ct->velocity, Vector3Scale(to_targ, into));
+					float into = Vector3DotProduct(to_targ, Vector3Normalize(hvel));
+					if(into < 0) {
+						ct->velocity = Vector3Subtract(ct->velocity, Vector3Scale(to_targ, into * 0.1f));
+					}
+
+					// Apply some extra gravity, to fall more into target
+					//ct->velocity.z -= (BUG_GRAV * 0.33f) * dt;
 				}
-
-				// Apply some extra gravity, to fall more into target
-				ct->velocity.z -= (BUG_GRAV * 0.33f) * dt;
+				// **
 			}
-			// **
 		}
 
 		if(ct->on_ground) {
@@ -457,7 +475,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			}
 		}
 
-		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->task_data.target_entity > -1 && ai->task_data.target_entity < handler->count) {
+		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->task_data.target_entity > -1 && ai->task_data.target_entity < handler->count
+		   && !(ent->flags & BUG_RECALL)) {
 			Entity *stick_ent = &handler->ents[ai->task_data.target_entity];			
 			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
 
@@ -494,11 +513,11 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 				ent->comp_ai.task_data.target_entity = handler->player_id;
 				
-				float dist_add = 5.0f + (Vector3Distance(player_ent->comp_transform.position, ct->position) * 0.1f);
-				dist_add = Clamp(dist_add, 0, 100);
+				float dist_add = 80.0f + (Vector3Distance(player_ent->comp_transform.position, ct->position) * 0.1f);
+				dist_add = Clamp(dist_add, 0, 300);
 				ct->velocity.z += dist_add;
 
-				if(ct->position.z < player_ent->comp_transform.position.z)
+				if(ct->position.z < player_ent->comp_transform.position.z - 32)
 					ct->velocity.z += 150.0f;
 
 				ent->comp_ai.state = BUG_LAUNCHED;

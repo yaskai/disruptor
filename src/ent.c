@@ -1972,8 +1972,7 @@ void ProjectileImpact(Projectile *projectile, EntityHandler *handler, i16 ent_id
 	float damage = Vector3Length(projectile->ct.velocity) * 0.01f;
 	damage = Clamp(damage, 0, 100);
 
-	if(ent->type != ENT_DISRUPTOR)
-		OnHitEnt(ent, (short)damage);
+	OnHitEnt(ent, (short)damage);
 
 	Vector3 knockback = (Vector3) { projectile->ct.velocity.x, projectile->ct.velocity.z, 0 };
 	knockback = Vector3Scale(knockback, 0.33f);

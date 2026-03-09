@@ -10,12 +10,12 @@ INFO: using built-in palette.
 WARNING: No wad or _wad key exists in the worldmodel
        32 entities
        12 unique textures
-      658 texinfos
-    1,012 unique planes
+      662 texinfos
+    1,010 unique planes
 
 INFO: world extents calculated to 4168 units
-      882 brushes
-    5,258 sides
+      884 brushes
+    5,269 sides
       149 side bevels
 
             0 texture frames added
@@ -32,58 +32,58 @@ WARNING: unable to find texture tiles_01
 WARNING: unable to find texture mtl_trim01_c
 WARNING: unable to find texture Transparent
 Processing hull 0...
-    882 SOLID brushes
-    882 brushes total
-    5,258 visible sides
-INFO: calculating BSP for 882 brushes with 5258 sides
-      882 brushes
-    5,258 visible faces
-    2,693 nodes
-    2,693 expensive split nodes
-    2,694 leaves
-    1,266 SOLID leafs
-    1,428 EMPTY leafs
-    2,694 leafs total
+    884 SOLID brushes
+    884 brushes total
+    5,269 visible sides
+INFO: calculating BSP for 884 brushes with 5269 sides
+      884 brushes
+    5,269 visible faces
+    2,696 nodes
+    2,696 expensive split nodes
+    2,697 leaves
+    1,268 SOLID leafs
+    1,429 EMPTY leafs
+    2,697 leafs total
     21 max tree height
     14 avg tree height
-    13,088 tree portals
+    13,109 tree portals
     363 outside leaves
     0 detail filled leafs
-      882 brushes
-    2,812 visible faces
-    2,446 non-visible faces
-    2,954 nodes
-      654 non-visible nodes
-    2,954 expensive split nodes
-    2,955 leaves
-    1,418 SOLID leafs
-    1,537 EMPTY leafs
-    2,955 leafs total
+      884 brushes
+    2,818 visible faces
+    2,451 non-visible faces
+    2,997 nodes
+      684 non-visible nodes
+    2,997 expensive split nodes
+    2,998 leaves
+    1,439 SOLID leafs
+    1,559 EMPTY leafs
+    2,998 leafs total
     21 max tree height
     14 avg tree height
-    14,189 tree portals
-    481 outside leaves
+    14,365 tree portals
+    502 outside leaves
     0 detail filled leafs
-    14,189 tree portals
-    10,548 sides visible
-    5,274 makefaces
-    1,141 merged
-    1,091 subdivided
-    759 nodes pruned
-    1,056 player-occupiable leaves
-    1,056 clusters of leaves
-    2,418 vis portals
-    1,056 EMPTY leafs
-    1,140 SOLID leafs
-    2,196 leafs total
+    14,365 tree portals
+    10,588 sides visible
+    5,294 makefaces
+    1,148 merged
+    1,095 subdivided
+    795 nodes pruned
+    1,057 player-occupiable leaves
+    1,057 clusters of leaves
+    2,420 vis portals
+    1,057 EMPTY leafs
+    1,146 SOLID leafs
+    2,203 leafs total
     20 max tree height
     14 avg tree height
-     4,925 edges added by tjunctions
-     5,172 faces optimized through MWT
-    15,284 triangles computed from MWT
-     1,270 faces created via optimization of MWT triangles
-    14,297 edges
-     6,494 faces
+     4,935 edges added by tjunctions
+     5,190 faces optimized through MWT
+    15,329 triangles computed from MWT
+     1,271 faces created via optimization of MWT triangles
+    14,337 edges
+     6,512 faces
 Processing hull 1...
 Processing hull 2...
 Writing ./resources/maps/06/test06.bsp as Quake BSP bsp29
@@ -91,21 +91,21 @@ Wrote ./resources/maps/06/test06.bsp
 
 count   lump name    byte size 
       1 models               64
-    705 planes            14100
-   7160 vertexes          85920
-   2195 nodes             52680
-    442 texinfos          17680
-   6494 faces            129880
-   4908 clipnodes         39264
-   1057 leafs             29596
-   7851 marksurfaces      15702
-  14298 edges             57192
-  28324 surfedges        113296
+    702 planes            14040
+   7180 vertexes          86160
+   2202 nodes             52848
+    445 texinfos          17800
+   6512 faces            130240
+   4933 clipnodes         39464
+   1058 leafs             29624
+   7864 marksurfaces      15728
+  14338 edges             57352
+  28404 surfedges        113616
      12 textures             52
         lightdata             0
         visdata               0
         entdata            2457
 
-1.247s seconds elapsed
+1.257s seconds elapsed
 
 
