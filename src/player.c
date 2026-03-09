@@ -668,6 +668,7 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 	*pm = step_pm;
 }
 
+// Remove velocity when colliding with surface
 u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 blocked) {
 	if(normal.z >= FLOOR_NORMAL_Z)  			// Floor
 		blocked |= BLOCK_GROUND;		
@@ -686,6 +687,7 @@ u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 bl
 	return blocked;
 }
 
+// Handle jump
 void pm_Jump(comp_Transform *ct, InputHandler *input) {
 	if(!ct->on_ground) return;
 
@@ -698,6 +700,8 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 	}
 }
 
+// * NOTE:
+// Not used 
 int pm_CheckHull(Vector3 point, u16 hull_id) {
 	Hull *hull = &ptr_sect->_hulls[BVH_BOX_MED].arr[hull_id];
 	short in = 0;
@@ -804,11 +808,9 @@ int pm_CheckHullEx(Vector3 point, u16 node_id) {
 	return node_id;
 }
 
+// Update camera effects, tilt, bob, etc.
 #define TILT_MAX 0.1f
 void cam_Adjust(comp_Transform *ct, float dt) {
-	Vector3 pos_target = Vector3Add(ct->position, Vector3Scale(UP, 12.0f));
-	//ptr_cam->target = Vector3Add(ptr_cam->position, ct->forward);
-
 	// Apply camera motion effects (bob, tilt) 
 	float t = GetTime();
 
@@ -902,9 +904,9 @@ void OnHitPlayer(Entity *ent, short damage) {
 	comp_Health *health = &ent->comp_health;
 	comp_Transform *ct = &ent->comp_transform;
 
-	//health->amount -= damage; 
 	ct->velocity.x *= (0.5f);
 	ct->velocity.y *= (0.5f);
+
 	hurt_frame = true;
 }
 

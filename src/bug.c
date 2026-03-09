@@ -23,12 +23,14 @@ bool bug_target_picked = false;
 
 float bug_z_vel_prev = 0;
 
+// This function handles setting Bug's target as well as moving towards it. 
 void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHandler *handler, u8 *bounce, float dt) {
 	EntGrid *grid = &handler->grid;
-
 	Coords coords = Vec3ToCoords(ct->position, grid);
 
+	// Find target if not set already 
 	if(!bug_target_picked) {
+		// Search in nearby grid cells
 		Coords cell_coords[] = {
 			coords,
 			(Coords) { coords.c - 1, coords.r - 1, coords.t, },
@@ -56,6 +58,9 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 				Entity *enemy_ent = &handler->ents[cell->ents[i]];
 				comp_Ai *enemy_ai = &enemy_ent->comp_ai;
 
+				// **
+				// Skip things that are not valid targets
+				// (dead entities, player, self, etc.)
 				if(enemy_ent->type == ENT_DISRUPTOR)
 					continue;
 
@@ -73,6 +78,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 				if(enemy_ai->input_mask & AI_INPUT_SELF_GLITCHED)
 					continue;
+				// **
 
 				Vector3 to_enemy = Vector3Subtract(
 					Vector3Add(
@@ -83,9 +89,11 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 				float dist = Vector3Length(to_enemy);
 
+				// Too far
 				if(dist > 250.0f)
 					continue;
 
+				// Set target to closest candidate
 				if(dist < closest) {
 					closest = dist;
 					enemy_id = enemy_ent->id;
@@ -97,8 +105,10 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		bug_ent->comp_ai.task_data.target_entity = enemy_id;
 	} 
 
+	// Increment bounce count
 	(*bounce)++;
 
+	// Set forward direction, only really used for model's rotation
 	Vector3 hdir = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 	hdir = Vector3Normalize(hdir);
 	ct->forward = hdir;	
@@ -106,6 +116,8 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	float angle = GetRandomValue(-70, 70);
 	ct->forward = Vector3RotateByAxisAngle(ct->forward, UP, angle*DEG2RAD);
 
+	// **
+	// Update velocity
 	if(!bug_target_picked) 
 		return;
 
@@ -113,7 +125,6 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	if(enemy_ent->comp_ai.state == STATE_DEAD) {
 		bug_target_picked = false;
 		bug_ent->comp_ai.task_data.target_entity = -1;
-		*bounce = 0;
 		*bounce = 0;
 	}
 
@@ -154,12 +165,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		ct->velocity.z += 100.0f;
 		(*bounce)--;
 	}
-
-	/*
-	if(enemy_ent->id == handler->player_id && d <= 150.0f) {
-		ct->velocity.z = Clamp(ct->velocity.z, -9999.9f, 75.0f);
-	}
-	*/
+	// **
 }
 
 u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection *sect, u8 *bounce, EntityHandler *handler, float dt) {
@@ -172,18 +178,6 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 		ct->ground_normal = Vector3Zero();
 		return 0;
 	}
-
-	/*
-	Vector3 feet_pos = Vector3Add(ct->position, Vector3Scale(UP, 17));
-	//Vector3 down_pos = Vector3Add(feet_pos, Vector3Scale(DOWN, 1));
-	Bsp_TraceData tr = Bsp_TraceDataEmpty();
-	Bsp_RecursiveTraceEx(&sect->bsp[0], sect->bsp[0].first_node, 0, 1, feet_pos, Vector3Add(feet_pos, Vector3Scale(DOWN, 0.1f)), &tr);
-
-	if(tr.plane.normal[2] < 0.7f) {
-		ct->ground_normal = Vector3Zero();
-		return 0;
-	}
-	*/
 
 	if(tr.fraction >= 1.0f) {
 		ct->ground_normal = Vector3Zero();
@@ -204,7 +198,6 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 		ct->velocity.z = 0;
 		return 1;
 	}
-	(*bounce)++;
 
 	BugBounce(ent, ct, sect, handler, bounce, dt);
 
@@ -244,7 +237,6 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Determine how much of movement was obstructed
 		float fraction = (tr.distance / Vector3Length(move));
-		//float fraction = bsp_tr.fraction;
 		fraction = Clamp(fraction, 0.0f, 1.0f);
 
 		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };
@@ -274,8 +266,6 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Add clip plane
 		if(num_clips + 1 < MAX_CLIPS) {
-			//clips[num_clips++] = tr.normal;
-			//clips[num_clips++] = (Vector3) { bsp_tr.plane.normal[0], bsp_tr.plane.normal[1], bsp_tr.plane.normal[2] };
 			clips[num_clips++] = (use_ent) ? ent_tr.normal : tr.normal; 
 
 			// Update velocity by each clip plane
@@ -405,6 +395,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				break;
 			}
 
+			// **
+			// Purpose of this block is to reduce likelihood of Bug overshooting it's target.
+			// Works in most cases
 			Vector3 hvel = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 			Vector3 self_xy = (Vector3) { ct->position.x, ct->position.y, 0 }; 
 			Vector3 targ_xy = (Vector3) { enemy_ent->comp_transform.position.x, enemy_ent->comp_transform.position.y, 0 }; 
@@ -416,8 +409,10 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 					ct->velocity = Vector3Subtract(ct->velocity, Vector3Scale(to_targ, into));
 				}
 
+				// Apply some extra gravity, to fall more into target
 				ct->velocity.z -= (BUG_GRAV * 0.33f) * dt;
 			}
+			// **
 		}
 
 		if(ct->on_ground) {
@@ -463,10 +458,10 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			Entity *stick_ent = &handler->ents[ai->task_data.target_entity];			
 			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
 
+			// Bounce off enemy when it dies
 			if(stick_ent->comp_ai.state == STATE_DEAD) {
 				ai->state = BUG_LAUNCHED;
 				ai->task_data.target_entity = -1;
-				
 
 				ent->flags &= ~BUG_DISRUPTED_ENEMY;
 				bug_bounce = 0;
@@ -475,12 +470,6 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 
 				if(ai->task_data.target_entity == -1) {
-					/*
-					ct->velocity.x += GetRandomValue(-200, 200);
-					ct->velocity.y += GetRandomValue(-200, 200);
-					ct->velocity.z += 400;
-					*/
-
 					ai->task_data.target_entity = handler->player_id;
 					bug_target_picked = true;
 					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
@@ -497,14 +486,6 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		// Recall
 		if(can_recall) {
 			if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-				if(ent->flags & BUG_DISRUPTED_ENEMY) {
-					Entity *enemy_ent = &handler->ents[ai->task_data.target_entity];
-					comp_Transform *enemy_ct = &enemy_ent->comp_transform;
-					
-					//ct->position.z = enemy_ent->comp_transform.bounds.max.z + 16;
-					//ct->velocity.z += 30.0f;
-				}
-
 				bug_bounce = 0;
 				bug_target_picked = true;
 
@@ -551,20 +532,16 @@ void BugDraw(Entity *ent) {
 	if(launch_timer >= 0.4725f)
 		return;
 
-	Vector3 pos = ent->comp_transform.position;
-	//pos.z -= 16;
-
 	float angle = atan2f(-ent->comp_transform.forward.x, ent->comp_transform.forward.y);
 	ent->model.transform = MatrixRotateY(angle);
 	ent->model.transform = MatrixMultiply(ent->model.transform, MatrixRotateX(90*DEG2RAD));
 
 	if(ent->comp_ai.state == STATE_DEAD) {
 		model_dead.transform = ent->model.transform;
-		DrawModel(model_dead, pos, 3, LIGHTGRAY);	
+		DrawModel(model_dead, ent->comp_transform.position, 3, LIGHTGRAY);	
  	} else {
-		DrawModel(ent->model, pos, 3, WHITE);	
+		DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
 	}
-
 	//DrawBoundingBox(ent->comp_transform.bounds, GREEN);
 }
 
@@ -596,11 +573,10 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 		} break;
 	}
 
-	//AiDoSchedule(ent, handler, sect, ai, &ai->task_data, 1);
-
 	AlertMaintainers(handler, ent_id);
 }
 
+// *TODO:
 void OnHitBug(Entity *ent, short damage) {
 }
 
