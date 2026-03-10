@@ -17,6 +17,8 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		return data;
 	}
 
+	// ---------------------------------------------------------------------------------------
+	// Header
 	Bsp_Header header = {0};
 	fread(&header, sizeof(header), 1, pF);
 
@@ -25,63 +27,50 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		return data;
 	}
 
-	//printf("%d\n", header.version);
-
+	if(print_output)
+		printf("%d\n", header.version);
 	// ---------------------------------------------------------------------------------------
 	// Planes
 	Bsp_Lump planes_lump = header.lumps[LUMP_PLANES];
-	if(planes_lump.file_size < sizeof(Bsp_Lump)) {
-		MessageError("ERROR: Lump size mismatch", NULL);
-		return data;
-	}
 
 	fseek(pF, planes_lump.file_offset, SEEK_SET);
 	i32 plane_count = planes_lump.file_size / sizeof(Bsp_Plane);  
 	Bsp_Plane planes[plane_count];
 	fread(&planes, sizeof(planes), 1, pF);
-	if(print_output) {
-		for(i32 i = 0; i < plane_count; i++) {
-			Bsp_Plane *p = &planes[i];
-			printf("{ %f, %f, %f }\n", p->normal[0], p->normal[1], p->normal[2]);
-		}
-	}
 
 	data.num_planes = plane_count;
 	data.planes = malloc(sizeof(Bsp_Plane) * data.num_planes);
 	memcpy(data.planes, planes, sizeof(planes));
-
 	// ---------------------------------------------------------------------------------------
 	// Miptex
 	Bsp_Lump miptex_lump = header.lumps[LUMP_MIPTEX];
-	if(miptex_lump.file_size < sizeof(Bsp_Lump)) {
-		MessageError("ERROR: Lump size mismatch", NULL);
-		return data;
-	}
 
-	fseek(pF, planes_lump.file_offset, SEEK_SET);
+	fseek(pF, miptex_lump.file_offset, SEEK_SET);
 	i32 miptex_count = miptex_lump.file_size / sizeof(Bsp_Miptex);  
 	Bsp_Miptex miptexes[miptex_count];
 	fread(&miptexes, sizeof(miptexes), 1, pF);
 
-	/*
-	data.num_planes = plane_count;
-	data.planes = malloc(sizeof(Bsp_Plane) * data.num_planes);
-	memcpy(data.planes, planes, sizeof(planes));
-	*/
-	
+	data.num_miptex = miptex_count;
+	data.miptex = malloc(sizeof(Bsp_Miptex) * data.num_miptex);
+	memcpy(data.miptex, miptexes, sizeof(miptexes));
 	// ---------------------------------------------------------------------------------------
 	// Vertices
-	
+	Bsp_Lump vert_lump = header.lumps[LUMP_VERTICES];
+
+	fseek(pF, vert_lump.file_offset, SEEK_SET);
+	i32 vert_count = vert_lump.file_size / sizeof(Vector3);  
+	Vector3 verts[vert_count];
+	fread(&verts, sizeof(verts), 1, pF);
+
+	data.num_verts = vert_count;
+	data.verts = malloc(sizeof(Vector3) * data.num_verts);
+	memcpy(data.verts, verts, sizeof(verts));
 	// ---------------------------------------------------------------------------------------
 	// Vis
 
 	// ---------------------------------------------------------------------------------------
 	// Nodes
 	Bsp_Lump nodes_lump = header.lumps[LUMP_NODES];
-	if(nodes_lump.file_size < sizeof(Bsp_Lump)) {
-		MessageError("ERROR: Lump size mismatch", NULL);
-		return data;
-	}
 
 	fseek(pF, nodes_lump.file_offset, SEEK_SET);
 	i32 node_count = nodes_lump.file_size / sizeof(Bsp_Node);
@@ -91,92 +80,128 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	data.num_nodes = node_count;
 	data.nodes = malloc(sizeof(Bsp_Node) * data.num_nodes);
 	memcpy(data.nodes, nodes, sizeof(nodes));
-
 	// ---------------------------------------------------------------------------------------
 	// Tex info
-	
+	Bsp_Lump texinfo_lump = header.lumps[LUMP_TEXINFO];
+
+	fseek(pF, texinfo_lump.file_offset, SEEK_SET);
+	i32 texinfo_count = texinfo_lump.file_size / sizeof(Bsp_Surface);
+	Bsp_Surface texinfos[texinfo_count];
+	fread(&texinfos, sizeof(texinfos), 1, pF);
+
+	data.num_surfaces = texinfo_count;
+	data.surfaces = malloc(sizeof(Bsp_Surface) * data.num_surfaces);
+	memcpy(data.surfaces, texinfos, sizeof(texinfos));	
 	// ---------------------------------------------------------------------------------------
 	// Faces 
+	Bsp_Lump faces_lump = header.lumps[LUMP_FACES];
 
+	fseek(pF, faces_lump.file_offset, SEEK_SET);
+	i32 face_count = faces_lump.file_size / sizeof(Bsp_Face);
+	Bsp_Face faces[face_count];
+	fread(&faces, sizeof(faces), 1, pF);
+
+	data.num_faces = face_count;
+	data.faces = malloc(sizeof(Bsp_Face) * data.num_faces);
+	memcpy(data.faces, faces, sizeof(faces));
 	// ---------------------------------------------------------------------------------------
 	// Lightmaps 
-
+	Bsp_Lump lightmap_lump = header.lumps[LUMP_LIGHTMAPS];
+	fseek(pF, lightmap_lump.file_offset, SEEK_SET);
+	data.lightmap.num_lightmap = lightmap_lump.file_size;
+	data.lightmap.lightmap = malloc(lightmap_lump.file_size);
+	fread(data.lightmap.lightmap, lightmap_lump.file_size, 1, pF);
 	// ---------------------------------------------------------------------------------------
 	// Clip nodes
 	Bsp_Lump clipnodes_lump = header.lumps[LUMP_CLIPNODES];
-	if(clipnodes_lump.file_size < sizeof(Bsp_Lump)) {
-		MessageError("ERROR: Lump size mismatch", NULL);
-		return data;
-	}
 
 	fseek(pF, clipnodes_lump.file_offset, SEEK_SET);
 	i32 clipnode_count = clipnodes_lump.file_size / sizeof(Bsp_ClipNode);
 	Bsp_ClipNode clipnodes[clipnode_count];
 	fread(&clipnodes, sizeof(clipnodes), 1, pF);
-	if(print_output) {
-		for(i32 i = 0; i < clipnode_count; i++) {
-			Bsp_ClipNode *node = &clipnodes[i];
-			printf("planenum: %d\n", node->planenum);
-			printf("front: %d\n", node->children[0]);
-			printf("back: %d\n", node->children[1]);
-		}
-	}
 
 	data.num_clipnodes = clipnode_count;
 	data.clipnodes = malloc(sizeof(Bsp_ClipNode) * data.num_clipnodes);
 	memcpy(data.clipnodes, clipnodes, sizeof(clipnodes));
-
 	// ---------------------------------------------------------------------------------------
 	// Leaves 
+	Bsp_Lump leaves_lump = header.lumps[LUMP_LEAVES];
 
+	fseek(pF, leaves_lump.file_offset, SEEK_SET);
+	i32 leaf_count = leaves_lump.file_size / sizeof(Bsp_Leaf);
+	Bsp_Leaf leaves[leaf_count];
+	fread(&leaves, sizeof(leaves), 1, pF);
+
+	data.num_leaves = leaf_count;
+	data.leaves = malloc(sizeof(Bsp_Leaf) * data.num_leaves);
+	memcpy(data.leaves, leaves, sizeof(leaves));
 	// ---------------------------------------------------------------------------------------
 	// L_faces 
+	Bsp_Lump lfaces_lump = header.lumps[LUMP_LFACES];	
+	
+	fseek(pF, lfaces_lump.file_offset, SEEK_SET);
+	i32 lfaces_count = lfaces_lump.file_size / sizeof(Bsp_LFaces);
+	Bsp_LFaces lfaces[lfaces_count];
+	fread(&lfaces, sizeof(lfaces), 1, pF);
 
+	data.lfaces.num_lface = lfaces_count;
+	data.lfaces.faces = malloc(sizeof(Bsp_LFaces) * data.lfaces.num_lface);
+	memcpy(data.lfaces.faces, lfaces, sizeof(lfaces));
 	// ---------------------------------------------------------------------------------------
 	// Edges 
-	
+	Bsp_Lump edges_lump = header.lumps[LUMP_EDGES];
+
+	fseek(pF, edges_lump.file_offset, SEEK_SET);
+	i32 edge_count = edges_lump.file_size / sizeof(Bsp_Edge);
+	Bsp_Edge edges[edge_count];
+	fread(&edges, sizeof(edges), 1, pF);
+
+	data.num_edges = edge_count;
+	data.edges = malloc(sizeof(Bsp_Edge) * data.num_edges);
+	memcpy(data.edges, edges, sizeof(edges));	
 	// ---------------------------------------------------------------------------------------
 	// L_edges 
+	Bsp_Lump ledges_lump = header.lumps[LUMP_L_EDGES];
 
+	fseek(pF, ledges_lump.file_offset, SEEK_SET);
+	i32 ledge_count = ledges_lump.file_size / sizeof(Bsp_LEdges);
+	Bsp_LEdges ledges[ledge_count];
+	fread(&ledges, sizeof(ledges), 1, pF);
+
+	data.num_ledges = ledge_count;
+	data.ledges.edge = malloc(sizeof(Bsp_LEdges) * data.num_ledges);
+	memcpy(data.ledges.edge, ledges, sizeof(ledges));	
 	// ---------------------------------------------------------------------------------------
 	// Models
 	Bsp_Lump models_lump = header.lumps[LUMP_MODELS];
-	if(models_lump.file_size < sizeof(Bsp_Lump)) {
-		MessageError("ERROR: Lump size mismatch", NULL);
-		return data;
-	}
-
 	fseek(pF, models_lump.file_offset, SEEK_SET);
+
 	i32 model_count = models_lump.file_size / sizeof(Bsp_Model);
 	Bsp_Model models[model_count];
 	fread(&models, sizeof(models), 1, pF);
-	
+
 	data.num_models = model_count;
 	data.models = malloc(sizeof(Bsp_Model) * data.num_models);
 	memcpy(data.models, models, sizeof(models));
+	// ---------------------------------------------------------------------------------------
 
-	/*
-	for(int i = 0; i < 4; i++) {
-		printf("head: %d\n", data.models[0].head_nodes[i]);
-	}
-	*/
-
+	// Close and return data
 	fclose(pF);
 	return data;
 }
 
 void UnloadBsp(Bsp_Data *data) {
-	if(data->planes)
-		free(data->planes);
-
-	if(data->miptex)
-		free(data->miptex);
-
-	if(data->clipnodes)
-		free(data->clipnodes);
-
-	if(data->models)
-		free(data->models);
+	if(data->planes)		free(data->planes);
+	if(data->miptex)		free(data->miptex);
+	if(data->verts)			free(data->verts);
+	if(data->vis)			free(data->vis);
+	if(data->nodes)			free(data->nodes);
+	if(data->clipnodes)		free(data->clipnodes);
+	if(data->edges)			free(data->edges);
+	if(data->ledges.edge)	free(data->ledges.edge);
+	if(data->faces)			free(data->faces);
+	if(data->surfaces)		free(data->surfaces);
+	if(data->models)		free(data->models);
 }
 
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {
@@ -402,4 +427,61 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 
 	return false;
 }
+
+Mesh BspLeafToMesh(Bsp_Data *bsp, Bsp_Leaf *leaf) {
+	Mesh mesh = (Mesh) {0};
+
+	u16 tri_count = 0;
+	for(u16 i = 0; i < leaf->num_faces; i++) {
+		u16 face_id = bsp->lfaces.faces[leaf->first_face + i];
+		Bsp_Face *face = &bsp->faces[face_id];
+		tri_count += face->edge_count - 2;
+	}
+
+	mesh.triangleCount = tri_count;
+	mesh.vertexCount = tri_count * 3;
+	mesh.vertices = malloc(sizeof(float) * mesh.vertexCount * 3);
+	mesh.texcoords = malloc(sizeof(float) * mesh.vertexCount * 2);
+
+	u16 vert_id = 0;
+	for(u16 i = 0; i < leaf->num_faces; i++) {
+		u16 face_id = bsp->lfaces.faces[leaf->first_face + i];
+		Bsp_Face *face = &bsp->faces[face_id];
+
+		Bsp_Surface *surface = &bsp->surfaces[face->styles];
+		Bsp_Miptex *miptex = &bsp->miptex[surface->texture_id];
+
+		// Get face vertices
+		Vector3 face_verts[face->edge_count];
+		for(i32 j = 0; j < face->edge_count; j++) {
+			i32 ledge = bsp->ledges.edge[face->first_edge + j];
+			if(ledge >= 0) 
+				face_verts[j] = bsp->verts[bsp->edges[ledge][0]];
+			else 
+				face_verts[j] = bsp->verts[bsp->edges[-ledge][1]];
+		}
+
+		// Fan triangulate
+		for(u16 j = 1; j < face->edge_count - 1; j++) {
+			Vector3 tri[3] = { face_verts[0], face_verts[j], face_verts[j + 1] };
+				
+			for(u16 k = 0; k < 3; k++) {
+				mesh.vertices[vert_id * 3 + 0] = tri[k].x;
+				mesh.vertices[vert_id * 3 + 1] = tri[k].y;
+				mesh.vertices[vert_id * 3 + 2] = tri[k].z;
+
+				float u = (Vector3DotProduct(tri[k], surface->vector_s) + surface->dist_s) / miptex->width;
+				float v = (Vector3DotProduct(tri[k], surface->vector_t) + surface->dist_t) / miptex->height;
+
+				mesh.texcoords[vert_id * 2 + 0] = u;
+				mesh.texcoords[vert_id * 2 + 1] = v;
+
+				vert_id++;
+			}
+		}
+	}
+
+	UploadMesh(&mesh, false);
+	return mesh;
+} 
 

@@ -1,4 +1,5 @@
 #include <math.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -579,17 +580,15 @@ void MapSectionClose(MapSection *sect) {
 			free(sect->navgraphs[i].edges);
 	}
 
-	if(sect->navgraphs)
-		free(sect->navgraphs);
-
+	/*
 	if(sect->base_navgraph.nodes)
 		free(sect->base_navgraph.nodes);
 
 	if(sect->base_navgraph.edges)
 		free(sect->base_navgraph.edges);
+	*/
 
 	UnloadBsp(&sect->bsp_data);
-
 	UnloadModel(sect->model);
 }
 

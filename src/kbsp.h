@@ -8,11 +8,6 @@
 #define BSP_VERSION 29
 #define BSP_LUMPS 	15
 
-typedef struct {
-    int16_t min;
-    int16_t max;
-} Bsp_Box32;
-
 enum LUMP_TYPES {
 	LUMP_ENTS			= 0,
 	LUMP_PLANES 		= 1,
@@ -31,18 +26,30 @@ enum LUMP_TYPES {
 	LUMP_MODELS			= 14,
 };
 
+// AABB
+typedef struct {
+    int16_t min;
+    int16_t max;
+} Bsp_Box32;
+
+// Edge
+typedef u16 Bsp_Edge[2];
+
+// Lump
 typedef struct {
 	i32 file_offset;
 	i32 file_size;
 
 } Bsp_Lump;
 
+// Header
 typedef struct {
 	i32 version;
 	Bsp_Lump lumps[BSP_LUMPS];
 
 } Bsp_Header;
 
+// Plane
 typedef struct {
 	float normal[3];
 	float dist;
@@ -50,12 +57,14 @@ typedef struct {
 
 } Bsp_Plane;
 
+// Mip Header
 typedef struct {
 	i32 *offset;
 	i32 numtex;
 
 } Bsp_Mipheader;
 
+// Mip Texture
 typedef struct {
 	char name[16];
 
@@ -69,12 +78,32 @@ typedef struct {
 
 } Bsp_Miptex;
 
+// Surface
+typedef struct {
+	Vector3 vector_s;
+	float dist_s;
+	Vector3 vector_t;
+	float dist_t;
+	u32 texture_id;
+	u32 animated;
+
+} Bsp_Surface;
+
+// Lightmap
+typedef struct {
+	u8 *lightmap;
+	u32 num_lightmap;
+
+} Bsp_Lightmap;
+
+// Clip Node
 typedef struct {
 	u32 planenum;
 	i16 children[2];
 
 } Bsp_ClipNode;
 
+// BSP Node
 typedef struct {
 	i32 planenum;
 	i16 children[2];
@@ -85,6 +114,44 @@ typedef struct {
 
 } Bsp_Node;
 
+// Leaf
+typedef struct {
+	i32 type;
+	i32 vis_list;
+	Bsp_Box32 aabb;
+	u16 first_face;
+	u16 num_faces;
+	u8 ambient[4];
+	
+} Bsp_Leaf;
+
+// Face
+typedef struct {
+	u16 plane;	
+	u16 side;
+	i32 first_edge;
+	u16 edge_count;
+	u16 styles;
+	u8 type_light;
+	u8 base_light;
+	u8 light[2];
+	i32 lightmap;
+
+} Bsp_Face;
+
+typedef struct {
+	u16 *faces;
+	u32 num_lface;
+
+} Bsp_LFaces;
+
+typedef struct {
+	u16 *edge;
+	u32 num_ledge;
+
+} Bsp_LEdges;
+
+// Model
 typedef struct {
 	float mins[3], maxs[3];
 	float origin[3];
@@ -96,20 +163,22 @@ typedef struct {
 
 } Bsp_Model;
 
+// Data
 typedef struct {
 	Bsp_Plane *planes;
 	Bsp_Miptex *miptex;
 	Vector3 *verts;
-	// Vis
+	u8 *vis;
 	Bsp_Node *nodes;
-	// Texinfo
-	// Faces
-	// Lightmaps
+	Bsp_Face *faces;
+	Bsp_Surface *surfaces;
+	Bsp_Lightmap lightmap;
+	Bsp_Lightmap *lightmaps;
 	Bsp_ClipNode *clipnodes;
-	// Leaves
-	// L_faces
-	// Edges
-	// L_edges
+	Bsp_Leaf *leaves;
+	Bsp_LFaces lfaces;
+	Bsp_Edge *edges;
+	Bsp_LEdges ledges;
 	Bsp_Model *models;
 
 	u32 num_planes;
@@ -118,7 +187,12 @@ typedef struct {
 	u32 num_vis;
 	u32 num_nodes;
 	u32 num_clipnodes;
+	u32 num_leaves;
+	u32 num_edges;
+	u32 num_ledges;
 	u32 num_models;
+	u32 num_faces;
+	u32 num_surfaces;
 
 } Bsp_Data;
 
@@ -165,5 +239,7 @@ typedef struct {
 Bsp_TraceData Bsp_TraceDataEmpty();
 
 bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_frac, Vector3 p1, Vector3 p2, Bsp_TraceData *trace);
+
+Mesh BspLeafToMesh(Bsp_Data *bsp, Bsp_Leaf *leaf); 
 
 #endif
