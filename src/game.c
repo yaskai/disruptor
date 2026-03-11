@@ -216,7 +216,7 @@ void GameDraw(Game *game, float dt) {
 
 			//PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
 			RenderEntities(&game->ent_handler, GetFrameTime());
-			DrawMap(&game->test_section);
+			DrawMap(&game->test_section, game->camera.position);
 
 			/*
 			for(u16 i = 0; i < tri_count; i++) {
@@ -413,8 +413,8 @@ void GameDraw(Game *game, float dt) {
 		}
 	}
 
-	//int fps = GetFPS();
-	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	int fps = GetFPS();
+	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 
 	//EntDebugText();
 

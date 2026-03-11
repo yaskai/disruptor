@@ -1,4 +1,6 @@
 @SolidClass = worldspawn : "World entity" []
+@SolidClass base(Func) = func_illusionary : "Non-solid brush, visible, protals pass through" []
+@SolidClass base(Func) = func_wall: "Solid brush, non-occluding" []
 
 // Player
 @baseclass size(-16 -16 -24, 16 16 32) color(0 255 0) = PlayerClass []

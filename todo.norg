@@ -76,8 +76,8 @@ ___
 * *BSP Rendering*
 
 ** (-) Basic: 
-*** (-) mesh generation
-*** (-) texture mapping 
+*** (x) mesh generation
+*** (x) texture mapping 
 
 ** (-) Lit:
 *** (x) TrenchBroom .fgd setup for lights
@@ -87,8 +87,10 @@ ___
 *** (-) write lighting shader
 
 ** (-) Optimized:
-*** (-) import .vis file
-*** (-) use portalizer for mesh render list
+*** (x) import .vis file
+*** (x) use portalizer for mesh render list
+*** (-) make special textures (hint + skip)
+*** (-) make detail brush entities in .fgd (func_detail_illusionary, func_detail_fence, func_detail_wall)
 
 ___
 * *UI*

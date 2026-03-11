@@ -10,10 +10,12 @@
 #include "../include/sort.h"
 #include "../include/log_message.h"
 #include "config.h"
+#include "rlgl.h"
 
 #define PLANE_EPS 0.001f
 
 rMeshCollection rmeshes_collection = {0};
+rModelList model_list = {0};
 
 Plane BuildPlane(Vector3 v0, Vector3 v1, Vector3 v2) {
 	Vector3 edge_0 = Vector3Subtract(v1, v0);
@@ -624,6 +626,25 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	}
 	*/
 
+	model_list.count = 0;
+	model_list.models = malloc(sizeof(Model) * 8000);
+	model_list.ids = malloc(sizeof(int) * 8000);
+
+	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
+		int temp_count;
+		Model *temp_models = BspLeafToModels(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count);
+
+		for(int j = 0; j < temp_count; j++) {
+			model_list.models[model_list.count + j] = temp_models[j]; 	
+			model_list.ids[model_list.count + j] = i;
+		}
+
+		model_list.count += temp_count;
+	}
+
+	model_list.models = realloc(model_list.models, sizeof(Model) * model_list.count);
+	model_list.ids = realloc(model_list.ids, sizeof(int) * model_list.count);
+
 	return sect;
 }
 
@@ -1002,7 +1023,7 @@ void UpdateMapMeshList(MapSection *sect, Camera3D cam) {
 	*/
 }
 
-void DrawMap(MapSection *sect) {
+void DrawMap(MapSection *sect, Vector3 pos) {
 	/*
 	for(u16 i = 0; i < rmesh_list.count; i++) {
 		DrawMesh(sect->model.meshes[rmesh_list.ids[i]], sect->model.materials[1], sect->model.transform);	
@@ -1011,6 +1032,18 @@ void DrawMap(MapSection *sect) {
 
 	//Matrix mat = MatrixRotateX(90*DEG2RAD);
 	//sect->model.transform = mat;
-	DrawModel(sect->model, Vector3Zero(), 1, WHITE);
+	//DrawModel(sect->model, Vector3Zero(), 1, WHITE);
+
+	rlDisableBackfaceCulling();
+	BeginBlendMode(BLEND_ALPHA);
+	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
+	for(int i = 0; i < model_list.count; i++) {
+		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
+			continue;
+
+		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
+	}
+	EndBlendMode();
+	rlEnableBackfaceCulling();
 }
 

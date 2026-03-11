@@ -6,17 +6,17 @@ LoadBSPFile: './resources/maps/06/test06.bsp'
 BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from ./resources/maps/06/test06.texinfo.json...
-   143 leafs
-   143 clusters
-   252 portals
+  1057 leafs
+  1057 clusters
+  2420 portals
 Calculating Base Vis:
 Calculating Full Vis:
 Expanding clusters...
-average leafs visible: 26
+average leafs visible: 136
 c_noclip: 0
-c_chains: 9451
-visdatasize:1650  compressed from 2574
+c_chains: 2232875
+visdatasize:42706  compressed from 140581
 Writing ./resources/maps/06/test06.bsp as Quake BSP bsp29
-0.01s elapsed
+0.59s elapsed
 
 

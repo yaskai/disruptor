@@ -23,6 +23,13 @@ typedef struct {
 } rMeshCollection;
 
 typedef struct {
+	Model *models;	
+	int *ids;
+	int count;
+	
+} rModelList;
+
+typedef struct {
 	char tex_name[128];
 
 	Vector3 verts[24];
@@ -114,7 +121,7 @@ void DebugDrawNavGraphs(MapSection *sect, Model model);
 void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size);
 
 void UpdateMapMeshList(MapSection *sect, Camera3D cam);
-void DrawMap(MapSection *sect);
+void DrawMap(MapSection *sect, Vector3 pos);
 
 #endif
 

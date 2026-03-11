@@ -1,0 +1,14 @@
+---- qbsp / ericw-tools 2.0.0-alpha10 ----
+
+--- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
+
+Input file: /home/kai/projects/disruptor/./resources/maps/06/06.map
+Output file: /home/kai/projects/disruptor/./resources/maps/06/06.bsp
+
+INFO: using built-in palette.
+************ ERROR ************
+LoadMapFile: Couldn't load map file "./resources/maps/06/06.map".
+
+
+

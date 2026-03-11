@@ -1,6 +1,7 @@
 #include "../include/num_redefs.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "hash.h"
 
 #ifndef KBSP_H_
 #define KBSP_H_
@@ -26,14 +27,30 @@ enum LUMP_TYPES {
 	LUMP_MODELS			= 14,
 };
 
+typedef struct {
+	char *key;
+	char *val;
+
+} Bsp_EntProp;
+
+typedef struct {
+	Bsp_EntProp *properties;
+	u32 prop_count;
+
+} Bsp_Ent;
+
 // AABB
 typedef struct {
-    int16_t min;
-    int16_t max;
+    int16_t min[3];
+    int16_t max[3];
+
 } Bsp_Box32;
 
 // Edge
-typedef u16 Bsp_Edge[2];
+typedef struct {
+	u16 v[2];
+
+} Bsp_Edge;
 
 // Lump
 typedef struct {
@@ -117,7 +134,7 @@ typedef struct {
 // Leaf
 typedef struct {
 	i32 type;
-	i32 vis_list;
+	i32 visofs;
 	Bsp_Box32 aabb;
 	u16 first_face;
 	u16 num_faces;
@@ -131,7 +148,7 @@ typedef struct {
 	u16 side;
 	i32 first_edge;
 	u16 edge_count;
-	u16 styles;
+	u16 texinfo;
 	u8 type_light;
 	u8 base_light;
 	u8 light[2];
@@ -176,9 +193,9 @@ typedef struct {
 	Bsp_Lightmap *lightmaps;
 	Bsp_ClipNode *clipnodes;
 	Bsp_Leaf *leaves;
-	Bsp_LFaces lfaces;
+	u16 *lfaces;
 	Bsp_Edge *edges;
-	Bsp_LEdges ledges;
+	i32 *ledges;
 	Bsp_Model *models;
 
 	u32 num_planes;
@@ -192,12 +209,18 @@ typedef struct {
 	u32 num_ledges;
 	u32 num_models;
 	u32 num_faces;
+	u32 num_lfaces;
 	u32 num_surfaces;
+
+	Texture2D *textures;
+	i32 miptex_lump_offset;
 
 } Bsp_Data;
 
 Bsp_Data LoadBsp(char *path, bool print_output);
 void UnloadBsp(Bsp_Data *data);
+
+void Bsp_PrintStructSizes();
 
 typedef struct {
 	Bsp_Plane *planes;
@@ -237,9 +260,11 @@ typedef struct {
 } Bsp_TraceData;
 
 Bsp_TraceData Bsp_TraceDataEmpty();
-
 bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_frac, Vector3 p1, Vector3 p2, Bsp_TraceData *trace);
 
-Mesh BspLeafToMesh(Bsp_Data *bsp, Bsp_Leaf *leaf); 
+int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
+bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
+
+Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
 
 #endif
