@@ -428,7 +428,6 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 			Vector3 look_point = targ_ent->comp_transform.position;
 			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 10*dt));
 
-
 			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
 			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
 				ct->targ_look = targ;

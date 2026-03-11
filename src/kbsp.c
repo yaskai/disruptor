@@ -492,8 +492,6 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 			.mipmaps = 1
 		};
 
-		ExportImage(img, TextFormat("./%d.png", i));
-
 		data.textures[i] = LoadTextureFromImage(img);
 		free(indexed);
 		free(rgba);
