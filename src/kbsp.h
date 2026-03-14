@@ -6,6 +6,20 @@
 #ifndef KBSP_H_
 #define KBSP_H_
 
+typedef struct {
+	Texture2D tex;
+	Rectangle *uvs;	
+	int uv_count;
+
+} Lightmap;
+
+typedef struct {
+	float min_u, max_u;
+	float min_v, max_v;
+	int w, h;
+
+} FaceLightmapInfo;
+
 #define BSP_VERSION 29
 #define BSP_LUMPS 	15
 
@@ -25,6 +39,7 @@ enum LUMP_TYPES {
 	LUMP_EDGES			= 12,
 	LUMP_L_EDGES		= 13,
 	LUMP_MODELS			= 14,
+	LUMP_BSPX			= 15
 };
 
 typedef struct {
@@ -215,6 +230,8 @@ typedef struct {
 	Texture2D *textures;
 	i32 miptex_lump_offset;
 
+	Lightmap lm;
+
 } Bsp_Data;
 
 Bsp_Data LoadBsp(char *path, bool print_output);
@@ -265,6 +282,11 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
 bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
+
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
+
+Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, Bsp_Face *face);
+FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, Bsp_Face *face);
+Lightmap BuildLightmap(Bsp_Data *bsp, char *path);
 
 #endif

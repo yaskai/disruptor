@@ -249,7 +249,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh[BVH_BOX_SMALL], 0, &tr, FLT_MAX);
+		BvhTracePointEx(ray, sect, &sect->bvh[BVH_BOX_SMALL], 0, &tr, Vector3Length(move));
 
 		// Determine how much of movement was obstructed
 		float fraction = (tr.distance / Vector3Length(move));
@@ -260,6 +260,11 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		float ent_frac = 1.0f;
 
 		bool use_ent = (ent_tr.hit_ent > -1 && ent_tr.hit_ent < handler->count && ent_tr.hit_ent != handler->player_id);
+
+		Entity *other_ent = &handler->ents[ent_tr.hit_ent];
+		if(other_ent->comp_ai.state == STATE_DEAD && other_ent->type != ENT_TURRET)
+			use_ent = false;
+
 		if(use_ent) {
 			ent_frac = (ent_tr.dist / Vector3Length(move));
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);

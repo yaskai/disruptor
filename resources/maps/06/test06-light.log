@@ -9,7 +9,8 @@ Loading extended content flags from ./resources/maps/06/test06.content.json...
 WARNING: worldspawn key _sunlight_color has invalid value of "$"
 WARNING: 'anglescale': 2 is greater than maximum value 1.
 43 entities read, 13 are lights.
-.lit colored light output requested on command line.
+BSPX colored light output requested on command line.
+BSPX light directions output requested on command line.
 
 --- Options Summary ---
     "dist" was set to "1.000000" (from map)
@@ -27,13 +28,11 @@ WARNING: 'anglescale': 2 is greater than maximum value 1.
     "sunlight_mangle" was set to "-3.3484866e-08 -0.76604444 -0.6427876" (from map)
     "sunlight_penumbra" was set to "20.000000" (from map)
     "surflight_radiosity" was set to "1" (from command line)
-    "soft" was set to "5" (from command line)
-    "extra" was set to "4" (from command line)
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	350 sky faces
-	9133 solid faces
+	352 sky faces
+	9111 solid faces
 	0 filtered faces
 	0 shadow-casting skip faces
 SetupLights: 13 initial lights
@@ -43,13 +42,12 @@ Final count: 13 lights, 129 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 1442368
+lightmap size (total): 2516976
 Lighting Completed.
 
-Writing ./resources/maps/06/test06.lit
 0 switchable light styles (32 max)
 Writing ./resources/maps/06/test06.bsp as Quake BSP bsp29
-24.004s seconds elapsed
+1.476s seconds elapsed
 0 empty lightmaps
 
 

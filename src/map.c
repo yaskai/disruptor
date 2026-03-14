@@ -604,7 +604,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	Message("Loading bsp", ANSI_BLUE);
 	short bsp_id = -1;
-	for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".bsp") == 0) bsp_id = i;
+	for(short i = 0; i < path_list.count; i++)
+		if(strcmp(GetFileExtension(path_list.paths[i]), ".bsp") == 0) bsp_id = i;
 
 	if(bsp_id == -1) { 
 		MessageError("Missing .bsp file", NULL);
@@ -625,6 +626,12 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		printf("back: %d\n", node->children[1]);
 	}
 	*/
+
+	short lit_path_id = 0;
+	for(short i = 0; i < path_list.count; i++)
+		if(strcmp(GetFileExtension(path_list.paths[i]), ".lit") == 0) lit_path_id = i;
+
+	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data, path_list.paths[lit_path_id]);
 
 	model_list.count = 0;
 	model_list.models = malloc(sizeof(Model) * 8000);

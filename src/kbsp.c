@@ -10,6 +10,7 @@
 #include "geo.h"
 #include "hash.h"
 
+Shader lm_shader;
 Material *materials;
 Texture2D *textures;
 HashMap material_hashmap = (HashMap) {0};
@@ -497,6 +498,8 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 	FilePathList mat_list = LoadDirectoryFiles("tools/Disruptor/textures/custom");	
 
+	lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
+
 	materials = malloc(sizeof(Material) * mat_list.count); 
 	textures = malloc(sizeof(Texture2D) * mat_list.count); 
 	for(int i = 0; i < mat_list.count; i++) {
@@ -931,7 +934,9 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
         int tid = slot_tex_ids[i];
         if (tid < bsp->num_miptex && bsp->textures[tid].id != 0) {
-			models[i].materials[0] = materials[HashFetch(&material_hashmap, bsp->miptex[tid].name)];
+			models[i].materials[0].maps[0].texture = materials[HashFetch(&material_hashmap, bsp->miptex[tid].name)].maps->texture;
+			models[i].materials[0].maps[MATERIAL_MAP_EMISSION].texture = bsp->lm.tex;
+			models[i].materials[0].shader = lm_shader;
         }
     }
 
@@ -943,4 +948,3 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
     return models;
 }
-
