@@ -522,8 +522,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		int offsets[num_lumps];
 		int sizes[num_lumps];
 
-		int lm_shift_id = -1;
-		int lm_rgb_id = -1;
+		int lm_shift_id = -1, lm_rgb_id = -1, lm_decoupled_id = -1;
 
 		for(int i = 0; i < num_lumps; i++) {
 			char name[24];
@@ -538,10 +537,10 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 			if(memcmp(name, "LMSHIFT", strlen("LMSHIFT")) == 0) 
 				lm_shift_id = i;
-
 			if(memcmp(name, "RGBLIGHTING", strlen("RGBLIGHTING")) == 0)
 				lm_rgb_id = i;
-
+			if(memcmp(name, "DECOUPLED_LM", strlen("DECOUPLED_LM")) == 0)
+				lm_decoupled_id = i;
 		}
 
 		for(int i = 0; i < num_lumps; i++) {
@@ -549,8 +548,6 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		}
 
 		if(lm_shift_id != -1) {
-			printf("lmshift found!\n");
-
 			data.lm_shift = malloc(data.num_faces);
 			memset(data.lm_shift, 4, data.num_faces);
 
@@ -559,12 +556,19 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		}
 
 		if(lm_rgb_id != -1) {
-			printf("lm_rgb found!\n");
-
 			data.lm_rgb = malloc(sizes[lm_rgb_id]);
 
 			fseek(pF, offsets[lm_rgb_id], SEEK_SET);
 			fread(data.lm_rgb, 1, sizes[lm_rgb_id], pF);
+		}
+
+		if(lm_decoupled_id != -1) {
+			puts("lm_decoupled found!");
+			int num_entries = sizes[lm_decoupled_id] / sizeof(Lm_Decoupled);
+			data.decouple_lm = malloc(sizes[lm_decoupled_id]);
+			fseek(pF, offsets[lm_decoupled_id], SEEK_SET);
+			fread(data.decouple_lm, 1, sizes[lm_decoupled_id], pF);
+			printf(" %d entries\n", num_entries);
 		}
 	}
 
@@ -630,6 +634,9 @@ void UnloadBsp(Bsp_Data *data) {
 
 	if(data->lm_shift)
 		free(data->lm_shift);
+
+	if(data->lm.uvs)
+		free(data->lm.uvs);
 }
 
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {
@@ -914,164 +921,150 @@ void Bsp_PrintStructSizes() {
 }
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
-    int max_tex_id = 0;
-    for(int i = 0; i < leaf->num_faces; i++) {
-        int face_id = bsp->lfaces[leaf->first_face + i];
-        Bsp_Face *face = &bsp->faces[face_id];
-        Bsp_Surface *surf = &bsp->surfaces[face->texinfo];
-        if (surf->texture_id > max_tex_id)
-            max_tex_id = surf->texture_id;
-    }
-    int tex_count = max_tex_id + 1;
+	int max_tex_id = 0; 
+	for(int i = 0; i < leaf->num_faces; i++) {
+		int face_id = bsp->lfaces[leaf->first_face + i];	
+		Bsp_Face *face = &bsp->faces[face_id];
 
-    int *tri_counts = calloc(tex_count, sizeof(int));
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		if(surface->texture_id > max_tex_id)
+			max_tex_id = surface->texture_id;
+	}
 
-    for(int i = 0; i < leaf->num_faces; i++) {
-        int face_id = bsp->lfaces[leaf->first_face + i];
-        Bsp_Face *face = &bsp->faces[face_id];
-        Bsp_Surface *surf = &bsp->surfaces[face->texinfo];
-        tri_counts[surf->texture_id] += face->edge_count - 2;
-    }
+	int tex_count = max_tex_id + 1;
+	int *tri_counts = calloc(tex_count, sizeof(int));
 
-    int used_count = 0;
-    for(int i = 0; i < tex_count; i++)
-        if (tri_counts[i] > 0) used_count++;
+	for(int i = 0; i < leaf->num_faces; i++) {
+		int face_id = bsp->lfaces[leaf->first_face + i];	
+		Bsp_Face *face = &bsp->faces[face_id];
 
-    *out_count = used_count;
-    if(used_count == 0) {
-        free(tri_counts);
-        return NULL;
-    }
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		tri_counts[surface->texture_id] += face->edge_count - 2;
+	}
 
-    int *tex_to_slot = malloc(tex_count * sizeof(int));
-    for(int i = 0; i < tex_count; i++)
+	int used = 0;	
+	for(int i = 0; i < tex_count; i++) {
+		if(tri_counts[i] > 0)
+			used++;
+	}
+
+	*out_count = used;
+	if(used == 0) {
+		free(tri_counts);
+		return NULL;
+	}
+
+	int *tex_to_slot = malloc(sizeof(int) * tex_count);
+	for(int i = 0; i < tex_count; i++)
 		tex_to_slot[i] = -1;
 
-    Mesh *meshes = calloc(used_count, sizeof(Mesh));
-    int  *slot_tex_ids = malloc(used_count * sizeof(int));  // slot -> tex_id
+	Mesh *meshes = calloc(used, sizeof(Mesh));
+	int *tex_slot_ids = malloc(used * sizeof(int));
+	int slot = 0;
 
-    int slot = 0;
-    for(int i = 0; i < tex_count; i++) {
-        if(tri_counts[i] == 0)
+	for(int i = 0; i < tex_count; i++) {
+		if(tri_counts[i] <= 0)
 			continue;
 
-        tex_to_slot[i] = slot;
-        slot_tex_ids[slot] = i;
+		tex_to_slot[i] = slot;
+		tex_slot_ids[slot] = i;
 
 		Mesh *mesh = &meshes[slot];
 
-        mesh->triangleCount = tri_counts[i];
-        mesh->vertexCount   = tri_counts[i] * 3;
-        mesh->vertices  	= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
-        mesh->texcoords 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
-        mesh->normals   	= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
-        mesh->texcoords2 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
-		
-        slot++;
-    }
+		mesh->triangleCount = tri_counts[i];
+		mesh->vertexCount 	= tri_counts[i]*3;
 
-    int *vert_cursors = calloc(used_count, sizeof(int));  // current vert index per slot
-	int face_id;
+		mesh->vertices 		= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
+		mesh->normals		= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
+		mesh->texcoords 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
+		mesh->texcoords2 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
 
-    for(int i = 0; i < leaf->num_faces; i++) {
-        face_id = bsp->lfaces[leaf->first_face + i];
-        Bsp_Face *face = &bsp->faces[face_id];
-        Bsp_Surface *surf = &bsp->surfaces[face->texinfo];
-        Bsp_Miptex *miptex = &bsp->miptex[surf->texture_id];
-		FaceLightmapInfo lm_info = GetFaceLightmapInfo(bsp, face_id);
+		slot++;
+	}
 
-        int s = tex_to_slot[surf->texture_id];
-        Mesh *mesh = &meshes[s];
-        int *vi = &vert_cursors[s];
+	int *cursors = calloc(used, sizeof(int));
 
-        Vector3 face_verts[face->edge_count];
-        for (int j = 0; j < face->edge_count; j++) {
-            i32 ledge = bsp->ledges[face->first_edge + j];
-            face_verts[j] = (ledge >= 0)
-                ? bsp->verts[bsp->edges[ ledge].v[0]]
-                : bsp->verts[bsp->edges[-ledge].v[1]];
-        }
+	for(int i = 0; i < leaf->num_faces; i++) {
+		int face_id = bsp->lfaces[leaf->first_face + i];
+		Bsp_Face *face = &bsp->faces[face_id];
 
-        Bsp_Plane *plane = &bsp->planes[face->plane];
-        Vector3 normal = { plane->normal[0], plane->normal[1], plane->normal[2] };
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
 
-		/*
-        if(face->side)
+		Lm_Decoupled *lmd = &bsp->decouple_lm[face_id];
+		Rectangle *uv_rec = &bsp->lm.uvs[face_id];
+
+		int _slot = tex_to_slot[surface->texture_id];
+		Mesh *mesh = &meshes[_slot];
+		int *vert_id = &cursors[_slot]; 
+
+		Vector3 face_verts[face->edge_count]; 
+		for(int j = 0; j < face->edge_count; j++) {
+			i32 list_edge = bsp->ledges[face->first_edge + j];
+			face_verts[j] = (list_edge >= 0) ? bsp->verts[bsp->edges[list_edge].v[0]] : bsp->verts[bsp->edges[-list_edge].v[1]]; 
+		}
+
+		Bsp_Plane *plane = &bsp->planes[face->plane];
+		Vector3 normal = *(Vector3 *) plane->normal;
+		if(face->side)
 			normal = Vector3Negate(normal);
-			*/
 
-        for(int j = 1; j < face->edge_count - 1; j++) {
-            Vector3 tri[3] = { face_verts[0], face_verts[j+1], face_verts[j] };
+		for(int j = 1; j < face->edge_count - 1; j++) {
+			Tri tri = (Tri) { .normal = normal, .vertices = { face_verts[0], face_verts[j+1], face_verts[j] } };
 
-            for(int k = 0; k < 3; k++) {
-                mesh->vertices[*vi * 3 + 0] = tri[k].x;
-                mesh->vertices[*vi * 3 + 1] = tri[k].y;
-                mesh->vertices[*vi * 3 + 2] = tri[k].z;
+			for(int k = 0; k < 3; k++) {
+				// Vertex
+				mesh->vertices[*vert_id*3+0] = tri.vertices[k].x;
+				mesh->vertices[*vert_id*3+1] = tri.vertices[k].y;
+				mesh->vertices[*vert_id*3+2] = tri.vertices[k].z;
 
-                mesh->normals[*vi * 3 + 0] = normal.x;
-                mesh->normals[*vi * 3 + 1] = normal.y;
-                mesh->normals[*vi * 3 + 2] = normal.z;
+				// Normal
+				mesh->normals[*vert_id*3+0]	= tri.normal.x;
+				mesh->normals[*vert_id*3+1]	= tri.normal.y;
+				mesh->normals[*vert_id*3+2]	= tri.normal.z;
 
-                float u = (Vector3DotProduct(tri[k], surf->vector_s) + surf->dist_s) / miptex->width;
-                float v = (Vector3DotProduct(tri[k], surf->vector_t) + surf->dist_t) / miptex->height;
+				// Texture UV
+				mesh->texcoords[*vert_id*2+0] = (Vector3DotProduct(tri.vertices[k], surface->vector_s) + surface->dist_s) / mip->width; 
+				mesh->texcoords[*vert_id*2+1] = (Vector3DotProduct(tri.vertices[k], surface->vector_t) + surface->dist_t) / mip->height;
 
-                mesh->texcoords[*vi * 2 + 0] = u;
-                mesh->texcoords[*vi * 2 + 1] = v;
-
-				if(face->lightmap >= 0 && face_id < bsp->lm.uv_count) {
-					Rectangle *rect = &bsp->lm.uvs[face_id];
-
-					//int lm_scale = 1 << bsp->lm_shift[face_id];
-					int lm_scale = bsp->lm_shift[face_id];
-
-					float raw_u = (Vector3DotProduct(tri[k], surf->vector_s) + surf->dist_s);
-					float raw_v = (Vector3DotProduct(tri[k], surf->vector_t) + surf->dist_t);
-
-					float lm_u = (raw_u - floorf(lm_info.min_u / lm_scale) * lm_scale) / lm_scale;
-					float lm_v = (raw_v - floorf(lm_info.min_v / lm_scale) * lm_scale) / lm_scale;
-
-					float atlas_u = (rect->x + lm_u + 0.5f) / bsp->lm.tex.width;
-					float atlas_v = (rect->y + lm_v + 0.5f) / bsp->lm.tex.height;
-
-					mesh->texcoords2[*vi * 2 + 0] = atlas_u;
-					mesh->texcoords2[*vi * 2 + 1] = atlas_v;
+				// Lighmap UV
+				if(lmd->w <= 0 || lmd->h <= 0) {
+					(*vert_id)++;
+					continue;
 				}
 
-                (*vi)++;
-            }
-        }
-    }
 
-    Model *models = malloc(used_count * sizeof(Model));
+				float lm_u = Vector3DotProduct(tri.vertices[k], lmd->vs) + lmd->dist_s;
+				float lm_v = Vector3DotProduct(tri.vertices[k], lmd->vt) + lmd->dist_t;
+				mesh->texcoords2[*vert_id*2+0] = (uv_rec->x + lm_u + 0.5f) / bsp->lm.tex.width;
+				mesh->texcoords2[*vert_id*2+1] = (uv_rec->y + lm_v + 0.5f) / bsp->lm.tex.height;
 
-    for(int i = 0; i < used_count; i++) {
-        UploadMesh(&meshes[i], false);
-        models[i] = LoadModelFromMesh(meshes[i]);
+				(*vert_id)++;
+			}
+		}
+	}
 
-        int tid = slot_tex_ids[i];
-        if(tid < bsp->num_miptex && bsp->textures[tid].id != 0) {
-			models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = materials[HashFetch(&material_hashmap, bsp->miptex[tid].name)].maps->texture;
-			models[i].materials[0].maps[MATERIAL_MAP_EMISSION].texture = bsp->lm.tex;
-			models[i].materials[0].shader = bsp->lm_shader;
+	Model *models = malloc(sizeof(Model) * used);
+	for(int i = 0; i < used; i++) {
+		UploadMesh(&meshes[i], false);
+		models[i] = LoadModelFromMesh(meshes[i]);
 
-			/*
-			Rectangle uv = bsp->lm.uvs[face_id];
-			RenderTexture2D rt = LoadRenderTexture(uv.width, uv.height);
-			BeginTextureMode(rt);
-			DrawTextureRec(rt.texture, uv, Vector2Zero(), WHITE);
-			EndTextureMode();
+		int tex_id = tex_slot_ids[i];
+		if(tex_id >= bsp->num_miptex || bsp->textures[tex_id].id == 0)
+			continue;
 
-			models[i].materials[0].maps[MATERIAL_MAP_EMISSION].texture = rt.texture;
-			models[i].materials[0].shader = bsp->lm_shader;
-			*/
-        }
-    }
+		Texture2D mat_texture = materials[HashFetch(&material_hashmap, bsp->miptex[tex_id].name)].maps->texture;
+		models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat_texture;
+		models[i].materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
+		models[i].materials[0].shader = bsp->lm_shader;
+	}
 
-    free(tri_counts);
-    free(tex_to_slot);
-    free(slot_tex_ids);
-    free(vert_cursors);
-    free(meshes);
-	
-    return models;
+	free(tri_counts);
+	free(tex_to_slot);
+	free(tex_slot_ids);
+	free(cursors);
+	free(meshes);
+
+	return models;
 }
+

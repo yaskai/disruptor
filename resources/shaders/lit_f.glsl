@@ -10,13 +10,11 @@ out vec4 finalColor;
 
 void main() {
 	vec4 diffuse = texture(texture0, fragTexCoord);
-	diffuse = clamp(diffuse, vec4(0.0), vec4(1.0));
 	vec4 light = texture(texture1, fragTexCoord2);
-	light = clamp(light, vec4(0.0), vec4(1.0));
 
-	finalColor = diffuse * light * 2.0;
+	finalColor = diffuse * light * 2.5;
 	//finalColor = diffuse * light * 0.5;
-	finalColor.a = 1.0;
+	//finalColor.a = 1.0;
 	//finalColor = vec4(fragTexCoord2.x, fragTexCoord2.y, 0.0, 1.0);
 	//finalColor = texture(texture1, fragTexCoord);
 	//finalColor = light;

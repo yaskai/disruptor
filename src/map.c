@@ -1009,45 +1009,8 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 	}
 }
 
-/*
-#define MAX_MAP_MESH_RENDERS 128
-typedef struct {
-	u16 ids[MAX_MAP_MESH_RENDERS];
-	u16 count;
-	
-} rMeshList;
-rMeshList rmesh_list = {0};
-*/
-
-void UpdateMapMeshList(MapSection *sect, Camera3D cam) {
-	/*
-	Vector3 view_pos = cam.position;
-	Vector3 view_dir = Vector3Normalize(Vector3Subtract(cam.target, view_pos));
-
-	rmesh_list.count = 0;
-	for(u16 i = 0; i < sect->model.meshCount; i++) {
-		Vector3 to_view = Vector3Subtract(view_pos, rmeshes_collection.rmeshes[i].position);
-
-		rmesh_list.ids[rmesh_list.count++] = i;
-	}
-	*/
-}
 
 void DrawMap(MapSection *sect, Vector3 pos) {
-	/*
-	for(u16 i = 0; i < rmesh_list.count; i++) {
-		DrawMesh(sect->model.meshes[rmesh_list.ids[i]], sect->model.materials[1], sect->model.transform);	
-	}
-	*/
-
-	//Matrix mat = MatrixRotateX(90*DEG2RAD);
-	//ect->model.transform = mat;
-	//DrawModel(sect->model, Vector3Zero(), 1, WHITE);
-
-	//puts("DrawMap()");
-
-	//rlDisableBackfaceCulling();
-	//BeginBlendMode(BLEND_ALPHA);
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
 	for(int i = 0; i < model_list.count; i++) {
 		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
@@ -1055,7 +1018,5 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
 	}
-	//EndBlendMode();
-	///rlEnableBackfaceCulling();
 }
 

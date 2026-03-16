@@ -2,10 +2,9 @@
 LoadBSPFile: 'test06.bsp'
 BSP is version Quake BSP bsp29
 INFO: using built-in palette.
-ConvertTextures: WARNING: invalid size data for 
 Loading extended texinfo flags from test06.texinfo.json...
 Loading extended content flags from test06.content.json...
-43 entities read, 13 are lights.
+44 entities read, 14 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -13,46 +12,48 @@ BSPX light directions output requested on command line.
 --- Options Summary ---
     "dist" was set to "1.000000" (from map)
     "anglescale" was set to "1.000000" (from map)
-    "light" was set to "0.000000" (from map)
+    "light" was set to "30.000000" (from map)
     "dirt" was set to "1" (from map)
     "minlight_dirt" was set to "1" (from command line)
     "bounce" was set to "1" (from map)
-    "bouncescale" was set to "5.000000" (from map)
+    "bouncescale" was set to "10.000000" (from map)
+    "bouncecolorscale" was set to "1.000000" (from map)
     "sunlight" was set to "400.000000" (from map)
-    "sunlight_color" was set to "255 242.25 204" (from map)
-    "sunlight2" was set to "60.000000" (from map)
-    "sunlight2_color" was set to "255 242.25 204" (from map)
+    "sunlight_color" was set to "255 196 192" (from map)
+    "sunlight2" was set to "300.000000" (from map)
+    "sunlight2_color" was set to "255 196 192" (from map)
+    "sunlight3" was set to "300.000000" (from map)
+    "sunlight3_color" was set to "255 196 192" (from map)
     "sunlight_dirt" was set to "1.000000" (from map)
     "sunlight2_dirt" was set to "1.000000" (from command line)
-    "sunlight_mangle" was set to "-3.3484866e-08 -0.76604444 -0.6427876" (from map)
-    "sunlight_penumbra" was set to "20.000000" (from map)
+    "sunlight_mangle" was set to "-0.007876437 -0.90255094 -0.4305111" (from map)
+    "sunlight_penumbra" was set to "3.000000" (from map)
     "surflight_radiosity" was set to "1" (from command line)
-    "exportobj" was set to "1" (from command line)
-    "lmshift" was set to "16" (from command line)
+    "soft" was set to "5" (from command line)
+    "extra" was set to "4" (from command line)
+    "world_units_per_luxel" was set to "16.000000" (from command line)
 
-DecompressAllVis: invalid visofs for leaf 0
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	352 sky faces
-	9111 solid faces
+	349 sky faces
+	9205 solid faces
 	0 filtered faces
 	0 shadow-casting skip faces
-SetupLights: 13 initial lights
-SetupLights: 13 after surface lights
-SetupLights: 13 after jittering
-Final count: 13 lights, 129 suns in use.
+SetupLights: 14 initial lights
+SetupLights: 14 after surface lights
+SetupLights: 14 after jittering
+Final count: 14 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 4584384
+lightmap size (total): 5647964
 Lighting Completed.
 
 Writing test06.lit
-max 4 styles per face, 1 used
-Wrote test06.obj
+DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
 Writing test06.bsp as Quake BSP bsp29
-2.013s seconds elapsed
+25.203s seconds elapsed
 0 empty lightmaps
 
 

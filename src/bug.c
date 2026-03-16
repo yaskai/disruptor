@@ -8,7 +8,7 @@
 
 #define BUG_MAX_BOUNCES 			16
 #define BUG_MAX_RECALL_BOUNCES		16
-#define BUG_MAX_VEL 				500.0f
+#define BUG_MAX_VEL 				550.0f
 #define BUG_GRAV					975.0f
 
 u8 bug_bounce = 0;
@@ -105,7 +105,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 				BvhTraceData tr = TraceDataEmpty();
 				Ray ray = (Ray) { .position = ct->position, .direction = Vector3Normalize(to_enemy) };
 				BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, dist);
-				if(tr.distance < dist) {
+				if(tr.hit) {
 					continue;
 				}
 
@@ -149,7 +149,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	to_enemy.z = 0;
 	to_enemy = Vector3Normalize(to_enemy);
 
-	if(d > 100 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 48)) {
+	if(d > 100 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 64)) {
 		ct->velocity.x = to_enemy.x * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
 		ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
 	} else {
@@ -169,7 +169,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		} else {
 			ct->velocity.z += 100.0f + (1.15f*(*bounce));
 			if(enemy_ent->comp_transform.position.z > ct->position.z + 64.0f) {
-				ct->velocity.z += 300.0f;
+				ct->velocity.z += 500.0f;
 			}
 		}
 	}
@@ -262,7 +262,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		bool use_ent = (ent_tr.hit_ent > -1 && ent_tr.hit_ent < handler->count && ent_tr.hit_ent != handler->player_id);
 
 		Entity *other_ent = &handler->ents[ent_tr.hit_ent];
-		if(other_ent->comp_ai.state == STATE_DEAD && other_ent->type != ENT_TURRET)
+		if((other_ent->comp_ai.state == STATE_DEAD && other_ent->type != ENT_TURRET) || other_ent->type == ENT_PLAYER)
 			use_ent = false;
 
 		if(use_ent) {
@@ -293,6 +293,9 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 			for(short j = 0; j < num_clips; j++) {
 				float into = Vector3DotProduct(vel, clips[j]);
 				float clip_bounce = (use_ent && j == num_clips - 1) ? 1.8f : 1.5005f;
+				if(clips[j].z < 0) {
+					clip_bounce = Clamp(clip_bounce, 1.001f, 1.025f);
+				}
 
 				if(into < 0) 
 					pm_ClipVelocity(vel, clips[j], &vel, clip_bounce, pm->block);
@@ -335,8 +338,10 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 	EntGrid *grid = &handler->grid;
 	Coords coords = Vec3ToCoords(ct->position, grid);
-	if(!CoordsInBounds(coords, grid))
+	if(!CoordsInBounds(coords, grid)) {
 		ai->state = STATE_DEAD;
+		return;
+	}
 
 	bug_z_vel_prev = ct->velocity.z;
 
@@ -388,8 +393,15 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		EntGrid *grid = &handler->grid;
 		Coords coords = Vec3ToCoords(ct->position, grid);
+		if(!CoordsInBounds(coords, &handler->grid)) {
+			ai->state = BUG_DEFAULT;
+			ct->position = player_ent->comp_transform.position;
+			return;
+		}
+
 		i16 cell_id = CellCoordsToId(coords, grid);
 		EntGridCell *cell = &grid->cells[cell_id];
+
 		for(u8 i = 0; i < cell->ent_count; i++) {
 			Entity *enemy_ent = &handler->ents[cell->ents[i]];
 

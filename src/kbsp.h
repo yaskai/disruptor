@@ -20,6 +20,20 @@ typedef struct {
 
 } FaceLightmapInfo;
 
+typedef struct {
+	u16 w;
+	u16 h;
+
+	u32 lm_offset;
+
+	Vector3 vs;
+	float dist_s;
+
+	Vector3 vt;
+	float dist_t;
+
+} Lm_Decoupled;
+
 #define BSP_VERSION 29
 #define BSP_LUMPS 	15
 
@@ -236,6 +250,9 @@ typedef struct {
 	u8 *lm_shift;
 	u8 *lm_rgb;
 
+	Lm_Decoupled *decouple_lm;
+	i32 *lm_offsets;
+
 } Bsp_Data;
 
 Bsp_Data LoadBsp(char *path, bool print_output);
@@ -287,9 +304,6 @@ int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
 bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
-
-Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, int face_id);
-FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, int face_id);
 Lightmap BuildLightmap(Bsp_Data *bsp, char *path);
 
 #endif
