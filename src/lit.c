@@ -26,6 +26,29 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 	fread(&version, 4, 1, pf);
 	printf("VERSION: %d\n", version);
 
+	// Instead of building atlas, just load the precomputed ones:
+	lm.tex = LoadTexture("litmap_correct.png");
+	lm.uv_count = bsp->num_faces;
+	lm.uvs = calloc(bsp->num_faces, sizeof(Rectangle));
+
+	FILE *f = fopen("litmap_uvs.bin", "rb");
+	uint32_t num_faces, atlas_width;
+	fread(&num_faces, 4, 1, f);
+	fread(&atlas_width, 4, 1, f);
+
+	uint16_t *uv_data = malloc(num_faces * 4 * sizeof(uint16_t));
+	fread(uv_data, sizeof(uint16_t), num_faces * 4, f);
+	fclose(f);
+
+	for(int i = 0; i < (int)num_faces; i++) {
+		lm.uvs[i].x      = uv_data[i*4+0];
+		lm.uvs[i].y      = uv_data[i*4+1];
+		lm.uvs[i].width  = uv_data[i*4+2];
+		lm.uvs[i].height = uv_data[i*4+3];
+	}
+	free(uv_data);
+
+	/*
 	u8 *data = calloc(len, 1);
 	fread(data, len, 1, pf);
 
@@ -34,7 +57,7 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 
 	// Cursor position
 	int cX = 0, cY = 0;
-	int atlas_width = 1024;
+	int atlas_width = 512;
 	int atlas_height = 0;
 	int row_height = 0;
 
@@ -43,7 +66,7 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 		if(face->lightmap < 0)
 			continue;
 
-		Vector2 size = Bsp_FaceLightmapSize(bsp, face); 
+		Vector2 size = Bsp_FaceLightmapSize(bsp, i); 
 
 		if(cX + size.x > atlas_width) {
 			cX = 0;
@@ -72,41 +95,24 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 
 	for(int i = 0; i < bsp->num_faces; i++) {
 		Bsp_Face *face = &bsp->faces[i];
+
 		if(face->lightmap < 0)
 			continue;
 
-		u8 *src_face_ptr = data + (face->lightmap * 3);
-
 		int w = lm.uvs[i].width, h = lm.uvs[i].height;
-		int ax = lm.uvs[i].x, ay = lm.uvs[i].y;
+		int ax = lm.uvs[i].x, ay = lm.uvs[i].y; 
 
-		/*
-		u8 *src_px = data + (face->lightmap) * 3;
-
+		//u8 *src_px = data + face->lightmap * 3;
+		u8 *src_px = bsp->lm_rgb + (face->lightmap * 3);
 		for(int y = 0; y < h; y++) {
 			for(int x = 0; x < w; x++) {
 				int src_id = (y * w + x) * 3;
+				//int src_id = (x * h + y) * 3;
 				int dst_id = ((ay + y) * atlas_width + (ax + x)) * 4;
-
-				px[dst_id+0] = src_px[src_id+0];	// R
-				px[dst_id+1] = src_px[src_id+1];	// G
-				px[dst_id+2] = src_px[src_id+2];	// B
-				px[dst_id+3] = 255;					// A
-			}
-		}
-		*/
-		Vector2 size = Bsp_FaceLightmapSize(bsp, face);
-
-		for(int y = 0; y < h; y++) {
-			u8 *src_row_ptr = src_face_ptr + (y * (int)size.x * 3); 
-
-			for(int x = 0; x < w; x++) {
-				int dst_id = ((ay + y) * atlas_width + (ax + x)) * 4;
-
-				px[dst_id+0] = src_row_ptr[x * 3 + 0];	// R
-				px[dst_id+1] = src_row_ptr[x * 3 + 1];	// G
-				px[dst_id+2] = src_row_ptr[x * 3 + 2];	// B
-				px[dst_id+3] = 255;						// A
+				px[dst_id+0] = src_px[src_id+0];
+				px[dst_id+1] = src_px[src_id+1];
+				px[dst_id+2] = src_px[src_id+2];
+				px[dst_id+3] = 255;
 			}
 		}
 	}
@@ -120,15 +126,23 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 	};
 
 	lm.tex = LoadTextureFromImage(img);
+	SetTextureFilter(lm.tex, TEXTURE_FILTER_POINT);
 	ExportImage(img, "litmap.png");
 	UnloadImage(img);
 	free(data);
+	*/
+
+	//SetShaderValueTexture(bsp->lm_shader, GetShaderLocation(bsp->lm_shader, "texture1"), lm.tex);
 
 	return lm;
 }
 
-Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, Bsp_Face *face) {
+Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, int face_id) {
+	Bsp_Face *face = &bsp->faces[face_id];
 	Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+
+	//int lmscale = 1 << bsp->lm_shift[face_id];
+	int lmscale = bsp->lm_shift[face_id];
 
 	float min_u = FLT_MAX, min_v = FLT_MAX;
 	float max_u = -FLT_MAX, max_v = -FLT_MAX;
@@ -137,8 +151,8 @@ Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, Bsp_Face *face) {
 		i32 ledge = bsp->ledges[face->first_edge + i];
 		Vector3 vert = (ledge >= 0) ? bsp->verts[bsp->edges[ledge].v[0]] : bsp->verts[bsp->edges[-ledge].v[1]];
 		
-		float u = (Vector3DotProduct(vert, surface->vector_s) + surface->dist_s) / Vector3Length(surface->vector_s);
-		float v = (Vector3DotProduct(vert, surface->vector_t) + surface->dist_t) / Vector3Length(surface->vector_t);
+		float u = (Vector3DotProduct(vert, surface->vector_s) + surface->dist_s);
+		float v = (Vector3DotProduct(vert, surface->vector_t) + surface->dist_t);
 
 		if(u < min_u)
 			min_u = u;
@@ -154,13 +168,17 @@ Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, Bsp_Face *face) {
 	}
 	
 	return (Vector2) {
-		.x = floorf(max_u / 16) - floorf(min_u / 16) + 1, 	// U
-		.y = floorf(max_v / 16) - floorf(min_v / 16) + 1	// V
+		.x = floorf(max_u / lmscale) - floorf(min_u / lmscale) + 1, // U
+		.y = floorf(max_v / lmscale) - floorf(min_v / lmscale) + 1	// V
 	};
 }
 
-FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, Bsp_Face *face) {
+FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, int face_id) {
+	Bsp_Face *face = &bsp->faces[face_id];
 	Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+
+	//int lmscale = 1 << bsp->lm_shift[face_id];
+	int lmscale = bsp->lm_shift[face_id];
 
 	FaceLightmapInfo info = (FaceLightmapInfo) {
 		.min_u = FLT_MAX, .min_v = FLT_MAX,
@@ -171,8 +189,10 @@ FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, Bsp_Face *face) {
 		i32 ledge = bsp->ledges[face->first_edge + i];
 		Vector3 vert = (ledge >= 0) ? bsp->verts[bsp->edges[ledge].v[0]] : bsp->verts[bsp->edges[-ledge].v[1]];
 		
-		float u = (Vector3DotProduct(vert, surface->vector_s) + surface->dist_s) / Vector3Length(surface->vector_s);
-		float v = (Vector3DotProduct(vert, surface->vector_t) + surface->dist_t) / Vector3Length(surface->vector_t);
+		//float u = (Vector3DotProduct(vert, surface->vector_s) + surface->dist_s) / Vector3Length(surface->vector_s);
+		//float v = (Vector3DotProduct(vert, surface->vector_t) + surface->dist_t) / Vector3Length(surface->vector_t);
+		float u = (Vector3DotProduct(vert, surface->vector_s) + surface->dist_s);
+		float v = (Vector3DotProduct(vert, surface->vector_t) + surface->dist_t);
 
 		if(u < info.min_u)
 			info.min_u = u;
@@ -187,8 +207,8 @@ FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, Bsp_Face *face) {
 			info.max_v = v;
 	}
 
-	info.w = (info.max_u / 16) - floorf(info.min_u / 16) + 1;
-	info.h = (info.max_v / 16) - (info.min_v / 16) + 1;
+	info.w = floorf(info.max_u / lmscale) - floorf(info.min_u / lmscale) + 1;
+	info.h = floorf(info.max_v / lmscale) - floorf(info.min_v / lmscale) + 1;
 
 	return info;
 }

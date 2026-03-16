@@ -168,7 +168,7 @@ void BrushGetVertices(Brush *brush) {
 #define PARSE_NONE -1
 #define PARSE_BRUSH 0
 #define PARSE_ENT 	1
-void LoadMapFile(BrushPool *brush_pool, char *path, Model *map_model, SpawnList *spawn_list) {
+void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 	FILE *pF = fopen(path, "r");
 
 	if(!pF) {
@@ -480,20 +480,21 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	// 1. Load 3d model, rendering
 	Message("Loading model...", ANSI_BLUE);
 	short model_id = -1;
-	for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".glb") == 0) model_id = i;
+	for(short i = 0; i < path_list.count; i++)
+		if(strcmp(GetFileExtension(path_list.paths[i]), ".glb") == 0) model_id = i;
 	//for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".obj") == 0) model_id = i;
 
 	// No model, exit
 	if(model_id == -1) {
 		MessageError("Missing model", NULL);
 		return sect;
+	} else { 
+		Model model = LoadModel(path_list.paths[model_id]);
+		model.transform = MatrixRotateX(90*DEG2RAD);
+		sect.model = model;
+		if(GetLogState())
+			printf("model tri_count: %d\n", sect._tris[0].count);
 	}
-	
-	Model model = LoadModel(path_list.paths[model_id]);
-	model.transform = MatrixRotateX(90*DEG2RAD);
-	sect.model = model;
-
-	if(GetLogState()) printf("model tri_count: %d\n", sect._tris[0].count);
 
 	// 2. Load .map file, collision, physics, ai logic, etc. 
 	Message("Loading map file...", ANSI_BLUE);
@@ -513,7 +514,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	spawn_list->arr = calloc(spawn_list->capacity, sizeof(EntSpawn));
 
 	BrushPool brush_pools[3] = {0};
-	LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], &model, spawn_list);
+	//LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], &model, spawn_list);
+	LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], spawn_list);
 
 	sect._tris[0].arr = TrisFromBrushPool(&brush_pools[0], &sect._tris[0].count);
 	sect._tris[0].ids = calloc(sect._tris[0].count, sizeof(u16));
@@ -556,8 +558,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	}
 
 	//rmeshes_collection.rmeshes = calloc(model.meshCount, sizeof(MapMesh)); 
-	BoundingBox model_bounds = GetModelBoundingBox(model);
-	Vector3 model_center = BoxCenter(model_bounds);
+	//BoundingBox model_bounds = GetModelBoundingBox(model);
+	//Vector3 model_center = BoxCenter(model_bounds);
 
 	/*
 	for(u16 i = 0; i < model.meshCount; i++) {
@@ -632,6 +634,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		if(strcmp(GetFileExtension(path_list.paths[i]), ".lit") == 0) lit_path_id = i;
 
 	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data, path_list.paths[lit_path_id]);
+	//sect.bsp_data.lm.tex = LoadTexture("litmap_correct.png");
 
 	model_list.count = 0;
 	model_list.models = malloc(sizeof(Model) * 8000);
@@ -1043,7 +1046,7 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 	//puts("DrawMap()");
 
-	rlDisableBackfaceCulling();
+	//rlDisableBackfaceCulling();
 	//BeginBlendMode(BLEND_ALPHA);
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
 	for(int i = 0; i < model_list.count; i++) {
@@ -1053,6 +1056,6 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
 	}
 	//EndBlendMode();
-	rlEnableBackfaceCulling();
+	///rlEnableBackfaceCulling();
 }
 

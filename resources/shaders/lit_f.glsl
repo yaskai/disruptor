@@ -1,18 +1,24 @@
 #version 330
 
-in vec2 frag_texcoord;
-in vec2 frag_texcoord2;
+in vec2 fragTexCoord;
+in vec2 fragTexCoord2;
 
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 
-out vec4 final_color;
+out vec4 finalColor;
 
 void main() {
-	vec4 diffuse = texture(texture0, frag_texcoord);
+	vec4 diffuse = texture(texture0, fragTexCoord);
 	diffuse = clamp(diffuse, vec4(0.0), vec4(1.0));
-	vec4 light = texture(texture1, frag_texcoord2);
+	vec4 light = texture(texture1, fragTexCoord2);
 	light = clamp(light, vec4(0.0), vec4(1.0));
 
-	final_color = diffuse * (light);
+	finalColor = diffuse * light * 2.0;
+	//finalColor = diffuse * light * 0.5;
+	finalColor.a = 1.0;
+	//finalColor = vec4(fragTexCoord2.x, fragTexCoord2.y, 0.0, 1.0);
+	//finalColor = texture(texture1, fragTexCoord);
+	//finalColor = light;
+	//finalColor = diffuse;
 }

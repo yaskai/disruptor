@@ -10,7 +10,6 @@
 #include "geo.h"
 #include "hash.h"
 
-Shader lm_shader;
 Material *materials;
 Texture2D *textures;
 HashMap material_hashmap = (HashMap) {0};
@@ -273,6 +272,12 @@ static const u8 qPalette[256][3] = {
 	{111, 112, 112},
 };
 
+typedef struct {
+	int face_id;
+	int lm_ofs;
+
+} faceOfs;
+
 Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Data data = (Bsp_Data) {0};
 
@@ -492,13 +497,85 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		free(rgba);
 	}
 	free(mip_offsets);
+	// ---------------------------------------------------------------------------------------
+	// BSPX
+	int last_offset = 0;
+	for(int i = 0; i < 15; i++) {
+		int end = header.lumps[i].file_offset + header.lumps[i].file_size;
+		if(end > last_offset)
+			last_offset = end;
+	}
+	last_offset = (last_offset + 3) & ~3;
+
+	fseek(pF, last_offset, SEEK_SET);
+	char magic[4];
+	fread(magic, 4, 1, pF);
+
+	if(memcmp(magic, "BSPX", 4) != 0) {
+		MessageError("NO BSPX DATA", NULL);
+	} else {
+		int num_lumps = 0;
+		fread(&num_lumps, 4, 1, pF);
+		printf("BSPX num_lumps: %d\n", num_lumps);
+
+		char names[num_lumps][24];
+		int offsets[num_lumps];
+		int sizes[num_lumps];
+
+		int lm_shift_id = -1;
+		int lm_rgb_id = -1;
+
+		for(int i = 0; i < num_lumps; i++) {
+			char name[24];
+			int fileofs, filelen;
+			fread(name, 24, 1, pF);
+			fread(&fileofs, 4, 1, pF);
+			fread(&filelen, 4, 1, pF);
+
+			memcpy(names[i], name, 24);
+			offsets[i] = fileofs;
+			sizes[i] = filelen;
+
+			if(memcmp(name, "LMSHIFT", strlen("LMSHIFT")) == 0) 
+				lm_shift_id = i;
+
+			if(memcmp(name, "RGBLIGHTING", strlen("RGBLIGHTING")) == 0)
+				lm_rgb_id = i;
+
+		}
+
+		for(int i = 0; i < num_lumps; i++) {
+			printf("  bspx lump: %s ofs = %d, len = %d\n", names[i], offsets[i], sizes[i]);
+		}
+
+		if(lm_shift_id != -1) {
+			printf("lmshift found!\n");
+
+			data.lm_shift = malloc(data.num_faces);
+			memset(data.lm_shift, 4, data.num_faces);
+
+			fseek(pF, offsets[lm_shift_id], SEEK_SET);
+			fread(data.lm_shift, 1, sizes[lm_shift_id], pF);
+		}
+
+		if(lm_rgb_id != -1) {
+			printf("lm_rgb found!\n");
+
+			data.lm_rgb = malloc(sizes[lm_rgb_id]);
+
+			fseek(pF, offsets[lm_rgb_id], SEEK_SET);
+			fread(data.lm_rgb, 1, sizes[lm_rgb_id], pF);
+		}
+	}
+
+	// ---------------------------------------------------------------------------------------
 
 	// Close and return data
 	fclose(pF);
 
 	FilePathList mat_list = LoadDirectoryFiles("tools/Disruptor/textures/custom");	
 
-	lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
+	data.lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
 
 	materials = malloc(sizeof(Material) * mat_list.count); 
 	textures = malloc(sizeof(Texture2D) * mat_list.count); 
@@ -546,6 +623,13 @@ void UnloadBsp(Bsp_Data *data) {
 
 		free(data->textures);
 	}
+
+	UnloadShader(data->lm_shader);
+	if(data->lm_rgb)
+		free(data->lm_rgb);
+
+	if(data->lm_shift)
+		free(data->lm_shift);
 }
 
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {
@@ -831,7 +915,7 @@ void Bsp_PrintStructSizes() {
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
     int max_tex_id = 0;
-    for (int i = 0; i < leaf->num_faces; i++) {
+    for(int i = 0; i < leaf->num_faces; i++) {
         int face_id = bsp->lfaces[leaf->first_face + i];
         Bsp_Face *face = &bsp->faces[face_id];
         Bsp_Surface *surf = &bsp->surfaces[face->texinfo];
@@ -842,7 +926,7 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
     int *tri_counts = calloc(tex_count, sizeof(int));
 
-    for (int i = 0; i < leaf->num_faces; i++) {
+    for(int i = 0; i < leaf->num_faces; i++) {
         int face_id = bsp->lfaces[leaf->first_face + i];
         Bsp_Face *face = &bsp->faces[face_id];
         Bsp_Surface *surf = &bsp->surfaces[face->texinfo];
@@ -850,42 +934,51 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
     }
 
     int used_count = 0;
-    for (int i = 0; i < tex_count; i++)
+    for(int i = 0; i < tex_count; i++)
         if (tri_counts[i] > 0) used_count++;
 
     *out_count = used_count;
-    if (used_count == 0) {
+    if(used_count == 0) {
         free(tri_counts);
         return NULL;
     }
 
     int *tex_to_slot = malloc(tex_count * sizeof(int));
-    for (int i = 0; i < tex_count; i++) tex_to_slot[i] = -1;
+    for(int i = 0; i < tex_count; i++)
+		tex_to_slot[i] = -1;
 
     Mesh *meshes = calloc(used_count, sizeof(Mesh));
     int  *slot_tex_ids = malloc(used_count * sizeof(int));  // slot -> tex_id
 
     int slot = 0;
-    for (int i = 0; i < tex_count; i++) {
-        if (tri_counts[i] == 0) continue;
+    for(int i = 0; i < tex_count; i++) {
+        if(tri_counts[i] == 0)
+			continue;
+
         tex_to_slot[i] = slot;
         slot_tex_ids[slot] = i;
 
-        meshes[slot].triangleCount = tri_counts[i];
-        meshes[slot].vertexCount   = tri_counts[i] * 3;
-        meshes[slot].vertices  = MemAlloc(sizeof(float) * meshes[slot].vertexCount * 3);
-        meshes[slot].texcoords = MemAlloc(sizeof(float) * meshes[slot].vertexCount * 2);
-        meshes[slot].normals   = MemAlloc(sizeof(float) * meshes[slot].vertexCount * 3);
+		Mesh *mesh = &meshes[slot];
+
+        mesh->triangleCount = tri_counts[i];
+        mesh->vertexCount   = tri_counts[i] * 3;
+        mesh->vertices  	= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
+        mesh->texcoords 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
+        mesh->normals   	= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
+        mesh->texcoords2 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
+		
         slot++;
     }
 
     int *vert_cursors = calloc(used_count, sizeof(int));  // current vert index per slot
+	int face_id;
 
-    for (int i = 0; i < leaf->num_faces; i++) {
-        int face_id = bsp->lfaces[leaf->first_face + i];
+    for(int i = 0; i < leaf->num_faces; i++) {
+        face_id = bsp->lfaces[leaf->first_face + i];
         Bsp_Face *face = &bsp->faces[face_id];
         Bsp_Surface *surf = &bsp->surfaces[face->texinfo];
         Bsp_Miptex *miptex = &bsp->miptex[surf->texture_id];
+		FaceLightmapInfo lm_info = GetFaceLightmapInfo(bsp, face_id);
 
         int s = tex_to_slot[surf->texture_id];
         Mesh *mesh = &meshes[s];
@@ -901,12 +994,16 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
         Bsp_Plane *plane = &bsp->planes[face->plane];
         Vector3 normal = { plane->normal[0], plane->normal[1], plane->normal[2] };
-        if (face->side) normal = Vector3Negate(normal);
 
-        for (int j = 1; j < face->edge_count - 1; j++) {
-            Vector3 tri[3] = { face_verts[0], face_verts[j], face_verts[j+1] };
+		/*
+        if(face->side)
+			normal = Vector3Negate(normal);
+			*/
 
-            for (int k = 0; k < 3; k++) {
+        for(int j = 1; j < face->edge_count - 1; j++) {
+            Vector3 tri[3] = { face_verts[0], face_verts[j+1], face_verts[j] };
+
+            for(int k = 0; k < 3; k++) {
                 mesh->vertices[*vi * 3 + 0] = tri[k].x;
                 mesh->vertices[*vi * 3 + 1] = tri[k].y;
                 mesh->vertices[*vi * 3 + 2] = tri[k].z;
@@ -921,6 +1018,25 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
                 mesh->texcoords[*vi * 2 + 0] = u;
                 mesh->texcoords[*vi * 2 + 1] = v;
 
+				if(face->lightmap >= 0 && face_id < bsp->lm.uv_count) {
+					Rectangle *rect = &bsp->lm.uvs[face_id];
+
+					//int lm_scale = 1 << bsp->lm_shift[face_id];
+					int lm_scale = bsp->lm_shift[face_id];
+
+					float raw_u = (Vector3DotProduct(tri[k], surf->vector_s) + surf->dist_s);
+					float raw_v = (Vector3DotProduct(tri[k], surf->vector_t) + surf->dist_t);
+
+					float lm_u = (raw_u - floorf(lm_info.min_u / lm_scale) * lm_scale) / lm_scale;
+					float lm_v = (raw_v - floorf(lm_info.min_v / lm_scale) * lm_scale) / lm_scale;
+
+					float atlas_u = (rect->x + lm_u + 0.5f) / bsp->lm.tex.width;
+					float atlas_v = (rect->y + lm_v + 0.5f) / bsp->lm.tex.height;
+
+					mesh->texcoords2[*vi * 2 + 0] = atlas_u;
+					mesh->texcoords2[*vi * 2 + 1] = atlas_v;
+				}
+
                 (*vi)++;
             }
         }
@@ -928,15 +1044,26 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
     Model *models = malloc(used_count * sizeof(Model));
 
-    for (int i = 0; i < used_count; i++) {
+    for(int i = 0; i < used_count; i++) {
         UploadMesh(&meshes[i], false);
         models[i] = LoadModelFromMesh(meshes[i]);
 
         int tid = slot_tex_ids[i];
-        if (tid < bsp->num_miptex && bsp->textures[tid].id != 0) {
-			models[i].materials[0].maps[0].texture = materials[HashFetch(&material_hashmap, bsp->miptex[tid].name)].maps->texture;
+        if(tid < bsp->num_miptex && bsp->textures[tid].id != 0) {
+			models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = materials[HashFetch(&material_hashmap, bsp->miptex[tid].name)].maps->texture;
 			models[i].materials[0].maps[MATERIAL_MAP_EMISSION].texture = bsp->lm.tex;
-			models[i].materials[0].shader = lm_shader;
+			models[i].materials[0].shader = bsp->lm_shader;
+
+			/*
+			Rectangle uv = bsp->lm.uvs[face_id];
+			RenderTexture2D rt = LoadRenderTexture(uv.width, uv.height);
+			BeginTextureMode(rt);
+			DrawTextureRec(rt.texture, uv, Vector2Zero(), WHITE);
+			EndTextureMode();
+
+			models[i].materials[0].maps[MATERIAL_MAP_EMISSION].texture = rt.texture;
+			models[i].materials[0].shader = bsp->lm_shader;
+			*/
         }
     }
 
@@ -945,6 +1072,6 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
     free(slot_tex_ids);
     free(vert_cursors);
     free(meshes);
-
+	
     return models;
 }

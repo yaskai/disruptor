@@ -1,14 +1,11 @@
 ---- light / ericw-tools 2.0.0-alpha10 ----
-LoadBSPFile: 'test06.bsp'
+LoadBSPFile: 'test07.bsp'
 BSP is version Quake BSP bsp29
 INFO: using built-in palette.
-ConvertTextures: WARNING: invalid size data for 
-Loading extended texinfo flags from test06.texinfo.json...
-Loading extended content flags from test06.content.json...
-43 entities read, 13 are lights.
+Loading extended texinfo flags from test07.texinfo.json...
+Loading extended content flags from test07.content.json...
+3 entities read, 1 are lights.
 .lit colored light output requested on command line.
-BSPX colored light output requested on command line.
-BSPX light directions output requested on command line.
 
 --- Options Summary ---
     "dist" was set to "1.000000" (from map)
@@ -27,32 +24,34 @@ BSPX light directions output requested on command line.
     "sunlight_mangle" was set to "-3.3484866e-08 -0.76604444 -0.6427876" (from map)
     "sunlight_penumbra" was set to "20.000000" (from map)
     "surflight_radiosity" was set to "1" (from command line)
+    "lightmap_scale" was set to "4" (from map)
+    "world_units_per_luxel" was set to "1.000000" (from command line)
     "exportobj" was set to "1" (from command line)
-    "lmshift" was set to "16" (from command line)
 
 DecompressAllVis: invalid visofs for leaf 0
+Forcing lightmap scale of 4qu
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	352 sky faces
-	9111 solid faces
+	0 sky faces
+	6 solid faces
 	0 filtered faces
 	0 shadow-casting skip faces
-SetupLights: 13 initial lights
-SetupLights: 13 after surface lights
-SetupLights: 13 after jittering
-Final count: 13 lights, 129 suns in use.
+SetupLights: 1 initial lights
+SetupLights: 1 after surface lights
+SetupLights: 1 after jittering
+Final count: 1 lights, 129 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
-map uses color: true
-lightmap size (total): 4584384
+map uses color: false
+lightmap size (total): 782464
 Lighting Completed.
 
-Writing test06.lit
-max 4 styles per face, 1 used
-Wrote test06.obj
+Writing test07.lit
+DECOUPLED_LM BSPX lump written
+Wrote test07.obj
 0 switchable light styles (32 max)
-Writing test06.bsp as Quake BSP bsp29
-2.013s seconds elapsed
+Writing test07.bsp as Quake BSP bsp29
+0.467s seconds elapsed
 0 empty lightmaps
 
 

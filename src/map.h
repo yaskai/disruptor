@@ -88,7 +88,7 @@ typedef struct {
 
 } CheckPointList;
 
-void LoadMapFile(BrushPool *brush_pool, char *path, Model *map_model, SpawnList *spawn_list);
+void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list);
 BrushPool ExpandBrushes(BrushPool *brush_pool, Vector3 aabb_extents);
 
 typedef struct {

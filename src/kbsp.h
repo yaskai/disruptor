@@ -231,6 +231,10 @@ typedef struct {
 	i32 miptex_lump_offset;
 
 	Lightmap lm;
+	Shader lm_shader;
+
+	u8 *lm_shift;
+	u8 *lm_rgb;
 
 } Bsp_Data;
 
@@ -282,11 +286,10 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
 bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
-
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
 
-Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, Bsp_Face *face);
-FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, Bsp_Face *face);
+Vector2 Bsp_FaceLightmapSize(Bsp_Data *bsp, int face_id);
+FaceLightmapInfo GetFaceLightmapInfo(Bsp_Data *bsp, int face_id);
 Lightmap BuildLightmap(Bsp_Data *bsp, char *path);
 
 #endif

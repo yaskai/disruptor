@@ -2,9 +2,10 @@
 
 --- Options Summary ---
     "forcegoodtree" was set to "1" (from command line)
+    "wrbrushes" was set to "1" (from command line)
 
-Input file: /home/kai/projects/disruptor/./resources/maps/06/test06.map
-Output file: /home/kai/projects/disruptor/./resources/maps/06/test06.bsp
+Input file: /home/kai/projects/disruptor/resources/maps/06/test06.map
+Output file: /home/kai/projects/disruptor/resources/maps/06/test06.bsp
 
 INFO: using built-in palette.
        46 entities
@@ -78,8 +79,8 @@ INFO: calculating BSP for 977 brushes with 5846 sides
      9,463 faces
 Processing hull 1...
 Processing hull 2...
-Writing ./resources/maps/06/test06.bsp as Quake BSP bsp29
-Wrote ./resources/maps/06/test06.bsp
+Writing test06.bsp as Quake BSP bsp29
+Wrote test06.bsp
 
 count   lump name    byte size 
       1 models               64
@@ -96,8 +97,11 @@ count   lump name    byte size
      12 textures         547544
         lightdata             0
         visdata               0
-        entdata            4545
+        entdata            4555
 
-1.532s seconds elapsed
+BSPX lump name   byte size 
+BRUSHLIST             29612
+
+1.586s seconds elapsed
 
 
