@@ -454,7 +454,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 					ct->velocity.y = hvel.y;
 
 					// Apply some extra gravity, to fall more into target
-					ct->velocity.z -= (BUG_GRAV * 0.33f) * dt;
+					ct->velocity.z -= (BUG_GRAV) * dt;
 				}
 				// **
 			}

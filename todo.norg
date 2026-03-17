@@ -81,10 +81,10 @@ ___
 
 ** (-) Lit:
 *** (x) TrenchBroom .fgd setup for lights
-*** (-) import .lit file 
-*** (-) bsp face texture atlas generation
+*** (x) import .lit file 
+*** (x) bsp face texture atlas generation
 *** (-) lighting manager/wrapper
-*** (-) write lighting shader
+*** (x) write lighting shader
 
 ** (-) Optimized:
 *** (x) import .vis file

@@ -36,7 +36,7 @@ INFO: calculating BSP for 974 brushes with 5817 sides
     3,653 leafs total
     22 max tree height
     14 avg tree height
-    17,367 tree portals
+    17,366 tree portals
     351 outside leaves
     0 detail filled leafs
       974 brushes
@@ -88,7 +88,7 @@ count   lump name    byte size
    3733 nodes             89592
     556 texinfos          22240
    9509 faces            190180
-   6996 clipnodes         55968
+   6998 clipnodes         55984
    1995 leafs             55860
   11314 marksurfaces      22628
   21091 edges             84364
@@ -101,6 +101,6 @@ count   lump name    byte size
 BSPX lump name   byte size 
 BRUSHLIST             29512
 
-1.306s seconds elapsed
+1.296s seconds elapsed
 
 
