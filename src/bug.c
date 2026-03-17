@@ -417,7 +417,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->comp_ai.state == STATE_DEAD)
 				continue;
 
-			bool height_check = (ct->position.z >= enemy_ent->comp_transform.position.z - 16);
+			bool height_check =
+				(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 64);
+
 			if(bug_bounce == 0) {
 				height_check = true;
 			}
@@ -444,12 +446,15 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 					Vector3 to_targ = Vector3Subtract(targ_xy, self_xy);
 
 					float into = Vector3DotProduct(to_targ, Vector3Normalize(hvel));
-					if(into < 0) {
-						ct->velocity = Vector3Subtract(ct->velocity, Vector3Scale(to_targ, into * 0.1f));
+					if(into <= -0.1f) {
+						hvel = Vector3Subtract(hvel, Vector3Scale(to_targ, into));
 					}
 
+					ct->velocity.x = hvel.x;
+					ct->velocity.y = hvel.y;
+
 					// Apply some extra gravity, to fall more into target
-					//ct->velocity.z -= (BUG_GRAV * 0.33f) * dt;
+					ct->velocity.z -= (BUG_GRAV * 0.33f) * dt;
 				}
 				// **
 			}

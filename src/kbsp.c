@@ -522,7 +522,10 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		int offsets[num_lumps];
 		int sizes[num_lumps];
 
-		int lm_shift_id = -1, lm_rgb_id = -1, lm_decoupled_id = -1;
+		int lm_shift_id = -1; 
+		int lm_rgb_id = -1; 
+		int lm_decoupled_id = -1;
+		int lm_grid_id = -1;
 
 		for(int i = 0; i < num_lumps; i++) {
 			char name[24];
@@ -541,6 +544,8 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 				lm_rgb_id = i;
 			if(memcmp(name, "DECOUPLED_LM", strlen("DECOUPLED_LM")) == 0)
 				lm_decoupled_id = i;
+			if(memcmp(name, "LIGHTGRID_OCTREE", strlen("LIGHTGRID_OCTREE")) == 0)
+				lm_grid_id = i;
 		}
 
 		for(int i = 0; i < num_lumps; i++) {
@@ -1056,6 +1061,12 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 		Texture2D mat_texture = materials[HashFetch(&material_hashmap, bsp->miptex[tex_id].name)].maps->texture;
 		models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat_texture;
 		models[i].materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
+
+		char pref[3];
+		memcpy(pref, bsp->miptex[tex_id].name, sizeof(pref));
+		if(strcmp(pref, "sky") == 0)
+			continue;
+
 		models[i].materials[0].shader = bsp->lm_shader;
 	}
 
