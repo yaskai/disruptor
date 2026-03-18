@@ -601,9 +601,8 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 		HashInsert(&material_hashmap, format, i);
 
-		//Image img = LoadImage(mat_list.paths[i]);
-		//textures[i] = LoadTextureFromImage(img);
 		textures[i] = LoadTexture(mat_list.paths[i]);
+		SetTextureFilter(textures[i], TEXTURE_FILTER_ANISOTROPIC_16X);
 
 		materials[i] = LoadMaterialDefault();
 		materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = textures[i];
@@ -723,7 +722,8 @@ bool Bsp_RecursiveTrace(Bsp_Hull *hull, int node_num, Vector3 point_A, Vector3 p
 	for(short i = 0; i < 3; i++)
 		m.v[i] = a.v[i] + fraction*(b.v[i] - a.v[i]);
 
-	Vector3 mid = (Vector3) { m.v[0], m.v[1], m.v[2] };
+	//Vector3 mid = (Vector3) { m.v[0], m.v[1], m.v[2] };
+	Vector3 mid = *(Vector3 *) m.v;
 
 	short side = (tA >= 0) ? 0 : 1;
 	if(Bsp_RecursiveTrace(hull, node->children[side], point_A, mid, intersection))

@@ -649,10 +649,13 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 	);
 
 	bool use_down = false;
-	if(down_pm.block & BLOCK_GROUND && (down_dist > dist_base + EPSILON) && (down_pm.end_pos.z > base_pm.end_pos.z + EPSILON))
+	if((down_pm.block & BLOCK_GROUND) && (down_dist > dist_base + 0.001f) && (down_pm.end_pos.z > base_pm.end_pos.z + 0.1f))
 		use_down = true;
 
 	if(tr.start_solid && tr.all_solid)
+		use_down = false;
+
+	if(tr.plane.normal[2] < 1.0f)
 		use_down = false;
 
 	if(use_down) {
