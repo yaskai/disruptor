@@ -30,4 +30,6 @@ void PlayerGunUpdateShotgun(PlayerGun *player_gun, float dt);
 void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt);
 void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt);
 
+void PlayerGunReload(PlayerGun *player_gun, float dt);
+
 #endif

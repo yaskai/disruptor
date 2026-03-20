@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "player_gun.h"
@@ -43,26 +44,55 @@ typedef struct {
 } PlayerGunRefs;
 PlayerGunRefs gun_refs = {0};
 
+comp_Weapon *curr_gun = NULL;
 comp_Weapon weapons[] = {
-	// Pistol
+	// Disruptor
 	(comp_Weapon) {
-		.id = WEAP_PISTOL,
-		.damage = 1
-	},
-	// Shotgun
-	(comp_Weapon) {
-		.id = WEAP_SHOTGUN,
-		.damage = 3,
+		.id = WEAP_DISRUPTOR,
+		.damage = 0,
+
+		.clip_size = 0,
+		.in_clip = 0,
+		.ammo = 0,
+
+		.reload_time_amnt = 100,
+		.reload_timer = 0,
 	},
 	// Revolver
 	(comp_Weapon) {
 		.id = WEAP_REVOLVER,
 		.damage = 3,
+
+		.clip_size = 6,
+		.in_clip = 6,
+		.ammo = 24,
+
+		.reload_time_amnt = 8,
+		.reload_timer = 0,
 	},
-	// Disruptor
+	// Pistol
 	(comp_Weapon) {
-		.id = WEAP_DISRUPTOR,
-		.damage = 0,
+		.id = WEAP_PISTOL,
+		.damage = 1,
+
+		.clip_size = 12,
+		.in_clip = 12,
+		.ammo = 24,
+
+		.reload_time_amnt = 2,
+		.reload_timer = 0,
+	},
+	// Shotgun
+	(comp_Weapon) {
+		.id = WEAP_SHOTGUN,
+		.damage = 3,
+
+		.clip_size = 8,
+		.in_clip = 8,
+		.ammo = 24,
+
+		.reload_time_amnt = 4,
+		.reload_timer = 0,
 	},
 };
 
@@ -82,14 +112,6 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 	models[WEAP_SHOTGUN] 	= LoadModel("resources/models/weapons/pistol_00.glb");
 	models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00.glb");
 	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_00.glb");
-	//player_gun->model = LoadModel("resources/models/weapons/rev_00.glb");
-	
-	/*
-	for(int i = 0; i < 4; i++) {
-		Matrix mat = MatrixRotateX(90*DEG2RAD);
-		models[i].transform = mat;
-	}
-	*/
 
 	gun_pos = REVOLVER_REST;
 	gun_rot = REVOLVER_ANGLE_REST;
@@ -100,7 +122,9 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 	gun_refs.effect_manager = effect_manager;
 
 	//player->comp_weapon.id = WEAP_DISRUPTOR;
-	player_gun->current_gun = WEAP_DISRUPTOR;
+	//player_gun->current_gun = WEAP_DISRUPTOR;
+	player_gun->current_gun = WEAP_REVOLVER;
+	curr_gun = &weapons[player_gun->current_gun];
 
 	player_gun->model = models[player_gun->current_gun];
 	mat = player_gun->model.transform;
@@ -120,11 +144,13 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 
 	int next_gun = player_gun->current_gun + scroll;
 	player_gun->current_gun = (next_gun % 2 == 0) ? WEAP_DISRUPTOR : WEAP_REVOLVER;
-	gun_refs.player->comp_weapon = weapons[player_gun->current_gun];
+	//gun_refs.player->comp_weapon = weapons[player_gun->current_gun];
 
 	//gun_refs.player->comp_weapon.id = (gun_refs.player->comp_weapon.id + scroll) % 2;
 	//player_gun->current_gun = gun_refs.player->comp_weapon.id;
 	//gun_refs.player->comp_weapon = weapons[gun_refs.player->comp_weapon.id];
+
+	curr_gun = &weapons[player_gun->current_gun];
 
 	if(gun_refs.player->comp_ai.state == STATE_DEAD)
 		return;
@@ -236,6 +262,22 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 	}
 
 	DrawText(TextFormat("_H_%d", gun_refs.player->comp_health.amount), 64, 980, 80, ColorAlpha(SKYBLUE, 0.95f));	
+	DrawText(
+		TextFormat("%d | %d", curr_gun->in_clip, curr_gun->ammo),
+		1640,
+		980,
+		80,
+		ColorAlpha(SKYBLUE, 0.95f)
+	);
+	/*
+	DrawText(
+		TextFormat("%d | %d", 6, 24),
+		1640,
+		980,
+		80,
+		ColorAlpha(SKYBLUE, 0.95f)
+	);
+	*/
 }
 
 void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
@@ -301,6 +343,8 @@ void PlayerShootPistol(PlayerGun *player_gun, EntityHandler *handler, MapSection
 	//if(dist >= 20)
 	vEffectsAddTrail(gun_refs.effect_manager, trail_start, trail_end);
 	gun_refs.effect_manager->trails[gun_refs.effect_manager->trail_count-1].timer = 0.75f;
+
+	curr_gun->in_clip--;
 }
 
 void PlayerShootShotgun(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
@@ -338,6 +382,12 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 
 	//if(dist >= 20)
 	vEffectsAddTrail(gun_refs.effect_manager, trail_start, trail_end);
+
+	curr_gun->in_clip--;
+	if(curr_gun->in_clip <= 0) {
+		curr_gun->in_clip = curr_gun->clip_size;
+		curr_gun->ammo -= curr_gun->clip_size;
+	}
 }
 
 void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
@@ -383,5 +433,9 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 	float angle = atan2f(-ct->forward.x, -ct->forward.y);
 	bug_ent->model.transform = MatrixRotateY(angle);
 	bug_ent->model.transform = MatrixMultiply(bug_ent->model.transform, MatrixRotateX(90*DEG2RAD));
+}
+
+void PlayerGunReload(PlayerGun *player_gun, float dt) {
+
 }
 
