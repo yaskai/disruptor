@@ -436,6 +436,7 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 }
 
 void PlayerGunReload(PlayerGun *player_gun, float dt) {
-
+	curr_gun->ammo -= curr_gun->clip_size;
+	curr_gun->in_clip = curr_gun->clip_size;
 }
 
