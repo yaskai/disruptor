@@ -200,10 +200,10 @@ void PlayerUpdate(Entity *player, float dt) {
 
 		if(!step_frame) {
 			//ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 12, dt * 100);
-			ptr_cam->position.z = player->comp_transform.position.z + 12;
+			ptr_cam->position.z = player->comp_transform.position.z + 16;
 		} else {
-			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 12, dt * 17.5f);
-			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + 12)) <= 0.75f) 
+			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 16, dt * 17.5f);
+			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + 16)) <= 0.75f) 
 				step_frame = false;
 		}
 
@@ -729,86 +729,6 @@ int pm_CheckHull(Vector3 point, u16 hull_id) {
 	dbg_hull_norm = worst_norm;
 
 	return hull_id;
-}
-
-#define CORRECTION_STEPS 16
-#define NUDGE_EPS 0.001f
-short pm_NudgePosition(comp_Transform *ct, u16 hull_id) {
-	puts("--------------------------");
-	puts("pm_NudgePosition()");
-
-	Hull *hull = &ptr_sect->_hulls[BVH_BOX_MED].arr[hull_id];
-	short moved = 0;
-
-	for(short i = 0; i < CORRECTION_STEPS; i++) {
-		float best_pen = 1.0f;
-		Plane *best_plane = NULL;
-
-		for(short j = 0; j < hull->plane_count; j++) {
-			Plane *pl = &hull->planes[j];
-			float dist = PlaneDistance(*pl, ct->position);
-
-			if(dist > 0)
-				continue;
-
-			if(dist < best_pen) {
-				best_pen = dist;
-				best_plane = pl;
-			}
-		}
-
-		if(!best_plane) {
-			puts("no best plane");
-			return moved;
-		}
-
-		printf("best plane: \n");
-		printf("normal: { %f %f %f }\n", best_plane->normal.x, best_plane->normal.y, best_plane->normal.z);
-
-		Vector3 push = Vector3Scale(best_plane->normal, -(best_pen + NUDGE_EPS));
-		printf("push: { %f %f %f }\n", push.x, push.y, push.z);
-
-		ct->position = Vector3Add(ct->position, push);
-		
-		/*
-		while(PlaneDistance(*best_plane, ct->position) > 0) {
-			Vector3 push = Vector3Scale(best_plane->normal, best_pen + NUDGE_EPS);
-			ct->position = Vector3Subtract(ct->position, push);
-
-			if(PlaneDistance(*best_plane, ct->position) > 0)
-				break;
-		}
-		*/
-	}
-
-	return moved;
-}
-
-int pm_CheckHullEx(Vector3 point, u16 node_id) {
-	float worst_dist = 0;
-	Vector3 worst_norm = Vector3Zero();
-
-	BvhNode *node = &ptr_sect->bvh[1].nodes[node_id];
-	for(u16 i = 0; i < node->tri_count; i++) {
-		u16 tri_id = ptr_sect->bvh->tris.ids[node->first_tri + i];
-		Tri tri = ptr_sect->bvh[1].tris.arr[tri_id];
-
-		Plane pl = TriToPlane(tri);
-		float dist = Vector3DotProduct(pl.normal, point) - pl.d;
-
-		if(dist < worst_dist) {
-			worst_dist = dist;
-			worst_norm = pl.normal;
-		}
-
-		if(dist > 0)
-			return -1;
-
-		dbg_hull_pen = worst_dist;
-		dbg_hull_norm = worst_norm;
-	}
-
-	return node_id;
 }
 
 // Update camera effects, tilt, bob, etc.

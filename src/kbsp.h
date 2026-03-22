@@ -7,6 +7,34 @@
 #define KBSP_H_
 
 typedef struct {
+	Vector3 grid_ext;
+	int grid_size[3];
+	Vector3 grid_min;
+	u8 num_styles;
+	u32 root;
+
+} lm_OctreeHeader; 
+
+typedef struct {
+	int x, y, z;
+	u32 children[8];
+	
+} lm_OctreeNode;
+
+typedef struct {
+	u8 r, g, b;
+	u8 style;
+
+} lm_OctreeSample;
+
+typedef struct {
+	u8 used;
+	u8 occluded;
+	lm_OctreeSample samples[4];
+
+} lm_SampleList;
+
+typedef struct {
 	Texture2D tex;
 	Rectangle *uvs;	
 	int uv_count;
@@ -199,7 +227,8 @@ typedef struct {
 
 // Model
 typedef struct {
-	float mins[3], maxs[3];
+	//float mins[3], maxs[3];
+	BoundingBox bounds;
 	float origin[3];
 
 	i32 head_nodes[4];
@@ -247,7 +276,6 @@ typedef struct {
 	Lightmap lm;
 	Shader lm_shader;
 
-	u8 *lm_shift;
 	u8 *lm_rgb;
 
 	Lm_Decoupled *decouple_lm;
@@ -304,6 +332,6 @@ int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
 bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
-Lightmap BuildLightmap(Bsp_Data *bsp, char *path);
+Lightmap BuildLightmap(Bsp_Data *bsp);
 
 #endif

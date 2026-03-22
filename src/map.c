@@ -560,24 +560,6 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		BvhConstruct(&sect, &sect.bvh[i], volume, &sect._tris[i]);
 		if(GetLogState()) printf("bvh[%d] node count: %d\n", i, sect.bvh->count);
 	}
-
-	//rmeshes_collection.rmeshes = calloc(model.meshCount, sizeof(MapMesh)); 
-	//BoundingBox model_bounds = GetModelBoundingBox(model);
-	//Vector3 model_center = BoxCenter(model_bounds);
-
-	/*
-	for(u16 i = 0; i < model.meshCount; i++) {
-		//BoundingBox mesh_bounds = GetMeshBoundingBox(model.meshes[i]);
-
-		rmeshes_collection.rmeshes[rmeshes_collection.count++] = (MapMesh) {
-			.mesh_id = i,
-			.material_id = model.meshMaterial[1],
-			.matrix = model.transform,
-			//.position = BoxCenter(mesh_bounds)
-			.position = brush_pools[0].brushes[i].center
-		};
-	}
-	*/
 	
 	// 4. Copy/convert brushes to hulls
 	for(short i = 0; i < 3; i++) {
@@ -614,7 +596,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		if(strcmp(GetFileExtension(path_list.paths[i]), ".bsp") == 0) bsp_id = i;
 
 	if(bsp_id == -1) { 
-		MessageError("Missing .bsp file", NULL);
+		MessageError("Missing .bsp file", path);
 		return sect;
 	}
 
@@ -623,26 +605,15 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	for(short i = 0; i < 4; i++)
 		sect.bsp[i] = Bsp_BuildHull(&sect.bsp_data, i);
 
-	/*
-	for(int i = 0; i < sect.bsp[1].last_node - 1; i++) {
-		Bsp_ClipNode *node = &sect.bsp[1].nodes[i];
-		puts("-------------------------");
-		printf("planenum: %d\n", node->planenum);
-		printf("front: %d\n", node->children[0]);
-		printf("back: %d\n", node->children[1]);
-	}
-	*/
-
 	short lit_path_id = 0;
 	for(short i = 0; i < path_list.count; i++)
 		if(strcmp(GetFileExtension(path_list.paths[i]), ".lit") == 0) lit_path_id = i;
 
-	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data, path_list.paths[lit_path_id]);
-	//sect.bsp_data.lm.tex = LoadTexture("litmap_correct.png");
+	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data);
 
 	model_list.count = 0;
-	model_list.models = malloc(sizeof(Model) * 8000);
-	model_list.ids = malloc(sizeof(int) * 8000);
+	model_list.models = malloc(sizeof(Model) * 4096);
+	model_list.ids = malloc(sizeof(int) * 4096);
 
 	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
 		int temp_count;

@@ -33,6 +33,7 @@ BSPX light directions output requested on command line.
     "extra" was set to "4" (from command line)
     "world_units_per_luxel" was set to "16.000000" (from command line)
     "lightgrid" was set to "1" (from command line)
+    "lightgrid_format" was set to "octree" (from command line)
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
@@ -63,7 +64,7 @@ octree leafs 4416 overhead 105984 bytes
       3401275 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test06.bsp as Quake BSP bsp29
-54.715s seconds elapsed
+68.543s seconds elapsed
 0 empty lightmaps
 
 

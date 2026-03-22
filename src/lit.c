@@ -7,29 +7,8 @@
 #include "kbsp.h"
 #include "../include/log_message.h"
 
-Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
+Lightmap BuildLightmap(Bsp_Data *bsp) {
 	Lightmap lm = (Lightmap) {0};
-
-	/*
-	char header[4] = {0};
-	int version; 
-	int len = GetFileLength(path) - 8;
-
-	FILE *pf = fopen(path, "rb");
-	if(!pf) {
-		MessageError("ERROR: Could not load .lit", path);
-		return lm;
-	}
-
-	fread(header, 4, 1, pf);
-	printf("HEADER: %s\n", header);
-
-	fread(&version, 4, 1, pf);
-	printf("VERSION: %d\n", version);
-
-	u8 *data = calloc(len, 1);
-	fread(data, len, 1, pf);
-	*/
 	
 	lm.uvs = calloc(bsp->num_faces, sizeof(Rectangle));
 	lm.uv_count = bsp->num_faces;
@@ -58,11 +37,6 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 	}
 
 	int atlas_h = cY + row_h;
-	int powtwo = 1;
-	while(powtwo < atlas_h) {
-		powtwo = powtwo << 1;
-	}
-	atlas_h = powtwo;
 
 	u8 *px = calloc(atlas_w * atlas_h * 4, 1);
 	for(int i = 0; i < atlas_w * atlas_h * 4; i+=4) {
@@ -75,10 +49,8 @@ Lightmap BuildLightmap(Bsp_Data *bsp, char *path) {
 	for(int i = 0; i < bsp->num_faces; i++) {
 		Lm_Decoupled *dlm = &bsp->decouple_lm[i];
 
-		/*
 		if(dlm->w == 0 || dlm->h == 0)
 			continue;
-		*/
 
 		int w = dlm->w;
 		int h = dlm->h;

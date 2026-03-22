@@ -108,7 +108,7 @@ void GameRenderSetup(Game *game) {
 	qr_img = LoadTexture("resources/qr.png");
 }
 
-void GameLoadTestScene1(Game *game, char *path) {
+void GameLoadScene(Game *game, char *path) {
 	SpawnList spawn_list = (SpawnList) {0}; 
 	game->test_section = BuildMapSect(path, &spawn_list);
 	game->test_section.navgraphs = malloc(sizeof(NavGraph) * 32);
@@ -121,7 +121,6 @@ void GameLoadTestScene1(Game *game, char *path) {
 	Entity bug = (Entity) {0};
 	bug.type = ENT_DISRUPTOR;
 	bug.flags |= ENT_ACTIVE;
-
 	// ----------------------------------------------------------------------------------------
 
 	game->test_section.base_navgraph = (NavGraph) {
@@ -151,8 +150,8 @@ void GameLoadTestScene1(Game *game, char *path) {
 		&game->effect_manager
 	);
 
-	BugInit(&game->ent_handler.ents[game->ent_handler.bug_id], &game->ent_handler, &game->test_section);
-
+	// -----------------------------------------------------------------------------------------------------------------
+	// *
 	BuildNavEdges(&game->test_section.base_navgraph);
 
 	game->test_section.navgraphs[0] = (NavGraph) {
@@ -166,7 +165,10 @@ void GameLoadTestScene1(Game *game, char *path) {
 
 	SubdivideNavGraph(&game->test_section, &game->test_section.base_navgraph);
 	AiNavSetup(&game->ent_handler, &game->test_section);
+	// *
+	// -----------------------------------------------------------------------------------------------------------------
 
+	BugInit(&game->ent_handler.ents[game->ent_handler.bug_id], &game->ent_handler, &game->test_section);
 	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], game->ent_handler.player_start);
 
 	game->ent_handler.spawn_list.count = spawn_list.count;
