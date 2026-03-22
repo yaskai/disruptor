@@ -303,7 +303,7 @@ void GameDraw(Game *game, float dt) {
 		BeginMode3D(game->camera_debug);
 
 			if(IsKeyPressed(KEY_U)) debug_draw_flags ^= DEBUG_DRAW_FULL_MODEL;
-			if(debug_draw_flags & DEBUG_DRAW_FULL_MODEL) DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));
+			//if(debug_draw_flags & DEBUG_DRAW_FULL_MODEL) DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));
 
 			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, RAYWHITE);
 			//DrawBoundingBox(game->test_section.bvh.nodes[0].bounds, WHITE);

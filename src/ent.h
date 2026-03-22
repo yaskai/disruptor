@@ -129,13 +129,12 @@ typedef struct {
 	short travel_type;
 	short damage;
 
-	u8 id;
+	int clip_size;
+	int in_clip;
+	int ammo;
 
 	u8 ammo_type;
-	u8 ammo;
-
-	u8 clip_size;
-	u8 in_clip;
+	u8 id;
 
 } comp_Weapon;
 

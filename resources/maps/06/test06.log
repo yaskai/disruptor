@@ -101,6 +101,6 @@ count   lump name    byte size
 BSPX lump name   byte size 
 BRUSHLIST             31816
 
-1.498s seconds elapsed
+2.012s seconds elapsed
 
 

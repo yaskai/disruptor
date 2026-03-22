@@ -63,7 +63,7 @@ octree leafs 4416 overhead 105984 bytes
       3401275 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test06.bsp as Quake BSP bsp29
-66.537s seconds elapsed
+54.715s seconds elapsed
 0 empty lightmaps
 
 

@@ -172,6 +172,12 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 		 	PlayerGunUpdateDisruptor(player_gun, dt);
 			break;
 	}	
+
+	if(player_gun->current_gun == WEAP_DISRUPTOR)
+		return;
+
+	if(IsKeyPressed(KEY_R)) 
+		PlayerGunReload(player_gun, 1);
 }
 
 void PlayerGunUpdatePistol(PlayerGun *player_gun, float dt) {
@@ -385,8 +391,8 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 
 	curr_gun->in_clip--;
 	if(curr_gun->in_clip <= 0) {
-		curr_gun->in_clip = curr_gun->clip_size;
-		curr_gun->ammo -= curr_gun->clip_size;
+		curr_gun->in_clip = 0;
+		PlayerGunReload(player_gun, 1);
 	}
 }
 
@@ -436,7 +442,34 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 }
 
 void PlayerGunReload(PlayerGun *player_gun, float dt) {
-	curr_gun->ammo -= curr_gun->clip_size;
-	curr_gun->in_clip = curr_gun->clip_size;
+	// Already reloading, do nothing
+	/*
+	if(curr_gun->reload_timer > 0) {
+		return;
+	}
+	*/
+
+	// No more ammo available, do nothing
+	if(curr_gun->ammo <= 0) {
+		curr_gun->ammo = 0;
+		return;
+	}
+
+	// Clip is already full, do nothing
+	if(curr_gun->in_clip == curr_gun->clip_size) {
+		return;
+	}
+
+	// Fill clip
+	int clip_refill = curr_gun->clip_size - curr_gun->in_clip;
+
+	if(curr_gun->ammo + curr_gun->in_clip < curr_gun->clip_size)
+		clip_refill = curr_gun->ammo;
+
+	curr_gun->ammo -= clip_refill;
+	curr_gun->in_clip += clip_refill;
+
+	// Set timer
+	curr_gun->reload_timer = curr_gun->reload_time_amnt;
 }
 

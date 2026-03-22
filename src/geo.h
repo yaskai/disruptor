@@ -186,7 +186,7 @@ typedef struct {
 	NavGraph base_navgraph;
 	NavGraph *navgraphs;
 
-	Model model;
+	//Model model;
 
 	u16 hull_count;
 

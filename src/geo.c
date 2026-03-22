@@ -589,7 +589,7 @@ void MapSectionClose(MapSection *sect) {
 	*/
 
 	UnloadBsp(&sect->bsp_data);
-	UnloadModel(sect->model);
+	//UnloadModel(sect->model);
 }
 
 // Return empty TraceData struct

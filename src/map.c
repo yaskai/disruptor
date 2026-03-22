@@ -484,7 +484,11 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		if(strcmp(GetFileExtension(path_list.paths[i]), ".glb") == 0) model_id = i;
 	//for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".obj") == 0) model_id = i;
 
+	// * DEPRECATED!
+	// BSP is now the only method for rendering level geometry  
+	//
 	// No model, exit
+	/*
 	if(model_id == -1) {
 		MessageError("Missing model", NULL);
 		return sect;
@@ -495,6 +499,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		if(GetLogState())
 			printf("model tri_count: %d\n", sect._tris[0].count);
 	}
+	*/
 
 	// 2. Load .map file, collision, physics, ai logic, etc. 
 	Message("Loading map file...", ANSI_BLUE);
@@ -514,7 +519,6 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	spawn_list->arr = calloc(spawn_list->capacity, sizeof(EntSpawn));
 
 	BrushPool brush_pools[3] = {0};
-	//LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], &model, spawn_list);
 	LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], spawn_list);
 
 	sect._tris[0].arr = TrisFromBrushPool(&brush_pools[0], &sect._tris[0].count);

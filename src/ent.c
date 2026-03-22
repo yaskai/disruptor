@@ -268,8 +268,8 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 	grid_tick -= dt;
 	if(grid_tick < 0.0f) {
-		// Do next grid update in ~3 frames
-		grid_tick = (3*dt);
+		// Do next grid update in ~1 frames
+		grid_tick = (1*dt);
 
 		UpdateGrid(handler);
 	}
