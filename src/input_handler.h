@@ -34,6 +34,7 @@ typedef struct {
 
 #define ACTION_SHOOT		5
 #define ACTION_SHOOT_ALT 	6
+#define ACTION_RELOAD		7
 
 typedef struct {
 	InputAction actions[INPUT_ACTION_COUNT];

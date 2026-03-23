@@ -47,7 +47,7 @@ Vector3 CoordsToVec3(Coords coords, EntGrid *grid);
 
 bool CoordsInBounds(Coords coords, EntGrid *grid);
 
-typedef struct  {
+typedef struct {
 	BoundingBox bounds;
 
 	Vector3 position;

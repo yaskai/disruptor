@@ -290,10 +290,13 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 				lm_grid_id = i;
 		}
 
-		for(int i = 0; i < num_lumps; i++) {
-			printf("  bspx lump: %s ofs = %d, len = %d\n", names[i], offsets[i], sizes[i]);
+		if(GetLogState()) {
+			for(int i = 0; i < num_lumps; i++) {
+				printf("  bspx lump: %s ofs = %d, len = %d\n", names[i], offsets[i], sizes[i]);
+			}
 		}
 
+		// Read lightmap RGB data (if available)
 		if(lm_rgb_id != -1) {
 			data.lm_rgb = malloc(sizes[lm_rgb_id]);
 
@@ -301,13 +304,12 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 			fread(data.lm_rgb, 1, sizes[lm_rgb_id], pF);
 		}
 
+		// Read structural lightmap data (if available)
 		if(lm_decoupled_id != -1) {
-			puts("lm_decoupled found!");
 			int num_entries = sizes[lm_decoupled_id] / sizeof(Lm_Decoupled);
 			data.decouple_lm = malloc(sizes[lm_decoupled_id]);
 			fseek(pF, offsets[lm_decoupled_id], SEEK_SET);
 			fread(data.decouple_lm, 1, sizes[lm_decoupled_id], pF);
-			printf(" %d entries\n", num_entries);
 		}
 	}
 	// ---------------------------------------------------------------------------------------
@@ -511,8 +513,8 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 		t1 =  p1_f3.v[plane->type] - plane->dist;
 		t2 =  p2_f3.v[plane->type] - plane->dist;
 
-		p1 = (Vector3) { p1_f3.v[0], p1_f3.v[1], p1_f3.v[2] };
-		p2 = (Vector3) { p2_f3.v[0], p2_f3.v[1], p2_f3.v[2] };
+		p1 = *(Vector3 *) p1_f3.v;
+		p2 = *(Vector3 *) p2_f3.v;
 
 	} else {
 
@@ -544,7 +546,7 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 	for(short i = 0; i < 3; i++) 
 		m.v[i] = p1_f3.v[i] + frac*(p2_f3.v[i] - p1_f3.v[i]);
 
-	mid = (Vector3) { m.v[0], m.v[1], m.v[2] };
+	mid = *(Vector3 *) m.v;
 
 	side = (t1 < 0);
 
@@ -589,7 +591,7 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 		for(short i = 0; i < 3; i++) 
 			m.v[i] = p1_f3.v[i] + frac*(p2_f3.v[i] - p1_f3.v[i]);
 
-		mid = (Vector3) { m.v[0], m.v[1], m.v[2] };
+		mid = *(Vector3 *) m.v;
 	}
 
 	trace->fraction = mid_frac;
@@ -785,8 +787,7 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 		models[i] = LoadModelFromMesh(meshes[i]);
 
 		int tex_id = tex_slot_ids[i];
-		//if(tex_id >= bsp->num_miptex || bsp->textures[tex_id].id == 0)
-			//continue;
+
 		if(tex_id >= bsp->num_miptex) 
 			continue;
 

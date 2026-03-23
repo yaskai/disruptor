@@ -343,13 +343,9 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 		float angle = sinf(GetTime() * 1.5f);
 		angle = Clamp(angle, angle_min, angle_max);
 
-		//angle = angle + ent->comp_transform.start_angle;
-
-		//if(ent->comp_ai.disrupt_timer > 0)
 		if(ent->comp_weapon.ammo > 0) {
 			ent->comp_transform.forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
 		} else {
-			//ent->comp_transform.targ_look = ent->comp_transform.forward;		
 			ent->comp_ai.task_data.task_id = TASK_WAIT_TIME;
 		}
 
@@ -452,9 +448,8 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 			weap->ammo = weap->clip_size;
 	}
 
-	if(weap->ammo <= 0) {
+	if(weap->ammo <= 0) 
 		return;
-	}
 
 	Vector3 trace_start = ct->position;
 	trace_start.z += 12;
@@ -476,7 +471,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	// Change this from hardcoded to data specific when ammo clip system implemented.
 	// Purpose of the dummy value is to cause no dammage on the first few shots,
 	// gives the player a warning for fairness.
-	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 2 && !(ai->input_mask & AI_INPUT_LOST_PLAYER));
+	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 2);
 	Vector3 bullet_dest = TraceBullet(handler, sect, trace_start, dir, ent->id, &hit, dummy);
 
 	//Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
@@ -488,16 +483,9 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	}
 
 	float dist = Vector3Distance(trail_start, trail_end);
-
-	// *NOTE:
-	// This just hides a bug with the turret rotation,
-	// delete check when fixed
-	//if(weap->ammo < 60)
-		//vEffectsAddTrail(handler->effect_manager, trail_start, trail_end);
-	
 	vEffectsAddTrail(handler->effect_manager, trail_start, trail_end);
 
-	weap->cooldown = 0.075f;
+	weap->cooldown = 0.065f;
 	weap->ammo--;
 }
 

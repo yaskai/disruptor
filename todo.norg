@@ -165,8 +165,7 @@ ___
 ___
 * *Animation*
 
-  ## !!! Choose Method !!! ##
-
+  *_Choose Method!_*
    options are:
    - vertex frames (possibly with interpolation)
    - gpu skinning
