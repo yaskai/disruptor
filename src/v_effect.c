@@ -66,7 +66,6 @@ void vEffectsAddTrail(vEffect_Manager *manager, Vector3 start, Vector3 end) {
 		.point_A = start,
 		.point_B = end,
 		.timer = 1,
-		//.timer = 10,
 		.active = true
 	}; 	
 

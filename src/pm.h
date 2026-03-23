@@ -75,13 +75,14 @@ int pm_NudgePositionEx(comp_Transform *ct, u16 node_id);
 
 void pm_AirFriction(comp_Transform *ct, float dt);
 
+// Step height
 #define PM_STEP_Z 16.0f
 
 #define BLOCK_GROUND 	0x01
 #define BLOCK_STEP	 	0x02
 u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 blocked);
 
-#define BASE_JUMP_FORCE 260.0f
+#define BASE_JUMP_FORCE 210.0f
 void pm_Jump(comp_Transform *ct, InputHandler *input);
 
 #endif

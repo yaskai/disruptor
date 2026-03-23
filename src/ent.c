@@ -1796,7 +1796,7 @@ void proj_TraceMove(Projectile *proj, Vector3 start, Vector3 wish_vel, pmTraceDa
 		dest = Vector3Add(dest, Vector3Scale(move, fraction));
 
 		if(fraction < 1.0f) {
-			pm->end_in_solid = (tr.hit) ? pm_CheckHull(dest, tr.hull_id) : -1;
+			pm->end_in_solid = (tr.hit);
 
 			//health->amount -= Vector3Length(vel) * 0.5f;
 			health->amount -= Vector3Length(vel) * 0.1f;

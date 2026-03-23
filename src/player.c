@@ -11,11 +11,11 @@
 #include "pm.h"
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
-#define PLAYER_SPEED 265.0f
+#define PLAYER_SPEED 245.0f
 #define PLAYER_MAX_SPEED 300.0f
-#define PLAYER_MAX_VEL 300.5f
+#define PLAYER_MAX_VEL 300.0f
 
-#define PLAYER_GROUND_SPEED 256.0f
+#define PLAYER_GROUND_SPEED 246.0f
 #define PLAYER_AIR_SPEED	270.0f
 
 #define PLAYER_MAX_ACCEL 15.5f
@@ -305,7 +305,6 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	if(!player_dead)
 		wish_dir = pm_GetWishDir(ct, input);
 
-	//float wish_speed = PLAYER_SPEED;
 	float wish_speed = (ct->on_ground) ? PLAYER_GROUND_SPEED : PLAYER_AIR_SPEED;
 	if(hurt_frame) wish_speed *= 0.33f;
 	if(wish_speed > PLAYER_MAX_SPEED) {
@@ -333,8 +332,6 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 
 	// 6. Movement tracing 
 	pmTraceData pm = (pmTraceData) {0};
-	//pm_TraceMove(ct, ct->position, ct->velocity, &pm, dt);
-	//pm_TraceMoveEx(ent, ct->position, ct->velocity, &pm, dt, handler);
 	if(ct->ground_normal.z == 1.0f) 
 		pm_GroundMove(ent, ct, ct->position, &pm, dt, ct->velocity, handler);
 	else 
@@ -703,33 +700,6 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 	}
 }
 
-// * NOTE:
-// Not used 
-int pm_CheckHull(Vector3 point, u16 hull_id) {
-	Hull *hull = &ptr_sect->_hulls[BVH_BOX_MED].arr[hull_id];
-	short in = 0;
-	float worst_dist = FLT_MAX;
-	Vector3 worst_norm = Vector3Zero();
-
-	for(short i = 0; i < hull->plane_count; i++) {
-		Plane *pl = &hull->planes[i];
-
-		float dist = Vector3DotProduct(pl->normal, point) - pl->d;
-
-		if(dist < worst_dist) {
-			worst_norm = pl->normal;
-			worst_dist = dist;	
-		}
-
-		if(dist >= 0)
-			return -1;
-	}
-
-	dbg_hull_pen = worst_dist;
-	dbg_hull_norm = worst_norm;
-
-	return hull_id;
-}
 
 // Update camera effects, tilt, bob, etc.
 #define TILT_MAX 0.1f
