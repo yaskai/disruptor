@@ -17,7 +17,7 @@ typedef struct {
 
 } HashMap;
 
-u64 Hash(char *key);
+int Hash(char *key);
 u32 LinearProbe(uint32_t index, uint32_t attempt, uint32_t size);
 void HashResize(HashMap *map);
 void HashInsert(HashMap *map, char *key, int val);

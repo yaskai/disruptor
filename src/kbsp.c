@@ -14,12 +14,6 @@ Material *materials;
 Texture2D *textures;
 HashMap material_hashmap = (HashMap) {0};
 
-typedef struct {
-	int face_id;
-	int lm_ofs;
-
-} faceOfs;
-
 Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Data data = (Bsp_Data) {0};
 
@@ -324,7 +318,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	materials = malloc(sizeof(Material) * mat_list.count); 
 	textures = malloc(sizeof(Texture2D) * mat_list.count); 
 	for(int i = 0; i < mat_list.count; i++) {
-		char path[128] = {0};
+		char path[255] = {0};
 		memcpy(path, mat_list.paths[i], strlen(mat_list.paths[i]));
 
 		char *sep = strrchr(path, '/');
@@ -454,7 +448,6 @@ bool Bsp_RecursiveTrace(Bsp_Hull *hull, int node_num, Vector3 point_A, Vector3 p
 	for(short i = 0; i < 3; i++)
 		m.v[i] = a.v[i] + fraction*(b.v[i] - a.v[i]);
 
-	//Vector3 mid = (Vector3) { m.v[0], m.v[1], m.v[2] };
 	Vector3 mid = *(Vector3 *) m.v;
 
 	short side = (tA >= 0) ? 0 : 1;
@@ -607,7 +600,7 @@ int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point) {
 		Bsp_Node *node = &bsp->nodes[node_num];
 		Bsp_Plane *plane = &bsp->planes[node->planenum];
 
-		Vector3 normal = (Vector3) { plane->normal[0], plane->normal[1], plane->normal[2] };
+		Vector3 normal = *(Vector3 *) plane->normal;
 		float d = Vector3DotProduct(normal, point) - plane->dist;
 
 		node_num = (d >= 0) ? node->children[0] : node->children[1];

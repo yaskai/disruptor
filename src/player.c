@@ -446,7 +446,7 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		return 0;
 	}
 
-	ct->ground_normal = (Vector3) { tr.plane.normal[0], tr.plane.normal[1], tr.plane.normal[2] };
+	ct->ground_normal = *(Vector3 *) tr.plane.normal;
 	//pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.00001f, 0);
 	pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.0f, 0);
 	if(fabsf(ct->velocity.z) < STOP_EPS) ct->velocity.z = 0;

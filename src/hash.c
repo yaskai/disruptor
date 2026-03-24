@@ -4,25 +4,25 @@
 #include <string.h>
 #include "hash.h"
 
-u64 Hash(char *key) {
-	uint64_t hash = 5381;
+int Hash(char *key) {
+	int hash = 5381;
 
-	int32_t c;
+	int c;
 	while((c = *key++) != '\0') 
 		hash = ((hash << 5) + hash) + c;
 
 	return hash;
 }
 
-u32 LinearProbe(uint32_t index, uint32_t attempt, uint32_t size) {
+u32 LinearProbe(u32 index, u32 attempt, u32 size) {
 	return (index + attempt) % size;
 }
 
 void HashResize(HashMap *map) {
-	u32 new_cap = map->capacity << 1;
+	u32 new_cap = (map->capacity << 1);
 
 	if(new_cap == 0)
-		new_cap = 1;
+		new_cap = 4;
 
 	HashNode *nodes = calloc(new_cap, sizeof(HashNode));
 
@@ -83,7 +83,7 @@ int HashFetch(HashMap *map, char *key) {
 
 	short found = 0;
 	while(attempt < map->capacity) {
-		if(!strcmp(map->nodes[id].key, key)) { 	
+		if(strcmp(map->nodes[id].key, key) == 0) { 	
 			found = 1;
 			break;
 		}
@@ -100,10 +100,11 @@ int HashFetch(HashMap *map, char *key) {
 }
 
 void DisplayNodes(HashMap *map) {
-	for(uint32_t i = 0; i < map->capacity; i++) {
+	for(u32 i = 0; i < map->capacity; i++) {
 		HashNode *node = &map->nodes[i];
-		//if(!node->key || !node->key) continue;
-		if(node->key[0] == '\0') continue;
+
+		if(node->key[0] == '\0')
+			continue;
 
 		puts("--------------------------");
 		printf("%u:	", i);
