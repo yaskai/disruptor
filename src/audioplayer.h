@@ -8,11 +8,14 @@
 typedef struct {
 	Camera3D *camera;
 
+	HashMap sound_hashmap;
+	HashMap track_hashmap;
+
 	Sound *sounds;
 	Music *tracks;
 
-	HashMap sound_hashmap;
-	HashMap track_hashmap;
+	int sound_count;
+	int track_count;
 
 } AudioPlayer;
 

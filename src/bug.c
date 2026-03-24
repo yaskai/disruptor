@@ -174,6 +174,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		}
 	}
 
+	// * NOTE: 
 	// Forgiveness,
 	// feels very bad when bug doesn't hit and lands super close to enemy
 	if(d <= 128 && *bounce >= BUG_MAX_BOUNCES ) {
@@ -181,7 +182,6 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		ct->velocity.z += 100.0f;
 		(*bounce)--;
 	}
-	// **
 }
 
 u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection *sect, u8 *bounce, EntityHandler *handler, float dt) {
@@ -317,9 +317,6 @@ void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	ent->model = LoadModel("resources/models/weapons/bug_00.glb");
 	model_dead = LoadModel("resources/models/weapons/bug_dead_00.glb");
 
-	//ent->model.transform = MatrixRotateZ(90*DEG2RAD);
-	//model_dead.transform = MatrixRotateZ(90*DEG2RAD);
-
 	ent->comp_transform.bounds = (BoundingBox) {
 		.min = (Vector3) { -4, -4, -4 },
 		.max = (Vector3) {  4,  4,  4 }
@@ -344,8 +341,6 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	}
 
 	bug_z_vel_prev = ct->velocity.z;
-
-	//ent->cell_id = CellCoordsToId(Vec3ToCoords(ct->position, &handler->grid), &handler->grid);
 
 	if(ai->state == BUG_DEFAULT) {
 		ct->position = player_ent->comp_transform.position;
@@ -374,20 +369,20 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	if(ai->state == BUG_LAUNCHED) {
 		launch_timer -= dt;
 
+		// Check if grounded
 		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
+
 		// Apply gravity
 		if(!ct->on_ground) 
 			ct->velocity.z -= BUG_GRAV * dt;
 
 		pmTraceData pm = (pmTraceData) {0};
-		//pm_AirFriction(ct, dt);
 	
 		Vector3 prev_pos = ct->position;
 		bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
 		ct->velocity = pm.end_vel;
 		ct->position = pm.end_pos;
 		
-		//ct->velocity.z = Clamp(ct->velocity.z, -BUG_MAX_VEL, BUG_MAX_VEL);
 		if(launch_timer <= 0)
 			ct->velocity = Vector3ClampValue(ct->velocity, -BUG_MAX_VEL, BUG_MAX_VEL);
 
@@ -589,6 +584,7 @@ void BugDraw(Entity *ent) {
  	} else {
 		DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
 	}
+
 	//DrawBoundingBox(ent->comp_transform.bounds, GREEN);
 }
 
@@ -625,5 +621,6 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 
 // *TODO:
 void OnHitBug(Entity *ent, short damage) {
+	// ...
 }
 
