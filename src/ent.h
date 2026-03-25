@@ -298,6 +298,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect);
 void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, Ai_TaskData *task_data, float dt);
 void AiDoState(Entity *ent, comp_Ai *ai, Ai_TaskData *task_data, float dt);
 
+// * NAVIGATION
+// Definitions found in nav.h
 int FindClosestNavNode(Vector3 position, MapSection *sect);
 void AiNavSetup(EntityHandler *handler, MapSection *sect);
 

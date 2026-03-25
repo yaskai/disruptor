@@ -638,12 +638,14 @@ void BuildNavGraph(MapSection *sect) {
 	NavGraph *navgraph = &sect->base_navgraph;
 	navgraph->edge_count = 0;
 
-	BuildNavEdges(navgraph);
+	BuildNavEdges(navgraph, sect);
 	SubdivideNavGraph(sect, navgraph);
 }
 
-#define MAX_EDGE_LENGTH (64.0f*64.0f)
-void BuildNavEdges(NavGraph *navgraph) {
+#define MAX_EDGE_LENGTH (1024.0f*1024.0f)
+void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
+	MessageDiag("BuildNavEdges()", NULL, ANSI_BLUE);
+
 	navgraph->edge_count = 0;
 	navgraph->edge_cap = 128;
 	if(navgraph->edges) 
@@ -659,17 +661,25 @@ void BuildNavEdges(NavGraph *navgraph) {
 		for(u16 j = 0; j < navgraph->node_count; j++) {
 			NavNode *node_B = &navgraph->nodes[j];
 
-			if(j == i)
-				continue;
+			if(j == i) continue;
 
 			// Using vector subtraction to get distance,
 			// doing this in case I want to integrate actual level geometry later 
 			Vector3 v = Vector3Subtract(node_A->position, node_B->position);
 			float length = Vector3LengthSqr(v);	
-		
-			// Don't build edges if nodes are too far apart
-			if(length > MAX_EDGE_LENGTH)
+
+			//Ray ray = (Ray) { .position = node_A->position, .direction = Vector3Normalize(v) };
+			//BvhTraceData tr = TraceDataEmpty();
+			//BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, FLT_MAX);
+			
+			Bsp_TraceData tr = Bsp_TraceDataEmpty();
+			if(!(Bsp_RecursiveTraceEx(&sect->bsp[0], 0, 0, 1, node_A->position, node_B->position, &tr)))
 				continue;
+
+			// Don't build edges if line between nodes are obstructed by level geometry
+			//if(tr.hit) continue;
+			// Don't build edges if nodes are too far apart
+			if(length > MAX_EDGE_LENGTH) continue;
 
 			// All checks passed, create edge
 			NavEdge edge = (NavEdge) { .id_A = i, .id_B = j };
@@ -684,7 +694,6 @@ void BuildNavEdges(NavGraph *navgraph) {
 			bool duplicate = false;
 			for(u16 k = 0; k < navgraph->edge_count; k++) {
 				NavEdge *edge = &navgraph->edges[k];
-				//if((edge->node_A == i && edge->node_B == j) || (edge->node_B == i && edge->node_A == j)) {
 				if((edge->id_A == node_A->id && edge->id_B == node_B->id) || (edge->id_B == node_A->id && edge->id_A == node_B->id)) {
 					duplicate = true;
 					break;
@@ -814,7 +823,7 @@ void SubdivideNavGraph(MapSection *sect, NavGraph *navgraph) {
 			graph.nodes[j].id = j;
 			graph.nodes[j].edge_count = 0;
 		}
-		BuildNavEdges(&graph);
+		BuildNavEdges(&graph, sect);
 		for(u16 j = 0; j < graph.edge_count; j++) {
 			NavEdge *edge = &graph.edges[j];
 
@@ -842,7 +851,7 @@ void SubdivideNavGraph(MapSection *sect, NavGraph *navgraph) {
 		*/
 	}
 
-	//printf("graph count: %d\n", sect->navgraph_count);
+	printf("graph count: %d\n", sect->navgraph_count);
 
 	free(traveled);
 }
@@ -922,14 +931,19 @@ void DebugDrawNavGraphs(MapSection *sect, Model model) {
 	for(u16 i = 0; i < sect->navgraph_count; i++) {
 		NavGraph *navgraph = &sect->navgraphs[i];
 
+		for(u16 n = 0; n < navgraph->node_count; n++) {
+			NavNode *node = &navgraph->nodes[n];
+			DrawModel(model, node->position, 1, BLUE);
+		}
+
 		for(u16 e = 0; e < navgraph->edge_count; e++) {
 			NavEdge *edge = &navgraph->edges[e];
 
 			NavNode *node_A = &navgraph->nodes[edge->id_A];
 			NavNode *node_B = &navgraph->nodes[edge->id_B];
 
-			DrawModel(model, node_A->position, 1, BLUE);
-			DrawModel(model, node_B->position, 1, BLUE);
+			//DrawModel(model, node_A->position, 1, BLUE);
+			//DrawModel(model, node_B->position, 1, BLUE);
 
 			Color line_color = (i % 2 == 0) ? MAGENTA : GREEN; 
 			DrawLine3D(node_A->position, node_B->position, line_color);

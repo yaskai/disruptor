@@ -106,7 +106,7 @@ MapSection BuildMapSect(char *file_path, SpawnList *spawn_list);
 
 void InitNavGraph(MapSection *sect);
 void BuildNavGraph(MapSection *sect);
-void BuildNavEdges(NavGraph *navgraph);
+void BuildNavEdges(NavGraph *navgraph, MapSection *sect);
 void SplitNavGraph(NavGraph *navgraph, MapSection *sect);
 void SubdivideNavGraph(MapSection *sect, NavGraph *navgraph);
 

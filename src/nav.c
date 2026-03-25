@@ -54,20 +54,6 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 			}
 		}
 	}
-
-	for(u16 i = 0; i < handler->count; i++) {
-		Entity *ent = &handler->ents[i];	
-		comp_Ai *ai = &ent->comp_ai;
-
-		if(ent->type == ENT_MAINTAINER) {
-			//printf("graph: %d\n", ai->navgraph_id);
-			//printf("node: %d\n", ai->curr_navnode_id);
-
-			//MakeNavPath(ent, &sect->navgraphs[ent->comp_ai.navgraph_id], 6);
-			//ai->curr_schedule = SCHED_PATROL;
-			//ai->task_data.task_id = TASK_MAKE_PATROL_PATH;
-		}
-	}
 }
 
 #define NULL_NODE -1
@@ -214,14 +200,10 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 	task->target_position = point;
 	
 	Vector3 dir = (Vector3Subtract(point, ct->position));
-	dir.y = 0;
+	dir.z = 0;
 	dir = Vector3Normalize(dir);
 	ct->forward = dir;
 
-	/*
-	float angle = atan2f(ct->forward.x, ct->forward.z);
-	ent->model.transform = MatrixRotateY(angle + 90 * DEG2RAD);
-	*/
 	float angle = atan2f(ct->forward.x, ct->forward.y);
 	ent->model.transform = MatrixRotateZ(angle + 90 * DEG2RAD);
 	ai->wish_dir = Vector3Add(Vector3Scale(ai->wish_dir, 0.1f), dir); 

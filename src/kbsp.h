@@ -81,12 +81,13 @@ enum LUMP_TYPES {
 	LUMP_EDGES			= 12,
 	LUMP_L_EDGES		= 13,
 	LUMP_MODELS			= 14,
-	LUMP_BSPX			= 15
+	LUMP_BSPX			= 15	// Extra lump from ericw-tools
 };
 
+// Entity property
+// Just a key value pair
 typedef struct {
-	char *key;
-	char *val;
+	char *key, *val;
 
 } Bsp_EntProp;
 

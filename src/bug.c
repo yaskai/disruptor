@@ -78,16 +78,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 				if(enemy_ai->input_mask & AI_INPUT_SELF_GLITCHED)
 					continue;
-				// **
 
-				/*
-				Vector3 to_enemy = Vector3Subtract(
-					Vector3Add(
-						Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_health.bug_point),
-						Vector3Scale(enemy_ent->comp_transform.velocity, 1)),
-					ct->position
-				);	
-				*/
 				Vector3 to_enemy = Vector3Subtract(
 					Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_health.bug_point),
 					ct->position

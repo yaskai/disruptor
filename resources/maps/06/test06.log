@@ -8,7 +8,7 @@ Input file: /home/kai/projects/disruptor/resources/maps/06/test06.map
 Output file: /home/kai/projects/disruptor/resources/maps/06/test06.bsp
 
 INFO: using built-in palette.
-       77 entities
+       80 entities
        11 unique textures
       826 texinfos
     1,320 unique planes
@@ -96,11 +96,11 @@ count   lump name    byte size
      11 textures         547540
         lightdata             0
         visdata               0
-        entdata            9627
+        entdata            9779
 
 BSPX lump name   byte size 
 BRUSHLIST             32288
 
-1.488s seconds elapsed
+1.620s seconds elapsed
 
 

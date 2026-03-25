@@ -76,7 +76,7 @@ void GameRenderSetup(Game *game) {
 	};
 
 	game->camera_debug = (Camera3D) {
-		.position = (Vector3) { -1500, 1000, -1500 },
+		.position = (Vector3) { -1500, -1500, 1000 },
 		.target = (Vector3) { 0, 0, 0 },
 		.up = UP,
 		.fovy = 90,
@@ -152,7 +152,7 @@ void GameLoadScene(Game *game, char *path) {
 
 	// -----------------------------------------------------------------------------------------------------------------
 	// *
-	BuildNavEdges(&game->test_section.base_navgraph);
+	BuildNavEdges(&game->test_section.base_navgraph, &game->test_section);
 
 	game->test_section.navgraphs[0] = (NavGraph) {
 		.node_count = game->test_section.base_navgraph.node_count,
@@ -271,9 +271,17 @@ void GameDraw(Game *game, float dt) {
 				*/
 			}
 			RenderEntities(&game->ent_handler, GetFrameTime());
-			//DebugDrawNavGraphs(&game->test_section, sphere_model);
 
 			vEffectsRun(&game->effect_manager, dt);
+
+			/*
+			for(int i = 0; i < game->test_section.base_navgraph.node_count; i++) {
+				NavNode *node = &game->test_section.base_navgraph.nodes[i];
+				DrawModel(sphere_model, node->position, 1, PURPLE);
+			}
+			*/
+
+			//DebugDrawNavGraphs(&game->test_section, sphere_model);
 
 		EndMode3D();
 
@@ -292,8 +300,8 @@ void GameDraw(Game *game, float dt) {
 		PlayerGunDraw(&game->player_gun);
 	EndTextureMode();
 
-	//if(IsKeyPressed(KEY_Z))
-		//debug_draw_flags ^= DEBUG_ENABLE;
+	if(IsKeyPressed(KEY_Z))
+		debug_draw_flags ^= DEBUG_ENABLE;
 
 	if(debug_draw_flags & DEBUG_ENABLE) {
 		// 3D Rendering, debug
@@ -347,7 +355,8 @@ void GameDraw(Game *game, float dt) {
 				}
 			}
 
-		DebugDrawNavGraphs(&game->test_section, sphere_model);
+		//DebugDrawNavGraphs(&game->test_section, sphere_model);
+		
 
 		EndMode3D();
 
