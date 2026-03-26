@@ -592,7 +592,7 @@ void MapSectionClose(MapSection *sect) {
 	//UnloadModel(sect->model);
 }
 
-// Return empty TraceData struct
+// Return empty/default TraceData struct
 BvhTraceData TraceDataEmpty() {
 	return (BvhTraceData) { 
 		.point = Vector3Zero(),

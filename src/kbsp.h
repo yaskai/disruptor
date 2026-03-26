@@ -282,6 +282,9 @@ typedef struct {
 	Lm_Decoupled *decouple_lm;
 	i32 *lm_offsets;
 
+	lm_OctreeNode *lm_oct_nodes;
+	i32 num_oct_nodes;
+
 } Bsp_Data;
 
 Bsp_Data LoadBsp(char *path, bool print_output);
@@ -334,5 +337,7 @@ bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
 Lightmap BuildLightmap(Bsp_Data *bsp);
+
+void BspRenderSetup(Bsp_Data *bsp);
 
 #endif

@@ -101,12 +101,18 @@ typedef struct {
 } RenderList;
 RenderList render_list = {0};
 
+// * NOTE: 
+// Render list will be swapped out for different system.
+// Current implementation is more expensive than just drawing the entities.
+// Could be swapped out for some sort of trace + hashing thing...
+
 void UpdateRenderList(EntityHandler *handler, MapSection *sect) {
 	render_list.count = 0;
 }
 
 float prev_pos_tick = 0.0f;
 
+// Entity update loop, called once per frame, every frame
 void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	if(!ptr_handler_self)
 		ptr_handler_self = handler;
@@ -275,6 +281,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	}
 }
 
+// Entity draw loop, every frame, draws all entities.
 void RenderEntities(EntityHandler *handler, float dt) {
 	EntGrid *grid = &handler->grid;
 
@@ -298,40 +305,12 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				BugDraw(ent);
 				break;
 		}
-
-		/*
-		EntGridCell *cell = &grid->cells[ent->cell_id];
-		DrawBoundingBox(ent->comp_transform.bounds, PURPLE);
-		DrawBoundingBox(cell->aabb, GREEN);
-		*/
-
-		//DrawBoundingBox(ent->comp_transform.bounds, RED);
 	}
-
-	//DrawSphere(debug_bullet_dest, 10, RED);
-	//DrawLine3D(debug_bullet_dest, Vector3Add(debug_bullet_dest, Vector3Scale(debug_bullet_norm, 20)), PURPLE);
 
 	RenderProjectiles(handler);
-
-	/*
-	for(int i = 0; i < grid->cell_count; i++) {
-		EntGridCell *cell = &grid->cells[i];
-		if(cell->ent_count <= 0)
-			continue;
-
-		DrawBoundingBox(cell->aabb, PURPLE);
-	}
-	*/
-
-
-	/*
-	for(int i = 0; i < handler->checkpoint_list.count; i++) {
-		DrawSphere(handler->checkpoint_list.points[i], 10, YELLOW);
-	}
-	*/
 }
 
-
+// Update logic for turret
 void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	float angle_min = -70;
 	float angle_max =  70;
@@ -358,6 +337,7 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 	}
 }
 
+// Draw logic for turret
 void TurretDraw(Entity *ent) {
 	comp_Transform *ct = &ent->comp_transform;
 
@@ -374,38 +354,6 @@ void TurretDraw(Entity *ent) {
 
 	DrawMesh(ent->model.meshes[1], ent->model.materials[1], mat_gun);
 	DrawMesh(ent->model.meshes[0], ent->model.materials[1], mat_base);
-
-	/*
-	comp_Transform *ct = &ent->comp_transform;
-
-	float yaw = atan2f(-ct->forward.x, -ct->forward.z);
-
-	Matrix mat_base = MatrixTranslate(ct->position.x, ct->position.y, ct->position.z);
-	Matrix mat_gun = MatrixRotateY(yaw);
-
-	Vector3 right = Vector3CrossProduct(ct->start_forward, UP);
-
-	Vector2 xz = (Vector2) { -ct->forward.x, -ct->forward.z };
-	float xz_len = Vector2Length(xz);
-	xz = Vector2Normalize(xz);
-	float pitch = atan2f(-ct->forward.y, xz_len);
-
-	mat_gun = MatrixMultiply(MatrixRotate(right, pitch), mat_gun);
-	mat_gun = MatrixMultiply(mat_gun, mat_base);
-
-	DrawMesh(ent->model.meshes[1], ent->model.materials[1], mat_base);
-	DrawMesh(ent->model.meshes[0], ent->model.materials[1], mat_gun);
-	*/
-
-	/*
-	Vector3 center = BoxCenter(ent->comp_transform.bounds);
-	Vector3 forward = ent->comp_transform.forward;
-
-	DrawLine3D(center, Vector3Add(center, Vector3Scale(forward, 60)), PURPLE);
-	*/
-	//DrawBoundingBox(ct->bounds, RED);
-	
-	//DrawModel(ent->model, ent->comp_transform.position, 1, WHITE);
 }
 
 void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
@@ -417,7 +365,8 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	if(weap->cooldown > 0)
 		return; 
 
-	if( (ai->input_mask & AI_INPUT_SELF_GLITCHED) == 0) {
+	if(!(ai->input_mask & AI_INPUT_SELF_GLITCHED)) {
+		// Not disrupted and see's player
 		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
 			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
 
@@ -429,6 +378,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 				ct->targ_look = targ;
 
 		} else {
+			// Disrupted
 			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
 
 			Vector3 look_point = ai->task_data.known_target_position;
@@ -468,22 +418,18 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 
 	bool hit = false;
 	// * NOTE:
-	// Change this from hardcoded to data specific when ammo clip system implemented.
-	// Purpose of the dummy value is to cause no dammage on the first few shots,
-	// gives the player a warning for fairness.
+	// Purpose of the dummy value is to cause no dammage on the first few shots, gives the player a warning for fairness.
 	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 2);
 	Vector3 bullet_dest = TraceBullet(handler, sect, trace_start, dir, ent->id, &hit, dummy);
 
-	//Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
-	Vector3 trail_start = trace_start;
-
-	Vector3 trail_end = Vector3Add(trail_start, Vector3Scale(dir, Vector3Distance(trail_start, bullet_dest)));
+	Vector3 trail_end = Vector3Add(trace_start, Vector3Scale(dir, Vector3Distance(trace_start, bullet_dest)));
 	if(!hit) {
-		trail_end = Vector3Add(trail_start, Vector3Scale(ct->forward, 2000.0f));
+		trail_end = Vector3Add(trace_start, Vector3Scale(ct->forward, 2000.0f));
 	}
-
-	float dist = Vector3Distance(trail_start, trail_end);
-	vEffectsAddTrail(handler->effect_manager, trail_start, trail_end);
+	
+	// Add bullet trail effect
+	float dist = Vector3Distance(trace_start, trail_end);
+	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
 
 	weap->cooldown = 0.065f;
 	weap->ammo--;
@@ -549,20 +495,17 @@ void MaintainerDraw(Entity *ent, float dt) {
 	}
 	
 	Vector3 pos = ent->comp_transform.position;
-	//pos.z -= 10;
 	DrawModel(ent->model, pos, 0.1f, LIGHTGRAY);
-
-	//Vector3 center = BoxCenter(ent->comp_transform.bounds);
-	//center.y += 10;
-	//Vector3 forward = ent->comp_transform.forward;
-	//DrawBoundingBox(ent->comp_health.hit_box, PURPLE);
 }
 
+// Update an entitie's ai component
 void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, Ai_TaskData *task_data, MapSection *sect, float dt) {
 	if(ent->comp_ai.state == STATE_DEAD)
 		return;
 
 	// Handle interrupts
+	// * NOTE: 
+	// Complete this later
 	for(u32 i = 0; i < 32; i++) {
 		u32 mask = (1 << i);
 		if(task_data->interrupt_mask & mask) {
@@ -570,16 +513,23 @@ void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, Ai_Task
 		}
 	}
 
+	// Update input mask
 	AiCheckInputs(ent, handler, sect);
+
+	// Execute current ai scehdule
 	AiDoSchedule(ent, handler, sect, ai, task_data, dt);
 
+	// Tick timer down
 	ai->task_data.timer--;
 
+	// Tick disrupt timer down (if disrupted)
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED) {
 		ai->disrupt_timer--;
 	}
 }
 
+// Ai tick, not every frame,
+// has it's own tick timer (every 11 frames)
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 	Entity *player = &handler->ents[handler->player_id];
 	player->comp_ai.navgraph_id = -1;
@@ -596,9 +546,11 @@ void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
+		// Don't update player ai (does not make sense)
 		if(handler->player_id == i)
 			continue;
 
+		// Don't update invalid components
 		if(!ent->comp_ai.component_valid)
 			continue;
 
@@ -649,24 +601,6 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 			ai->input_mask |= AI_INPUT_SEE_PLAYER;
 			ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
 		}
-
-		/*
-		// Check for obstructions
-		Ray ray = (Ray) { .position = ct->position, .direction = to_player };
-		RayCollision player_coll = GetRayCollisionBox(ray, player_ent->comp_transform.bounds);
-
-		// Trace map geometry
-		// Small affordance to account for spatial partition structure (+32)
-		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, bvh, 0, &tr, player_coll.distance + 16);
-
-		// Player hitbox collision closer than possible surface collision.
-		// No obstruction, player is visible 
-		if(player_coll.distance < tr.distance) {
-			ai->input_mask |= AI_INPUT_SEE_PLAYER;
-			ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
-		}
-		*/
 	}
 
 	if(ai->task_data.target_entity == handler->player_id && (ai->input_mask & AI_INPUT_SEE_PLAYER)) {
@@ -685,7 +619,9 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	}
 }
 
+// Execute ai schedule
 void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, Ai_TaskData *task_data, float dt) {
+	// Wait time special case:
 	task_data->timer -= dt;
 	if(task_data->task_id == TASK_WAIT_TIME) {
 		if(task_data->timer > 0) {
@@ -693,6 +629,7 @@ void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai
 		}
 	}
 
+	// Schedule state machine:
 	switch(ai->curr_schedule) {
 		case SCHED_IDLE:
 			break;
@@ -725,10 +662,6 @@ void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai
 			break;
 	}
 }
-
-void AiDoState(Entity *ent, comp_Ai *ai, Ai_TaskData *task_data, float dt) {
-}
-
 
 #define NODE_REACH_RADIUS (32.0f*32.0f)
 void AiPatrol(Entity *ent, MapSection *sect, float dt) {
@@ -792,6 +725,7 @@ void AiPatrol(Entity *ent, MapSection *sect, float dt) {
 	}
 }
 
+// Maintainer find and fix
 void AiFixFriendSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -866,7 +800,6 @@ void AiFixFriendSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	}
 
 	// **
-
 	// Fix friend
 	if(task->task_id == TASK_DO_FIX) {
 		if(task->timer < 0) {
@@ -874,8 +807,7 @@ void AiFixFriendSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, 
 			DoFix(&handler->ents[task->target_entity]);
 
 			// End schedule
-			//ai->curr_schedule = SCHED_PATROL;	
-			//ai->curr_schedule = SCHED_MAINTAINER_ATTACK;
+			ai->curr_schedule = SCHED_IDLE;
 
 			// Backoff
 			task->task_id = TASK_GOTO_POINT;
@@ -890,6 +822,7 @@ void AiFixFriendSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	}
 }
 
+// For turret
 void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -962,27 +895,10 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 			task->task_id = TASK_WAIT_TIME;
 			task->timer = 25.0f;
 		}
-		
-		/*
-		Vector3 look_point = handler->ents[task->target_entity].comp_transform.position;
-		Vector3 target_vel = handler->ents[task->target_entity].comp_transform.velocity;
-		look_point = Vector3Add(look_point, target_vel);
-
-		Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
-		ct->targ_look = targ;
-
-		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
-			task->task_id = TASK_FIRE_WEAPON;
-			ent->comp_weapon.ammo = 40;
-			ent->comp_weapon.cooldown = 0.05f;
-		} else {
-			task->task_id = TASK_WAIT_TIME;
-			task->timer = 1.0f;
-		}
-		*/
 	}
 }
 
+// Turret disrupted
 void AiSentryDisruptionSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -1043,6 +959,10 @@ void AiChasePlayerSchedule(Entity *ent, EntityHandler *handler, MapSection *sect
 	}
 }
 
+// Maintainer attack
+// * NOTE:
+// temporary throw projectile behavior,
+// to be changed later...
 void AiMaintainerAttackSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 
@@ -1082,6 +1002,7 @@ void AiMaintainerMakeNewSchedule(Entity *ent, EntityHandler *handler, MapSection
 	ai->prev_schedule = ai->curr_schedule;
 }
 
+// Default entity trace data
 EntTraceData EntTraceDataEmpty() {
 	return (EntTraceData) {
 		.point = Vector3Zero(),
@@ -1335,8 +1256,6 @@ void DebugDrawEntText(EntityHandler *handler, Camera3D cam) {
 // in the future I'll probably use actual ai inputs for this...
 // Sound, sight, etc.
 void AlertMaintainers(EntityHandler *handler, u16 disrupted_id) {
-	//puts("AlertMaintainers");
-
 	Entity *disrupted_ent = &handler->ents[disrupted_id];
 	comp_Ai *disrupted_ai = &disrupted_ent->comp_ai;
 
@@ -1378,6 +1297,7 @@ void AlertMaintainers(EntityHandler *handler, u16 disrupted_id) {
 	}
 }
 
+// When entity is hit with bullet or other damaging thing
 void OnHitEnt(Entity *ent, short damage) {
 	comp_Health *health = &ent->comp_health;
 	
@@ -1404,9 +1324,15 @@ void OnHitEnt(Entity *ent, short damage) {
 		OnHitPlayer(ent, damage);
 }
 
+// When turret is hit
+// * NOTE:
+// Nothing right now, 
+// unsure design-wise what to do here...
 void OnHitTurret(Entity *ent, short damage) {
+
 }
 
+// Maintainer hit
 void OnHitMaintainer(Entity *ent, short damage) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -1451,9 +1377,14 @@ void OnHitMaintainer(Entity *ent, short damage) {
 	}
 }
 
+// Regulator hit
+// * NOTE:
+// Nothing right now as that enemy isn't implemented yet...
 void OnHitRegulator(Entity *ent, short damage) {
+
 }
 
+// Fix disrupted entity
 void DoFix(Entity *ent) {
 	ent->comp_ai.input_mask &= ~AI_INPUT_SELF_GLITCHED;
 
@@ -1487,6 +1418,7 @@ void OnFixMaintainer(Entity *ent) {
 void OnFixRegulator(Entity *ent) {
 }
 
+// Move entity through space
 void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -1513,6 +1445,7 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 	ct->velocity = move_data.end_vel;
 }
 
+// Projectile movement tracing
 void proj_TraceMove(Projectile *proj, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, MapSection *sect, short bvh_id) {
 	comp_Transform *ct = &proj->ct;
 	comp_Health *health = &proj->health;
@@ -1603,6 +1536,7 @@ void proj_TraceMove(Projectile *proj, Vector3 start, Vector3 wish_vel, pmTraceDa
 	pm->end_pos = dest;
 }
 
+// Projectile check ground
 u8 proj_CheckGround(comp_Transform *ct, Vector3 position, MapSection *sect, short bvh_id) {
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
 
@@ -1621,6 +1555,8 @@ u8 proj_CheckGround(comp_Transform *ct, Vector3 position, MapSection *sect, shor
 	return 1;
 }
 
+// Projectile update loop
+#define PROJ_GRAVITY 800.0f
 void ProjectileUpdate(Projectile *projectile, EntityHandler *handler, MapSection *sect, float dt) {
 	if(projectile->health.amount <= 0) {
 		projectile->active = false;
@@ -1634,6 +1570,7 @@ void ProjectileUpdate(Projectile *projectile, EntityHandler *handler, MapSection
 	EntGrid *grid = &handler->grid;
 	Coords coords = Vec3ToCoords(ct->position, grid);
 
+	// Check nearby cells for collisions
 	Coords cell_coords[] = {
 		coords,
 		(Coords) { coords.c - 1, coords.r, coords.t - 1 },
@@ -1657,18 +1594,21 @@ void ProjectileUpdate(Projectile *projectile, EntityHandler *handler, MapSection
 			i16 ent_id = cell->ents[j]; 
 			Entity *ent = &handler->ents[ent_id];
 
+			// Don't collide between projectile and projectile sender entity
 			if(ent->id == projectile->sender)
 				continue;
 
+			// Impact entity
 			if(CheckCollisionBoxes(ct->bounds, ent->comp_transform.bounds)) {
-				// Impact entity
 				ProjectileImpact(projectile, handler, ent_id);
 			}
 		}
 	}
 
-	ct->velocity.z -= 800.0f * dt;
+	// Apply gravity
+	ct->velocity.z -= PROJ_GRAVITY * dt;
 
+	// Trace movement
 	pmTraceData pm = (pmTraceData) {0};
 	proj_TraceMove(projectile, ct->position, ct->velocity, &pm, dt, sect, BVH_BOX_SMALL);
 
@@ -1681,6 +1621,7 @@ void ProjectileDraw(Projectile *projectile) {
 	//DrawBoundingBox(projectile->ct.bounds, RED);
 }
 
+// Make an entity throw a projectile
 void ProjectileThrow(Entity *ent, Vector3 pos, Vector3 dir, float force, u8 type, EntityHandler *handler) {
 	Projectile projectile = (Projectile) {0};
 
@@ -1713,6 +1654,7 @@ void ProjectileThrow(Entity *ent, Vector3 pos, Vector3 dir, float force, u8 type
 	handler->projectiles[slot] = projectile;
 }
 
+// Projectile hit entity
 void ProjectileImpact(Projectile *projectile, EntityHandler *handler, i16 ent_id) {
 	if(ent_id == -1) {
 		*projectile = (Projectile) {0};
@@ -1739,6 +1681,7 @@ void ProjectileImpact(Projectile *projectile, EntityHandler *handler, i16 ent_id
 	*projectile = (Projectile) {0};
 }
 
+// Update all projectiles (every frame)
 void ManageProjectiles(EntityHandler *handler, MapSection *sect, float dt) {
 	for(u16 i = 0; i < handler->projectile_capacity; i++) {
 		Projectile *projectile = &handler->projectiles[i];
@@ -1750,6 +1693,7 @@ void ManageProjectiles(EntityHandler *handler, MapSection *sect, float dt) {
 	}
 }
 
+// Draw all projectiles (every frame)
 void RenderProjectiles(EntityHandler *handler) {
 	for(u16 i = 0; i < handler->projectile_capacity; i++) {
 		Projectile *projectile = &handler->projectiles[i];
@@ -1762,34 +1706,40 @@ void RenderProjectiles(EntityHandler *handler) {
 }
 
 void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states) {
+	// Get entity states
 	u8 states[handler->count];
 	for(u16 i = 0; i < handler->count; i++) {
 		states[i] = handler->ents[i].comp_ai.state;
 	}
 
+	// Clear entities
 	handler->count = 0;
 
 	for(u16 i = 0; i < handler->spawn_list.count; i++) {
 		ProcessEntity(&handler->spawn_list.arr[i], handler, NULL);
 
 		if(with_states) {
-			if(states[handler->count-1] == STATE_DEAD)
+			// Spawn new entity, retain it's old state before reload
+			// * NOTE:
+			// Only really works with dead state at the moment.
+			// This whole block will probably disappear when serialization is added
+			if(states[handler->count-1] == STATE_DEAD) {
 				handler->ents[handler->count-1].comp_ai.state = STATE_DEAD;
+			}
 		}
 	}
 
-	// * NOTE:
-	// Remove later
-	//handler->checkpoint_list.active = 2;
-
+	// Handle checkpoint logic
 	if(handler->checkpoint_list.active > -1)
 		handler->player_start = handler->checkpoint_list.points[handler->checkpoint_list.active];
 
 	SpawnPlayer(&handler->ents[handler->player_id], handler->player_start);
 	handler->ents[handler->bug_id].comp_ai.state = 0;	
 
+	// Set up ai navigation
 	AiNavSetup(handler, sect);
 
+	// Reset ai tick
 	handler->ai_tick = 1.0f; 
 }
 

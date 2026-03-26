@@ -5,6 +5,9 @@
 #include "config.h"
 #include "game.h"
 
+void GameTick(bool *exit, Game *game);
+void OnExit(Config *conf, Game *game);
+
 int main() {
 	Config conf = (Config) {0};
 	ConfigInit(&conf);
@@ -32,21 +35,29 @@ int main() {
 	DisableCursor();
 
 	GameLoadScene(&game, "resources/maps/06");
+	//GameLoadScene(&game, "resources/maps/07");
 
 	bool exit = false;
-	while(!exit) {
-		exit = ((game.flags & FLAG_EXIT_REQUEST) || WindowShouldClose());
+	GameTick(&exit, &game);
+
+	OnExit(&conf, &game);
+	return 0;
+}
+
+void GameTick(bool *exit, Game *game) {
+	while(!(*exit)) {
+		*exit = ((game->flags & FLAG_EXIT_REQUEST) || WindowShouldClose());
 		float dt = GetFrameTime(); 	
 
-		GameUpdate(&game, dt);
-		GameDraw(&game, dt);
+		GameUpdate(game, dt);
+		GameDraw(game, dt);
 	}
+}
 
+void OnExit(Config *conf, Game *game) {
 	CloseWindow();
 
-	ConfigClose(&conf);
-	GameClose(&game);
-
-	return 0;
+	ConfigClose(conf);
+	GameClose(game);
 }
 

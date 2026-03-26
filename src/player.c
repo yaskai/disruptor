@@ -73,7 +73,10 @@ bool step_frame = false;
 
 // **
 // -----------------------------------------------------------------------------
-
+// Movement tracing,
+// take start position and desired velocity,
+// clip and modify to find end destination and new velocity.
+// Creates collide and slide behavior.
 void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
 	comp_Transform *ct = &ent->comp_transform;
 
@@ -295,6 +298,7 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	DrawRay(clip_ray, GREEN);
 }
 
+// Player movement loop
 void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler *handler, float dt) {
 	// 1. Categorize position
 	ct->on_ground = pm_CheckGround(ct, ct->position);
@@ -333,13 +337,14 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	// 6. Movement tracing 
 	pmTraceData pm = (pmTraceData) {0};
 	if(ct->ground_normal.z == 1.0f) 
-		pm_GroundMove(ent, ct, ct->position, &pm, dt, ct->velocity, handler);
+		pm_GroundMove(ent, ct, ct->position, &pm, dt, ct->velocity, handler);	// Handles stepping logic
 	else 
 		pm_TraceMoveEx(ent, ct->position, ct->velocity, &pm, dt, handler);
 
 	debug_vel_full = ct->velocity;
 	debug_vel_clipped = pm.end_vel;
 
+	// Set new position and velocity from trace
 	ct->velocity = pm.end_vel;
 	ct->position = pm.end_pos;
 
@@ -424,11 +429,9 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 } 
 
 #define GROUND_EPS 0.01f
+// Check if grounded
 u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
-
-	//BvhTraceData tr = TraceDataEmpty();	
-	//BvhTracePointEx(ray, ptr_sect, &ptr_sect->bvh[BVH_BOX_MED], 0, &tr, 1 + GROUND_EPS);
 
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 	Bsp_RecursiveTraceEx(
@@ -446,17 +449,23 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		return 0;
 	}
 
+	// Set stored ground normal
 	ct->ground_normal = *(Vector3 *) tr.plane.normal;
-	//pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.00001f, 0);
+
+	// Clip velocity going into ground
 	pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.0f, 0);
-	if(fabsf(ct->velocity.z) < STOP_EPS) ct->velocity.z = 0;
+
+	if(fabsf(ct->velocity.z) < STOP_EPS)
+		ct->velocity.z = 0;
 
 	return 1;
 }
 
+// Apply friction (grounded)
 void pm_GroundFriction(comp_Transform *ct, float dt) {
 	// Only apply friction if grounded
-	if(!ct->on_ground) return;
+	if(!ct->on_ground) 
+		return;
 
 	// If horizontal velocity is smaller than 1 just set to 0,
 	// prevents infinite small movements all the time
@@ -464,6 +473,8 @@ void pm_GroundFriction(comp_Transform *ct, float dt) {
 	vel.z = 0;
 
 	float speed = Vector3Length(vel);
+
+	// Cancel and zero velocity if speed is too small
 	if(speed < 0.01f) {
 		ct->velocity.x = 0;
 		ct->velocity.y = 0;
@@ -579,6 +590,7 @@ void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceDa
 	memcpy(pm->clips, clips, sizeof(Vector3) * num_clips);
 }
 
+// Trace move when grounded, stepping logic handled
 void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt, Vector3 wish_vel, EntityHandler *handler) {
 	// First try moving to destination
 	pmTraceData base_pm = (pmTraceData) { .end_in_solid = -1, .start_in_solid = -1, .origin = start, .clip_count = 0 };
@@ -793,6 +805,7 @@ void pm_AirFriction(comp_Transform *ct, float dt) {
 	ct->velocity.y = vel.y;
 }
 
+// Take damage
 void OnHitPlayer(Entity *ent, short damage) {
 	comp_Health *health = &ent->comp_health;
 	comp_Transform *ct = &ent->comp_transform;

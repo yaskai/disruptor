@@ -305,38 +305,18 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 			fseek(pF, offsets[lm_decoupled_id], SEEK_SET);
 			fread(data.decouple_lm, 1, sizes[lm_decoupled_id], pF);
 		}
+
+		// Read lightgrid octree data (if available)
+		if(lm_grid_id != -1) {
+			int num_entries = sizes[lm_grid_id] / sizeof(lm_OctreeNode);
+		}
 	}
 	// ---------------------------------------------------------------------------------------
 
 	// Close and return data
 	fclose(pF);
 
-	FilePathList mat_list = LoadDirectoryFiles("tools/Disruptor/textures/custom");	
-
-	data.lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
-
-	materials = malloc(sizeof(Material) * mat_list.count); 
-	textures = malloc(sizeof(Texture2D) * mat_list.count); 
-	for(int i = 0; i < mat_list.count; i++) {
-		char path[255] = {0};
-		memcpy(path, mat_list.paths[i], strlen(mat_list.paths[i]));
-
-		char *sep = strrchr(path, '/');
-		*sep = '\0';
-
-		char *format = sep + 1;
-		char *dot = strrchr(format, '.');
-		*dot = '\0';
-
-		HashInsert(&material_hashmap, format, i);
-
-		textures[i] = LoadTexture(mat_list.paths[i]);
-		SetTextureFilter(textures[i], TEXTURE_FILTER_POINT);
-
-		materials[i] = LoadMaterialDefault();
-		materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = textures[i];
-		materials[i].params[0] = 1;
-	}
+	BspRenderSetup(&data);
 
 	return data;
 }
@@ -362,11 +342,15 @@ void UnloadBsp(Bsp_Data *data) {
 	}
 
 	UnloadShader(data->lm_shader);
+
 	if(data->lm_rgb)
 		free(data->lm_rgb);
 
 	if(data->lm.uvs)
 		free(data->lm.uvs);
+
+	if(data->lm_oct_nodes)
+		free(data->lm_oct_nodes);
 }
 
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {
@@ -634,8 +618,10 @@ bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf) {
 				if(leafnum == test_leaf) {
 					return (*vis >> bit) & 1;
 				}
+
 				leafnum++;
 			}
+
 			vis++;
 		}
 	}
@@ -776,13 +762,13 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
 	Model *models = malloc(sizeof(Model) * used);
 	for(int i = 0; i < used; i++) {
-		UploadMesh(&meshes[i], false);
-		models[i] = LoadModelFromMesh(meshes[i]);
-
 		int tex_id = tex_slot_ids[i];
 
 		if(tex_id >= bsp->num_miptex) 
 			continue;
+
+		UploadMesh(&meshes[i], false);
+		models[i] = LoadModelFromMesh(meshes[i]);
 
 		Texture2D mat_texture = materials[HashFetch(&material_hashmap, bsp->miptex[tex_id].name)].maps->texture;
 		models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat_texture;
@@ -803,5 +789,34 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 	free(meshes);
 
 	return models;
+}
+
+void BspRenderSetup(Bsp_Data *bsp) {
+	FilePathList mat_list = LoadDirectoryFiles("tools/Disruptor/textures/custom");	
+
+	materials = malloc(sizeof(Material) * mat_list.count); 
+	textures = malloc(sizeof(Texture2D) * mat_list.count); 
+	for(int i = 0; i < mat_list.count; i++) {
+		char path[255] = {0};
+		memcpy(path, mat_list.paths[i], strlen(mat_list.paths[i]));
+
+		char *sep = strrchr(path, '/');
+		*sep = '\0';
+
+		char *format = sep + 1;
+		char *dot = strrchr(format, '.');
+		*dot = '\0';
+
+		HashInsert(&material_hashmap, format, i);
+
+		textures[i] = LoadTexture(mat_list.paths[i]);
+		SetTextureFilter(textures[i], TEXTURE_FILTER_POINT);
+
+		materials[i] = LoadMaterialDefault();
+		materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = textures[i];
+		materials[i].params[0] = 1;
+	}
+
+	bsp->lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
 }
 

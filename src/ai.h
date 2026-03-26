@@ -7,7 +7,6 @@
 
 #define AI_TICK_RATE 11.0f
 
-
 // ** Input mask definitions ** //
 //
 #define AI_INPUT_SEE_PLAYER		0x0001
