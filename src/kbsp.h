@@ -275,7 +275,8 @@ typedef struct {
 	i32 miptex_lump_offset;
 
 	Lightmap lm;
-	Shader lm_shader;
+	Shader lm_shader;	// Default lightmap shader
+	Shader ff_shader;	// Force field shader
 
 	u8 *lm_rgb;
 

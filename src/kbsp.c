@@ -475,14 +475,14 @@ bool Bsp_RecursiveTraceEx(Bsp_Hull *hull, int node_num, float p1_frac, float p2_
 
 	if(node_num < hull->first_node || node_num > hull->last_node) {
 		MessageError("Bsp_RecursiveTraceEx", "bad node number");
-		printf("node_num: %d\n", node_num);
+		if(GetLogState()) printf("node_num: %d\n", node_num);
 		return true;
 	}
 
 	node = &hull->nodes[node_num];
 	plane = &hull->planes[node->planenum];
 
-	Vector3 norm = (Vector3) { plane->normal[0], plane->normal[1], plane->normal[2] };
+	Vector3 norm = *(Vector3 *) plane->normal;
 	if(plane->type < 3) {
 		float3 p1_f3 = Vector3ToFloatV(p1);
 		float3 p2_f3 = Vector3ToFloatV(p2);
@@ -612,6 +612,7 @@ bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf) {
 			vis++;
 			leafnum += *vis * 8;
 			vis++;
+
 		} else {
 			// Test each bit in byte
 			for(int bit = 0; bit < 8; bit++) {
@@ -772,13 +773,21 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
 		Texture2D mat_texture = materials[HashFetch(&material_hashmap, bsp->miptex[tex_id].name)].maps->texture;
 		models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat_texture;
-		models[i].materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
-
 		char pref[3];
 		memcpy(pref, bsp->miptex[tex_id].name, sizeof(pref));
-		if(strcmp(pref, "sky") == 0)
-			continue;
 
+		if(strcmp(pref, "sky") == 0) {
+			continue;
+		}
+
+		/*
+		if(strcmp(pref, "{ff") == 0) {
+			models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(GenImageColor(512, 512, ColorAlpha(BLUE, 0.5)));
+			continue;
+		}
+		*/
+
+		models[i].materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
 		models[i].materials[0].shader = bsp->lm_shader;
 	}
 
@@ -792,6 +801,9 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 }
 
 void BspRenderSetup(Bsp_Data *bsp) {
+	bsp->lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
+	bsp->ff_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/force_field_f.glsl");
+
 	FilePathList mat_list = LoadDirectoryFiles("tools/Disruptor/textures/custom");	
 
 	materials = malloc(sizeof(Material) * mat_list.count); 
@@ -816,7 +828,5 @@ void BspRenderSetup(Bsp_Data *bsp) {
 		materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = textures[i];
 		materials[i].params[0] = 1;
 	}
-
-	bsp->lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
 }
 

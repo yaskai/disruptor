@@ -1000,9 +1000,33 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 
 
 void DrawMap(MapSection *sect, Vector3 pos) {
+	/*
+	rlDisableBackfaceCulling();
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
 	for(int i = 0; i < model_list.count; i++) {
 		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
+			continue;
+
+		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
+	}
+	rlEnableBackfaceCulling();
+	*/
+	/*
+	for(int i = 0; i < sect->bsp_data.num_leaves; i++) {
+		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
+	}
+	*/
+
+	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
+	for(int i = 0; i < model_list.count; i++) {
+		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
+			continue;
+
+		Bsp_Face *face = &sect->bsp_data.faces[sect->bsp_data.leaves[curr_leaf].first_face];
+		Bsp_Surface *surface = &sect->bsp_data.surfaces[face->texinfo];
+		Bsp_Miptex *mip = &sect->bsp_data.miptex[surface->texture_id];
+
+		if(mip->name[0] == '{')
 			continue;
 
 		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);

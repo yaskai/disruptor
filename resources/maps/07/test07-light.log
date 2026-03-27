@@ -35,12 +35,11 @@ BSPX light directions output requested on command line.
     "lightgrid" was set to "1" (from command line)
     "lightgrid_format" was set to "octree" (from command line)
 
-DecompressAllVis: invalid visofs for leaf 0
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	110 sky faces
-	1447 solid faces
-	0 filtered faces
+	105 sky faces
+	1456 solid faces
+	7 filtered faces
 	0 shadow-casting skip faces
 SetupLights: 0 initial lights
 SetupLights: 0 after surface lights
@@ -49,7 +48,7 @@ Final count: 0 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 929348
+lightmap size (total): 953512
 Lighting Completed.
 
 Writing test07.lit
@@ -62,10 +61,10 @@ DECOUPLED_LM BSPX lump written
 octree stored 797234 grid nodes + 9166 occluded = 806400 total, full stored 806400 (octree is 98.86334 percent)
 octree nodes size: 9636 bytes (219 * 44)
 octree leafs 1318 overhead 31632 bytes
-      4007623 bytes LIGHTGRID_OCTREE
+      4007599 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test07.bsp as Quake BSP bsp29
-17.759s seconds elapsed
+19.664s seconds elapsed
 0 empty lightmaps
 
 
