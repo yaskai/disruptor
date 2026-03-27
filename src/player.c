@@ -739,12 +739,12 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	cam_bob = Lerp(cam_bob, bob_targ, dt * 10);
 	
 	float tilt_input = cam_input_side * 0.1f;
-	tilt_input = Clamp(tilt_input, -0.031f, 0.031f);
+	tilt_input = Clamp(tilt_input, -0.032f, 0.032f);
 	Vector3 tilt_targ = UP;
 
 	if(land_frame) {
-		cam_bob += (18.5f * z_vel_prev * 0.00125f);
-		tilt_input += 0.5f;
+		//cam_bob += (18.5f * z_vel_prev * 0.00125f);
+		tilt_input += 1.5f;
 	}
 
 	if(fabsf(tilt_input) >= EPSILON) tilt_targ = Vector3RotateByAxisAngle(UP, ct->forward, tilt_input);

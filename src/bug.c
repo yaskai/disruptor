@@ -540,11 +540,17 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		launch_timer -= dt;
 	}
 	// -------------------------------------------------------------------------------------------------------------
-
+	
+	// -------------------------------------------------------------------------------------------------------------
 	// Pickup
-	if(CheckCollisionSpheres(ct->position, 8, player_ent->comp_transform.position, 16) && launch_timer <= 0) {
+	float pickup_radius = 16.0f;
+	if(ent->flags & BUG_RECALL)
+		pickup_radius *= 1.25f;
+
+	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) && launch_timer <= 0) {
 		ai->state = BUG_DEFAULT;
 	}
+	// -------------------------------------------------------------------------------------------------------------
 
 	if(ai->state == STATE_DEAD) {
 		// Pickup dead
