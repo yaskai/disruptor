@@ -12,7 +12,7 @@
 
 Material *materials;
 Texture2D *textures;
-HashMap material_hashmap = (HashMap) {0};
+HashMap material_hashmap = (HashMap) { 0 };
 
 Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Data data = (Bsp_Data) {0};
@@ -780,12 +780,10 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 			continue;
 		}
 
-		/*
 		if(strcmp(pref, "{ff") == 0) {
 			models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(GenImageColor(512, 512, ColorAlpha(BLUE, 0.5)));
 			continue;
 		}
-		*/
 
 		models[i].materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
 		models[i].materials[0].shader = bsp->lm_shader;
@@ -828,5 +826,7 @@ void BspRenderSetup(Bsp_Data *bsp) {
 		materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = textures[i];
 		materials[i].params[0] = 1;
 	}
+
+	//DisplayNodes(&material_hashmap);
 }
 

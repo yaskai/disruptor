@@ -477,31 +477,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	FilePathList path_list = LoadDirectoryFiles(path);
 
-	// 1. Load 3d model, rendering
-	Message("Loading model...", ANSI_BLUE);
-	short model_id = -1;
-	for(short i = 0; i < path_list.count; i++)
-		if(strcmp(GetFileExtension(path_list.paths[i]), ".glb") == 0) model_id = i;
-	//for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".obj") == 0) model_id = i;
-
-	// * DEPRECATED!
-	// BSP is now the only method for rendering level geometry  
-	//
-	// No model, exit
-	/*
-	if(model_id == -1) {
-		MessageError("Missing model", NULL);
-		return sect;
-	} else { 
-		Model model = LoadModel(path_list.paths[model_id]);
-		model.transform = MatrixRotateX(90*DEG2RAD);
-		sect.model = model;
-		if(GetLogState())
-			printf("model tri_count: %d\n", sect._tris[0].count);
-	}
-	*/
-
-	// 2. Load .map file, collision, physics, ai logic, etc. 
+	// 1. Load .map file, collision, physics, ai logic, etc. 
 	Message("Loading map file...", ANSI_BLUE);
 	short mpf_id = -1;
 	for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".map") == 0) mpf_id = i;
@@ -525,7 +501,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	sect._tris[0].ids = calloc(sect._tris[0].count, sizeof(u16));
 	for(u16 j = 0; j < sect._tris[0].count; j++) sect._tris[0].ids[j] = j;
 
-	// 3. Build expanded geometry for character to world collsions 
+	// 2. Build expanded geometry for character to world collsions 
 	for(short i = 1; i < 3; i++) {
 		brush_pools[i].count = brush_pools[0].count;
 		brush_pools[i].brushes = calloc(brush_pools[i].count, sizeof(Brush));
@@ -614,6 +590,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	model_list.count = 0;
 	model_list.models = malloc(sizeof(Model) * 4096);
 	model_list.ids = malloc(sizeof(int) * 4096);
+	model_list.flags = malloc(4096);
 
 	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
 		int temp_count;
@@ -629,6 +606,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	model_list.models = realloc(model_list.models, sizeof(Model) * model_list.count);
 	model_list.ids = realloc(model_list.ids, sizeof(int) * model_list.count);
+	model_list.flags = realloc(model_list.flags, model_list.count);
 
 	return sect;
 }
@@ -1021,13 +999,14 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 	for(int i = 0; i < model_list.count; i++) {
 		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
 			continue;
-
+		/*
 		Bsp_Face *face = &sect->bsp_data.faces[sect->bsp_data.leaves[curr_leaf].first_face];
 		Bsp_Surface *surface = &sect->bsp_data.surfaces[face->texinfo];
 		Bsp_Miptex *mip = &sect->bsp_data.miptex[surface->texture_id];
-
-		if(mip->name[0] == '{')
+		if(mip->name[0] == '{') {
 			continue;
+		}
+		*/
 
 		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
 	}

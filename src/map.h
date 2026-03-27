@@ -22,9 +22,22 @@ typedef struct {
 	
 } rMeshCollection;
 
+#define MDL_NOFLAGS			0x00
+#define MDL_TRANSLUCENT		0x01
+#define MDL_FORCEFIELD		0x02
+typedef struct {
+	Model model;	
+	int id;
+	u8 flags;
+
+} render_Model;
+
 typedef struct {
 	Model *models;	
+
 	int *ids;
+	u8 *flags;
+
 	int count;
 	
 } rModelList;

@@ -22,7 +22,7 @@ void HashResize(HashMap *map) {
 	u32 new_cap = (map->capacity << 1);
 
 	if(new_cap == 0)
-		new_cap = 4;
+		new_cap = 128;
 
 	HashNode *nodes = calloc(new_cap, sizeof(HashNode));
 
@@ -71,8 +71,8 @@ void HashInsert(HashMap *map, char *key, int val) {
 	HashNode node = (HashNode) { .val = val, .key = { '\0' } };
 	memcpy(node.key, key, strlen(key));
 
-	map->nodes[id] = node;
 	map->count++;
+	map->nodes[id] = node;
 }
 
 int HashFetch(HashMap *map, char *key) {

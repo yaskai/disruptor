@@ -121,6 +121,13 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 
 		float ent_frac = 1.0f;
 		bool use_ent = (ent_tr.hit_ent != -1);
+		
+		// Prevent entity trace from using Bug,
+		// sometimes happens when thrown downwards because launch timer is outside pickup window. 
+		// Stops jarring camera movement
+		if(ent_tr.hit_ent == handler->bug_id)
+			use_ent = false;
+
 		if(use_ent) {
 			ent_frac = (ent_tr.dist / Vector3Length(move));
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
@@ -140,7 +147,7 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 
 		// Add clip plane
 		if(num_clips < MAX_CLIPS) {
-			clips[num_clips] = (use_ent) ? ent_tr.normal : (Vector3) { tr.plane.normal[0], tr.plane.normal[1], tr.plane.normal[2] }; 
+			clips[num_clips] = (use_ent) ? ent_tr.normal : *(Vector3 *) tr.plane.normal; 
 			num_clips++;
 		} else 
 			break;
