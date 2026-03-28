@@ -9,7 +9,7 @@
 #define UP 		(Vector3) {  0,  0,  1 	}
 #define DOWN 	(Vector3) {  0,  0, -1 	} 
 
-// Triangle primitive struct
+// Collision layer flags
 #define COLL_BLOCK_NONE		0x00
 #define COLL_BLOCK_ALL		0x01
 #define COLL_BLOCK_BULLETS	0x02
@@ -17,6 +17,8 @@
 #define COLL_BLOCK_PLAYER	0x08
 #define COLL_BLOCK_VIS		0x10
 #define COLL_BLOCK_BUG		0x20
+
+// Triangle primitive struct
 typedef struct {
 	Vector3 vertices[3];
 	Vector3 normal;

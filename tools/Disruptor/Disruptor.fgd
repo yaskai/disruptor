@@ -74,6 +74,16 @@
 
 // Pickup, ammo, revolver
 
+
+// Pickup, weapon, pistol
+
+
+// Pickup, weapon, shotgun
+
+
+// Pickup, weapon, revolver
+
+
 @baseclass = Angle [ 
 	angle(integer) : "Direction (0-360 yaw, or -1 for up/-2 for down)"
 ]

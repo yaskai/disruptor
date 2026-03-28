@@ -6,22 +6,6 @@
 #ifndef MAP_H_
 #define MAP_H_
 
-typedef struct  {
-	Matrix matrix;
-
-	Vector3 position;
-
-	u16 mesh_id;
-	u16 material_id;
-
-} MapMesh;
-
-typedef struct {
-	MapMesh *rmeshes;
-	u16 count;
-	
-} rMeshCollection;
-
 typedef struct {
 	Model *models;	
 
@@ -33,6 +17,7 @@ typedef struct {
 } rModelList;
 
 typedef struct {
+	char class_name[128];
 	char tex_name[128];
 
 	Vector3 verts[24];
