@@ -93,7 +93,7 @@ ___
 *** (x) make detail brush entities in .fgd (func_detail_illusionary, func_detail_fence, func_detail_wall)
 
 ** Extra:
-*** (-) separate draw steps for translucent brushes (eg. forcefield, fence, etc.)
+*** (x) separate draw steps for translucent brushes (eg. forcefield, fence, etc.)
 
 ___
 * *UI*

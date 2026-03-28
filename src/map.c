@@ -314,10 +314,14 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 		Message("--------------- [ ENTITIES ] -----------------", ANSI_GREEN);
 		for(int i = 0; i < spawn_list->count; i++) {
 			printf("-----------------------\n");
-			printf("clasname: %s\n", spawn_list->arr[i].tag);
-			printf("type: %d\n", spawn_list->arr[i].ent_type);
-			printf("pos: { %f %f %f }\n", spawn_list->arr[i].position.x, spawn_list->arr[i].position.y, spawn_list->arr[i].position.z);
-			printf("angle: %d\n", spawn_list->arr[i].angle);
+			//printf("clasname: %s\n", spawn_list->arr[i].tag);
+			//printf("type: %d\n", spawn_list->arr[i].ent_type);
+			MessageKeyValPair("classname", spawn_list->arr[i].tag);
+			MessageKeyValPairInt("type", spawn_list->arr[i].ent_type);
+			//printf("pos: { %f %f %f }\n", spawn_list->arr[i].position.x, spawn_list->arr[i].position.y, spawn_list->arr[i].position.z);
+			MessageKeyValPairVec3("pos", spawn_list->arr[i].position.x, spawn_list->arr[i].position.y, spawn_list->arr[i].position.z);
+			//printf("angle: %d\n", spawn_list->arr[i].angle);
+			MessageKeyValPairFloat("angle", spawn_list->arr[i].angle);
 		}
 		Message("----------------------------------------------", ANSI_GREEN);
 	}

@@ -11,4 +11,10 @@ void MessageError(char *text, char *param);
 void MessageDiag(char *text, char *param, char *color);
 void MessageKeyValPair(char *key, char *val);
 
+void MessageDiagInt(char *text, int param, char *color);
+
+void MessageKeyValPairInt(char *key, int val);
+void MessageKeyValPairFloat(char *key, float val);
+void MessageKeyValPairVec3(char *key, float x, float y, float z);
+
 #endif

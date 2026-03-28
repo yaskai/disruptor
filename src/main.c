@@ -37,11 +37,11 @@ int main() {
 	//GameLoadScene(&game, "resources/maps/06");
 	GameLoadScene(&game, "resources/maps/07");
 
-	// Loop:
+	// Run main game loop
 	bool exit = false;
 	GameTick(&exit, &game);
 
-	// App exit:
+	// App shutdown
 	OnExit(&conf, &game);
 	return 0;
 }
