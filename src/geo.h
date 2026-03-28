@@ -6,14 +6,16 @@
 #ifndef GEO_H_
 #define GEO_H_
 
-#define UP 		(Vector3) {  0,  0,  1 }
-#define DOWN 	(Vector3) {  0,  0, -1 } 
+#define UP 		(Vector3) {  0,  0,  1 	}
+#define DOWN 	(Vector3) {  0,  0, -1 	} 
 
 // Triangle primitive struct
+#define COLL_BLOCK_NONE		0x00
 #define COLL_BLOCK_ALL		0x01
 #define COLL_BLOCK_BULLETS	0x02
 #define COLL_BLOCK_ENTS		0x04
 #define COLL_BLOCK_PLAYER	0x08
+#define COLL_BLOCK_VIS		0x10
 typedef struct {
 	Vector3 vertices[3];
 	Vector3 normal;
@@ -36,7 +38,7 @@ Tri TriTranslate(Tri tri, Vector3 point);
 // Plane struct, used for volume to surface collision
 typedef struct {
 	Vector3 normal;
-	float d;
+	float d;			// Signed plane distance
 
 } Plane;
 

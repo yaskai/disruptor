@@ -48,7 +48,7 @@ int main() {
 
 void GameTick(bool *exit, Game *game) {
 	while(!(*exit)) {
-		*exit = ((game->flags & FLAG_EXIT_REQUEST) || WindowShouldClose());
+		*exit = ( (game->flags & FLAG_EXIT_REQUEST) || WindowShouldClose() );
 		float dt = GetFrameTime(); 	
 
 		GameUpdate(game, dt);

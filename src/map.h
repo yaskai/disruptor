@@ -22,16 +22,6 @@ typedef struct {
 	
 } rMeshCollection;
 
-#define RBRUSH_NOFLAGS			0x00
-#define RBRUSH_TRANSLUCENT		0x01
-#define RBRUSH_FORCEFIELD		0x02
-typedef struct {
-	Model model;
-	int id;
-	u8 flags;
-
-} RenderBrush;
-
 typedef struct {
 	Model *models;	
 
@@ -113,6 +103,8 @@ typedef struct {
 Tri *BrushToTris(Brush *brush, u16 *count, u16 brush_id);
 Tri *TrisFromBrushPool(BrushPool *brush_pool, u16 *count);
 
+Model BrushToModel(Brush *brush, Bsp_Data *bsp);
+
 void BrushTestView(BrushPool *brush_pool, Color color);
 
 MapSection BuildMapSect(char *file_path, SpawnList *spawn_list);
@@ -135,6 +127,7 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 
 void UpdateMapMeshList(MapSection *sect, Camera3D cam);
 void DrawMap(MapSection *sect, Vector3 pos);
+void DrawMapTranslucent(MapSection *sect, Vector3 pos);
 
 #endif
 

@@ -318,6 +318,9 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 	BspRenderSetup(&data);
 
+	if(GetLogState())
+		printf("bsp submodel count: %d\n", data.num_models);
+
 	return data;
 }
 
@@ -796,6 +799,193 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 	free(meshes);
 
 	return models;
+}
+
+RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
+	int max_tex_id = 0; 
+	for(int i = 0; i < leaf->num_faces; i++) {
+		int face_id = bsp->lfaces[leaf->first_face + i];	
+		Bsp_Face *face = &bsp->faces[face_id];
+
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		if(surface->texture_id > max_tex_id)
+			max_tex_id = surface->texture_id;
+	}
+
+	int tex_count = max_tex_id + 1;
+	int *tri_counts = calloc(tex_count, sizeof(int));
+
+	for(int i = 0; i < leaf->num_faces; i++) {
+		int face_id = bsp->lfaces[leaf->first_face + i];	
+		Bsp_Face *face = &bsp->faces[face_id];
+
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		tri_counts[surface->texture_id] += face->edge_count - 2;
+	}
+
+	int used = 0;	
+	for(int i = 0; i < tex_count; i++) {
+		if(tri_counts[i] > 0)
+			used++;
+	}
+
+	*out_count = used;
+	if(used == 0) {
+		free(tri_counts);
+		return NULL;
+	}
+
+	int *tex_to_slot = malloc(sizeof(int) * tex_count);
+	for(int i = 0; i < tex_count; i++)
+		tex_to_slot[i] = -1;
+
+	Mesh *meshes = calloc(used, sizeof(Mesh));
+	int *tex_slot_ids = malloc(used * sizeof(int));
+	int slot = 0;
+
+	for(int i = 0; i < tex_count; i++) {
+		if(tri_counts[i] <= 0)
+			continue;
+
+		tex_to_slot[i] = slot;
+		tex_slot_ids[slot] = i;
+
+		Mesh *mesh = &meshes[slot];
+
+		mesh->triangleCount = tri_counts[i];
+		mesh->vertexCount 	= tri_counts[i]*3;
+
+		mesh->vertices 		= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
+		mesh->normals		= MemAlloc(sizeof(float) * mesh->vertexCount * 3);
+		mesh->texcoords 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
+		mesh->texcoords2 	= MemAlloc(sizeof(float) * mesh->vertexCount * 2);
+
+		slot++;
+	}
+
+	int *cursors = calloc(used, sizeof(int));
+
+	for(int i = 0; i < leaf->num_faces; i++) {
+		int face_id = bsp->lfaces[leaf->first_face + i];
+		Bsp_Face *face = &bsp->faces[face_id];
+
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
+
+		/*
+		if(mip->name[0] == '{')
+			continue;
+		*/
+
+		Lm_Decoupled *lmd = &bsp->decouple_lm[face_id];
+		Rectangle *uv_rec = &bsp->lm.uvs[face_id];
+
+		int _slot = tex_to_slot[surface->texture_id];
+		Mesh *mesh = &meshes[_slot];
+		int *vert_id = &cursors[_slot]; 
+
+		Vector3 face_verts[face->edge_count]; 
+		for(int j = 0; j < face->edge_count; j++) {
+			i32 list_edge = bsp->ledges[face->first_edge + j];
+			face_verts[j] = (list_edge >= 0) ? bsp->verts[bsp->edges[list_edge].v[0]] : bsp->verts[bsp->edges[-list_edge].v[1]]; 
+		}
+
+		Bsp_Plane *plane = &bsp->planes[face->plane];
+		Vector3 normal = *(Vector3 *) plane->normal;
+		if(face->side)
+			normal = Vector3Negate(normal);
+
+		for(int j = 1; j < face->edge_count - 1; j++) {
+			Tri tri = (Tri) { .normal = normal, .vertices = { face_verts[0], face_verts[j+1], face_verts[j] } };
+
+			for(int k = 0; k < 3; k++) {
+				// Vertex
+				mesh->vertices[*vert_id*3+0] = tri.vertices[k].x;
+				mesh->vertices[*vert_id*3+1] = tri.vertices[k].y;
+				mesh->vertices[*vert_id*3+2] = tri.vertices[k].z;
+
+				// Normal
+				mesh->normals[*vert_id*3+0]	= tri.normal.x;
+				mesh->normals[*vert_id*3+1]	= tri.normal.y;
+				mesh->normals[*vert_id*3+2]	= tri.normal.z;
+
+				// Texture UV
+				mesh->texcoords[*vert_id*2+0] = (Vector3DotProduct(tri.vertices[k], surface->vector_s) + surface->dist_s) / mip->width; 
+				mesh->texcoords[*vert_id*2+1] = (Vector3DotProduct(tri.vertices[k], surface->vector_t) + surface->dist_t) / mip->height;
+
+				// Lighmap UV
+				if(lmd->w <= 0 || lmd->h <= 0) {
+					(*vert_id)++;
+					continue;
+				}
+
+
+				float lm_u = Vector3DotProduct(tri.vertices[k], lmd->vs) + lmd->dist_s;
+				float lm_v = Vector3DotProduct(tri.vertices[k], lmd->vt) + lmd->dist_t;
+				mesh->texcoords2[*vert_id*2+0] = (uv_rec->x + lm_u + 0.5f) / bsp->lm.tex.width;
+				mesh->texcoords2[*vert_id*2+1] = (uv_rec->y + lm_v + 0.5f) / bsp->lm.tex.height;
+
+				(*vert_id)++;
+			}
+		}
+	}
+
+	RenderBrush *render_brushes = malloc(sizeof(RenderBrush) * used);
+
+	for(int i = 0; i < used; i++) {
+		render_brushes[i] = (RenderBrush) {0};
+
+		int tex_id = tex_slot_ids[i];
+
+		if(tex_id >= bsp->num_miptex) 
+			continue;
+
+		UploadMesh(&meshes[i], false);
+		render_brushes[i].model = LoadModelFromMesh(meshes[i]);
+
+		char pref[3];
+		memcpy(pref, bsp->miptex[tex_id].name, sizeof(pref));
+
+		if(pref[0] == '{') {
+			render_brushes[i].flags |= RBRUSH_TRANSLUCENT;
+			//MessageDiag("Made translucent render brush", NULL, ANSI_YELLOW);
+
+			//Texture2D tex = LoadTextureFromImage(GenImageColor(1, 1, ColorAlpha(WHITE, 0.0f)));
+			//continue;
+		}
+
+		Texture2D mat_texture = materials[HashFetch(&material_hashmap, bsp->miptex[tex_id].name)].maps->texture;
+		render_brushes[i].model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat_texture;
+
+		if(strcmp(pref, "sky") == 0) {
+			continue;
+		}
+
+		/*
+		if(strcmp(pref, "{ff") == 0) {
+			render_brushes[i].model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+				LoadTextureFromImage(GenImageColor(1, 1, ColorAlpha(BLUE, 0.5)));
+
+			render_brushes[i].flags |= RBRUSH_FORCEFIELD;
+			render_brushes[i].model.materials[0].shader = bsp->ff_shader; 
+
+			MessageDiag("Made force field render brush", NULL, ANSI_YELLOW);
+
+			continue;
+		}
+		*/
+
+		render_brushes[i].model.materials[0].maps[1].texture = bsp->lm.tex;
+		render_brushes[i].model.materials[0].shader = bsp->lm_shader;
+	}
+
+	free(tri_counts);
+	free(tex_to_slot);
+	free(tex_slot_ids);
+	free(cursors);
+	free(meshes);
+
+	return render_brushes;
 }
 
 void BspRenderSetup(Bsp_Data *bsp) {

@@ -212,33 +212,12 @@ void GameDraw(Game *game, float dt) {
 	
 	ClearBackground(BLACK);
 		BeginMode3D(game->camera);
-
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, WHITE);
-			//DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(WHITE, 0.95f));
-			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, GREEN);
-
 			//PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
-			RenderEntities(&game->ent_handler, GetFrameTime());
 			DrawMap(&game->test_section, game->camera.position);
+			RenderEntities(&game->ent_handler, GetFrameTime());
+			vEffectsRun(&game->effect_manager, dt);
+			DrawMapTranslucent(&game->test_section, game->camera.position);
 
-			/*
-			for(u16 i = 0; i < tri_count; i++) {
-				Tri *tri = &tris[i];
-
-				Color color = colors[i % 6];
-				DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 1.00f));
-			}
-			*/
-
-			/*
-			for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
-				//Tri *tri = &game->test_section.bvh[1].tris.arr[j];
-				Tri *tri = &game->test_section.bvh[1].tris.arr[j];
-				Color color = colors[j % 6];
-				DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 0.5f));
-			}
-			*/
-			
 			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
 				for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
 					Tri *tri = &game->test_section.bvh[1].tris.arr[j];
@@ -270,9 +249,8 @@ void GameDraw(Game *game, float dt) {
 				}
 				*/
 			}
-			RenderEntities(&game->ent_handler, GetFrameTime());
+			//RenderEntities(&game->ent_handler, GetFrameTime());
 
-			vEffectsRun(&game->effect_manager, dt);
 
 			/*
 			for(int i = 0; i < game->test_section.base_navgraph.node_count; i++) {

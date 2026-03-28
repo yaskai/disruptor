@@ -11,11 +11,14 @@
 #include "../include/log_message.h"
 #include "config.h"
 #include "rlgl.h"
+#include "tex_utils.h"
 
 #define PLANE_EPS 0.001f
 
-rMeshCollection rmeshes_collection = {0};
-rModelList model_list = {0};
+Shader default_shader;
+
+rBrushList rbrush_list = {0};
+rBrushList translucent_rbrush_list = {0};
 
 Plane BuildPlane(Vector3 v0, Vector3 v1, Vector3 v2) {
 	Vector3 edge_0 = Vector3Subtract(v1, v0);
@@ -165,9 +168,9 @@ void BrushGetVertices(Brush *brush) {
 	free(vertices);
 }
 
-#define PARSE_NONE -1
-#define PARSE_BRUSH 0
-#define PARSE_ENT 	1
+#define PARSE_NONE 	   -1
+#define PARSE_BRUSH 	0
+#define PARSE_ENT 		1
 void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 	FILE *pF = fopen(path, "r");
 
@@ -196,14 +199,20 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 		// Set mode & id of brush or entity 
 		if(line[0] == '/' && line[1] == '/' && line[2] == ' ') {
 			if(line[3] == 'b') {
-				parse_mode = PARSE_BRUSH;
-				char *tok; 
-				tok = strtok(line, " ");
-				while(tok != NULL) {
-					sscanf(tok, "%d", &curr_brush);
-					tok = strtok(NULL, " ");
+				if(curr_ent <= 1) {
+					parse_mode = PARSE_BRUSH;
+					char *tok; 
+					tok = strtok(line, " ");
+					while(tok != NULL) {
+						sscanf(tok, "%d", &curr_brush);
+						tok = strtok(NULL, " ");
+					}
+					brush_pool->count++;
+
+				} else {
+					parse_mode = PARSE_BRUSH;
+					curr_brush = brush_pool->count++;
 				}
-				brush_pool->count++;
 
 			} else if(line[3] == 'e') {
 				parse_mode = PARSE_ENT;
@@ -241,10 +250,10 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			char *uv_str = space + 1;
 			//printf("%s\n", uv_str);
 
-			int u = 0, v = 0, r = 0, scale_x = 0, scale_y = 0;
+			float u = 0, v = 0, r = 0, scale_x = 1, scale_y = 1;
 			sscanf(
 				uv_str,
-				"%d %d %d %d %d",
+				"%f %f %f %f %f",
 				&u, &v, &r, &scale_x, &scale_y
 			);
 
@@ -447,10 +456,97 @@ Tri *TrisFromBrushPool(BrushPool *brush_pool, u16 *count) {
 	return tris;
 }
 
+Model BrushToModel(Brush *brush, Bsp_Data *bsp) {
+	if(!IsShaderValid(default_shader)) {
+		default_shader = LoadShader("resources/shaders/default_v.glsl", "resources/shaders/default_f.glsl");
+	}
+
+	MessageDiag("BrushToModel()", NULL, ANSI_YELLOW);
+	printf("plane_count: %d, vert_count: %d, tex_name: %s\n", 
+    brush->plane_count, brush->vert_count, brush->tex_name);
+
+	Model model = (Model) {0};
+	Texture2D tex;
+
+	Shader shader = default_shader;
+	bool use_shader = false;
+
+	// Load texture and shader for model to use
+	if(strcmp(brush->tex_name, "{ff") == 0) {
+		tex = LoadTextureFromImage(GenImageColor(1, 1, ColorAlpha(BLUE, 0.5)));
+		shader = bsp->ff_shader;
+		use_shader = true;
+
+	} else {
+		//Image img = LoadImage(TextFormat("tools/Disruptor/textures/custom/%s.png", brush->tex_name));
+		//ExportImage(img, "test.png");
+		//tex = LoadTextureFromImage(img);	
+		tex = LoadTexture(TextFormat("tools/Disruptor/textures/custom/%s.png", brush->tex_name));
+		use_shader = false;
+	}
+	printf("tex size: %d x %d\n", tex.width, tex.height);
+	printf("uv: %f %f, uv_scale: %f %f\n", brush->uv.x, brush->uv.y, brush->uv_scale.x, brush->uv_scale.y);
+	
+	// Build triangles
+	u16 tri_count = 0;
+	Tri *tris = BrushToTris(brush, &tri_count, 0);
+	printf("tri_count: %d\n", tri_count);
+
+	// Convert triangles to mesh
+	Mesh mesh = (Mesh) {0};
+
+	mesh.triangleCount 	= tri_count;
+	mesh.vertexCount 	= tri_count * 3;
+
+	mesh.vertices 	= MemAlloc(sizeof(float) * mesh.vertexCount * 3);
+	mesh.normals 	= MemAlloc(sizeof(float) * mesh.vertexCount * 3);	
+	mesh.texcoords 	= MemAlloc(sizeof(float) * mesh.vertexCount * 2);
+	mesh.texcoords2 = MemAlloc(sizeof(float) * mesh.vertexCount * 2);
+
+	u16 vert_id = 0;
+	for(u16 i = 0; i < mesh.triangleCount; i++) {
+
+		Vector3 vs, vt;
+		GetTextureAxes(tris[i].normal, &vs, &vt);
+
+		for(u16 j = 0; j < 3; j++) {
+			mesh.vertices[vert_id*3+0] = tris[i].vertices[j].x;
+			mesh.vertices[vert_id*3+1] = tris[i].vertices[j].y;
+			mesh.vertices[vert_id*3+2] = tris[i].vertices[j].z;
+
+			mesh.normals[vert_id*3+0] = tris[i].normal.x;
+			mesh.normals[vert_id*3+1] = tris[i].normal.y;
+			mesh.normals[vert_id*3+2] = tris[i].normal.z;
+
+			float u = (Vector3DotProduct(tris[i].vertices[j], vs) + brush->uv.x) / brush->uv_scale.x;
+			float v = (Vector3DotProduct(tris[i].vertices[j], vt) + brush->uv.y) / brush->uv_scale.y;
+
+			mesh.texcoords[vert_id*2+0] = u / tex.width;
+			mesh.texcoords[vert_id*2+1] = v / tex.height;
+
+			if(vert_id == 0) {
+				printf("first uv: %f %f\n", 
+					mesh.texcoords[0], mesh.texcoords[1]);
+			}
+
+			vert_id++;	
+		}
+	}
+
+	free(tris);
+
+	UploadMesh(&mesh, false);
+	model = LoadModelFromMesh(mesh);
+
+	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = tex;
+	if(use_shader) model.materials[0].shader = shader;
+
+	return model;
+}
+
 void BrushTestView(BrushPool *brush_pool, Color color) {
 	for(u16 i = 0; i < brush_pool->count; i++) {
 		Brush *brush = &brush_pool->brushes[i];
-
 		//DrawBoundingBox(brush->bounds, SKYBLUE);
 		
 		for(short j = 0; j < brush->vert_count; j++) {
@@ -563,7 +659,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 			sect._hulls[i].arr[j] = hull;
 		}
 
-		free(bp->brushes);
+		//free(bp->brushes);
 	}
 
 	Message("Loading bsp", ANSI_BLUE);
@@ -585,28 +681,74 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	for(short i = 0; i < path_list.count; i++)
 		if(strcmp(GetFileExtension(path_list.paths[i]), ".lit") == 0) lit_path_id = i;
 
+	// Make BSP lightmap for lighting level geometry
 	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data);
 
-	model_list.count = 0;
-	model_list.models = malloc(sizeof(Model) * 4096);
-	model_list.ids = malloc(sizeof(int) * 4096);
-	model_list.flags = malloc(4096);
+	// Make render brush models
+	rbrush_list.count = 0;
+	rbrush_list.cap = 4096;
+	rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * rbrush_list.cap);
+	rbrush_list.ids = malloc(sizeof(int) * rbrush_list.cap);
 
 	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
-		int temp_count;
-		Model *temp_models = BspLeafToModels(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count);
+		int temp_count = 0;
+		RenderBrush *temp_brushes = BspLeafToRenderBrushes(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count); 
 
 		for(int j = 0; j < temp_count; j++) {
-			model_list.models[model_list.count + j] = temp_models[j]; 	
-			model_list.ids[model_list.count + j] = i;
+			rbrush_list.render_brushes[rbrush_list.count + j] = temp_brushes[j];
+			rbrush_list.ids[rbrush_list.count + j] = i;
 		}
 
-		model_list.count += temp_count;
+		rbrush_list.count += temp_count;
 	}
 
-	model_list.models = realloc(model_list.models, sizeof(Model) * model_list.count);
-	model_list.ids = realloc(model_list.ids, sizeof(int) * model_list.count);
-	model_list.flags = realloc(model_list.flags, model_list.count);
+	rbrush_list.cap = rbrush_list.count;
+	rbrush_list.render_brushes = realloc(rbrush_list.render_brushes, sizeof(RenderBrush) * rbrush_list.cap);
+	rbrush_list.ids = realloc(rbrush_list.ids, sizeof(int) * rbrush_list.cap);
+
+	// Make render brush models for translucent objects
+	translucent_rbrush_list.count = 0;
+	translucent_rbrush_list.cap = 4096;
+	translucent_rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * translucent_rbrush_list.cap);
+	translucent_rbrush_list.ids = malloc(sizeof(int) * translucent_rbrush_list.cap);
+
+	for(int i = 0; i < brush_pools[0].count; i++) {
+		if(brush_pools[0].brushes[i].tex_name[0] != '{')
+			continue;
+
+		MessageDiag("Made translucent render brush", NULL, ANSI_YELLOW);
+
+		RenderBrush render_brush = (RenderBrush) {0};
+		render_brush.model = BrushToModel(&brush_pools[0].brushes[i], &sect.bsp_data);
+		translucent_rbrush_list.render_brushes[translucent_rbrush_list.count++] = render_brush;
+
+		printf("mesh count: %d, tri count: %d, material count: %d\n",
+			render_brush.model.meshCount,
+			render_brush.model.meshes[0].triangleCount,
+			render_brush.model.materialCount);
+		printf("texture id: %d, size: %dx%d\n",
+			render_brush.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.id,
+			render_brush.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.width,
+			render_brush.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.height);
+	}
+
+	translucent_rbrush_list.cap = translucent_rbrush_list.count;
+	translucent_rbrush_list.render_brushes = realloc(translucent_rbrush_list.render_brushes, sizeof(RenderBrush) * translucent_rbrush_list.cap);
+	translucent_rbrush_list.ids = realloc(translucent_rbrush_list.ids, sizeof(int) * translucent_rbrush_list.cap);
+
+	for(short i = 0; i < 3; i++) {
+		BrushPool *bp = &brush_pools[i];
+		free(bp->brushes);
+	}
+
+	printf("translucent render brush count: %d\n", translucent_rbrush_list.count);
+	/*
+	for(int i = 0; i < rbrush_list.count; i++) {
+		if(rbrush_list.render_brushes[i].flags & RBRUSH_TRANSLUCENT) {
+			translucent_rbrush_list.render_brushes[translucent_rbrush_list.count++] = rbrush_list.render_brushes[i];
+		}
+	}
+	*/
 
 	return sect;
 }
@@ -976,39 +1118,28 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 	}
 }
 
-
+#define TRANSLUCENT_MAX	128
+int translucent_count = 0;
+int translucent_ids[TRANSLUCENT_MAX] = {0};
 void DrawMap(MapSection *sect, Vector3 pos) {
-	/*
-	rlDisableBackfaceCulling();
+	translucent_count = 0;
+	
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
-	for(int i = 0; i < model_list.count; i++) {
-		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
+	for(int i = 0; i < rbrush_list.count; i++) {
+		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, rbrush_list.ids[i])) 
 			continue;
 
-		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
-	}
-	rlEnableBackfaceCulling();
-	*/
-	/*
-	for(int i = 0; i < sect->bsp_data.num_leaves; i++) {
-		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
-	}
-	*/
-
-	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
-	for(int i = 0; i < model_list.count; i++) {
-		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, model_list.ids[i])) 
-			continue;
-		/*
-		Bsp_Face *face = &sect->bsp_data.faces[sect->bsp_data.leaves[curr_leaf].first_face];
-		Bsp_Surface *surface = &sect->bsp_data.surfaces[face->texinfo];
-		Bsp_Miptex *mip = &sect->bsp_data.miptex[surface->texture_id];
-		if(mip->name[0] == '{') {
+		if(rbrush_list.render_brushes[i].flags & RBRUSH_TRANSLUCENT) {
 			continue;
 		}
-		*/
 
-		DrawModel(model_list.models[i], Vector3Zero(), 1, WHITE);
+		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
+	}
+}
+
+void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
+	for(int i = 0; i < translucent_rbrush_list.count; i++) {
+		DrawModel(translucent_rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
 	}
 }
 

@@ -6,6 +6,25 @@
 #ifndef KBSP_H_
 #define KBSP_H_
 
+#define RBRUSH_NOFLAGS			0x00
+#define RBRUSH_TRANSLUCENT		0x01
+#define RBRUSH_FORCEFIELD		0x02
+typedef struct {
+	Model model;
+	int id;
+	u8 flags;
+
+} RenderBrush;
+
+typedef struct {
+	RenderBrush *render_brushes;
+	int *ids;
+
+	int count;
+	int cap;
+
+} rBrushList;
+
 typedef struct {
 	Vector3 grid_ext;
 	int grid_size[3];
@@ -337,6 +356,8 @@ int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
 bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
+RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
+
 Lightmap BuildLightmap(Bsp_Data *bsp);
 
 void BspRenderSetup(Bsp_Data *bsp);
