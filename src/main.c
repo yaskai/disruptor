@@ -34,8 +34,8 @@ int main() {
 	SetExitKey(KEY_NULL);
 	DisableCursor();
 
-	//GameLoadScene(&game, "resources/maps/06");
-	GameLoadScene(&game, "resources/maps/07");
+	GameLoadScene(&game, "resources/maps/06");
+	//GameLoadScene(&game, "resources/maps/07");
 
 	// Loop:
 	bool exit = false;

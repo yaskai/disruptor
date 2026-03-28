@@ -5,6 +5,9 @@
 #include "v_effect.h"
 #include "../include/num_redefs.h"
 #include "geo.h"
+#include "rlgl.h"
+
+Texture2D decal_textures[8];
 
 void vEffectsInit(vEffect_Manager *manager) {
 	*manager = (vEffect_Manager) {0};
@@ -13,6 +16,8 @@ void vEffectsInit(vEffect_Manager *manager) {
 	manager->trail_model.transform = MatrixIdentity();
 
 	manager->trail_material = LoadMaterialDefault();
+
+	decal_textures[0] = LoadTexture("tools/Disruptor/textures/custom/bul_dec00.png");
 }
 
 void vEffectsRun(vEffect_Manager *manager, float dt) {
@@ -30,7 +35,7 @@ void vEffectsRun(vEffect_Manager *manager, float dt) {
 		}
 
 		float alpha = trail->timer;
-		alpha = Clamp(alpha, 0.0f, 0.5f);
+		alpha = Clamp(alpha, 0.0f, 0.75f);
 
 		trail->point_A.z += trail->timer * dt;
 		trail->point_B.z += trail->timer * dt;

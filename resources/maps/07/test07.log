@@ -97,7 +97,7 @@ count   lump name    byte size
    1807 marksurfaces       3614
    3472 edges             13888
    6832 surfedges         27328
-      8 textures         398212
+      8 textures         436292
         lightdata             0
         visdata               0
         entdata             541
@@ -105,6 +105,6 @@ count   lump name    byte size
 BSPX lump name   byte size 
 BRUSHLIST              4076
 
-0.157s seconds elapsed
+0.166s seconds elapsed
 
 

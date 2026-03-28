@@ -4,7 +4,7 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from test06.texinfo.json...
 Loading extended content flags from test06.content.json...
-82 entities read, 47 are lights.
+83 entities read, 48 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -37,18 +37,18 @@ BSPX light directions output requested on command line.
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	409 sky faces
-	9613 solid faces
-	0 filtered faces
+	422 sky faces
+	9297 solid faces
+	137 filtered faces
 	0 shadow-casting skip faces
-SetupLights: 47 initial lights
-SetupLights: 47 after surface lights
-SetupLights: 47 after jittering
-Final count: 47 lights, 194 suns in use.
+SetupLights: 48 initial lights
+SetupLights: 48 after surface lights
+SetupLights: 48 after jittering
+Final count: 48 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 5653340
+lightmap size (total): 5786928
 Lighting Completed.
 
 Writing test06.lit
@@ -61,10 +61,10 @@ DECOUPLED_LM BSPX lump written
 octree stored 670578 grid nodes + 1422 occluded = 672000 total, full stored 672000 (octree is 99.78839 percent)
 octree nodes size: 28292 bytes (643 * 44)
 octree leafs 4438 overhead 106512 bytes
-      3415275 bytes LIGHTGRID_OCTREE
+      3415287 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test06.bsp as Quake BSP bsp29
-95.905s seconds elapsed
+71.794s seconds elapsed
 0 empty lightmaps
 
 

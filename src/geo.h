@@ -16,6 +16,7 @@
 #define COLL_BLOCK_ENTS		0x04
 #define COLL_BLOCK_PLAYER	0x08
 #define COLL_BLOCK_VIS		0x10
+#define COLL_BLOCK_BUG		0x20
 typedef struct {
 	Vector3 vertices[3];
 	Vector3 normal;
