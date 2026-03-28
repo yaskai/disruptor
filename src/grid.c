@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include "raylib.h"
 #include "ent.h"
+#include "../include/log_message.h"
 
 void EntGridInit(EntityHandler *handler) {
-	//printf("grid init\n");
+	Message("EntGridInit()", ANSI_BLUE);
 
 	EntGrid grid = (EntGrid) {0};
 
@@ -13,12 +14,13 @@ void EntGridInit(EntityHandler *handler) {
 	grid.cell_count = grid.size.c * grid.size.r * grid.size.t;
 	grid.cells = calloc(grid.cell_count, sizeof(EntGridCell));
 
-	/*
-	printf("cols: %d\n", grid.size.c);
-	printf("rows: %d\n", grid.size.r);
-	printf("tabs: %d\n", grid.size.t);
-	printf("cell count: %d\n", (grid.size.c * grid.size.r * grid.size.t));
-	*/
+	if(GetLogState()) {
+		Message("GRID INFO:", ANSI_YELLOW);
+		printf("cols: %d\n", grid.size.c);
+		printf("rows: %d\n", grid.size.r);
+		printf("tabs: %d\n", grid.size.t);
+		printf("cell count: %d\n", (grid.size.c * grid.size.r * grid.size.t));
+	}
 
 	Vector3 origin = (Vector3) {
 		(-grid.size.c * ENT_GRID_CELL_EXTENTS.x) * 0.5f,

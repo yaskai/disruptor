@@ -175,7 +175,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 	FILE *pF = fopen(path, "r");
 
 	if(!pF) {
-		printf("ERROR: No file[%s]\n", path);
+		MessageError("ERROR: no .map file at ->", path);
 		return;
 	}
 
@@ -245,10 +245,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			char *space = strchr(tex_str, ' ');
 			*space = '\0';
 			memcpy(brush->tex_name, tex_str, strlen(tex_str));
-			//printf("%s\n", brush->tex_name);
-
 			char *uv_str = space + 1;
-			//printf("%s\n", uv_str);
 
 			float u = 0, v = 0, r = 0, scale_x = 1, scale_y = 1;
 			sscanf(
@@ -317,7 +314,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 		Message("--------------- [ ENTITIES ] -----------------", ANSI_GREEN);
 		for(int i = 0; i < spawn_list->count; i++) {
 			printf("-----------------------\n");
-			printf("tag: %s\n", spawn_list->arr[i].tag);
+			printf("clasname: %s\n", spawn_list->arr[i].tag);
 			printf("type: %d\n", spawn_list->arr[i].ent_type);
 			printf("pos: { %f %f %f }\n", spawn_list->arr[i].position.x, spawn_list->arr[i].position.y, spawn_list->arr[i].position.z);
 			printf("angle: %d\n", spawn_list->arr[i].angle);
@@ -457,18 +454,10 @@ Tri *TrisFromBrushPool(BrushPool *brush_pool, u16 *count) {
 }
 
 Model BrushToModel(Brush *brush, Bsp_Data *bsp) {
-	if(!IsShaderValid(default_shader)) {
-		default_shader = LoadShader("resources/shaders/default_v.glsl", "resources/shaders/default_f.glsl");
-	}
-
-	MessageDiag("BrushToModel()", NULL, ANSI_YELLOW);
-	printf("plane_count: %d, vert_count: %d, tex_name: %s\n", 
-    brush->plane_count, brush->vert_count, brush->tex_name);
-
 	Model model = (Model) {0};
 	Texture2D tex;
 
-	Shader shader = default_shader;
+	Shader shader;
 	bool use_shader = false;
 
 	// Load texture and shader for model to use
@@ -478,19 +467,13 @@ Model BrushToModel(Brush *brush, Bsp_Data *bsp) {
 		use_shader = true;
 
 	} else {
-		//Image img = LoadImage(TextFormat("tools/Disruptor/textures/custom/%s.png", brush->tex_name));
-		//ExportImage(img, "test.png");
-		//tex = LoadTextureFromImage(img);	
 		tex = LoadTexture(TextFormat("tools/Disruptor/textures/custom/%s.png", brush->tex_name));
 		use_shader = false;
 	}
-	printf("tex size: %d x %d\n", tex.width, tex.height);
-	printf("uv: %f %f, uv_scale: %f %f\n", brush->uv.x, brush->uv.y, brush->uv_scale.x, brush->uv_scale.y);
 	
 	// Build triangles
 	u16 tri_count = 0;
 	Tri *tris = BrushToTris(brush, &tri_count, 0);
-	printf("tri_count: %d\n", tri_count);
 
 	// Convert triangles to mesh
 	Mesh mesh = (Mesh) {0};
@@ -523,11 +506,6 @@ Model BrushToModel(Brush *brush, Bsp_Data *bsp) {
 
 			mesh.texcoords[vert_id*2+0] = u / tex.width;
 			mesh.texcoords[vert_id*2+1] = v / tex.height;
-
-			if(vert_id == 0) {
-				printf("first uv: %f %f\n", 
-					mesh.texcoords[0], mesh.texcoords[1]);
-			}
 
 			vert_id++;	
 		}
@@ -716,20 +694,9 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		if(brush_pools[0].brushes[i].tex_name[0] != '{')
 			continue;
 
-		MessageDiag("Made translucent render brush", NULL, ANSI_YELLOW);
-
 		RenderBrush render_brush = (RenderBrush) {0};
 		render_brush.model = BrushToModel(&brush_pools[0].brushes[i], &sect.bsp_data);
 		translucent_rbrush_list.render_brushes[translucent_rbrush_list.count++] = render_brush;
-
-		printf("mesh count: %d, tri count: %d, material count: %d\n",
-			render_brush.model.meshCount,
-			render_brush.model.meshes[0].triangleCount,
-			render_brush.model.materialCount);
-		printf("texture id: %d, size: %dx%d\n",
-			render_brush.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.id,
-			render_brush.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.width,
-			render_brush.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.height);
 	}
 
 	translucent_rbrush_list.cap = translucent_rbrush_list.count;
@@ -740,15 +707,6 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		BrushPool *bp = &brush_pools[i];
 		free(bp->brushes);
 	}
-
-	printf("translucent render brush count: %d\n", translucent_rbrush_list.count);
-	/*
-	for(int i = 0; i < rbrush_list.count; i++) {
-		if(rbrush_list.render_brushes[i].flags & RBRUSH_TRANSLUCENT) {
-			translucent_rbrush_list.render_brushes[translucent_rbrush_list.count++] = rbrush_list.render_brushes[i];
-		}
-	}
-	*/
 
 	return sect;
 }
