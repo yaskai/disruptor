@@ -147,7 +147,8 @@ void GameLoadScene(Game *game, char *path) {
 		&game->ent_handler.ents[game->ent_handler.player_id],
 		&game->ent_handler,
 		&game->test_section,
-		&game->effect_manager
+		&game->effect_manager,
+		game->conf
 	);
 
 	// -----------------------------------------------------------------------------------------------------------------

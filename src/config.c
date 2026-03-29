@@ -126,6 +126,9 @@ void ConfigInit(Config *conf) {
 
 	Option opt_mouse_sensitivity = OptionCreate("mouse_sens", &conf->mouse_sensitivity, VAL_INT);
 	OptionTableInsert(&conf->option_tables[OPT_BLOCK_INPUT], opt_mouse_sensitivity);
+
+	Option opt_draw_crosshair = OptionCreate("draw_crosshair", &conf->draw_crosshair, VAL_INT);
+	OptionTableInsert(&conf->option_tables[OPT_BLOCK_OTHER], opt_draw_crosshair);
 }
 
 void ConfigClose(Config *conf) {

@@ -30,8 +30,11 @@ int main() {
 
 	GameRenderSetup(&game);
 
-	// Disable exit key
+	// Disable exit key (raylib defaults to escape key)
 	SetExitKey(KEY_NULL);
+
+	// Disable cursor,
+	// prevents drawing cursor image and aiming issues
 	DisableCursor();
 
 	//GameLoadScene(&game, "resources/maps/06");
@@ -46,6 +49,7 @@ int main() {
 	return 0;
 }
 
+// Main loop, called every frame
 void GameTick(bool *exit, Game *game) {
 	while(!(*exit)) {
 		*exit = ( (game->flags & FLAG_EXIT_REQUEST) || WindowShouldClose() );
@@ -56,6 +60,7 @@ void GameTick(bool *exit, Game *game) {
 	}
 }
 
+// Unload game data, called on application shutdown
 void OnExit(Config *conf, Game *game) {
 	CloseWindow();
 

@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "ent.h"
 #include "v_effect.h"
+#include "config.h"
 
 #ifndef PLAYER_GUN_H_
 #define PLAYER_GUN_H_
@@ -15,7 +16,7 @@ typedef struct {
 
 } PlayerGun;
 
-void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler, MapSection *sect, vEffect_Manager *effect_manager);
+void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler, MapSection *sect, vEffect_Manager *effect_manager, Config *conf);
 void PlayerGunUpdate(PlayerGun *player_gun, float dt);
 void PlayerGunDraw(PlayerGun *player_gun);
 void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);

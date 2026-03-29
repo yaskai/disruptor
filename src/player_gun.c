@@ -5,6 +5,7 @@
 #include "geo.h"
 #include "ent.h"
 #include "v_effect.h"
+#include "config.h"
 
 #define USE_MWHEEL (true)
 
@@ -40,11 +41,13 @@ typedef struct {
 	MapSection *sect;
 	Entity *player;
 	vEffect_Manager *effect_manager;
+	Config *conf;
 
 } PlayerGunRefs;
 PlayerGunRefs gun_refs = {0};
 
 comp_Weapon *curr_gun = NULL;
+
 comp_Weapon weapons[] = {
 	// Disruptor
 	(comp_Weapon) {
@@ -99,7 +102,18 @@ comp_Weapon weapons[] = {
 Model models[4];
 Matrix gun_matrix;
 
-void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler, MapSection *sect, vEffect_Manager *effect_manager) {
+enum CROSSHAIR_IDS : short {
+	CROSSHAIR_DEFAULT 		= 0,
+	CROSSHAIR_PROJECTILE	= 1,
+};
+
+Texture2D crosshair_textures[4];
+void LoadCrosshairTextures() {
+	crosshair_textures[0] = LoadTexture("resources/ui/crosshair/default.png");
+	crosshair_textures[1] = LoadTexture("resources/ui/crosshair/arrow.png");
+}
+
+void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler, MapSection *sect, vEffect_Manager *effect_manager, Config *conf) {
 	player_gun->cam = (Camera3D) {
 		.position = (Vector3) { 0, 0, -1 },
 		.target = (Vector3) { 0, 0, 1 },
@@ -120,6 +134,7 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 	gun_refs.sect = sect;
 	gun_refs.handler = handler;
 	gun_refs.effect_manager = effect_manager;
+	gun_refs.conf = conf;
 
 	//player->comp_weapon.id = WEAP_DISRUPTOR;
 	//player_gun->current_gun = WEAP_DISRUPTOR;
@@ -128,6 +143,8 @@ void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler
 
 	player_gun->model = models[player_gun->current_gun];
 	mat = player_gun->model.transform;
+
+	LoadCrosshairTextures();
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
@@ -284,6 +301,30 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		ColorAlpha(SKYBLUE, 0.95f)
 	);
 	*/
+
+	short crosshair_type = CROSSHAIR_DEFAULT;
+	switch(player_gun->current_gun) {
+		case WEAP_DISRUPTOR: 
+			crosshair_type = CROSSHAIR_PROJECTILE;
+			break;		
+
+		default:
+			crosshair_type = CROSSHAIR_DEFAULT;
+			break;
+	}
+
+	Vector2 crosshair_pos = (Vector2) {
+		.x = 1920 * 0.5f - (crosshair_textures[0].width  * 0.5f),
+		.y = 1080 * 0.5f - (crosshair_textures[0].height * 0.5f)
+	}; 
+
+	short draw_crosshair = gun_refs.conf->draw_crosshair;
+
+	if(player_gun->current_gun == WEAP_DISRUPTOR && bug_ent->comp_ai.state != BUG_DEFAULT)
+		draw_crosshair = false;
+
+	if(draw_crosshair)
+		DrawTextureV(crosshair_textures[crosshair_type], crosshair_pos, ColorAlpha(WHITE, 0.9f));
 }
 
 void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {

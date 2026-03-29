@@ -56,12 +56,14 @@ void OptionTableInsert(OptionTable *table, Option entry);
 Option *OptionTableSearch(OptionTable *table, char *key);
 
 typedef struct {
+	OptionTable option_tables[OPTION_BLOCK_COUNT];
+
 	u32 window_width, window_height;
 	u32 target_fps;
 
 	u32 mouse_sensitivity;
 
-	OptionTable option_tables[OPTION_BLOCK_COUNT];
+	u32 draw_crosshair;
 
 } Config;
 
