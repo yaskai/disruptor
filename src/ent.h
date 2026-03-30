@@ -157,6 +157,7 @@ enum ENT_TYPES : u8 {
 	ENT_AMMO_SHOTGUN 	= 	7,
 	ENT_AMMO_REVOLVER	=	8,
 	ENT_DISRUPTOR	 	= 	9,
+	ENT_SWITCH			=  10,
 };
 
 typedef struct {
@@ -399,5 +400,7 @@ void RenderProjectiles(EntityHandler *handler);
 
 void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states);
 void ReloadEntitiesPartial(EntityHandler *handler, MapSection *sect);
+
+void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp);
 
 #endif

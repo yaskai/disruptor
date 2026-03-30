@@ -183,6 +183,8 @@ void GameLoadScene(Game *game, char *path) {
 		game->ent_handler.checkpoint_list.cells[i] = CellCoordsToId(
 			Vec3ToCoords(game->ent_handler.checkpoint_list.points[i], &game->ent_handler.grid), &game->ent_handler.grid);	
 	}
+
+	ParseBspEnts(&game->ent_handler, &game->test_section.bsp_data);
 }
 
 void GameUpdate(Game *game, float dt) {

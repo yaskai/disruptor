@@ -319,12 +319,17 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 	}; 
 
 	short draw_crosshair = gun_refs.conf->draw_crosshair;
+	float crosshair_alpha = 1.0f;
+	Color crosshair_color = WHITE;
 
-	if(player_gun->current_gun == WEAP_DISRUPTOR && bug_ent->comp_ai.state != BUG_DEFAULT)
-		draw_crosshair = false;
+	if(player_gun->current_gun == WEAP_DISRUPTOR) {
+		if((bug_ent->flags & BUG_DISRUPTED_ENEMY) && bug_ent->comp_ai.state == BUG_LANDED) {
+			crosshair_color = PURPLE; 
+		}
+	}
 
 	if(draw_crosshair)
-		DrawTextureV(crosshair_textures[crosshair_type], crosshair_pos, ColorAlpha(WHITE, 0.9f));
+		DrawTextureV(crosshair_textures[crosshair_type], crosshair_pos, ColorAlpha(crosshair_color, crosshair_alpha));
 }
 
 void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {

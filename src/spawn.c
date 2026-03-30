@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "map.h"
 #include "ent.h"
+#include "kbsp.h"
+#include "../include/log_message.h"
 
 void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph) {
 	if(!strcmp(spawn_point->tag, "worldspawn")) {
@@ -206,5 +208,61 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 	handler->count++;
 
 	return ent;
+}
+
+void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
+	char *cursor = bsp->ent_str;	
+
+	Bsp_Ent ent_data[1024] = {0};
+	int count = 0;
+		
+	while(*cursor) {
+		if(*cursor == '{') {
+			Bsp_Ent *ent = &ent_data[count++];
+			cursor++;
+			
+			while(*cursor && *cursor != '}') {
+				if(*cursor != '"') {
+					cursor++;
+					continue;
+				}
+
+				Bsp_EntProp *prop = &ent->properties[ent->prop_count++];
+
+				// Skip opening quote
+				cursor++;
+				char *dest = prop->key;
+				while(*cursor && *cursor != '"') *dest++ = *cursor++;
+				// Skip closing quote
+				cursor++;
+
+				// Skip whitespace
+				while(*cursor && *cursor != '"') *dest++ = *cursor++;
+
+				// Skip opening quote
+				cursor++;
+				dest = prop->val;
+				while(*cursor && *cursor != '"') *dest++ = *cursor++;
+				// Skip closing quote
+				cursor++;
+			}
+			cursor++;
+		}
+		cursor++;
+	}
+
+	printf("count: %d\n", count);
+	for(int i = 0; i < count; i++) {
+		Bsp_Ent *ent = &ent_data[i];
+		Message("---------------", ANSI_GREEN);
+
+		printf("ent [%d]\n", i);
+		printf("prop_count: %d\n", ent->prop_count);
+
+		for(int j = 0; j < ent->prop_count; j++) {
+			Bsp_EntProp *prop = &ent->properties[j];
+			MessageKeyValPair(prop->key, prop->val);
+		}	
+	}
 }
 

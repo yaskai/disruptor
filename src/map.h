@@ -53,6 +53,8 @@ typedef struct {
 	int angle;
 	int ent_type;
 
+	int bsp_model;
+
 	u16 id;
 	
 } EntSpawn; 
@@ -88,7 +90,7 @@ typedef struct {
 Tri *BrushToTris(Brush *brush, u16 *count, u16 brush_id);
 Tri *TrisFromBrushPool(BrushPool *brush_pool, u16 *count);
 
-Model BrushToModel(Brush *brush, Bsp_Data *bsp);
+Model BrushToModel(Brush *brush, Bsp_Data *bsp, u8 *out_flags);
 
 void BrushTestView(BrushPool *brush_pool, Color color);
 

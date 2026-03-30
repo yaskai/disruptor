@@ -453,23 +453,28 @@ Tri *TrisFromBrushPool(BrushPool *brush_pool, u16 *count) {
 	return tris;
 }
 
-Model BrushToModel(Brush *brush, Bsp_Data *bsp) {
+Model BrushToModel(Brush *brush, Bsp_Data *bsp, u8 *out_flags) {
 	Model model = (Model) {0};
 	Texture2D tex;
 
 	Shader shader;
 	bool use_shader = false;
+	*out_flags = 0;
 
 	// Load texture and shader for model to use
 	if(strcmp(brush->tex_name, "{ff") == 0) {
 		tex = LoadTextureFromImage(GenImageColor(1, 1, ColorAlpha(BLUE, 0.5)));
 		shader = bsp->ff_shader;
 		use_shader = true;
+		
+		*out_flags |= RBRUSH_FORCEFIELD;
 
 	} else {
 		tex = LoadTexture(TextFormat("tools/Disruptor/textures/custom/%s.png", brush->tex_name));
 		use_shader = false;
 	}
+
+	GenTextureMipmaps(&tex);
 	
 	// Build triangles
 	u16 tri_count = 0;
@@ -636,8 +641,6 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 			sect._hulls[i].arr[j] = hull;
 		}
-
-		//free(bp->brushes);
 	}
 
 	Message("Loading bsp", ANSI_BLUE);
@@ -695,7 +698,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 			continue;
 
 		RenderBrush render_brush = (RenderBrush) {0};
-		render_brush.model = BrushToModel(&brush_pools[0].brushes[i], &sect.bsp_data);
+		render_brush.model = BrushToModel(&brush_pools[0].brushes[i], &sect.bsp_data, &render_brush.flags);
 		translucent_rbrush_list.render_brushes[translucent_rbrush_list.count++] = render_brush;
 	}
 
@@ -1096,8 +1099,26 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 }
 
 void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
+	int ff_count = 0;
+	int ff_ids[128] = {0};
+
+	rlDisableDepthMask();
 	for(int i = 0; i < translucent_rbrush_list.count; i++) {
-		DrawModel(translucent_rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
+		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[i];
+		if(rbrush->flags & RBRUSH_FORCEFIELD) {
+			ff_ids[ff_count++] = i;	
+			continue;
+		}
+
+		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
 	}
+	rlEnableDepthMask();
+
+	BeginBlendMode(BLEND_MULTIPLIED);
+	for(int i = 0; i < ff_count; i++) {
+		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[ff_ids[i]];
+		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
+	}	
+	EndBlendMode();
 }
 

@@ -108,7 +108,7 @@ void MessageKeyValPairInt(char *key, int val) {
 	// Print key string
 	printf("%s", key);
 
-	printf("%s = ", ANSI_WHITE);
+	printf("%s=", ANSI_WHITE);
 
 	// Set text color for value	
 	printf("%s", ANSI_YELLOW);

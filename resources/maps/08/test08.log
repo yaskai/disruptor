@@ -1,0 +1,115 @@
+---- qbsp / ericw-tools 2.0.0-alpha10 ----
+
+--- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
+    "wrbrushes" was set to "1" (from command line)
+
+Input file: /home/kai/projects/disruptor/resources/maps/08/test08.map
+Output file: /home/kai/projects/disruptor/resources/maps/08/test08.bsp
+
+INFO: using built-in palette.
+     19 entities
+      8 unique textures
+     66 texinfos
+    382 unique planes
+
+INFO: world extents calculated to 7496 units
+    130 brushes
+    787 sides
+     26 side bevels
+
+            0 texture frames added
+Processing hull 0...
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+    110 SOLID brushes
+      6 SKY brushes
+    121 brushes total
+    733 visible sides
+INFO: calculating BSP for 121 brushes with 733 sides
+    121 brushes
+    733 visible faces
+    524 nodes
+    524 expensive split nodes
+    525 leaves
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    144 SOLID leafs
+    112 SKY leafs
+    264 EMPTY leafs
+    525 leafs total
+    18 max tree height
+    13 avg tree height
+    2,454 tree portals
+    93 outside leaves
+    0 detail filled leafs
+    121 brushes
+    433 visible faces
+    300 non-visible faces
+    611 nodes
+    213 non-visible nodes
+    611 expensive split nodes
+    612 leaves
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    147 SOLID leafs
+    130 SKY leafs
+    330 EMPTY leafs
+    612 leafs total
+    17 max tree height
+    11 avg tree height
+    2,788 tree portals
+    151 outside leaves
+    0 detail filled leafs
+    2,788 tree portals
+    1,761 sides visible
+    963 makefaces
+    240 merged
+    684 subdivided
+    18 nodes pruned
+    314 player-occupiable leaves
+    311 clusters of leaves
+    756 vis portals
+fixing up cluster at 768 248 200
+fixing up cluster at 920 -216 104
+fixing up cluster at -16 144 112
+fixing up cluster at -528 -344 96
+fixing up cluster at 928 -812 160
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    179 EMPTY leafs
+    130 SKY leafs
+    280 SOLID leafs
+    594 leafs total
+    17 max tree height
+    11 avg tree height
+      991 edges added by tjunctions
+    1,334 faces optimized through MWT
+    3,668 triangles computed from MWT
+      252 faces created via optimization of MWT triangles
+    3,645 edges
+    1,594 faces
+Processing hull 1...
+Processing hull 2...
+Writing test08.bsp as Quake BSP bsp29
+Wrote test08.bsp
+
+count   lump name    byte size 
+      2 models              128
+    283 planes             5660
+   1890 vertexes          22680
+    615 nodes             14760
+     42 texinfos           1680
+   1648 faces             32960
+    606 clipnodes          4848
+    338 leafs              9464
+   2006 marksurfaces       4012
+   3754 edges             15016
+   7080 surfedges         28320
+      8 textures         436292
+        lightdata             0
+        visdata               0
+        entdata            1954
+
+BSPX lump name   byte size 
+BRUSHLIST              4200
+
+0.127s seconds elapsed
+
+

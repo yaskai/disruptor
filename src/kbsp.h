@@ -11,6 +11,8 @@
 #define RBRUSH_FORCEFIELD		0x02
 typedef struct {
 	Model model;
+	BoundingBox aabb;
+
 	int id;
 	u8 flags;
 
@@ -106,13 +108,13 @@ enum LUMP_TYPES {
 // Entity property
 // Just a key value pair
 typedef struct {
-	char *key, *val;
+	char key[64], val[64];
 
 } Bsp_EntProp;
 
 typedef struct {
-	Bsp_EntProp *properties;
-	u32 prop_count;
+	Bsp_EntProp properties[64];
+	int prop_count;
 
 } Bsp_Ent;
 
@@ -260,6 +262,8 @@ typedef struct {
 
 // Data
 typedef struct {
+	char *ent_str;
+
 	Bsp_Plane *planes;
 	Bsp_Miptex *miptex;
 	Vector3 *verts;

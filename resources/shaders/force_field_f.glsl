@@ -15,5 +15,5 @@ void main() {
 	//finalColor = vec4(diffuse.x, diffuse.y, diffuse.z, 0.1);
 	//finalColor = diffuse;
 
-	finalColor = vec4(0.5, 0.6, 1.0, 0.5);
+	finalColor = vec4(0.5, 0.6, 1.0, 0.25);
 }

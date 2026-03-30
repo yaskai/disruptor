@@ -1,3 +1,4 @@
+** (x) crosshair
 ___
 * *Collision Detection & Response*
 
@@ -99,7 +100,8 @@ ___
 * *UI*
 
 ** (x) hp counter
-** ammo/clip counter
+** (x) ammo/clip counter
+** (x) crosshair
 ** diegetic elements for Bug
 
 ___

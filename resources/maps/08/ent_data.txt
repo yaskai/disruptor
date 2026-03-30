@@ -1,0 +1,120 @@
+-------- ENTITY DATA --------
+bytes [1954]
+{
+"classname" "worldspawn"
+"_wad" "/home/kai/projects/disruptor/tools/Disruptor/texdata.wad"
+"_bounce" "1"
+"_sunlight" "300"
+"_sunlight_color" "1 0.76862746 0.7529412"
+"_dirt" "1"
+"_sunlight_mangle" "-60 -25 0"
+"_sunlight_color2" "1 0.76862746 0.7529412"
+"_sunlight2" "200"
+"_bouncescale" "8.5"
+"_sunlight_penumbra" "2"
+"_sunlight_dirt" "1"
+"_dist" "1"
+"_minlight" "30"
+"_anglescale" "1"
+"_sunlight3" "200"
+"sunlight_color3" "1 0.76862746 0.7529412"
+"_bouncecolorscale" "1"
+}
+{
+"classname" "info_player_start"
+"origin" "-656 -136 40"
+}
+{
+"classname" "light"
+"origin" "1136 -1008 256"
+"spawnflags" "0"
+"light" "200"
+"_color" "0.92941177 1 0.90588236"
+"wait" "1"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "light"
+"origin" "720 -1008 256"
+"spawnflags" "0"
+"light" "200"
+"_color" "0.92941177 1 0.90588236"
+"wait" "1"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "light"
+"origin" "936 -1008 256"
+"spawnflags" "0"
+"light" "200"
+"_color" "0.92941177 1 0.90588236"
+"wait" "1"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "light"
+"origin" "632 -560 216"
+"spawnflags" "0"
+"light" "200"
+"_color" "0.92941177 1 0.90588236"
+"wait" "1"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "func_ladder"
+"_phong" "0"
+"_phong_angle" "88"
+"model" "*1"
+}
+{
+"classname" "info_switch"
+"origin" "936 -996 140"
+"tag" "force_field_00"
+"enum_id" "10"
+"angle" "0"
+"trigger_type" "0"
+}
+{
+"classname" "light"
+"origin" "1224 184 184"
+"spawnflags" "0"
+"light" "80"
+"_color" "1 0.76862746 0.7529412"
+"wait" "0.25"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "light"
+"origin" "1224 -40 184"
+"spawnflags" "0"
+"light" "70"
+"_color" "1 0.76862746 0.7529412"
+"wait" "0.25"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "light"
+"origin" "1224 -232 184"
+"spawnflags" "0"
+"light" "30"
+"_color" "1 0.76862746 0.7529412"
+"wait" "0.05"
+"style" "0"
+"impulse" "0"
+}
+{
+"classname" "light"
+"origin" "1224 -440 184"
+"spawnflags" "0"
+"light" "30"
+"_color" "1 0.76862746 0.7529412"
+"wait" "0.05"
+"style" "0"
+"impulse" "0"
+}

@@ -39,6 +39,16 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	// ---------------------------------------------------------------------------------------
 	// Entities
 	Bsp_Lump ents_lump = header.lumps[LUMP_ENTS];
+	
+	fseek(pF, ents_lump.file_offset, SEEK_SET);
+	data.ent_str = (char*)malloc(ents_lump.file_size);
+	fread(data.ent_str, ents_lump.file_size, 1, pF);
+
+	if(print_output) {
+		Message("-------- ENTITY DATA --------", ANSI_GREEN);
+		MessageDiagInt("bytes", ents_lump.file_size, ANSI_YELLOW);
+		printf("%s\n", data.ent_str);
+	}
 
 	// ---------------------------------------------------------------------------------------
 	// Planes
@@ -114,7 +124,6 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 	fseek(pF, faces_lump.file_offset, SEEK_SET);
 	i32 face_count = faces_lump.file_size / sizeof(Bsp_Face);
-	
 	Bsp_Face *faces = malloc(sizeof(Bsp_Face) * face_count);
 	fread(faces, sizeof(Bsp_Face) * face_count, 1, pF);
 
@@ -195,6 +204,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	data.num_models = model_count;
 	data.models = models;
 	// ---------------------------------------------------------------------------------------
+	// Miptex
 	/*
 	data.miptex_lump_offset = miptex_lump.file_offset;
 	data.textures = malloc(sizeof(Texture) * data.num_miptex);
@@ -325,6 +335,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 }
 
 void UnloadBsp(Bsp_Data *data) {
+	if(data->ent_str)		free(data->ent_str);
 	if(data->planes)		free(data->planes);
 	if(data->miptex)		free(data->miptex);
 	if(data->verts)			free(data->verts);
@@ -871,11 +882,6 @@ RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_coun
 
 		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
 		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
-
-		/*
-		if(mip->name[0] == '{')
-			continue;
-		*/
 
 		Lm_Decoupled *lmd = &bsp->decouple_lm[face_id];
 		Rectangle *uv_rec = &bsp->lm.uvs[face_id];

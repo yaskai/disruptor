@@ -38,7 +38,8 @@ int main() {
 	DisableCursor();
 
 	//GameLoadScene(&game, "resources/maps/06");
-	GameLoadScene(&game, "resources/maps/07");
+	//GameLoadScene(&game, "resources/maps/07");
+	GameLoadScene(&game, "resources/maps/08");
 
 	// Run main game loop
 	bool exit = false;

@@ -371,11 +371,12 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
 
 			Vector3 look_point = targ_ent->comp_transform.position;
-			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 10*dt));
+			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 5*dt));
 
 			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
 			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
-				ct->targ_look = targ;
+				ct->targ_look = Vector3Lerp(ct->targ_look, targ, 100*dt);
+				//ct->targ_look = targ;
 
 		} else {
 			// Disrupted
@@ -406,12 +407,12 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
 
 	Vector3 dir = ct->forward;
-	float offset = GetRandomValue(-2, 2) * 0.01f;	
+	float offset = GetRandomValue(-4, 4) * 0.01f;	
 
 	Vector3 right = Vector3CrossProduct(ct->forward, UP);
 	dir = Vector3Add(dir, Vector3Scale(right, offset));
 
-	offset = GetRandomValue(-2, 2) * 0.01f;
+	offset = GetRandomValue(-4, 4) * 0.01f;
 	dir = Vector3Add(dir, Vector3Scale(UP, offset));
 
 	dir = Vector3Normalize(dir);
@@ -419,7 +420,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	bool hit = false;
 	// * NOTE:
 	// Purpose of the dummy value is to cause no dammage on the first few shots, gives the player a warning for fairness.
-	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 2);
+	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 3);
 	Vector3 bullet_dest = TraceBullet(handler, sect, trace_start, dir, ent->id, &hit, dummy);
 
 	Vector3 trail_end = Vector3Add(trace_start, Vector3Scale(dir, Vector3Distance(trace_start, bullet_dest)));
@@ -431,7 +432,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	float dist = Vector3Distance(trace_start, trail_end);
 	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
 
-	weap->cooldown = 0.065f;
+	weap->cooldown = 0.075f;
 	weap->ammo--;
 }
 
@@ -858,6 +859,7 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 	if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
 		task->task_id = TASK_LOOK_AT_ENTITY;
 		task->target_entity = handler->player_id;
+
 	} else if((ai->task_data.task_id != TASK_FIRE_WEAPON) && ent->comp_weapon.ammo <= 0) {
 		Vector3 targ = Vector3Lerp(ct->forward, ct->start_forward, 0.1f);
 		/*
@@ -879,7 +881,7 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 			//ai->task_data.known_target_position = look_point;
 
 			Vector3 target_vel = handler->ents[task->target_entity].comp_transform.velocity;
-			look_point = Vector3Add(look_point, target_vel);
+			look_point = Vector3Add(look_point, Vector3Scale(target_vel, 0.25f));
 		} else if(ai->input_mask & AI_INPUT_LOST_PLAYER) {
 			look_point = ai->task_data.known_target_position;
 		}
@@ -890,7 +892,8 @@ void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
 			task->task_id = TASK_FIRE_WEAPON;
 			ent->comp_weapon.ammo = ent->comp_weapon.clip_size;
-			ent->comp_weapon.cooldown = 0.05f;
+			ent->comp_weapon.cooldown = 1.0f;
+
 		} else if(ai->input_mask & AI_INPUT_LOST_PLAYER) {
 			task->task_id = TASK_WAIT_TIME;
 			task->timer = 25.0f;
