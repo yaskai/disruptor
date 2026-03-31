@@ -219,6 +219,7 @@ void GameDraw(Game *game, float dt) {
 			DrawMap(&game->test_section, game->camera.position);
 			RenderEntities(&game->ent_handler, GetFrameTime());
 			vEffectsRun(&game->effect_manager, dt);
+			RenderBrushEntities(&game->ent_handler);
 			DrawMapTranslucent(&game->test_section, game->camera.position);
 
 			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 

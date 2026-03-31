@@ -1095,19 +1095,6 @@
 "classname" "func_detail_fence"
 // brush 0
 {
-( 784 -512 192 ) ( 784 -496 16 ) ( 784 -496 192 ) {ff 0 0 0 1 1
-( 1056 -512 192 ) ( 784 -512 16 ) ( 784 -512 192 ) {ff 0 0 0 1 1
-( 1056 -496 16 ) ( 784 -512 16 ) ( 1056 -512 16 ) {ff 0 0 0 1 1
-( 1056 -496 192 ) ( 784 -512 192 ) ( 784 -496 192 ) {ff 0 0 0 1 1
-( 1056 -496 192 ) ( 784 -496 16 ) ( 1056 -496 16 ) {ff 0 0 0 1 1
-( 1056 -496 192 ) ( 1056 -512 16 ) ( 1056 -512 192 ) {ff 0 0 0 1 1
-}
-}
-// entity 4
-{
-"classname" "func_detail_fence"
-// brush 0
-{
 ( 728 -816 184 ) ( 728 -808 136 ) ( 728 -808 184 ) {fence00 0 0 0 0.2 0.2
 ( 1128 -816 184 ) ( 728 -816 136 ) ( 728 -816 184 ) {fence00 0 0 0 0.2 0.2
 ( 1128 -808 136 ) ( 728 -816 136 ) ( 1128 -816 136 ) {fence00 0 0 0 0.2 0.2
@@ -1116,7 +1103,7 @@
 ( 1128 -808 184 ) ( 1128 -816 136 ) ( 1128 -816 184 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 5
+// entity 4
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -1129,7 +1116,7 @@
 ( 1152 240 192 ) ( 1152 240 208 ) ( 1152 368 208 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 6
+// entity 5
 {
 "classname" "light"
 "origin" "1136 -1008 256"
@@ -1140,7 +1127,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 7
+// entity 6
 {
 "classname" "light"
 "origin" "720 -1008 256"
@@ -1151,7 +1138,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 8
+// entity 7
 {
 "classname" "light"
 "origin" "936 -1008 256"
@@ -1162,7 +1149,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 9
+// entity 8
 {
 "classname" "light"
 "origin" "632 -560 216"
@@ -1173,7 +1160,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 10
+// entity 9
 {
 "classname" "func_ladder"
 "_phong" "0"
@@ -1260,7 +1247,7 @@
 ( 692 -444 32 ) ( 696 -448 32 ) ( 696 -448 160 ) met01 0 0 0 1 1
 }
 }
-// entity 11
+// entity 10
 {
 "classname" "info_switch"
 "origin" "936 -996 140"
@@ -1269,7 +1256,7 @@
 "angle" "0"
 "trigger_type" "0"
 }
-// entity 12
+// entity 11
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -1282,7 +1269,7 @@
 ( 288 64 160 ) ( 288 48 64 ) ( 288 48 160 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 13
+// entity 12
 {
 "classname" "light"
 "origin" "1224 184 184"
@@ -1293,7 +1280,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 14
+// entity 13
 {
 "classname" "light"
 "origin" "1224 -40 184"
@@ -1304,7 +1291,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 15
+// entity 14
 {
 "classname" "light"
 "origin" "1224 -232 184"
@@ -1315,7 +1302,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 16
+// entity 15
 {
 "classname" "light"
 "origin" "1224 -440 184"
@@ -1326,7 +1313,27 @@
 "style" "0"
 "impulse" "0"
 }
+// entity 16
+{
+"classname" "func_forcefield"
+// brush 0
+{
+( 784 -512 192 ) ( 784 -496 16 ) ( 784 -496 192 ) {ff 0 0 0 1 1
+( 1056 -512 192 ) ( 784 -512 16 ) ( 784 -512 192 ) {ff 0 0 0 1 1
+( 1056 -496 16 ) ( 784 -512 16 ) ( 1056 -512 16 ) {ff 0 0 0 1 1
+( 1056 -496 192 ) ( 784 -512 192 ) ( 784 -496 192 ) {ff 0 0 0 1 1
+( 1056 -496 192 ) ( 784 -496 16 ) ( 1056 -496 16 ) {ff 0 0 0 1 1
+( 1056 -496 192 ) ( 1056 -512 16 ) ( 1056 -512 192 ) {ff 0 0 0 1 1
+}
+}
 // entity 17
+{
+"classname" "info_maintainer_spawn"
+"origin" "608 -288 40"
+"enum_id" "2"
+"angle" "0"
+}
+// entity 18
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
@@ -1334,7 +1341,7 @@
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 18
+// entity 19
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

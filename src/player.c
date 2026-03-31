@@ -80,7 +80,8 @@ bool step_frame = false;
 void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
 	comp_Transform *ct = &ent->comp_transform;
 
-	Bsp_Hull *bsp = &ptr_sect->bsp[1];
+	//Bsp_Hull *bsp = &ptr_sect->bsp[1];
+	Bsp_Data *bsp = &ptr_sect->bsp_data;
 	EntGrid *grid = &handler->grid;
 
 	*pm = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1, .origin = start, .block = 0, .clip_count = 0 };
@@ -108,11 +109,26 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 
 		// Trace geometry 
 		Bsp_TraceData tr = Bsp_TraceDataEmpty();
-		Bsp_RecursiveTraceEx(bsp, bsp->first_node, 0, 1, dest, Vector3Add(dest, move), &tr);
+		float fraction = 1.0f;
+	
+		for(int j = 0; j < bsp->num_models; j++) {
+			if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+				continue;
 
-		// Determine how much of movement was obstructed
-		float fraction = tr.fraction;
-		fraction = Clamp(fraction, 0.0f, 1.0f);
+			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+
+			Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &temp_tr);
+
+			// Determine how much of movement was obstructed
+			float hull_frac = temp_tr.fraction;
+			hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+			if(hull_frac < fraction) {
+				tr = temp_tr;
+				fraction = hull_frac;
+			}
+		}		
 
 		// Repeat trace steps for entity collisions,
 		// if entity hit is closer, use that collision for clipping plane 
@@ -129,27 +145,28 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			use_ent = false;
 
 		if(use_ent) {
-			ent_frac = (ent_tr.dist / Vector3Length(move));
+			ent_frac = (ent_tr.dist / Vector3Length(move)) - 0.05f;
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
-			
-			use_ent = ent_frac < fraction;
-
-			if(use_ent)
-				fraction = ent_frac;
 		}
+
+		if(num_clips < MAX_CLIPS && tr.fraction < 1.0f) {
+			clips[num_clips++] = *(Vector3 *) tr.plane.normal; 
+		} 
+
+		if(num_clips < MAX_CLIPS && ent_frac < 1.0f) {
+			clips[num_clips++] = ent_tr.normal;
+		}
+
+		if(use_ent)
+			fraction = Clamp(fraction, 0.0f, ent_frac);
+
+		Vector3 safe = dest;
 
 		// Update destination, move to point
 		dest = Vector3Add(dest, Vector3Scale(move, fraction));
 
 		// No obstruction, do full movement 
 		if(fraction >= 1.0f) 
-			break;
-
-		// Add clip plane
-		if(num_clips < MAX_CLIPS) {
-			clips[num_clips] = (use_ent) ? ent_tr.normal : *(Vector3 *) tr.plane.normal; 
-			num_clips++;
-		} else 
 			break;
 
 		// Update velocity by each clip plane
@@ -368,7 +385,6 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 			break;
 		}
 	}
-
 }
 
 // Take input, apply to velocity

@@ -1,3 +1,4 @@
+#include <raylib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -206,6 +207,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 	ent.cell_id = -1;
 
 	handler->count++;
+	handler->brush_ents_offset = handler->count;
 
 	return ent;
 }
@@ -251,18 +253,43 @@ void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 		cursor++;
 	}
 
-	printf("count: %d\n", count);
 	for(int i = 0; i < count; i++) {
 		Bsp_Ent *ent = &ent_data[i];
-		Message("---------------", ANSI_GREEN);
-
-		printf("ent [%d]\n", i);
-		printf("prop_count: %d\n", ent->prop_count);
-
+		//Message("---------------", ANSI_GREEN);
+		
+		int submodel = 0;
 		for(int j = 0; j < ent->prop_count; j++) {
 			Bsp_EntProp *prop = &ent->properties[j];
-			MessageKeyValPair(prop->key, prop->val);
+			//MessageKeyValPair(prop->key, prop->val);
+
+			if(prop->val[0] == '*') {
+				sscanf(prop->val, "*%d", &submodel);
+				printf("submodel: %d\n", submodel);
+				break;
+			}
 		}	
+
+		if(submodel > 0) {
+			Entity real_ent = (Entity) {0};
+			real_ent.model = BspModelToRenderModel(bsp, submodel);			
+			real_ent.type = ENT_BRUSH;
+
+			/*
+			real_ent.comp_transform.bounds.min = *(Vector3 *) bsp->models[submodel].mins;
+			real_ent.comp_transform.bounds.max = *(Vector3 *) bsp->models[submodel].maxs;
+			*/
+
+			real_ent.bsp_model = submodel;
+
+			real_ent.comp_transform.position = BoxCenter(real_ent.comp_transform.bounds);
+
+			real_ent.flags = (ENT_ACTIVE);
+
+			real_ent.id = handler->count;
+			handler->ents[handler->count++] = real_ent;	
+
+			printf("made submodel\n");
+		}
 	}
 }
 

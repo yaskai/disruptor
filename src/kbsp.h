@@ -249,16 +249,36 @@ typedef struct {
 
 // Model
 typedef struct {
-	//float mins[3], maxs[3];
-	BoundingBox bounds;
+	float mins[3], maxs[3];
 	float origin[3];
 
 	i32 head_nodes[4];
 	i32 num_leafs;
-	i32 face_id;
-	i32 faces;
+	i32 first_face;
+	i32 num_faces;
 
 } Bsp_Model;
+
+typedef struct {
+	Bsp_Plane *planes;
+	Bsp_ClipNode *nodes;
+
+	int first_node;
+	int last_node;
+
+	int num_planes;
+
+} Bsp_Hull;
+
+#define HULLGROUP_ACTIVE	0x01
+typedef struct {
+	Bsp_Hull hulls[4];
+	int model_id;
+
+	u8 flags;
+	u8 collision_flags;
+	
+} Bsp_HullGroup;
 
 // Data
 typedef struct {
@@ -309,6 +329,8 @@ typedef struct {
 	lm_OctreeNode *lm_oct_nodes;
 	i32 num_oct_nodes;
 
+	Bsp_HullGroup *hull_groups;
+
 } Bsp_Data;
 
 Bsp_Data LoadBsp(char *path, bool print_output);
@@ -316,18 +338,8 @@ void UnloadBsp(Bsp_Data *data);
 
 void Bsp_PrintStructSizes();
 
-typedef struct {
-	Bsp_Plane *planes;
-	Bsp_ClipNode *nodes;
-
-	int first_node;
-	int last_node;
-
-	int num_planes;
-
-} Bsp_Hull;
-
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index);
+Bsp_HullGroup Bsp_BuildHullGroup(Bsp_Data *data, int model_id);
 
 #define CONTENTS_EMPTY -1
 #define CONTENTS_SOLID -2
@@ -361,6 +373,8 @@ bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
 RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
+
+Model BspModelToRenderModel(Bsp_Data *bsp, int submodel_id);
 
 Lightmap BuildLightmap(Bsp_Data *bsp);
 

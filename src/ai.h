@@ -27,10 +27,11 @@ enum ANIM_STATES : u8 {
 	STATE_DISABLED
 };
 
-enum AI_SCHEDULES : u8 {
+enum SCHED_TYPES : u8 {
 	SCHED_IDLE,
 	SCHED_PATROL,
 	SCHED_WAIT,
+	SCHED_ATTACK_RANGE,
 	SCHED_FIX_FRIEND,
 	SCHED_SEARCH_FOR_PLAYER,
 	SCHED_SENTRY,
@@ -40,17 +41,17 @@ enum AI_SCHEDULES : u8 {
 	SCHED_MAINTAINER_MAKE_NEW
 };
 
-enum AI_TASKS : u8 {
+enum TASK_TYPES : u8 {
 	TASK_GOTO_POINT,	
 	TASK_FIRE_WEAPON,
 	TASK_RELOAD_WEAPON,
 	TASK_WAIT_TIME,
+	TASK_FACE_DIR,
 	TASK_FIND_POINT,
 	TASK_MAKE_PATROL_PATH,
 	TASK_LOOK_AT_ENTITY,
 	TASK_LOOK_AROUND,
 	TASK_DO_FIX,
-	TASK_STICK_TO_ENT,
 	TASK_THROW_PROJECTILE,
 };
 
@@ -72,6 +73,10 @@ typedef struct {
 	bool path_set;
 
 } Ai_TaskData;
+
+typedef struct {
+	
+} Ai_SchedState;
 
 typedef struct {
 	Ai_TaskData task_data;
@@ -105,4 +110,3 @@ typedef struct {
 } comp_Ai;
 
 #endif
-

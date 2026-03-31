@@ -13,10 +13,6 @@
 #include "../include/sort.h"
 #include "pm.h"
 
-#define STEP_SIZE 8.0f
-
-float grid_tick = 0.0f;
-
 Vector3 debug_bullet_dest;
 Vector3 debug_bullet_norm;
 
@@ -141,7 +137,16 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	render_list.count = 0;
 	Vector3 view_dir = player_ent->comp_transform.forward;
 
-	for(u16 i = 0; i < handler->count; i++) {
+	for(u16 i = handler->brush_ents_offset; i < handler->count; i++) {
+		Entity *ent = &handler->ents[i];
+
+		if(!(ent->flags & ENT_ACTIVE))
+			sect->bsp_data.hull_groups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
+		else
+			sect->bsp_data.hull_groups[ent->bsp_model].flags |=  HULLGROUP_ACTIVE;
+	}
+
+	for(u16 i = 0; i < handler->brush_ents_offset; i++) {
 		Entity *ent = &handler->ents[i];
 
 		if(ent->type <= 0)
@@ -272,12 +277,13 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 	ManageProjectiles(handler, sect, dt);
 
-	grid_tick -= dt;
-	if(grid_tick < 0.0f) {
-		// Do next grid update in ~1 frames
-		grid_tick = (1*dt);
+	UpdateGrid(handler);
 
-		UpdateGrid(handler);
+	if(IsKeyPressed(KEY_F)) {
+		for(int i = handler->brush_ents_offset; i < handler->count; i++) {
+			if(handler->ents[i].bsp_model == 2)
+				handler->ents[i].flags ^= ENT_ACTIVE;
+		}
 	}
 }
 
@@ -285,8 +291,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 void RenderEntities(EntityHandler *handler, float dt) {
 	EntGrid *grid = &handler->grid;
 
-	//for(u16 i = 0; i < render_list.count; i++) {
-	for(u16 i = 0; i < handler->count; i++) {;
+	for(u16 i = 0; i < handler->brush_ents_offset; i++) {;
 		Entity *ent = &handler->ents[i];
 
 		if(!(ent->flags & ENT_ACTIVE)) 
@@ -304,10 +309,29 @@ void RenderEntities(EntityHandler *handler, float dt) {
 			case ENT_DISRUPTOR:
 				BugDraw(ent);
 				break;
+
+			/*
+			case ENT_BRUSH:
+				DrawModel(ent->model, Vector3Zero(), 1, WHITE);
+				DrawBoundingBox(ent->comp_transform.bounds, RED);
+				break;
+			*/
 		}
 	}
 
 	RenderProjectiles(handler);
+}
+
+void RenderBrushEntities(EntityHandler *handler) {
+	for(int i = handler->brush_ents_offset; i < handler->count; i++) {
+		Entity *ent = &handler->ents[i];
+
+		if(!(ent->flags & ENT_ACTIVE)) 
+			continue;
+
+		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
+		DrawBoundingBox(ent->comp_transform.bounds, RED);
+	}
 }
 
 // Update logic for turret
@@ -1060,8 +1084,6 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 			if(Vector3DotProduct(to_ent, ray.direction) < 0) 
 				continue;
 			
-			// * NOTE:
-			// Change from transform bounds to actual damage hit box later 
 			RayCollision coll = GetRayCollisionBox(ray, ent->comp_transform.bounds);
 				
 			if(coll.hit && coll.distance < ent_hit_dist && coll.distance < max_dist) {
@@ -1084,10 +1106,10 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 				tmax_Z += td_z;
 			}
 		} else {
-			if(tmax_X < tmax_Z) {
+			if(tmax_Y < tmax_Z) {
 				cell.r += step_y;
 				t = tmax_Y;
-				tmax_Y += td_z;
+				tmax_Y += td_y;
 			} else {
 				cell.t += step_z;
 				t = tmax_Z;

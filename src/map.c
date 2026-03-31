@@ -655,8 +655,9 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	sect.bsp_data = LoadBsp(path_list.paths[bsp_id], false);
 
-	for(short i = 0; i < 4; i++)
+	for(short i = 0; i < 4; i++) {
 		sect.bsp[i] = Bsp_BuildHull(&sect.bsp_data, i);
+	}
 
 	short lit_path_id = 0;
 	for(short i = 0; i < path_list.count; i++)
@@ -696,6 +697,10 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	for(int i = 0; i < brush_pools[0].count; i++) {
 		if(brush_pools[0].brushes[i].tex_name[0] != '{')
 			continue;
+
+		if(strcmp(brush_pools[0].brushes[i].tex_name, "{ff") == 0) {
+			continue;
+		}
 
 		RenderBrush render_brush = (RenderBrush) {0};
 		render_brush.model = BrushToModel(&brush_pools[0].brushes[i], &sect.bsp_data, &render_brush.flags);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "raylib.h"
+#include "raymath.h"
 #include "ent.h"
 #include "../include/log_message.h"
 
@@ -42,66 +43,71 @@ void EntGridInit(EntityHandler *handler) {
 	handler->grid = grid;
 }
 
-void UpdateGrid(EntityHandler *handler) {
-	EntGrid *grid = &handler->grid;
+void GridClean(EntityHandler *handler, EntGrid *grid, int ent_id) {
+	Entity *ent = &handler->ents[ent_id];
+	comp_Transform *ct = &ent->comp_transform;
 
-	for(u16 i = 0; i < handler->count; i++) {
-		Entity *ent = &handler->ents[i];
-		comp_Transform *ct = &ent->comp_transform;
+	BoundingBox bounds_prev = BoxTranslate(ct->bounds, ct->prev_pos);
+	Coords min_coords = Vec3ToCoords(bounds_prev.min, grid); 
+	Coords max_coords = Vec3ToCoords(bounds_prev.max, grid);
 
-		i16 src_id = ent->cell_id; 	
+	for(i16 x = min_coords.c; x <= max_coords.c; x++) {
+		for(i16 y = min_coords.r; y <= max_coords.r; y++) {
+			for(i16 z = min_coords.t; z <= max_coords.t; z++) {
+				Coords coords = (Coords) { x, y, z };  
+				if(!CoordsInBounds(coords, grid))
+					continue;
 
-		Coords dest_coords = Vec3ToCoords(ct->position, grid);
-		if(!CoordsInBounds(dest_coords, grid)) {
-			//puts("dest coords out of bounds");
-			continue;
-		}
+				i16 cell_id = CellCoordsToId(coords, grid);
+				EntGridCell *cell = &grid->cells[cell_id];
+				
+				for(short j = 0; j < cell->ent_count; j++) {
+					if(cell->ents[j] != ent->id)
+						continue;
 
-		i16 dest_id = CellCoordsToId(dest_coords, grid);
+					for(short n = j; n < cell->ent_count-1; n++)
+						cell->ents[n] = cell->ents[n+1];
 
-		EntGridCell *dest_cell = &grid->cells[dest_id];
+					cell->ent_count--;
 
-		if(src_id == -1) {
-			ent->cell_id = dest_id;
-			dest_cell->ents[dest_cell->ent_count++] = ent->id;
-			continue;
-		}
-	
-		EntGridCell *src_cell = &grid->cells[src_id];
-			
-		if(src_id == dest_id)
-			continue;
-
-		/*
-		if(!CheckCollisionBoxes(ct->bounds, src_cell->aabb)) {
-			for(u8 j = 0; j < src_cell->ent_count; j++) {
-				if(src_cell->ents[j] == ent->id) { 
-					for(u8 n = j; n < src_cell->ent_count-1; n++)
-						src_cell->ents[n] = src_cell->ents[n+1];
-
-					src_cell->ent_count--;
 					break;
 				}
 			}
 		}
-		*/
+	}
+}
 
-		for(u8 j = 0; j < src_cell->ent_count; j++) {
-			if(src_cell->ents[j] == ent->id) { 
-				for(u8 n = j; n < src_cell->ent_count-1; n++) {
-					src_cell->ents[n] = src_cell->ents[n+1];
-				}
+void GridInsert(EntityHandler *handler, EntGrid *grid, int ent_id) {
+	Entity *ent = &handler->ents[ent_id];
+	comp_Transform *ct = &ent->comp_transform;
+	Coords min_coords = Vec3ToCoords(ct->bounds.min, grid); 
+	Coords max_coords = Vec3ToCoords(ct->bounds.max, grid);
 
-				src_cell->ent_count--;
-				break;
+	for(i16 x = min_coords.c; x <= max_coords.c; x++) {
+		for(i16 y = min_coords.r; y <= max_coords.r; y++) {
+			for(i16 z = min_coords.t; z <= max_coords.t; z++) {
+				Coords coords = (Coords) { x, y, z };  
+				if(!CoordsInBounds(coords, grid))
+					continue;
+
+				i16 cell_id = CellCoordsToId(coords, grid);
+				EntGridCell *cell = &grid->cells[cell_id];
+
+				if(cell->ent_count >= MAX_ENTS_PER_CELL)
+					continue;
+
+				cell->ents[cell->ent_count++] = ent->id;
 			}
 		}
+	}
+}
 
-		if(dest_cell->ent_count + 1 > MAX_ENTS_PER_CELL)
-			continue;
+void UpdateGrid(EntityHandler *handler) {
+	EntGrid *grid = &handler->grid;
 
-		ent->cell_id = dest_id;
-		dest_cell->ents[dest_cell->ent_count++] = ent->id;
+	for(u16 i = 0; i < handler->count; i++) {
+		GridClean(handler, grid, i);
+		GridInsert(handler, grid, i);
 	}
 }
 

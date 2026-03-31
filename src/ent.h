@@ -19,7 +19,7 @@ typedef struct {
 
 } Coords;
 
-#define ENT_GRID_CELL_EXTENTS (Vector3) { 512, 512, 512 } 
+#define ENT_GRID_CELL_EXTENTS (Vector3) { 480, 480, 480 } 
 #define MAX_ENTS_PER_CELL	32
 typedef struct {
 	BoundingBox aabb;
@@ -158,6 +158,8 @@ enum ENT_TYPES : u8 {
 	ENT_AMMO_REVOLVER	=	8,
 	ENT_DISRUPTOR	 	= 	9,
 	ENT_SWITCH			=  10,
+	ENT_BRUSH			=  11,
+	ENT_FORCEFIELD		=  12,
 };
 
 typedef struct {
@@ -171,6 +173,8 @@ typedef struct {
 	
 	int anim_count, curr_anim,  anim_frame;
 	float anim_timer;
+
+	int bsp_model;
 
 	u16 id;
 	i16 cell_id;
@@ -217,6 +221,8 @@ typedef struct {
 
 	float ai_tick;
 
+	int brush_ents_offset;
+
 	u16 count;
 	u16 capacity;
 
@@ -235,6 +241,8 @@ void EntHandlerClose(EntityHandler *handler);
 
 void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt);
 void RenderEntities(EntityHandler *handler, float dt);
+
+void RenderBrushEntities(EntityHandler *handler);
 
 void UpdateRenderList(EntityHandler *handler, MapSection *sect);
 

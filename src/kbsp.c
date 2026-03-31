@@ -261,6 +261,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 	if(memcmp(magic, "BSPX", 4) != 0) {
 		MessageError("NO BSPX DATA", NULL);
+
 	} else {
 		int num_lumps = 0;
 		fread(&num_lumps, 4, 1, pF);
@@ -331,6 +332,11 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	if(GetLogState())
 		printf("bsp submodel count: %d\n", data.num_models);
 
+	data.hull_groups = malloc(sizeof(Bsp_HullGroup) * data.num_models);
+	for(int i = 0; i < data.num_models; i++) {
+		data.hull_groups[i] = Bsp_BuildHullGroup(&data, i);
+	}
+
 	return data;
 }
 
@@ -374,10 +380,28 @@ Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {
 	hull.first_node = data->models[0].head_nodes[hull_index];
 	hull.last_node = data->num_clipnodes - 1;
 
-	hull.nodes = data->clipnodes;
 	hull.planes = data->planes;
 
 	return hull;
+}
+
+Bsp_HullGroup Bsp_BuildHullGroup(Bsp_Data *data, int model_id) {
+	Bsp_HullGroup group = (Bsp_HullGroup) {0};	
+	group.flags |= HULLGROUP_ACTIVE;
+
+	for(int i = 0; i < 4; i++) {
+		Bsp_Hull hull = (Bsp_Hull) {0};
+
+		hull.nodes = data->clipnodes;
+		hull.planes = data->planes;
+
+		hull.first_node = data->models[model_id].head_nodes[i];
+		hull.last_node = data->num_clipnodes - 1;
+
+		group.hulls[i] = hull;
+	}	
+
+	return group;
 }
 
 int Bsp_PointContents(Bsp_Hull *hull, int num, Vector3 point) {
@@ -992,6 +1016,84 @@ RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_coun
 	free(meshes);
 
 	return render_brushes;
+}
+
+Model BspModelToRenderModel(Bsp_Data *bsp, int submodel_id) {
+	Model model = (Model) {0};
+
+	Bsp_Model *bsp_m = &bsp->models[submodel_id];
+
+	int tri_count = 0;
+	for(int i = 0; i < bsp_m->num_faces; i++) {
+		Bsp_Face *face = &bsp->faces[bsp_m->first_face + i];
+		tri_count += face->edge_count -2;
+	}
+
+	Mesh mesh = (Mesh) {0};
+
+	mesh.triangleCount = tri_count;
+	mesh.vertexCount = tri_count * 3;
+
+	mesh.vertices 	= MemAlloc(sizeof(float) * mesh.vertexCount * 3);
+	mesh.normals 	= MemAlloc(sizeof(float) * mesh.vertexCount * 3);
+	mesh.texcoords 	= MemAlloc(sizeof(float) * mesh.vertexCount * 2);
+
+	int vert_id = 0;
+	for(int i = 0; i < bsp_m->num_faces; i++) {
+		Bsp_Face *face = &bsp->faces[bsp_m->first_face + i];
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
+
+		Vector3 face_verts[face->edge_count];
+		for(int j = 0; j < face->edge_count; j++) {
+			i32 list_edge = bsp->ledges[face->first_edge + j];
+			face_verts[j] = (list_edge >= 0) ? bsp->verts[bsp->edges[list_edge].v[0]] : bsp->verts[bsp->edges[-list_edge].v[1]]; 
+		}
+
+		Bsp_Plane *plane = &bsp->planes[face->plane];
+		Vector3 normal = *(Vector3 *) plane->normal;
+		if(face->side) normal = Vector3Negate(normal); 
+
+		for(int j = 1; j < face->edge_count - 1; j++) {
+			Vector3 tri[3] = { face_verts[0], face_verts[j + 1], face_verts[j] };
+
+			for(short k = 0; k < 3; k++) {
+				// Vertex
+				mesh.vertices[vert_id*3+0] = tri[k].x;
+				mesh.vertices[vert_id*3+1] = tri[k].y;
+				mesh.vertices[vert_id*3+2] = tri[k].z;
+
+				// Normal
+				mesh.normals[vert_id*3+0]	= normal.x;
+				mesh.normals[vert_id*3+1]	= normal.y;
+				mesh.normals[vert_id*3+2]	= normal.z;
+
+				// Texture UV
+				mesh.texcoords[vert_id*2+0] = (Vector3DotProduct(tri[k], surface->vector_s) + surface->dist_s) / mip->width; 
+				mesh.texcoords[vert_id*2+1] = (Vector3DotProduct(tri[k], surface->vector_t) + surface->dist_t) / mip->height;
+
+				vert_id++;
+			}
+		}
+	}
+
+	UploadMesh(&mesh, false);
+	model = LoadModelFromMesh(mesh);
+
+	Bsp_Face *first_face = &bsp->faces[bsp_m->first_face];
+	Bsp_Surface *surface = &bsp->surfaces[first_face->texinfo];
+	Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
+	int tex_id = HashFetch(&material_hashmap, mip->name);
+	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = materials[tex_id].maps[MATERIAL_MAP_DIFFUSE].texture;
+
+	char pref[3];
+	memcpy(pref, mip->name, sizeof(pref));
+	
+	if(strcmp(pref, "{ff") == 0) {
+		model.materials[0].shader = bsp->ff_shader;
+	}
+
+	return model;
 }
 
 void BspRenderSetup(Bsp_Data *bsp) {
