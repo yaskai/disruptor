@@ -281,7 +281,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 	if(IsKeyPressed(KEY_F)) {
 		for(int i = handler->brush_ents_offset; i < handler->count; i++) {
-			if(handler->ents[i].bsp_model == 2)
+			if(handler->ents[i].bsp_model == 1)
 				handler->ents[i].flags ^= ENT_ACTIVE;
 		}
 	}
@@ -328,6 +328,8 @@ void RenderBrushEntities(EntityHandler *handler) {
 
 		if(!(ent->flags & ENT_ACTIVE)) 
 			continue;
+
+			
 
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
 		DrawBoundingBox(ent->comp_transform.bounds, RED);
@@ -399,7 +401,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 
 			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
 			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
-				ct->targ_look = Vector3Lerp(ct->targ_look, targ, 100*dt);
+				ct->targ_look = Vector3Lerp(ct->targ_look, targ, 80*dt);
 				//ct->targ_look = targ;
 
 		} else {
@@ -431,12 +433,12 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
 
 	Vector3 dir = ct->forward;
-	float offset = GetRandomValue(-4, 4) * 0.01f;	
+	float offset = GetRandomValue(-6, 6) * 0.01f;	
 
 	Vector3 right = Vector3CrossProduct(ct->forward, UP);
 	dir = Vector3Add(dir, Vector3Scale(right, offset));
 
-	offset = GetRandomValue(-4, 4) * 0.01f;
+	offset = GetRandomValue(-6, 6) * 0.01f;
 	dir = Vector3Add(dir, Vector3Scale(UP, offset));
 
 	dir = Vector3Normalize(dir);
@@ -613,7 +615,7 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		Ray ray = (Ray) { .position = eye_pos, .direction = to_player };
 
 		EntTraceData ent_tr = EntTraceDataEmpty();
-		TraceEntities(ray, handler, 1000.0f, ent->id, &ent_tr);
+		TraceEntities(ray, handler, 2000.0f, ent->id, &ent_tr);
 
 		// Trace map geometry
 		// Small affordance to account for spatial partition structure (+32)

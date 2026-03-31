@@ -219,8 +219,8 @@ void GameDraw(Game *game, float dt) {
 			DrawMap(&game->test_section, game->camera.position);
 			RenderEntities(&game->ent_handler, GetFrameTime());
 			vEffectsRun(&game->effect_manager, dt);
-			RenderBrushEntities(&game->ent_handler);
 			DrawMapTranslucent(&game->test_section, game->camera.position);
+			RenderBrushEntities(&game->ent_handler);
 
 			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
 				for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
@@ -393,6 +393,7 @@ void GameDraw(Game *game, float dt) {
 		DrawTexture(qr_img, 0, 0, WHITE);
 	}
 
+	/*
 	if(game->ent_handler.checkpoint_list.active == 5 && 
 	   CheckCollisionSpheres(
 			game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position, 32, 
@@ -406,6 +407,7 @@ void GameDraw(Game *game, float dt) {
 			ReloadEntities(&game->ent_handler, &game->test_section, 0);
 		}
 	}
+	*/
 
 	int fps = GetFPS();
 	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);

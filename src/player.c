@@ -378,8 +378,11 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 
+	Coords coords = Vec3ToCoords(ct->position, &handler->grid);
+	i16 cell_id = CellCoordsToId(coords, &handler->grid);
+
 	for(u16 i = 0; i < handler->checkpoint_list.count; i++) {
-		if(ent->cell_id == handler->checkpoint_list.cells[i] && fabsf(ct->position.z - handler->checkpoint_list.points[i].z) <= 32) {
+		if(cell_id == handler->checkpoint_list.cells[i] && fabsf(ct->position.z - handler->checkpoint_list.points[i].z) <= 32) {
 			player_curr_checkpoint = i;
 			handler->checkpoint_list.active = player_curr_checkpoint;
 			break;

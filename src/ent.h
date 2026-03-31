@@ -19,7 +19,7 @@ typedef struct {
 
 } Coords;
 
-#define ENT_GRID_CELL_EXTENTS (Vector3) { 480, 480, 480 } 
+#define ENT_GRID_CELL_EXTENTS (Vector3) { 380, 380, 380 } 
 #define MAX_ENTS_PER_CELL	32
 typedef struct {
 	BoundingBox aabb;

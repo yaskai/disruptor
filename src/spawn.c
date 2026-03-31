@@ -279,6 +279,10 @@ void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 			real_ent.comp_transform.bounds.max = *(Vector3 *) bsp->models[submodel].maxs;
 			*/
 
+			if(strcmp(ent->properties[0].val, "force_field00")) {
+				real_ent.type = ENT_FORCEFIELD;
+			}
+
 			real_ent.bsp_model = submodel;
 
 			real_ent.comp_transform.position = BoxCenter(real_ent.comp_transform.bounds);
