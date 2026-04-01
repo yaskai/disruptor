@@ -277,7 +277,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			MessageKeyValPair(key, val);
 
 			if(streq(key, "classname")) {
-				memcpy(&curr_entspawn->tag, val, strlen(val));
+				memcpy(&curr_entspawn->classname, val, strlen(val));
 			}
 
 			if(streq(key, "origin")) {
@@ -293,6 +293,14 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 
 			if(streq(key, "angle")) {
 				sscanf(val, "%d", &curr_entspawn->angle);
+			}
+
+			if(streq(key, "trigger_group")) {
+				sscanf(val, "%d", &curr_entspawn->trigger_group);
+			}
+
+			if(streq(key, "on_trigger")) {
+				sscanf(val, "%d", &curr_entspawn->on_trigger);
 			}
 		}
 	}
@@ -314,7 +322,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 		Message("--------------- [ ENTITIES ] -----------------", ANSI_GREEN);
 		for(int i = 0; i < spawn_list->count; i++) {
 			Message("-----------------------", ANSI_GREEN);
-			MessageKeyValPair("classname", spawn_list->arr[i].tag);
+			MessageKeyValPair("classname", spawn_list->arr[i].classname);
 			MessageKeyValPairInt("type", spawn_list->arr[i].ent_type);
 			MessageKeyValPairVec3("pos", spawn_list->arr[i].position.x, spawn_list->arr[i].position.y, spawn_list->arr[i].position.z);
 			MessageKeyValPairFloat("angle", spawn_list->arr[i].angle);

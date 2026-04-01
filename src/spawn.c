@@ -8,12 +8,12 @@
 #include "../include/log_message.h"
 
 void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph) {
-	if(!strcmp(spawn_point->tag, "worldspawn")) {
+	if(!strcmp(spawn_point->classname, "worldspawn")) {
 		return;
 	}
 
 	if(nav_graph) {
-		if(!strcmp(spawn_point->tag, "nav_node")) {
+		if(!strcmp(spawn_point->classname, "nav_node")) {
 			if(nav_graph->node_count + 1 >= nav_graph->node_cap) {
 				nav_graph->node_cap = (nav_graph->node_cap << 1);
 				nav_graph->nodes = realloc(nav_graph->nodes, sizeof(NavNode) * nav_graph->node_cap);
@@ -32,7 +32,7 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		}
 	}
 
-	if(!strcmp(spawn_point->tag, "checkpoint")) {
+	if(!strcmp(spawn_point->classname, "checkpoint")) {
 		if(handler->checkpoint_list.count + 1 >= handler->checkpoint_list.capacity) {
 
 			if(handler->checkpoint_list.capacity <= 0) {
@@ -51,7 +51,7 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		handler->checkpoint_list.points[handler->checkpoint_list.count++] = spawn_point->position;
 	}
 
-	if(!strcmp(spawn_point->tag, "info_player_start")) {
+	if(!strcmp(spawn_point->classname, "info_player_start")) {
 		//puts("player_start");
 
 		handler->player_start = spawn_point->position;
@@ -66,7 +66,7 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		return;
 	}
 
-	if(!strcmp(spawn_point->tag, "func_group")) {
+	if(!strcmp(spawn_point->classname, "func_group")) {
 		//puts("skip func_group");
 		return;
 	}
@@ -190,6 +190,16 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 		case ENT_REGULATOR: {
 
 		} break;
+
+		case ENT_SWITCH: {
+			ent.comp_transform.bounds = (BoundingBox) {
+				.min = Vector3Scale(BODY_VOLUME_SMALL, -0.5f),
+				.max = Vector3Scale(BODY_VOLUME_SMALL,  0.5f)
+			};
+
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+
+		} break;
 	}
 
 	ent.comp_health.bug_box = (BoundingBox) {
@@ -294,6 +304,11 @@ void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 			printf("made submodel\n");
 		}
+	}
+}
+
+void SetEntityTriggers(EntityHandler *handler) {
+	for(u16 i = 0; i < handler->count; i++) {
 	}
 }
 

@@ -19,6 +19,8 @@ Vector3 debug_bullet_norm;
 MapSection *ptr_handler_sect = NULL;
 EntityHandler *ptr_handler_self = NULL;
 
+// -------------------------------------------------
+// Hit functions:
 typedef void (*OnHitFunc)(Entity *ent, short damage);
 OnHitFunc on_hit_funcs[] = {
 	&OnHitPlayer,
@@ -27,6 +29,29 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitRegulator,
 	&OnHitBug,
 };
+
+// -------------------------------------------------
+// Trigger functions:
+void OnTriggerToggle(Entity *ent) {
+	ent->flags ^= ENT_ACTIVE;
+}
+
+void OnTriggerTurnOn(Entity *ent) {
+	ent->flags |= ENT_ACTIVE;
+}
+
+void OnTriggerTurnOff(Entity *ent) {
+	ent->flags &= ~ENT_ACTIVE;
+}
+
+typedef void (*OnTriggerFunc)(Entity *ent);
+OnTriggerFunc on_trigger_funcs[] = {
+	NULL,
+	&OnTriggerToggle,
+	&OnTriggerTurnOn,
+	&OnTriggerTurnOff,
+};
+// -------------------------------------------------
 
 void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
@@ -186,7 +211,6 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 				health->damage_cooldown = 0;
 		}
 
-
 		// *** Render visibility checking ***
 
 		/*
@@ -310,6 +334,13 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				BugDraw(ent);
 				break;
 
+			// * NOTE:
+			// Placeholder, replace later
+			case ENT_SWITCH:
+				//DrawCubeV(ent->comp_transform.position, (Vector3) { 12, 12, 12 }, DARKGREEN);
+				DrawBoundingBox(ent->comp_transform.bounds, GREEN);
+				break;
+
 			/*
 			case ENT_BRUSH:
 				DrawModel(ent->model, Vector3Zero(), 1, WHITE);
@@ -328,8 +359,6 @@ void RenderBrushEntities(EntityHandler *handler) {
 
 		if(!(ent->flags & ENT_ACTIVE)) 
 			continue;
-
-			
 
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
 		DrawBoundingBox(ent->comp_transform.bounds, RED);

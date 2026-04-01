@@ -4,7 +4,7 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from test08.texinfo.json...
 Loading extended content flags from test08.content.json...
-24 entities read, 18 are lights.
+23 entities read, 18 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -32,8 +32,6 @@ BSPX light directions output requested on command line.
     "soft" was set to "5" (from command line)
     "extra" was set to "4" (from command line)
     "world_units_per_luxel" was set to "16.000000" (from command line)
-    "lightgrid" was set to "1" (from command line)
-    "lightgrid_format" was set to "octree" (from command line)
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
@@ -53,18 +51,9 @@ Lighting Completed.
 
 Writing test08.lit
 DECOUPLED_LM BSPX lump written
-     32 32 32 lightgrid_dist
-     156 80 72 grid_size
-     -2304 -1920 -1136 grid_mins
-     2664 640 1151.2139 grid_maxs
-     1 num_styles
-octree stored 897774 grid nodes + 786 occluded = 898560 total, full stored 898560 (octree is 99.91253 percent)
-octree nodes size: 8580 bytes (195 * 44)
-octree leafs 1332 overhead 31968 bytes
-      4513547 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test08.bsp as Quake BSP bsp29
-15.923s seconds elapsed
+6.068s seconds elapsed
 0 empty lightmaps
 
 

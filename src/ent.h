@@ -162,6 +162,13 @@ enum ENT_TYPES : u8 {
 	ENT_FORCEFIELD		=  12,
 };
 
+enum TRIGGER_EVENT_TYPES : u8 {
+	TRIGGER_NONE 		= 0,
+	TRIGGER_TOGGLE 		= 1,
+	TRIGGER_TURN_ON		= 2,
+	TRIGGER_TURN_OFF	= 3,
+};
+
 typedef struct {
 	Model model;
 	ModelAnimation *animations;
@@ -179,8 +186,10 @@ typedef struct {
 	u16 id;
 	i16 cell_id;
 
-	i8 type;
+	u16 trigger_id;
+	i8 on_trigger;
 
+	i8 type;
 	u8 flags;
 
 } Entity;
@@ -410,5 +419,10 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 void ReloadEntitiesPartial(EntityHandler *handler, MapSection *sect);
 
 void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp);
+void SetEntityTriggers(EntityHandler *handler);
+
+// ----------------------------------------------------------------------------------------------------------------------------
+
+void DoTrigger(Entity *switch_ent, EntityHandler *handler);
 
 #endif

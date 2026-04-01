@@ -46,7 +46,7 @@ typedef struct {
 } BrushPool;
 
 typedef struct {
-	char tag[64];
+	char classname[64];
 
 	Vector3 position;
 	
@@ -54,6 +54,9 @@ typedef struct {
 	int ent_type;
 
 	int bsp_model;
+
+	int trigger_group;
+	int on_trigger;
 
 	u16 id;
 	
