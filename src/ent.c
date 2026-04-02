@@ -162,8 +162,12 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	render_list.count = 0;
 	Vector3 view_dir = player_ent->comp_transform.forward;
 
-	for(u16 i = handler->brush_ents_offset; i < handler->count; i++) {
+	//for(u16 i = handler->brush_ents_offset; i < handler->count; i++) {
+	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
+
+		if(!ent->bsp_model)
+			continue;
 
 		if(!(ent->flags & ENT_ACTIVE))
 			sect->bsp_data.hull_groups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
@@ -171,8 +175,11 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags |=  HULLGROUP_ACTIVE;
 	}
 
-	for(u16 i = 0; i < handler->brush_ents_offset; i++) {
+	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
+
+		if(ent->bsp_model)
+			continue;
 
 		if(ent->type <= 0)
 			continue;
@@ -304,8 +311,8 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	UpdateGrid(handler);
 
 	if(IsKeyPressed(KEY_F)) {
-		for(int i = handler->brush_ents_offset; i < handler->count; i++) {
-			if(handler->ents[i].bsp_model == 1)
+		for(int i = 0; i < handler->count; i++) {
+			if(handler->ents[i].bsp_model == 2)
 				handler->ents[i].flags ^= ENT_ACTIVE;
 		}
 	}
@@ -315,8 +322,11 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 void RenderEntities(EntityHandler *handler, float dt) {
 	EntGrid *grid = &handler->grid;
 
-	for(u16 i = 0; i < handler->brush_ents_offset; i++) {;
+	for(u16 i = 0; i < handler->count; i++) {;
 		Entity *ent = &handler->ents[i];
+
+		if(ent->bsp_model)
+			continue;
 
 		if(!(ent->flags & ENT_ACTIVE)) 
 			continue;
@@ -354,8 +364,12 @@ void RenderEntities(EntityHandler *handler, float dt) {
 }
 
 void RenderBrushEntities(EntityHandler *handler) {
-	for(int i = handler->brush_ents_offset; i < handler->count; i++) {
+	//for(int i = handler->brush_ents_offset; i < handler->count; i++) {
+	for(int i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
+
+		if(!ent->bsp_model)
+			continue;
 
 		if(!(ent->flags & ENT_ACTIVE)) 
 			continue;
@@ -1265,15 +1279,16 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 		OnHitEnt(hit_ent, handler->ents[sender].comp_weapon.damage);
 	}
 
-	debug_bullet_dest = dest;
+	//debug_bullet_dest = dest;
 
-	return dest;
+	//return dest;
 
 	// *NOTE:
 	// BVH is still more accurate for point traces so I'll continue using it for now...
-	/*
 	Bsp_TraceData trace = Bsp_TraceDataEmpty();
-	Bsp_RecursiveTraceEx(&sect->bsp[0], sect->bsp[0].first_node, 0, 1, origin, dest, &trace);
+	Bsp_Data *bsp = &sect->bsp_data;
+	
+	Bsp_RecursiveTraceEx(&bsp->hull_groups[0].hulls[0], bsp->hull_groups[0].hulls[0].first_node, 0, 1, origin, dest, &trace);
 	*hit = trace.fraction < 1;
 
 	if(*hit) dest = trace.point;
@@ -1284,7 +1299,6 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 	debug_bullet_norm = trace.normal;
 
 	return dest;
-	*/
 }
 
 void DebugDrawEntText(EntityHandler *handler, Camera3D cam) {
@@ -1772,7 +1786,7 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 	handler->count = 0;
 
 	for(u16 i = 0; i < handler->spawn_list.count; i++) {
-		ProcessEntity(&handler->spawn_list.arr[i], handler, NULL);
+		ProcessEntity(&handler->spawn_list.arr[i], handler, NULL, &sect->bsp_data);
 
 		if(with_states) {
 			// Spawn new entity, retain it's old state before reload

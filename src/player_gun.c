@@ -432,8 +432,8 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 
 	float dist = Vector3Distance(trail_start, trail_end);
 
-	//if(dist >= 20)
-	//vEffectsAddTrail(gun_refs.effect_manager, trail_start, trail_end);
+	if(dist >= 20)
+		vEffectsAddTrail(gun_refs.effect_manager, trail_start, trail_end);
 
 	curr_gun->in_clip--;
 	if(curr_gun->in_clip <= 0) {

@@ -27,7 +27,7 @@ void vEffectsRun(vEffect_Manager *manager, float dt) {
 		if(!trail->active) 
 			continue;
 
-		trail->timer -= dt*1.75f;
+		//trail->timer -= dt*1.75f;
 		if(trail->timer <= 0) {
 			trail->active = false;
 			manager->trail_count--;
@@ -37,8 +37,8 @@ void vEffectsRun(vEffect_Manager *manager, float dt) {
 		float alpha = trail->timer;
 		alpha = Clamp(alpha, 0.0f, 0.75f);
 
-		trail->point_A.z += trail->timer * dt;
-		trail->point_B.z += trail->timer * dt;
+		//trail->point_A.z += trail->timer * dt;
+		//trail->point_B.z += trail->timer * dt;
 
 		Vector3 axis = Vector3Zero();
 		float angle = 0;

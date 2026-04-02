@@ -17,8 +17,8 @@ typedef struct {
 } rModelList;
 
 typedef struct {
-	char class_name[128];
-	char tex_name[128];
+	char class_name[64];
+	char tex_name[64];
 
 	Vector3 verts[24];
 	Plane planes[18];

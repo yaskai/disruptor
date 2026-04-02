@@ -109,9 +109,10 @@ void GameRenderSetup(Game *game) {
 }
 
 void GameLoadScene(Game *game, char *path) {
-	SpawnList spawn_list = (SpawnList) {0}; 
-	game->test_section = BuildMapSect(path, &spawn_list);
+	SpawnList sl = (SpawnList) {0}; 
+	game->test_section = BuildMapSect(path, &sl);
 	game->test_section.navgraphs = malloc(sizeof(NavGraph) * 32);
+	SpawnList spawn_list = ParseBspEnts(&game->ent_handler, &game->test_section.bsp_data);
 
 	// ----------------------------------------------------------------------------------------
 	Entity player = (Entity) {0};
@@ -132,12 +133,15 @@ void GameLoadScene(Game *game, char *path) {
 
 	game->ent_handler.count = 0;
 	for(int i = 0; i < spawn_list.count; i++) 
-		ProcessEntity(&spawn_list.arr[i], &game->ent_handler, &game->test_section.base_navgraph);
+		ProcessEntity(&spawn_list.arr[i], &game->ent_handler, &game->test_section.base_navgraph, &game->test_section.bsp_data);
 	
 	player.id = game->ent_handler.player_id;
 	game->ent_handler.ents[game->ent_handler.player_id] = player;
 	bug.id = game->ent_handler.bug_id;
 	game->ent_handler.ents[game->ent_handler.bug_id] = bug;
+
+	//printf("player_id: %d\n", game->ent_handler.player_id);
+	//printf("bug_id: %d\n", game->ent_handler.bug_id);
 
 	PlayerInit(&game->camera, &game->input_handler, &game->test_section, &player_data, &game->ent_handler);
 
@@ -176,15 +180,13 @@ void GameLoadScene(Game *game, char *path) {
 	game->ent_handler.spawn_list.arr = calloc(spawn_list.count, sizeof(EntSpawn));
 	memcpy(game->ent_handler.spawn_list.arr, spawn_list.arr, sizeof(EntSpawn) * spawn_list.count);
 
-	ReloadEntities(&game->ent_handler, &game->test_section, 0);
+	//ReloadEntities(&game->ent_handler, &game->test_section, 0);
 
 	// Setup checkpoints	
 	for(u16 i = 0; i < game->ent_handler.checkpoint_list.count; i++) {
 		game->ent_handler.checkpoint_list.cells[i] = CellCoordsToId(
 			Vec3ToCoords(game->ent_handler.checkpoint_list.points[i], &game->ent_handler.grid), &game->ent_handler.grid);	
 	}
-
-	ParseBspEnts(&game->ent_handler, &game->test_section.bsp_data);
 }
 
 void GameUpdate(Game *game, float dt) {
@@ -223,8 +225,8 @@ void GameDraw(Game *game, float dt) {
 			RenderBrushEntities(&game->ent_handler);
 
 			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
-				for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
-					Tri *tri = &game->test_section.bvh[1].tris.arr[j];
+				for(u16 j = 0; j < game->test_section.bvh[2].tris.count; j++) {
+					Tri *tri = &game->test_section.bvh[2].tris.arr[j];
 					Color color = colors[tri->hull_id % 7];
 					/*
 					Color color = {

@@ -812,7 +812,7 @@ void BvhSphereSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTra
 	}
 }
 
-void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox box, BvhTraceData *data) {
+void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingBox box, BvhTraceData *data, float max_dist) {
 	BvhNode *node = &bvh->nodes[node_id];
 
 	RayCollision coll;
@@ -840,7 +840,13 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);
 		if(!coll.hit) continue;
 
-		if(coll.distance > data->distance) continue;
+		/*
+		if(coll.distance > data->distance)
+			continue;
+		*/
+
+		if(coll.distance > max_dist) 
+			continue;
 
 		data->point = coll.point;
 		data->normal = tri.normal;
@@ -873,15 +879,13 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 	float dr = (hit_r.hit) ? hit_r.distance : FLT_MAX;
 
 	if(dl < dr) {
-		BvhBoxSweep(ray, sect, bvh, node->child_lft, box, data);
-		BvhBoxSweep(ray, sect, bvh, node->child_rgt, box, data);
+		BvhBoxSweep(ray, sect, bvh, node->child_lft, box, data, max_dist);
+		BvhBoxSweep(ray, sect, bvh, node->child_rgt, box, data, max_dist);
 		return;
 	}
 
-	//BvhTracePointEx(ray, sect, bvh, node->child_rgt, data);
-	//BvhTracePointEx(ray, sect, bvh, node->child_lft, data);
-	BvhBoxSweep(ray, sect, bvh, node->child_rgt, box, data);
-	BvhBoxSweep(ray, sect, bvh, node->child_lft, box, data);
+	BvhBoxSweep(ray, sect, bvh, node->child_rgt, box, data, max_dist);
+	BvhBoxSweep(ray, sect, bvh, node->child_lft, box, data, max_dist);
 }
 
 void MapSectionDisplayNormals(MapSection *sect) {

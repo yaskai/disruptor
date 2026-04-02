@@ -15,6 +15,59 @@
 
 #define PLANE_EPS 0.001f
 
+Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
+	Bsp_Model *bsp_m = &bsp->models[model_id];
+
+	u16 tri_count = 0;
+	for(int i = 0; i < bsp_m->num_faces; i++) {
+		Bsp_Face *face = &bsp->faces[bsp_m->first_face + i];
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
+
+		if(strcmp(mip->name, "{ff") == 0)
+			continue;
+
+		tri_count += face->edge_count -2;
+	}
+
+	Tri *tris = malloc(sizeof(Tri) * tri_count);
+
+	int tri_id = 0;
+	for(int i = 0; i < bsp_m->num_faces; i++) {
+		Bsp_Face *face = &bsp->faces[bsp_m->first_face + i];
+		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
+		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
+
+		if(strcmp(mip->name, "{ff") == 0)
+			continue;
+
+		Vector3 face_verts[face->edge_count];
+		for(int j = 0; j < face->edge_count; j++) {
+			i32 list_edge = bsp->ledges[face->first_edge + j];
+			face_verts[j] = (list_edge >= 0) ? bsp->verts[bsp->edges[list_edge].v[0]] : bsp->verts[bsp->edges[-list_edge].v[1]]; 
+		}
+
+		Bsp_Plane *plane = &bsp->planes[face->plane];
+		Vector3 normal = *(Vector3 *) plane->normal;
+		if(face->side) normal = Vector3Negate(normal); 
+
+		for(int j = 1; j < face->edge_count - 1; j++) {
+			Tri tri = (Tri) {
+				.vertices[0] = face_verts[0],
+				.vertices[1] = face_verts[j+1],
+				.vertices[2] = face_verts[j],
+				.normal = normal
+			};
+
+			tris[tri_id++] = tri;
+		}
+	}
+
+	*out_count = tri_id;
+
+	return tris;
+}
+
 Shader default_shader;
 
 rBrushList rbrush_list = {0};
@@ -187,7 +240,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 	}
 
 	int curr_brush = 0;
-	int curr_ent = 0;
+	int curr_ent = 1;
 
 	short parse_mode = -1;
 
@@ -199,7 +252,7 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 		// Set mode & id of brush or entity 
 		if(line[0] == '/' && line[1] == '/' && line[2] == ' ') {
 			if(line[3] == 'b') {
-				if(curr_ent <= 1) {
+				if(!curr_ent) {
 					parse_mode = PARSE_BRUSH;
 					char *tok; 
 					tok = strtok(line, " ");
@@ -208,11 +261,16 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 						tok = strtok(NULL, " ");
 					}
 					brush_pool->count++;
+					memcpy(brush_pool->brushes[curr_brush].class_name, curr_entspawn->classname, 64);
 
 				} else {
 					parse_mode = PARSE_BRUSH;
 					curr_brush = brush_pool->count++;
+					memcpy(brush_pool->brushes[curr_brush].class_name, curr_entspawn->classname, 64);
 				}
+
+				if(strcmp(curr_entspawn->classname, "func_forcefield"))
+					continue;
 
 			} else if(line[3] == 'e') {
 				parse_mode = PARSE_ENT;
@@ -274,10 +332,10 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			char *val = strchr(end, '"');
 			val = strtok(val, "\"");
 
-			MessageKeyValPair(key, val);
+			//MessageKeyValPair(key, val);
 
 			if(streq(key, "classname")) {
-				memcpy(&curr_entspawn->classname, val, strlen(val));
+				memcpy(curr_entspawn->classname, val, strlen(val));
 			}
 
 			if(streq(key, "origin")) {
@@ -309,6 +367,11 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 
 	for(u16 i = 0; i < brush_pool->count; i++) {
 		Brush *brush = &brush_pool->brushes[i];
+
+		puts("--------------------------");
+		printf("%s\n", brush->class_name);
+		printf("%s\n", brush->tex_name);
+		puts("--------------------------");
 	
 		// Build vertices, AABBs
 		BrushGetVertices(brush);
@@ -317,6 +380,15 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			brush->bounds.max = Vector3Max(brush->bounds.max, brush->verts[j]);
 		}
 	}
+
+	/*
+	for(int i = 0; i < brush_pool->count-1; i++) {
+		if(strcmp(brush_pool->brushes[i].tex_name, "{ff")) {
+			brush_pool->brushes[i] = brush_pool->brushes[i+1];
+			brush_pool->count--;
+		}
+	}
+	*/
 
 	if(GetLogState()) {
 		Message("--------------- [ ENTITIES ] -----------------", ANSI_GREEN);
@@ -334,12 +406,18 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 // Expand brushes to use as fitting collision volumes 
 BrushPool ExpandBrushes(BrushPool *brush_pool, Vector3 aabb_extents) {
 	BrushPool exp = (BrushPool) {0};
-	exp.count = brush_pool->count;
+	//exp.count = brush_pool->count;
 	exp.brushes = calloc(brush_pool->count, sizeof(Brush));
+	exp.count = 0;
 
 	// 1. Extend plane by it's normal
 	Vector3 half_extents = Vector3Scale(aabb_extents, 0.5f);
 	for(u16 i = 0; i < brush_pool->count; i++) {
+		if(strcmp(brush_pool->brushes[i].tex_name, "{ff") == 0) {
+			Message("EXP SKIP ff", ANSI_RED);
+			continue;
+		}
+
 		exp.brushes[i] = (Brush) { .plane_count = brush_pool->brushes[i].plane_count, .vert_count = brush_pool->brushes[i].vert_count };
 		Brush *brush = &exp.brushes[i];
 
@@ -359,6 +437,8 @@ BrushPool ExpandBrushes(BrushPool *brush_pool, Vector3 aabb_extents) {
 			brush->bounds.min = Vector3Min(brush->bounds.min, brush->verts[j]);
 			brush->bounds.max = Vector3Max(brush->bounds.max, brush->verts[j]);
 		}
+
+		exp.count++;
 	}	
 	
 	return exp;
@@ -440,6 +520,11 @@ Tri *TrisFromBrushPool(BrushPool *brush_pool, u16 *count) {
 
 	for(u16 i = 0; i < brush_pool->count; i++) {
 		Brush *brush = &brush_pool->brushes[i];
+
+		if(strcmp(brush->tex_name, "{ff") == 0) {
+			Message("SKIPPED {ff", ANSI_RED);
+			continue;
+		}
 
 		u16 temp_count = 0;
 		Tri *brush_tris = BrushToTris(brush, &temp_count, i);
@@ -564,7 +649,56 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	FilePathList path_list = LoadDirectoryFiles(path);
 
-	// 1. Load .map file, collision, physics, ai logic, etc. 
+	// -------------------------------------------------------------------------------
+	// Load bsp data
+	Message("Loading bsp", ANSI_BLUE);
+
+	short bsp_id = -1;
+	for(short i = 0; i < path_list.count; i++)
+		if(strcmp(GetFileExtension(path_list.paths[i]), ".bsp") == 0) bsp_id = i;
+
+	if(bsp_id == -1) { 
+		MessageError("Missing .bsp file", path);
+		return sect;
+	}
+
+	sect.bsp_data = LoadBsp(path_list.paths[bsp_id], false);
+
+	for(short i = 0; i < 4; i++) {
+		sect.bsp[i] = Bsp_BuildHull(&sect.bsp_data, i);
+	}
+
+	short lit_path_id = 0;
+	for(short i = 0; i < path_list.count; i++)
+		if(strcmp(GetFileExtension(path_list.paths[i]), ".lit") == 0) lit_path_id = i;
+
+	// Make BSP lightmap for lighting level geometry
+	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data);
+
+	// Make render brush models (from bsp leaves)
+	rbrush_list.count = 0;
+	rbrush_list.cap = 4096;
+	rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * rbrush_list.cap);
+	rbrush_list.ids = malloc(sizeof(int) * rbrush_list.cap);
+
+	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
+		int temp_count = 0;
+		RenderBrush *temp_brushes = BspLeafToRenderBrushes(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count); 
+
+		for(int j = 0; j < temp_count; j++) {
+			rbrush_list.render_brushes[rbrush_list.count + j] = temp_brushes[j];
+			rbrush_list.ids[rbrush_list.count + j] = i;
+		}
+
+		rbrush_list.count += temp_count;
+	}
+
+	rbrush_list.cap = rbrush_list.count;
+	rbrush_list.render_brushes = realloc(rbrush_list.render_brushes, sizeof(RenderBrush) * rbrush_list.cap);
+	rbrush_list.ids = realloc(rbrush_list.ids, sizeof(int) * rbrush_list.cap);
+	// -------------------------------------------------------------------------------
+
+	// Load .map file, collision, physics, ai logic, etc. 
 	Message("Loading map file...", ANSI_BLUE);
 	short mpf_id = -1;
 	for(short i = 0; i < path_list.count; i++) if(strcmp(GetFileExtension(path_list.paths[i]), ".map") == 0) mpf_id = i;
@@ -580,11 +714,15 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		.capacity = 255,
 	};
 	spawn_list->arr = calloc(spawn_list->capacity, sizeof(EntSpawn));
-
+	
 	BrushPool brush_pools[3] = {0};
 	LoadMapFile(&brush_pools[0], path_list.paths[mpf_id], spawn_list);
 
+	// * NOTE:
+	// Change this...
+	// Brushes belonging to separate bsp models should not be included in tri contrstruction
 	sect._tris[0].arr = TrisFromBrushPool(&brush_pools[0], &sect._tris[0].count);
+	//sect._tris[0].arr = TrisFromBspModel(&sect.bsp_data, &sect._tris[0].count, 0);
 	sect._tris[0].ids = calloc(sect._tris[0].count, sizeof(u16));
 	for(u16 j = 0; j < sect._tris[0].count; j++) sect._tris[0].ids[j] = j;
 
@@ -600,6 +738,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 		// Extract tris
 		sect._tris[i].arr = TrisFromBrushPool(&exp, &sect._tris[i].count);
+		//sect._tris[i].arr = TrisFromBspModel(&sect.bsp_data, &sect._tris[i].count, 0);
 		sect._tris[i].ids = calloc(sect._tris[i].count, sizeof(u16));
 		for(u16 j = 0; j < sect._tris[i].count; j++) sect._tris[i].ids[j] = j;
 	}
@@ -651,6 +790,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		}
 	}
 
+	/*
 	Message("Loading bsp", ANSI_BLUE);
 	short bsp_id = -1;
 	for(short i = 0; i < path_list.count; i++)
@@ -695,6 +835,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	rbrush_list.cap = rbrush_list.count;
 	rbrush_list.render_brushes = realloc(rbrush_list.render_brushes, sizeof(RenderBrush) * rbrush_list.cap);
 	rbrush_list.ids = realloc(rbrush_list.ids, sizeof(int) * rbrush_list.cap);
+	*/
 
 	// Make render brush models for translucent objects
 	translucent_rbrush_list.count = 0;
@@ -703,9 +844,11 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	translucent_rbrush_list.ids = malloc(sizeof(int) * translucent_rbrush_list.cap);
 
 	for(int i = 0; i < brush_pools[0].count; i++) {
+		// Skip non translucent brushes (tranlucent brushes are denoted with first char being '{', HL1/goldsrc convention)
 		if(brush_pools[0].brushes[i].tex_name[0] != '{')
 			continue;
 
+		// Skip force field, they are classified as entities
 		if(strcmp(brush_pools[0].brushes[i].tex_name, "{ff") == 0) {
 			continue;
 		}

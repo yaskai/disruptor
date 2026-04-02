@@ -293,8 +293,8 @@ void PlayerDebugText(Entity *player);
 void PlayerMove(Entity *player, float dt);
 // ----------------------------------------------------------------------------------------------------------------------------
 
-void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph);
-Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler);
+void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph, Bsp_Data *bsp);
+Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp);
 
 // ----------------------------------------------------------------------------------------------------------------------------
 // **** Enemies **** 
@@ -418,7 +418,7 @@ void RenderProjectiles(EntityHandler *handler);
 void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states);
 void ReloadEntitiesPartial(EntityHandler *handler, MapSection *sect);
 
-void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp);
+SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp);
 void SetEntityTriggers(EntityHandler *handler);
 
 // ----------------------------------------------------------------------------------------------------------------------------

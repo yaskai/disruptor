@@ -7,7 +7,7 @@
 #define BLOCK_OPEN_MARKER	'['
 #define BLOCK_CLOSE_MARKER	']'
 
-#define streq(a, b) (!strcmp(a, b))
+#define streq(a, b) (strcmp(a, b) == 0)
 
 enum VALUE_TYPES : u8 {
 	VAL_INT 	= 0,

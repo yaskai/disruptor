@@ -180,6 +180,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 
 	BvhTraceData tr = TraceDataEmpty();	
 	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
+	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 	
 	if(!tr.hit) {
 		ct->ground_normal = Vector3Zero();
@@ -241,9 +242,12 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
 		BvhTracePointEx(ray, sect, &sect->bvh[BVH_BOX_SMALL], 0, &tr, Vector3Length(move));
+		//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ct->bounds, &tr, Vector3Length(move) + Vector3Length(BODY_VOLUME_SMALL) * 0.5f);
 
 		// Determine how much of movement was obstructed
-		float fraction = (tr.distance / Vector3Length(move));
+		//float fraction = (tr.distance / Vector3Length(move));
+
+		float fraction = (tr.contact_dist / Vector3Length(move));
 		fraction = Clamp(fraction, 0.0f, 1.0f);
 
 		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };
@@ -259,7 +263,25 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		if(use_ent) {
 			ent_frac = (ent_tr.dist / Vector3Length(move));
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
-			fraction = ent_frac;
+			//fraction = ent_frac;
+			fraction = Clamp(fraction, 0.0f, ent_frac);
+
+			// Add clip plane
+			if(num_clips + 1 < MAX_CLIPS) {
+				clips[num_clips++] = ent_tr.normal; 
+
+				// Update velocity by each clip plane
+				for(short j = 0; j < num_clips; j++) {
+					float into = Vector3DotProduct(vel, clips[j]);
+					float clip_bounce = (use_ent && j == num_clips - 1) ? 1.8f : 1.5005f;
+					if(clips[j].z < 0) {
+						clip_bounce = Clamp(clip_bounce, 1.001f, 1.025f);
+					}
+
+					if(into < 0) 
+						pm_ClipVelocity(vel, clips[j], &vel, clip_bounce, pm->block);
+				}
+			}  
 		}
 
 		pm->fraction = fraction;
@@ -278,22 +300,17 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Add clip plane
 		if(num_clips + 1 < MAX_CLIPS) {
-			clips[num_clips++] = (use_ent) ? ent_tr.normal : tr.normal; 
+			clips[num_clips++] = tr.normal;
 
 			// Update velocity by each clip plane
 			for(short j = 0; j < num_clips; j++) {
 				float into = Vector3DotProduct(vel, clips[j]);
 				float clip_bounce = (use_ent && j == num_clips - 1) ? 1.8f : 1.5005f;
-				if(clips[j].z < 0) {
-					clip_bounce = Clamp(clip_bounce, 1.001f, 1.025f);
-				}
 
 				if(into < 0) 
 					pm_ClipVelocity(vel, clips[j], &vel, clip_bounce, pm->block);
 			}
-
-		} else 
-			break;
+		}  
 
 		// Update remaining time
 		t_remain *= (1 - fraction);
@@ -403,12 +420,29 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->comp_ai.state == STATE_DEAD)
 				continue;
 
+			if(enemy_ent->type == ENT_FORCEFIELD) {
+				continue;
+			}
+
 			bool height_check =
 				(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 64);
 
 			if(bug_bounce == 0) {
 				height_check = true;
 			}
+
+			/*
+			if(enemy_ent->type == ENT_FORCEFIELD) {
+				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds)) {
+					Vector3 hdir = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
+					hdir = Vector3Negate(hdir);
+					ct->velocity.x = hdir.x;
+					ct->velocity.y = hdir.y;
+				}
+
+				break;
+			}
+			*/
 
 			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check) {
 				ct->on_ground = true;

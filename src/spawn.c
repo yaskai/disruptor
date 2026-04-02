@@ -5,9 +5,10 @@
 #include "map.h"
 #include "ent.h"
 #include "kbsp.h"
+#include "config.h"
 #include "../include/log_message.h"
 
-void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph) {
+void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph, Bsp_Data *bsp) {
 	if(!strcmp(spawn_point->classname, "worldspawn")) {
 		return;
 	}
@@ -45,14 +46,13 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 				handler->checkpoint_list.points = realloc(handler->checkpoint_list.points, sizeof(Vector3) * handler->checkpoint_list.capacity);	
 				handler->checkpoint_list.cells = realloc(handler->checkpoint_list.cells, sizeof(u16) * handler->checkpoint_list.capacity);	
 			}
-
 		}
 
 		handler->checkpoint_list.points[handler->checkpoint_list.count++] = spawn_point->position;
 	}
 
 	if(!strcmp(spawn_point->classname, "info_player_start")) {
-		//puts("player_start");
+		puts("player_start");
 
 		handler->player_start = spawn_point->position;
 		handler->player_start.z += BODY_VOLUME_MEDIUM.z * 0.5f;
@@ -71,16 +71,22 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		return;
 	}
 
+	if(strcmp(spawn_point->classname, "func_forcefield") == 0) {
+		spawn_point->ent_type = ENT_FORCEFIELD;
+		printf("forced ent type of forcefield\n");
+	}
+
 	if(spawn_point->ent_type <= 0)
 		return;
-
-	handler->ents[handler->count] = SpawnEntity(spawn_point, handler);
+	
+	handler->ents[handler->count] = SpawnEntity(spawn_point, handler, bsp);
 }
 
-Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
+Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp) {
 	Entity ent = (Entity) {0};
 	ent.id = handler->count;
 	ent.cell_id = -1;
+	ent.bsp_model = spawn_point->bsp_model;
 
 	ent.comp_transform.position = spawn_point->position;
 
@@ -200,6 +206,18 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 
 		} break;
+
+		case ENT_FORCEFIELD: {
+			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);			
+			ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
+			ent.comp_transform.bounds.min = Vector3Subtract(ent.comp_transform.bounds.min, BODY_VOLUME_SMALL);
+			ent.comp_transform.bounds.max = Vector3Add(ent.comp_transform.bounds.max, BODY_VOLUME_SMALL);
+				
+			ent.comp_transform.position = BoxCenter(ent.comp_transform.bounds);
+
+			printf("made ff, %d\n", ent.bsp_model);
+
+		} break;
 	}
 
 	ent.comp_health.bug_box = (BoundingBox) {
@@ -217,12 +235,14 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler) {
 	ent.cell_id = -1;
 
 	handler->count++;
-	handler->brush_ents_offset = handler->count;
+	//handler->brush_ents_offset = handler->count;
 
 	return ent;
 }
 
-void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
+SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
+	Message("ParseBspEnts()", ANSI_BLUE);
+
 	char *cursor = bsp->ent_str;	
 
 	Bsp_Ent ent_data[1024] = {0};
@@ -263,48 +283,63 @@ void ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 		cursor++;
 	}
 
-	for(int i = 0; i < count; i++) {
-		Bsp_Ent *ent = &ent_data[i];
-		//Message("---------------", ANSI_GREEN);
-		
+	SpawnList spawn_list = (SpawnList) {0};
+	spawn_list.capacity = count; 
+	spawn_list.count = count;
+	spawn_list.arr = calloc(spawn_list.capacity, sizeof(EntSpawn));
+
+	for(int i = 0; i < spawn_list.count; i++) {
+		Bsp_Ent *bsp_ent = &ent_data[i];
+		EntSpawn spawn = (EntSpawn) {0};
+
+		Message("---------------", ANSI_GREEN);
+
 		int submodel = 0;
-		for(int j = 0; j < ent->prop_count; j++) {
-			Bsp_EntProp *prop = &ent->properties[j];
-			//MessageKeyValPair(prop->key, prop->val);
 
-			if(prop->val[0] == '*') {
+		for(int j = 0; j < bsp_ent->prop_count; j++) {
+			Bsp_EntProp *prop = &bsp_ent->properties[j];
+			prop->key[strlen(prop->key)-1] = 0;
+
+			MessageKeyValPair(prop->key, prop->val);
+
+			if(streq(prop->key, "classname")) {
+				memcpy(spawn.classname, prop->val, strlen(prop->val));
+			}
+	
+			if(streq(prop->key, "origin")) {
+				int x, y, z;
+				sscanf(prop->val, "%d %d %d", &x, &y, &z);
+				spawn.position = (Vector3) { x, y, z};
+			}
+
+			if(streq(prop->key, "angle")) {
+				sscanf(prop->val, "%d", &spawn.angle);
+			}
+
+			if(streq(prop->key, "enum_id")) {
+				sscanf(prop->val, "%d", &spawn.ent_type);
+			}
+
+			if(streq(prop->key, "trigger_group")) {
+				sscanf(prop->val, "%d", &spawn.trigger_group);
+			}
+
+			if(streq(prop->key, "on_trigger")) {
+				sscanf(prop->val, "%d", &spawn.on_trigger);
+			}
+
+			// *NOTE:
+			// Not sure why but normal streq check on key for model doesn't work...
+			if(streq(prop->key, "model") || prop->val[0] == '*') {
 				sscanf(prop->val, "*%d", &submodel);
-				printf("submodel: %d\n", submodel);
-				break;
 			}
-		}	
-
-		if(submodel > 0) {
-			Entity real_ent = (Entity) {0};
-			real_ent.model = BspModelToRenderModel(bsp, submodel);			
-			real_ent.type = ENT_BRUSH;
-
-			/*
-			real_ent.comp_transform.bounds.min = *(Vector3 *) bsp->models[submodel].mins;
-			real_ent.comp_transform.bounds.max = *(Vector3 *) bsp->models[submodel].maxs;
-			*/
-
-			if(strcmp(ent->properties[0].val, "force_field00")) {
-				real_ent.type = ENT_FORCEFIELD;
-			}
-
-			real_ent.bsp_model = submodel;
-
-			real_ent.comp_transform.position = BoxCenter(real_ent.comp_transform.bounds);
-
-			real_ent.flags = (ENT_ACTIVE);
-
-			real_ent.id = handler->count;
-			handler->ents[handler->count++] = real_ent;	
-
-			printf("made submodel\n");
 		}
+
+		spawn.bsp_model = submodel;
+		spawn_list.arr[i] = spawn;
 	}
+
+	return spawn_list;
 }
 
 void SetEntityTriggers(EntityHandler *handler) {
