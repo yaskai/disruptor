@@ -61,8 +61,8 @@ ___
 ___
 * *Environment Interactions*
 
-** gates & switches
-** (-) force fields
+** (-) gates & switches
+** (x) force fields
 ** breakable boxes
 ** pickup items (health + ammo)
 
@@ -76,18 +76,18 @@ ___
 ___
 * *BSP Rendering*
 
-** (-) Basic: 
+** (x) Basic: 
 *** (x) mesh generation
 *** (x) texture mapping 
 
-** (-) Lit:
+** (x) Lit:
 *** (x) TrenchBroom .fgd setup for lights
 *** (x) import .lit file 
 *** (x) bsp face texture atlas generation
 *** (x) -lighting manager/wrapper- (not needed)
 *** (x) write lighting shader
 
-** (-) Optimized:
+** (x) Optimized:
 *** (x) import .vis file
 *** (x) use portalizer for mesh render list
 *** (x) make special textures (hint + skip)
@@ -188,5 +188,6 @@ ___
 ** game state serialization
 
 ** iterative map section loading 
+
 
 ___

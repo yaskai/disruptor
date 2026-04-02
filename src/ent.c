@@ -31,28 +31,6 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitSwitch,
 };
 
-// -------------------------------------------------
-// Trigger functions:
-void OnTriggerToggle(Entity *ent) {
-	ent->flags ^= ENT_ACTIVE;
-}
-
-void OnTriggerTurnOn(Entity *ent) {
-	ent->flags |= ENT_ACTIVE;
-}
-
-void OnTriggerTurnOff(Entity *ent) {
-	ent->flags &= ~ENT_ACTIVE;
-}
-
-typedef void (*OnTriggerFunc)(Entity *ent);
-OnTriggerFunc on_trigger_funcs[] = {
-	NULL,
-	&OnTriggerToggle,
-	&OnTriggerTurnOn,
-	&OnTriggerTurnOff,
-};
-// -------------------------------------------------
 
 void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
@@ -70,7 +48,6 @@ void LoadEntityBaseAnims() {
 Model projectile_models[4];
 
 void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager) {
-
 	handler->count = 0;
 	handler->capacity = 128;
 	handler->ents = calloc(handler->capacity, sizeof(Entity));
@@ -1821,17 +1798,4 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 	handler->ai_tick = 1.0f; 
 }
 
-void OnHitSwitch(Entity *ent, short damage) {
-	EntityHandler *handler = ptr_handler_self;
-
-	for(int i = 0; i < handler->count; i++) {
-		Entity *obj = &handler->ents[i];
-
-		if(obj->trigger_id != ent->trigger_id)	
-			continue;
-
-		if(obj->on_trigger)
-			on_trigger_funcs[obj->on_trigger](obj);
-	}
-}
 

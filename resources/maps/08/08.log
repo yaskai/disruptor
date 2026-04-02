@@ -99,7 +99,7 @@ count   lump name    byte size
     819 nodes             19656
      40 texinfos           1600
    2427 faces             48540
-    936 clipnodes          7488
+    921 clipnodes          7368
     441 leafs             12348
    2988 marksurfaces       5976
    5511 edges             22044
@@ -107,11 +107,11 @@ count   lump name    byte size
       9 textures         486068
         lightdata             0
         visdata               0
-        entdata            4404
+        entdata            4428
 
 BSPX lump name   byte size 
 BRUSHLIST              5868
 
-0.196s seconds elapsed
+0.187s seconds elapsed
 
 

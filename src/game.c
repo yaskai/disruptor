@@ -134,6 +134,8 @@ void GameLoadScene(Game *game, char *path) {
 	game->ent_handler.count = 0;
 	for(int i = 0; i < spawn_list.count; i++) 
 		ProcessEntity(&spawn_list.arr[i], &game->ent_handler, &game->test_section.base_navgraph, &game->test_section.bsp_data);
+
+	SwitchSetup(&game->ent_handler);
 	
 	player.id = game->ent_handler.player_id;
 	game->ent_handler.ents[game->ent_handler.player_id] = player;

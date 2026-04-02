@@ -147,26 +147,34 @@ enum ENT_BEHAVIORS : i8 {
 };
 
 enum ENT_TYPES : u8 {
-	ENT_PLAYER 		 	= 	0,
-	ENT_TURRET 		 	= 	1,
-	ENT_MAINTAINER 	 	= 	2,
-	ENT_REGULATOR	 	= 	3,
-	ENT_DRONE 		 	= 	4,
-	ENT_HEALTHPACK	 	= 	5,
-	ENT_AMMO_PISTOL	 	= 	6,
-	ENT_AMMO_SHOTGUN 	= 	7,
-	ENT_AMMO_REVOLVER	=	8,
-	ENT_DISRUPTOR	 	= 	9,
-	ENT_SWITCH			=  10,
-	ENT_BRUSH			=  11,
-	ENT_FORCEFIELD		=  12,
+	ENT_PLAYER 		 		= 	0,
+	ENT_TURRET 		 		= 	1,
+	ENT_MAINTAINER 	 		= 	2,
+	ENT_REGULATOR	 		= 	3,
+	ENT_DRONE 		 		= 	4,
+	ENT_HEALTHPACK	 		= 	5,
+	ENT_AMMO_PISTOL	 		= 	6,
+	ENT_AMMO_SHOTGUN 		= 	7,
+	ENT_AMMO_REVOLVER		=	8,
+	ENT_DISRUPTOR	 		= 	9,
+	ENT_SWITCH				=  10,
+	ENT_BRUSH				=  11,
+	ENT_FORCEFIELD			=  12,
 };
 
-enum TRIGGER_EVENT_TYPES : u8 {
-	TRIGGER_NONE 		= 0,
-	TRIGGER_TOGGLE 		= 1,
-	TRIGGER_TURN_ON		= 2,
-	TRIGGER_TURN_OFF	= 3,
+enum ON_TRIGGER_EVENT_TYPES : u8 {
+	TRIGGER_NONE 			=  0,
+	TRIGGER_TOGGLE 			=  1,
+	TRIGGER_TURN_ON			=  2,
+	TRIGGER_TURN_OFF		=  3,
+};
+
+enum TRIGGER_CONDITION_TYPES : u8 {
+	TRIGGER_COND_HIT		=  0,	// Hit with bullet
+	TRIGGER_COND_COLL_ENT	=  1,	// Colliding with entity (any)
+	TRIGGER_COND_COLL_PLR	=  2,	// Colliding with player
+	TRIGGER_COND_COLL_BUG	=  3,	// Colliding with bug
+	TRIGGER_COND_INTERACT   =  4,
 };
 
 typedef struct {
@@ -187,7 +195,9 @@ typedef struct {
 	i16 cell_id;
 
 	u16 trigger_id;
-	i8 on_trigger;
+	u8 on_trigger;
+	u8 trigger_condition;
+	u8 trigger_state;
 
 	i8 type;
 	u8 flags;
@@ -425,5 +435,7 @@ void SetEntityTriggers(EntityHandler *handler);
 // ----------------------------------------------------------------------------------------------------------------------------
 
 void DoTrigger(Entity *switch_ent, EntityHandler *handler);
+
+void SwitchSetup(EntityHandler *handler);
 
 #endif

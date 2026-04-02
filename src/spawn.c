@@ -86,7 +86,13 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	Entity ent = (Entity) {0};
 	ent.id = handler->count;
 	ent.cell_id = -1;
+
 	ent.bsp_model = spawn_point->bsp_model;
+
+	ent.on_trigger = spawn_point->on_trigger;
+	ent.trigger_id = spawn_point->trigger_group;
+	ent.trigger_condition = spawn_point->trigger_condition;
+	ent.trigger_state = 0;
 
 	ent.comp_transform.position = spawn_point->position;
 
@@ -204,6 +210,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			};
 
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+
+			ent.comp_health.on_hit = -1;
 
 		} break;
 
@@ -328,6 +336,10 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 				sscanf(prop->val, "%d", &spawn.on_trigger);
 			}
 
+			if(streq(prop->key, "trigger_condition")) {
+				sscanf(prop->val, "%d", &spawn.trigger_condition);
+			}
+
 			// *NOTE:
 			// Not sure why but normal streq check on key for model doesn't work...
 			if(streq(prop->key, "model") || prop->val[0] == '*') {
@@ -339,11 +351,7 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 		spawn_list.arr[i] = spawn;
 	}
 
-	return spawn_list;
-}
 
-void SetEntityTriggers(EntityHandler *handler) {
-	for(u16 i = 0; i < handler->count; i++) {
-	}
+	return spawn_list;
 }
 

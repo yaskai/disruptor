@@ -57,6 +57,7 @@ typedef struct {
 
 	int trigger_group;
 	int on_trigger;
+	int trigger_condition;
 
 	u16 id;
 	
