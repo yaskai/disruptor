@@ -24,9 +24,6 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
 		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
 
-		if(strcmp(mip->name, "{ff") == 0)
-			continue;
-
 		tri_count += face->edge_count -2;
 	}
 
@@ -38,8 +35,10 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
 		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
 
+		/*
 		if(strcmp(mip->name, "{ff") == 0)
 			continue;
+		*/
 
 		Vector3 face_verts[face->edge_count];
 		for(int j = 0; j < face->edge_count; j++) {
@@ -56,7 +55,8 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 				.vertices[0] = face_verts[0],
 				.vertices[1] = face_verts[j+1],
 				.vertices[2] = face_verts[j],
-				.normal = normal
+				.normal = normal,
+				.model_id = model_id
 			};
 
 			tris[tri_id++] = tri;
@@ -865,6 +865,29 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	for(short i = 0; i < 3; i++) {
 		BrushPool *bp = &brush_pools[i];
 		free(bp->brushes);
+	}
+
+	sect.bvh_hullgroup_count = sect.bsp_data.num_models;
+	sect.bvh_hullgroups = malloc(sizeof(Bvh_HullGroup) * sect.bvh_hullgroup_count);
+	for(int i = 0; i < sect.bvh_hullgroup_count; i++) {
+		Bvh_HullGroup *hg = &sect.bvh_hullgroups[i];
+		*hg = (Bvh_HullGroup) {0};
+		
+		hg->bvh[0].tris.arr = TrisFromBspModel(&sect.bsp_data, &hg->bvh[0].tris.count, i);
+		hg->bvh[0].tris.ids = calloc(hg->bvh[0].tris.count, sizeof(u16));
+		for(int k = 0; k < hg->bvh[0].tris.count; k++) hg->bvh[0].tris.ids[k] = k;
+
+		BvhConstruct(&sect, &hg->bvh[0], Vector3Zero(), &hg->bvh[0].tris);
+		if(hg->bvh[0].tris.count == 0) {
+			free(hg->bvh->tris.arr);
+			free(hg->bvh->tris.ids);
+
+			hg->flags = 0;
+
+			continue;
+		}
+
+		hg->flags |= HULLGROUP_ACTIVE;
 	}
 
 	return sect;

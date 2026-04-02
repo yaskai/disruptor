@@ -209,11 +209,11 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 		case ENT_FORCEFIELD: {
 			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);			
-			ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
-			ent.comp_transform.bounds.min = Vector3Subtract(ent.comp_transform.bounds.min, BODY_VOLUME_SMALL);
-			ent.comp_transform.bounds.max = Vector3Add(ent.comp_transform.bounds.max, BODY_VOLUME_SMALL);
+			//ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
+			//ent.comp_transform.bounds.min = Vector3Subtract(ent.comp_transform.bounds.min, BODY_VOLUME_SMALL);
+			//ent.comp_transform.bounds.max = Vector3Add(ent.comp_transform.bounds.max, BODY_VOLUME_SMALL);
 				
-			ent.comp_transform.position = BoxCenter(ent.comp_transform.bounds);
+			//ent.comp_transform.position = BoxCenter(ent.comp_transform.bounds);
 
 			printf("made ff, %d\n", ent.bsp_model);
 

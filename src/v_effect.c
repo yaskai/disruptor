@@ -27,7 +27,7 @@ void vEffectsRun(vEffect_Manager *manager, float dt) {
 		if(!trail->active) 
 			continue;
 
-		//trail->timer -= dt*1.75f;
+		trail->timer -= dt*1.75f;
 		if(trail->timer <= 0) {
 			trail->active = false;
 			manager->trail_count--;

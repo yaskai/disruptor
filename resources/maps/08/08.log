@@ -107,11 +107,11 @@ count   lump name    byte size
       9 textures         486068
         lightdata             0
         visdata               0
-        entdata            4314
+        entdata            4404
 
 BSPX lump name   byte size 
 BRUSHLIST              5868
 
-0.178s seconds elapsed
+0.196s seconds elapsed
 
 

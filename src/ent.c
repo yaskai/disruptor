@@ -28,6 +28,7 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitMaintainer,
 	&OnHitRegulator,
 	&OnHitBug,
+	&OnHitSwitch,
 };
 
 // -------------------------------------------------
@@ -162,17 +163,20 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	render_list.count = 0;
 	Vector3 view_dir = player_ent->comp_transform.forward;
 
-	//for(u16 i = handler->brush_ents_offset; i < handler->count; i++) {
+	// Manage brush entity flags
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
 
 		if(!ent->bsp_model)
 			continue;
 
-		if(!(ent->flags & ENT_ACTIVE))
+		if(!(ent->flags & ENT_ACTIVE)) {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
-		else
+			sect->bvh_hullgroups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
+		} else {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags |=  HULLGROUP_ACTIVE;
+			sect->bvh_hullgroups[ent->bsp_model].flags |= HULLGROUP_ACTIVE;
+		}
 	}
 
 	for(u16 i = 0; i < handler->count; i++) {
@@ -310,12 +314,14 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 	UpdateGrid(handler);
 
+	/*
 	if(IsKeyPressed(KEY_F)) {
 		for(int i = 0; i < handler->count; i++) {
 			if(handler->ents[i].bsp_model == 2)
 				handler->ents[i].flags ^= ENT_ACTIVE;
 		}
 	}
+	*/
 }
 
 // Entity draw loop, every frame, draws all entities.
@@ -1279,10 +1285,11 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 		OnHitEnt(hit_ent, handler->ents[sender].comp_weapon.damage);
 	}
 
-	//debug_bullet_dest = dest;
+	debug_bullet_dest = dest;
 
-	//return dest;
+	return dest;
 
+	/*
 	// *NOTE:
 	// BVH is still more accurate for point traces so I'll continue using it for now...
 	Bsp_TraceData trace = Bsp_TraceDataEmpty();
@@ -1299,6 +1306,7 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 	debug_bullet_norm = trace.normal;
 
 	return dest;
+	*/
 }
 
 void DebugDrawEntText(EntityHandler *handler, Camera3D cam) {
@@ -1811,5 +1819,19 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 
 	// Reset ai tick
 	handler->ai_tick = 1.0f; 
+}
+
+void OnHitSwitch(Entity *ent, short damage) {
+	EntityHandler *handler = ptr_handler_self;
+
+	for(int i = 0; i < handler->count; i++) {
+		Entity *obj = &handler->ents[i];
+
+		if(obj->trigger_id != ent->trigger_id)	
+			continue;
+
+		if(obj->on_trigger)
+			on_trigger_funcs[obj->on_trigger](obj);
+	}
 }
 

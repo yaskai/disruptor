@@ -23,6 +23,7 @@ typedef struct {
 	Vector3 vertices[3];
 	Vector3 normal;
 
+	int model_id;
 	u16 hull_id;
 		
 	u8 collision_flags;
@@ -178,6 +179,16 @@ typedef struct {
 
 } HullPool;
 
+typedef struct {
+	BvhTree bvh[3];
+
+	int model_id;
+
+	u8 flags;
+	u8 collision_flags;
+	
+} Bvh_HullGroup; 
+
 #define MAP_SECT_LOADED	0x01
 #define MAP_SECT_QUEUED	0x02
 typedef struct {
@@ -192,6 +203,9 @@ typedef struct {
 	NavGraph *navgraphs;
 
 	//Model model;
+
+	Bvh_HullGroup *bvh_hullgroups;
+	int bvh_hullgroup_count;
 
 	u16 hull_count;
 
@@ -309,6 +323,7 @@ IntersectData IntersectDataEmpty();
 void BvhBoxIntersect(BoundingBox box, MapSection *sect, BvhTree *bvh, u16 node_id, IntersectData *data);
 
 bool IsPointInHull(Vector3 point, Hull *hull);
+
 
 #endif
 

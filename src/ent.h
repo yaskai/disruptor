@@ -390,6 +390,7 @@ void OnHitBug(Entity *ent, short damage);
 void OnHitTurret(Entity *ent, short damage);
 void OnHitMaintainer(Entity *ent, short damage);
 void OnHitRegulator(Entity *ent, short damage);
+void OnHitSwitch(Entity *ent, short damage);
 
 void DoFix(Entity *ent);
 void OnFixTurret(Entity *ent);
