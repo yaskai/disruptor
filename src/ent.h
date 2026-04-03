@@ -433,9 +433,8 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp);
 void SetEntityTriggers(EntityHandler *handler);
 
 // ----------------------------------------------------------------------------------------------------------------------------
-
-void DoTrigger(Entity *switch_ent, EntityHandler *handler);
-
 void SwitchSetup(EntityHandler *handler);
+void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt);
+void DoTrigger(EntityHandler *handler, Entity *switch_ent);
 
 #endif

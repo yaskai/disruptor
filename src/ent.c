@@ -31,7 +31,6 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitSwitch,
 };
 
-
 void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
 	handler->base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
@@ -182,6 +181,10 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 			case ENT_DISRUPTOR:
 				BugUpdate(ent, handler, sect, dt);
+				break;
+			
+			case ENT_SWITCH:
+				SwitchUpdate(handler, ent, dt);
 				break;
 		}
 
