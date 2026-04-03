@@ -506,3 +506,49 @@ void AiMaintainerMakeNewSchedule(Entity *ent, EntityHandler *handler, MapSection
 	ai->curr_schedule = ai->prev_schedule;
 	ai->prev_schedule = ai->curr_schedule;
 }
+
+// * NOTE:
+// This function is placeholder and mostly for testing,
+// in the future I'll probably use actual ai inputs for this...
+// Sound, sight, etc.
+void AlertMaintainers(EntityHandler *handler, u16 disrupted_id) {
+	Entity *disrupted_ent = &handler->ents[disrupted_id];
+	comp_Ai *disrupted_ai = &disrupted_ent->comp_ai;
+
+	for(u16 i = 0; i < handler->count; i++) {
+		Entity *ent = &handler->ents[i];
+		comp_Ai *ai = &ent->comp_ai;
+
+		if(!ai->component_valid)	
+			continue;
+
+		if(ent->type == ENT_PLAYER)
+			continue;
+
+		if(ent->type == ENT_DISRUPTOR)
+			continue;
+
+		if(ent->comp_ai.state == STATE_DEAD)
+			return;
+	
+		if(ai->navgraph_id != disrupted_ai->navgraph_id)	
+			continue;
+
+		if(ai->navgraph_id == -1)
+			continue;
+
+		if(ent->type != ENT_MAINTAINER)
+			continue;
+
+		if(ent->id == disrupted_id)
+			continue;
+
+		ai->task_data.timer = 0;
+		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
+		ai->curr_schedule = SCHED_FIX_FRIEND;
+		ai->task_data.schedule_id = SCHED_FIX_FRIEND;
+		ai->task_data.task_id = TASK_GOTO_POINT;
+		ai->task_data.target_entity = disrupted_id;
+		ai->task_data.path_set = false;
+	}
+}
