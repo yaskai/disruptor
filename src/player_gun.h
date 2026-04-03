@@ -16,7 +16,15 @@ typedef struct {
 
 } PlayerGun;
 
-void PlayerGunInit(PlayerGun *player_gun, Entity *player, EntityHandler *handler, MapSection *sect, vEffect_Manager *effect_manager, Config *conf);
+void PlayerGunInit(
+	PlayerGun *player_gun,
+	Entity *player,
+	EntityHandler *handler,
+	MapSection *sect,
+	vEffect_Manager *effect_manager,
+	Config *conf
+);
+
 void PlayerGunUpdate(PlayerGun *player_gun, float dt);
 void PlayerGunDraw(PlayerGun *player_gun);
 void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);

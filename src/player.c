@@ -71,6 +71,8 @@ i16 player_curr_checkpoint = -1;
 
 bool step_frame = false;
 
+float recoil_input = 0.0f;
+
 // **
 // -----------------------------------------------------------------------------
 // Movement tracing,
@@ -783,6 +785,8 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 
 	ptr_cam->position.z += cam_bob;
 	ptr_cam->target.z += cam_bob;
+
+	ptr_cam->target.z += recoil_input;
 }
 
 void PlayerDebugText(Entity *player) {
@@ -863,5 +867,9 @@ void SpawnPlayer(Entity *ent, Vector3 position) {
 
 	death_timer = 0;
 	player_dead = false;
+}
+
+void PlayerSetRecoilInput(Entity *player, float input) {
+	recoil_input = input;
 }
 
