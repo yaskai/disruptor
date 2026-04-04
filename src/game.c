@@ -274,9 +274,9 @@ void GameDraw(Game *game, float dt) {
 		//DebugDrawNavGraphsText(&game->test_section, game->camera_debug, (Vector2) {VIRT_W, VIRT_H} );
 
 		if(player_ent->comp_ai.state == STATE_DEAD) {
-			float deathscreen_alpha = player_ent->comp_ai.task_data.timer*0.5f;
+			float deathscreen_alpha = player_ent->comp_ai.task_state.timer*0.5f;
 			if(deathscreen_alpha > 1) deathscreen_alpha = 1;
-			DrawRectangleRec((Rectangle) { 0, 0, VIRT_W, VIRT_H } , ColorAlpha(BLACK, player_ent->comp_ai.task_data.timer*0.5f));
+			DrawRectangleRec((Rectangle) { 0, 0, VIRT_W, VIRT_H } , ColorAlpha(BLACK, player_ent->comp_ai.task_state.timer*0.5f));
 		}
 
 	EndTextureMode();

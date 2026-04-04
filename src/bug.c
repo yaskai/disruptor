@@ -109,7 +109,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 			}
 		}
 
-		bug_ent->comp_ai.task_data.target_entity = enemy_id;
+		bug_ent->comp_ai.targ_data.ent_id = enemy_id;
 	} 
 
 	// Increment bounce count
@@ -128,10 +128,10 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	if(!bug_target_picked) 
 		return;
 
-	Entity *enemy_ent = &handler->ents[bug_ent->comp_ai.task_data.target_entity];
+	Entity *enemy_ent = &handler->ents[bug_ent->comp_ai.targ_data.ent_id];
 	if(enemy_ent->comp_ai.state == STATE_DEAD) {
 		bug_target_picked = false;
-		bug_ent->comp_ai.task_data.target_entity = -1;
+		bug_ent->comp_ai.targ_data.ent_id = -1;
 		*bounce = 0;
 	}
 
@@ -340,7 +340,7 @@ void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	};
 
 	ent->comp_ai.component_valid = false;
-	ent->comp_ai.task_data.target_entity = -1;
+	ent->comp_ai.targ_data.ent_id = -1;
 	ent->comp_ai.state = 0;
 }
 
@@ -377,7 +377,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ent->comp_health.amount = 100;
 
 		bug_target_picked = false;
-		ent->comp_ai.task_data.target_entity = -1;
+		ent->comp_ai.targ_data.ent_id = -1;
 	}
 
 	ct->bounds = BoxTranslate(ct->bounds, ct->position);
@@ -456,7 +456,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check) {
 				ct->on_ground = true;
 				ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
-				ai->task_data.target_entity = enemy_ent->id;
+				ai->targ_data.ent_id = enemy_ent->id;
 				ct->forward = enemy_ent->comp_transform.forward;
 				ent->comp_health.damage_cooldown = 10;
 				ct->velocity = Vector3Zero();
@@ -526,15 +526,15 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			}
 		}
 
-		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->task_data.target_entity > -1 && ai->task_data.target_entity < handler->count
+		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->targ_data.ent_id > -1 && ai->targ_data.ent_id < handler->count
 		   && !(ent->flags & BUG_RECALL)) {
-			Entity *stick_ent = &handler->ents[ai->task_data.target_entity];			
+			Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];			
 			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
 
 			// Bounce off enemy when it dies
 			if(stick_ent->comp_ai.state == STATE_DEAD) {
 				ai->state = BUG_LAUNCHED;
-				ai->task_data.target_entity = -1;
+				ai->targ_data.ent_id = -1;
 
 				ent->flags &= ~BUG_DISRUPTED_ENEMY;
 				bug_bounce = 0;
@@ -542,8 +542,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 
-				if(ai->task_data.target_entity == -1) {
-					ai->task_data.target_entity = handler->player_id;
+				if(ai->targ_data.ent_id == -1) {
+					ai->targ_data.ent_id = handler->player_id;
 					bug_target_picked = true;
 					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 				}
@@ -562,7 +562,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				bug_bounce = 0;
 				bug_target_picked = true;
 
-				ent->comp_ai.task_data.target_entity = handler->player_id;
+				ent->comp_ai.targ_data.ent_id = handler->player_id;
 				
 				float dist_add = 80.0f + (Vector3Distance(player_ent->comp_transform.position, ct->position) * 0.1f);
 				dist_add = Clamp(dist_add, 0, 300);
@@ -644,19 +644,19 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 	switch(ent->type) {
 		case ENT_TURRET: {
 			ai->disrupt_timer = 100;
-			ai->task_data.timer = 0;
+			ai->task_state.timer = 0;
 			ent->comp_weapon.ammo = 60;
 			ent->comp_weapon.cooldown = 0;
-			ai->task_data.task_id = TASK_FIRE_WEAPON;
+			ai->task_state.task_id = TASK_FIRE_WEAPON;
 
 			ct->forward = ct->start_forward;
-			ai->task_data.known_target_position = Vector3Add(ct->position, ct->forward);
-			ai->task_data.target_position = Vector3Add(ct->position, ct->forward);
+			ai->targ_data.known_position = Vector3Add(ct->position, ct->forward);
+			ai->targ_data.position = Vector3Add(ct->position, ct->forward);
 
 		} break;
 	}
 
-	AlertMaintainers(handler, ent_id);
+	//AlertMaintainers(handler, ent_id);
 }
 
 // *TODO:

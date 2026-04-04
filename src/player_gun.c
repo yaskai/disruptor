@@ -16,7 +16,7 @@ Matrix mat = {0};
 
 #define LOCAL_UP (Vector3) { 0, 1, 0 }
 
-#define REVOLVER_REST (Vector3) { -0.65f, -2.05f, 5.0f }
+#define REVOLVER_REST (Vector3) { -0.65f, -1.95f, 5.0f }
 //#define REVOLVER_REST (Vector3) { -0.75f, 6.25f, -2.35f }
 #define REVOLVER_ANGLE_REST 1.5f
 

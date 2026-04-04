@@ -29,7 +29,6 @@ enum ANIM_STATES : u8 {
 
 enum SCHED_TYPES : u8 {
 	SCHED_IDLE,
-	SCHED_SENTRY_IDLE,
 	SCHED_PATROL,
 	SCHED_WAIT,
 	SCHED_ATTACK_RANGE,
@@ -57,6 +56,25 @@ enum TASK_TYPES : u8 {
 };
 
 typedef struct {
+	NavPath path;
+
+	Vector3 target_position;
+	Vector3 known_target_position;
+
+	float timer;
+
+	u32 schedule_id;
+	u32 task_id;
+
+	u32 interrupt_mask;
+
+	i16 target_entity;
+
+	bool path_set;
+
+} Ai_TaskData;
+
+typedef struct {
 	u32 sched_id;
 	u32 interrupt_mask;
 
@@ -77,28 +95,7 @@ typedef struct {
 } Ai_SchedDef;
 
 typedef struct {
-	Vector3 position;
-	Vector3 known_position;
-	i16 ent_id;
-
-} Ai_TargetData;
-
-typedef struct {
-	NavPath path;
-
-	float timer;
-
-	u8 task_id;
-
-	bool is_init;
-	bool complete;
-
-} Ai_TaskState;
-
-typedef struct {
-	Ai_SchedState sched_state;
-	Ai_TaskState task_state;
-	Ai_TargetData targ_data;
+	Ai_TaskData task_data;
 
 	Vector3 wish_dir;
 	Vector3 move_input;
@@ -107,6 +104,10 @@ typedef struct {
 	float speed;
 
 	u32 input_mask;
+
+	u32 curr_schedule;
+	u32 prev_schedule;
+	u32 next_schedule;
 
 	int curr_navnode_id;
 
@@ -123,8 +124,5 @@ typedef struct {
 	bool component_valid;
 
 } comp_Ai;
-
-void AiSetSchedule(comp_Ai *ai, u8 sched_id);
-
 
 #endif

@@ -141,8 +141,9 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.comp_ai.sight_cone = 0.5f;
 			ent.comp_ai.hear_distance = 5.0f;
 
-			ent.comp_ai.curr_schedule = SCHED_SENTRY;
-			ent.comp_ai.task_data.task_id = TASK_LOOK_AT_ENTITY;
+			AiSetSchedule(&ent.comp_ai, SCHED_SENTRY_IDLE);
+			//ent.comp_ai.task_data.task_id = TASK_LOOK_AT_ENTITY;
+			//ent.comp_ai.task_state.task_id = TASK_LOOK_AT_ENTITY;
 
 			ent.comp_transform.targ_look = ent.comp_transform.forward;
 			
@@ -151,7 +152,9 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 				.id = WEAP_TURRET,
 				.cooldown = 1,
 				.damage = 7,
-				.clip_size = 100
+				.clip_size = 100,
+				.ammo = 100,
+				.reload_time_amnt = 0.5f,
 			};
 
 			ent.comp_health.amount = 100;
@@ -184,7 +187,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
 			//ent.comp_ai.task_data.timer = 0.1f;
 
-			ent.comp_ai.curr_schedule = SCHED_MAINTAINER_ATTACK;
+			ent.comp_ai.sched_state.sched_id = SCHED_MAINTAINER_ATTACK;
 			//ent.comp_ai.curr_schedule = SCHED_IDLE;
 			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
 

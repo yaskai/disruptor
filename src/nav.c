@@ -65,10 +65,10 @@ bool MakeNavPath(Entity *ent, NavGraph *graph, i16 target_id) {
 
 	comp_Ai *ai = &ent->comp_ai;
 
-	NavPath *path = &ai->task_data.path;
+	NavPath *path = &ai->task_state.path;
 
 	path->count = 0;
-	ai->task_data.path_set = false;
+	ai->task_state.is_init = false;
 
 	i16 start = ai->curr_navnode_id;
 	u16 node_count = graph->node_count;
@@ -102,7 +102,7 @@ bool MakeNavPath(Entity *ent, NavGraph *graph, i16 target_id) {
 		}
 
 		if(curr == NULL_NODE) {
-			ai->task_data.path_set = false;
+			ai->task_state.is_init = false;
 			path->count = 0;
 			path->targ = ai->curr_navnode_id;
 			return false;
@@ -168,7 +168,7 @@ bool MakeNavPath(Entity *ent, NavGraph *graph, i16 target_id) {
 	}
 	
 	path->curr = 0;
-	ai->task_data.path_set = true;
+	ai->task_state.is_init = true;
 	ai->curr_navnode_id = path->nodes[0];
 
 	dest_found = true;
@@ -179,7 +179,7 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
-	Ai_TaskData *task = &ai->task_data;
+	Ai_TaskState *task = &ai->task_state;
 	NavPath *path = &task->path;
 
 	if(path_id >= path->count) {
@@ -197,7 +197,7 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 	}
 
 	Vector3 point = graph->nodes[path->nodes[path_id]].position;
-	task->target_position = point;
+	ai->targ_data.position = point;
 	
 	Vector3 dir = (Vector3Subtract(point, ct->position));
 	dir.z = 0;

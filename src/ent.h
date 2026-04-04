@@ -323,11 +323,14 @@ void MaintainerDraw(Entity *ent, float dt);
 // **** AI ****
 
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt);
-void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, Ai_TaskData *task_data, MapSection *sect, float dt);
+void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, MapSection *sect, float dt);
 
 void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect);
-void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, Ai_TaskData *task_data, float dt);
-void AiDoState(Entity *ent, comp_Ai *ai, Ai_TaskData *task_data, float dt);
+
+void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, float dt);
+u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, u8 task_id, float dt);
+
+void AiDoState(Entity *ent, comp_Ai *ai, float dt);
 
 // * NAVIGATION
 // Definitions found in nav.h

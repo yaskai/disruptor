@@ -220,7 +220,7 @@ void PlayerUpdate(Entity *player, float dt) {
 		if(death_timer > 3) 
 			death_timer = 3;
 
-		player->comp_ai.task_data.timer = death_timer;
+		player->comp_ai.task_state.timer = death_timer;
 	}
 
 	if(!player_dead) {
@@ -861,7 +861,7 @@ void SpawnPlayer(Entity *ent, Vector3 position) {
 
 	ent->comp_ai.component_valid = false;
 	ent->comp_ai.state = STATE_IDLE;
-	ent->comp_ai.task_data.timer = 0;
+	ent->comp_ai.task_state.timer = 0;
 
 	ent->flags = (ENT_ACTIVE | ENT_COLLIDERS);
 

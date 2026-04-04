@@ -1974,13 +1974,20 @@
 }
 // entity 34
 {
+"classname" "info_turret_spawn"
+"origin" "-92 -252 48"
+"angle" "0"
+"enum_id" "1"
+}
+// entity 35
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 35
+// entity 36
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

@@ -131,7 +131,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	Entity *player_ent = &handler->ents[handler->player_id];
 	PlayerUpdate(player_ent, dt);
 
-	if(player_ent->comp_ai.state == STATE_DEAD && player_ent->comp_ai.task_data.timer >= 2) {
+	if(player_ent->comp_ai.state == STATE_DEAD && player_ent->comp_ai.task_state.timer >= 2) {
 		ReloadEntities(handler, sect, 1);
 		return;
 	}
@@ -363,195 +363,6 @@ void RenderBrushEntities(EntityHandler *handler) {
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
 		DrawBoundingBox(ent->comp_transform.bounds, RED);
 	}
-}
-
-// Update logic for turret
-void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
-	float angle_min = -70;
-	float angle_max =  70;
-
-	if((ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
-		ent->comp_ai.task_data.timer = 0;
-		ent->comp_ai.task_data.task_id = TASK_FIRE_WEAPON;
-		
-		float angle = sinf(GetTime() * 1.5f);
-		angle = Clamp(angle, angle_min, angle_max);
-
-		if(ent->comp_weapon.ammo > 0) {
-			ent->comp_transform.forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
-		} else {
-			ent->comp_ai.task_data.task_id = TASK_WAIT_TIME;
-		}
-
-	} else {
-		ent->comp_transform.forward = Vector3Lerp(ent->comp_transform.forward, ent->comp_transform.targ_look, 10*dt);
-	}
-
-	if(ent->comp_ai.task_data.task_id == TASK_FIRE_WEAPON) {
-		TurretShoot(ent, handler, sect, dt);
-	}
-}
-
-// Draw logic for turret
-void TurretDraw(Entity *ent) {
-	comp_Transform *ct = &ent->comp_transform;
-
-	float yaw = atan2f(ct->forward.x, -ct->forward.y);
-
-	float xz_len = Vector2Length( (Vector2) { ct->forward.x, ct->forward.y } );
-	float pitch = atan2f(-ct->forward.z, xz_len);
-
-	Matrix mat_base = MatrixMultiply(ent->model.transform, MatrixTranslate(ct->position.x, ct->position.y, ct->position.z));
-
-	Matrix mat_gun = MatrixMultiply(MatrixRotateX(pitch), MatrixRotateY(yaw));
-	mat_gun = MatrixMultiply(mat_gun, MatrixRotateX(90*DEG2RAD));
-	mat_gun = MatrixMultiply(mat_gun, MatrixTranslate(ct->position.x, ct->position.y, ct->position.z));
-
-	DrawMesh(ent->model.meshes[1], ent->model.materials[1], mat_gun);
-	DrawMesh(ent->model.meshes[0], ent->model.materials[1], mat_base);
-}
-
-void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
-	comp_Weapon *weap = &ent->comp_weapon;
-	comp_Transform *ct = &ent->comp_transform;
-	comp_Ai *ai = &ent->comp_ai;
-
-	weap->cooldown -= dt;
-	if(weap->cooldown > 0)
-		return; 
-
-	if(!(ai->input_mask & AI_INPUT_SELF_GLITCHED)) {
-		// Not disrupted and see's player
-		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
-			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
-
-			Vector3 look_point = targ_ent->comp_transform.position;
-			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 5*dt));
-
-			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
-			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
-				ct->targ_look = Vector3Lerp(ct->targ_look, targ, 80*dt);
-				//ct->targ_look = targ;
-
-		} else {
-			// Disrupted
-			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
-
-			Vector3 look_point = ai->task_data.known_target_position;
-			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 10*dt));
-
-			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
-
-			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
-				ct->targ_look = targ;
-			else 
-				ct->targ_look = ct->start_forward;
-		}
-	} else {
-		ct->targ_look.z = Lerp(ct->targ_look.z, 0, dt * 5);
-
-		if(ent->comp_ai.disrupt_timer >= 99.9f)
-			weap->ammo = weap->clip_size;
-	}
-
-	if(weap->ammo <= 0) 
-		return;
-
-	Vector3 trace_start = ct->position;
-	trace_start.z += 12;
-	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
-
-	Vector3 dir = ct->forward;
-	float offset = GetRandomValue(-6, 6) * 0.01f;	
-
-	Vector3 right = Vector3CrossProduct(ct->forward, UP);
-	dir = Vector3Add(dir, Vector3Scale(right, offset));
-
-	offset = GetRandomValue(-6, 6) * 0.01f;
-	dir = Vector3Add(dir, Vector3Scale(UP, offset));
-
-	dir = Vector3Normalize(dir);
-
-	bool hit = false;
-	// * NOTE:
-	// Purpose of the dummy value is to cause no dammage on the first few shots, gives the player a warning for fairness.
-	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 3);
-	Vector3 bullet_dest = TraceBullet(handler, sect, trace_start, dir, ent->id, &hit, dummy);
-
-	Vector3 trail_end = Vector3Add(trace_start, Vector3Scale(dir, Vector3Distance(trace_start, bullet_dest)));
-	if(!hit) {
-		trail_end = Vector3Add(trace_start, Vector3Scale(ct->forward, 2000.0f));
-	}
-	
-	// Add bullet trail effect
-	float dist = Vector3Distance(trace_start, trail_end);
-	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
-
-	weap->cooldown = 0.075f;
-	weap->ammo--;
-}
-
-void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
-	comp_Ai *ai = &ent->comp_ai;
-	comp_Transform *ct = &ent->comp_transform;
-
-	switch(ai->state) {
-		case STATE_IDLE:
-			ent->curr_anim = 0;
-			break;
-
-		case STATE_MOVE:
-			ent->curr_anim = 1;
-			break;
-	}
-
-	if((ai->input_mask & AI_INPUT_SELF_GLITCHED) && ai->state != STATE_DEAD) {
-		ai->curr_schedule = SCHED_IDLE;
-		float angle = sinf(GetTime()*20) * PI;
-		ent->comp_transform.forward = Vector3RotateByAxisAngle(ent->comp_transform.forward, UP, angle);
-		ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(angle)); 
-	}
-
-	if(ai->input_mask & AI_INPUT_SEE_GLITCHED)
-		ai->curr_schedule = SCHED_FIX_FRIEND;
-
-	ent->comp_health.hit_box = BoxTranslate(ent->comp_health.hit_box, ent->comp_transform.position);
-
-	if(ai->curr_schedule == SCHED_MAINTAINER_ATTACK) {
-		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
-			ct->forward =  Vector3Lerp(ct->forward, Vector3Subtract(ai->task_data.known_target_position, ct->position), 30*dt);
-			ct->forward.z = 0;
-			ct->forward = Vector3Normalize(ct->forward);
-
-			float angle = atan2f(-ct->forward.x, ct->forward.y);
-			ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(angle+(90*DEG2RAD)*-1));
-		}
-	}
-
-	EntMove(ent, sect, handler, dt);
-	//ent->anim_frame = (ent->anim_frame + 1) % ent->animations[ent->curr_anim].frameCount;
-}
-
-void MaintainerDraw(Entity *ent, float dt) {
-	comp_Ai *ai = &ent->comp_ai;
-
-	if(ai->state == STATE_DEAD) {
-		Vector3 pos = ent->comp_transform.position;		
-		pos.z -= 20;
-
-		DrawModelEx(
-			ent->model,
-			pos,
-			Vector3CrossProduct(ent->comp_transform.forward, UP),
-			90,
-			Vector3Scale(Vector3One(), 0.1f),
-			LIGHTGRAY 
-		);
-		return;
-	}
-	
-	Vector3 pos = ent->comp_transform.position;
-	DrawModel(ent->model, pos, 0.1f, LIGHTGRAY);
 }
 
 // Default entity trace data
@@ -818,7 +629,7 @@ void OnHitEnt(Entity *ent, short damage) {
 
 	if(health->amount <= 0) {
 		ent->comp_ai.state = STATE_DEAD;
-		ent->comp_ai.curr_schedule = SCHED_DEAD;
+		ent->comp_ai.sched_state.sched_id = SCHED_DEAD;
 
 		ent->flags &= ~ENT_COLLIDERS;
 	}
@@ -831,13 +642,6 @@ void OnHitEnt(Entity *ent, short damage) {
 		OnHitPlayer(ent, damage);
 }
 
-// When turret is hit
-// * NOTE:
-// Nothing right now, 
-// unsure design-wise what to do here...
-void OnHitTurret(Entity *ent, short damage) {
-
-}
 
 // Maintainer hit
 void OnHitMaintainer(Entity *ent, short damage) {
@@ -889,34 +693,6 @@ void OnHitMaintainer(Entity *ent, short damage) {
 // Nothing right now as that enemy isn't implemented yet...
 void OnHitRegulator(Entity *ent, short damage) {
 
-}
-
-// Fix disrupted entity
-void DoFix(Entity *ent) {
-	ent->comp_ai.input_mask &= ~AI_INPUT_SELF_GLITCHED;
-
-	switch(ent->type) {
-		case ENT_TURRET:
-			OnFixTurret(ent);
-			break;
-			
-		case ENT_MAINTAINER:
-			OnFixMaintainer(ent);
-			break;
-
-		case ENT_REGULATOR:
-			OnFixRegulator(ent);
-			break;
-	}
-}
-
-void OnFixTurret(Entity *ent) {
-	comp_Ai *ai = &ent->comp_ai;
-
-	ai->curr_schedule = SCHED_SENTRY;
-	ai->task_data.schedule_id = SCHED_SENTRY;
-	ai->task_data.task_id = TASK_WAIT_TIME;
-	ai->task_data.timer = 1;
 }
 
 void OnFixMaintainer(Entity *ent) {
@@ -1249,5 +1025,4 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 	// Reset ai tick
 	handler->ai_tick = 1.0f; 
 }
-
 
