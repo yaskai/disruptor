@@ -140,6 +140,13 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	to_enemy.z = 0;
 	to_enemy = Vector3Normalize(to_enemy);
 
+	if(Vector3DotProduct(to_enemy, enemy_ent->comp_transform.velocity) > 0.5f) {
+		to_enemy = Vector3Subtract( Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_transform.velocity), ct->position );	
+		d = Vector3Length(to_enemy);
+		to_enemy.z = 0;
+		to_enemy = Vector3Normalize(to_enemy);
+	}
+
 	if(d > 100 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 64)) {
 		ct->velocity.x = to_enemy.x * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
 		ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	

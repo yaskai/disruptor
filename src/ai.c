@@ -120,6 +120,14 @@ u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
 	return 0;
 }
 
+u8 ExecFindPoint(Entity *ent, MapSection *sect) {
+	comp_Ai *ai = &ent->comp_ai;
+
+	Vector3 dest = ai->targ_data.position;
+
+	return 0;
+}
+
 // Ai tick, not every frame,
 // has it's own tick timer (every 11 frames)
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {

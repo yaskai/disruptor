@@ -108,7 +108,7 @@ ___
 * *AI*
 
 ** (-) Cleanup
-*** (-) use interrupt mask properly
+*** (x) use interrupt mask properly
 *** (x) move ai functions out of ent.c
 
 ** (-) Inputs
@@ -128,7 +128,6 @@ ___
 
 ** (-) maintainer behaviour
 *** (x) idle
-*** (x) attack (throw projectile)
 *** (-) attack (go to & pickup projectile and/or meelee)
 *** (-) fix disrupted entities (*_navigation system is blocker_*)
 *** (-) disrupted (*_design is blocker_*)

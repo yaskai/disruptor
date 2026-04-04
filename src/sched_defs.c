@@ -27,4 +27,8 @@ static Ai_SchedDef sched_defs[] = {
 		.fail_sched = SCHED_PATROL,
 		.next_sched = SCHED_PATROL
 	},
+
+	[SCHED_MAINTAINER_ATTACK] = {
+	},
 };
+

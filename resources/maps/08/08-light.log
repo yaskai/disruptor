@@ -5,7 +5,7 @@ INFO: using built-in palette.
 Loading extended texinfo flags from 08.texinfo.json...
 Loading extended content flags from 08.content.json...
 WARNING: entity at (944 -672 240) (light) has empty key/value "_dirt" ""
-34 entities read, 22 are lights.
+40 entities read, 22 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -54,7 +54,7 @@ Writing 08.lit
 DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
 Writing 08.bsp as Quake BSP bsp29
-5.879s seconds elapsed
+6.007s seconds elapsed
 0 empty lightmaps
 
 

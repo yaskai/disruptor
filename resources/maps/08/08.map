@@ -2014,13 +2014,49 @@
 }
 // entity 41
 {
+"classname" "nav_node"
+"origin" "412 140 20"
+"flag" "0"
+}
+// entity 42
+{
+"classname" "nav_node"
+"origin" "564 12 20"
+"flag" "0"
+}
+// entity 43
+{
+"classname" "nav_node"
+"origin" "444 -60 20"
+"flag" "0"
+}
+// entity 44
+{
+"classname" "nav_node"
+"origin" "1036 44 20"
+"flag" "0"
+}
+// entity 45
+{
+"classname" "nav_node"
+"origin" "1036 -236 20"
+"flag" "0"
+}
+// entity 46
+{
+"classname" "nav_node"
+"origin" "700 -156 20"
+"flag" "0"
+}
+// entity 47
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 42
+// entity 48
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

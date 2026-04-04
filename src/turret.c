@@ -45,7 +45,7 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 			ct->forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
 		} else {
 			AiSetSchedule(ai, SCHED_IDLE);
-			ct->forward.z = Lerp(ct->forward.z, ct->start_forward.z - 0.2f, dt);
+			ct->forward.z = Lerp(ct->forward.z, ct->start_forward.z - 0.2f, 10*dt);
 			ct->forward = Vector3Normalize(ct->forward);
 
 			if(fabsf(ct->start_forward.z - ct->forward.z) >= 0.19f)	
