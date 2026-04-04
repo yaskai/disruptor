@@ -282,6 +282,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		*/
 	}
 
+	/*
 	handler->ai_tick -= dt;
 	if(handler->ai_tick < 0.0f) {
 		// Do next ai update in ~11 frames
@@ -289,7 +290,9 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 		AiSystemUpdate(handler, sect, dt);
 	}
+	*/
 
+	AiSystemUpdate(handler, sect, dt);
 	ManageProjectiles(handler, sect, dt);
 
 	UpdateGrid(handler);

@@ -16,6 +16,7 @@
 #define AI_INPUT_TAKE_DAMAGE	0x0010
 #define AI_INPUT_LOST_PLAYER	0x0020
 #define AI_INPUT_HEAR_PLAYER	0x0040
+#define AI_INPUT_DEST_REACHED	0x0080
 // *** 
 
 enum ANIM_STATES : u8 {
@@ -29,17 +30,11 @@ enum ANIM_STATES : u8 {
 
 enum SCHED_TYPES : u8 {
 	SCHED_IDLE,
-	SCHED_SENTRY_IDLE,
-	SCHED_PATROL,
-	SCHED_WAIT,
-	SCHED_ATTACK_RANGE,
-	SCHED_FIX_FRIEND,
-	SCHED_SEARCH_FOR_PLAYER,
-	SCHED_SENTRY,
 	SCHED_DEAD,
-	SCHED_CHASE_PLAYER,
-	SCHED_MAINTAINER_ATTACK,
-	SCHED_MAINTAINER_MAKE_NEW
+	SCHED_SENTRY_IDLE,
+	SCHED_SENTRY,
+	SCHED_MAINTAINER_IDLE,
+	SCHED_PATROL,
 };
 
 enum TASK_TYPES : u8 {
@@ -54,6 +49,7 @@ enum TASK_TYPES : u8 {
 	TASK_LOOK_AROUND,
 	TASK_DO_FIX,
 	TASK_THROW_PROJECTILE,
+	TASK_STOP_MOVE,
 };
 
 typedef struct {
@@ -84,6 +80,7 @@ typedef struct {
 } Ai_TargetData;
 
 typedef struct {
+	Vector3 move_dest;
 	NavPath path;
 
 	float timer;
@@ -125,6 +122,5 @@ typedef struct {
 } comp_Ai;
 
 void AiSetSchedule(comp_Ai *ai, u8 sched_id);
-
 
 #endif

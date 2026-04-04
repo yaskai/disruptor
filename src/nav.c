@@ -1,4 +1,6 @@
 #include <float.h>
+#include "raylib.h"
+#include "raymath.h"
 #include "ent.h"
 #include "nav.h"
 #include "geo.h"
@@ -48,7 +50,7 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 
 				NavNode *node = &graph->nodes[closest_node];
 				//ct->position.x = node->position.x;
-				//ct->position.z = node->position.z;
+				//ct->position.y = node->position.y;
 
 				break;
 			}
@@ -202,10 +204,11 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 	Vector3 dir = (Vector3Subtract(point, ct->position));
 	dir.z = 0;
 	dir = Vector3Normalize(dir);
-	ct->forward = dir;
+	//ct->forward = dir;
+	ct->targ_look = dir;
 
 	float angle = atan2f(ct->forward.x, ct->forward.y);
-	ent->model.transform = MatrixRotateZ(angle + 90 * DEG2RAD);
+	//ent->model.transform = MatrixRotateZ(angle + 90 * DEG2RAD);
 	ai->wish_dir = Vector3Add(Vector3Scale(ai->wish_dir, 0.1f), dir); 
 	ai->wish_dir = Vector3Normalize(ai->wish_dir);
  

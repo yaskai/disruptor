@@ -18,4 +18,13 @@ static Ai_SchedDef sched_defs[] = {
 		.fail_sched = SCHED_SENTRY_IDLE,
 		.next_sched = SCHED_SENTRY_IDLE
 	},
+
+	[SCHED_PATROL] = {
+		.tasks = { TASK_MAKE_PATROL_PATH, TASK_FACE_DIR, TASK_GOTO_POINT, TASK_STOP_MOVE, TASK_WAIT_TIME },
+		.num_tasks = 5,
+		.interrupt_mask = (0),
+		.interrupt_sched = SCHED_PATROL,
+		.fail_sched = SCHED_PATROL,
+		.next_sched = SCHED_PATROL
+	},
 };

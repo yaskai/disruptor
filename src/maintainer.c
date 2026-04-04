@@ -1,3 +1,5 @@
+#include "raylib.h"
+#include "raymath.h"
 #include "ent.h"
 #include "ai.h"
 
@@ -40,11 +42,40 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 	}
 	*/
 
-	EntMove(ent, sect, handler, dt);
+	//EntMove(ent, sect, handler, dt);
 	//ent->anim_frame = (ent->anim_frame + 1) % ent->animations[ent->curr_anim].frameCount;
+
+	EntMove(ent, sect, handler, dt);
+
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+
+	if(ai->task_state.task_id == TASK_FACE_DIR) {
+		/*
+		ct->forward = Vector3Subtract(ai->targ_data.position, ct->position);
+		ct->forward.z = 0;
+		ct->forward = Vector3Normalize(ct->forward);
+		*/
+
+		//ct->targ_look = Vector3Subtract(ai->targ_data.position, ct->position);
+		//ct->targ_look.z = 0;
+		//ct->targ_look = Vector3Normalize(ct->targ_look);
+
+	}
+
+	ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
+	ct->forward.z = 0;
+	ct->forward = Vector3Normalize(ct->forward);
+
+	if(Vector3DotProduct(ct->forward, ct->targ_look) < 0.8f) {
+		ai->speed = 0;
+	} else {
+		ai->speed = 50;
+	}
 }
 
 void MaintainerDraw(Entity *ent, float dt) {
+	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
 	if(ai->state == STATE_DEAD) {
@@ -54,7 +85,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 		DrawModelEx(
 			ent->model,
 			pos,
-			Vector3CrossProduct(ent->comp_transform.forward, UP),
+			Vector3CrossProduct(ct->forward, UP),
 			90,
 			Vector3Scale(Vector3One(), 0.1f),
 			LIGHTGRAY 
@@ -63,5 +94,19 @@ void MaintainerDraw(Entity *ent, float dt) {
 	}
 	
 	Vector3 pos = ent->comp_transform.position;
-	DrawModel(ent->model, pos, 0.1f, LIGHTGRAY);
+	float yaw = atan2f(-ct->forward.x, ct->forward.y);
+	//ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(yaw+(90*DEG2RAD)*-1));
+	//DrawModel(ent->model, pos, 0.1f, LIGHTGRAY);
+	DrawModelEx(
+		ent->model,
+		pos,
+		UP,
+		yaw*RAD2DEG,
+		Vector3Scale(Vector3One(), 0.1f),
+		LIGHTGRAY 
+	);
+
+	DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 10)), GREEN);
+	DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->targ_look, 10)), RED);
 }
+

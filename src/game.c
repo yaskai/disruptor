@@ -341,8 +341,7 @@ void GameDraw(Game *game, float dt) {
 				}
 			}
 
-		//DebugDrawNavGraphs(&game->test_section, sphere_model);
-		
+		DebugDrawNavGraphs(&game->test_section, sphere_model);
 
 		EndMode3D();
 

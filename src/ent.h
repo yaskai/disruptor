@@ -323,6 +323,8 @@ void MaintainerDraw(Entity *ent, float dt);
 // **** AI ****
 
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt);
+void AiRunTimers(EntityHandler *handler, float dt);
+
 void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, MapSection *sect, float dt);
 
 void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect);

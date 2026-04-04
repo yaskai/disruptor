@@ -1,12 +1,15 @@
+#include <raylib.h>
+#include <raymath.h>
 #include <stdio.h>
 #include "ai.h"
 #include "ent.h"
 #include "sched_defs.c"
 #include "../include/log_message.h"
 
+#define AI_TICKRATE 11.0f
+float ai_tick = 0.0f;
+
 u8 ExecWaitTime(comp_Ai *ai, float dt) {
-	ai->task_state.timer -= dt;	
-	//ai->task_state.timer--;
 	if(ai->task_state.timer <= 0) {
 		ai->task_state.timer = 0;
 		return 1;
@@ -31,8 +34,6 @@ u8 ExecReloadWeapon(Entity *ent, comp_Ai *ai, float dt) {
 		ai->task_state.is_init = true;
 	}
 
-	ai->task_state.timer -= dt;
-	//ai->task_state.timer--;
 	if(ai->task_state.timer <= 0) {
 		ai->task_state.timer = 0;
 		ent->comp_weapon.ammo = ent->comp_weapon.clip_size;
@@ -54,9 +55,81 @@ u8 ExecLookAtEntity(Entity *ent, EntityHandler *handler, comp_Ai *ai) {
 	return 0;
 }
 
+u8 ExecFaceDir(Entity *ent, Vector3 dir) {
+	//dir.z = 0;
+	//dir = Vector3Normalize(dir);
+
+	comp_Transform *ct = &ent->comp_transform;
+	if(Vector3DotProduct(ct->forward, dir) >= 0.95f)
+		return 1;
+	
+	return 0;
+}
+
+#define NODE_REACH_RADIUS (32.0f*32.0f)
+u8 ExecGotoPoint(Entity *ent, MapSection *sect) {		
+	//Message("ExecGotoPoint()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;
+	comp_Transform *ct = &ent->comp_transform;
+	NavPath *path = &ai->task_state.path;
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+
+	Vector3 to_targ = Vector3Subtract(ai->targ_data.position, ent->comp_transform.position);
+	if(Vector3LengthSqr(to_targ) <= NODE_REACH_RADIUS) {
+		path->curr++;
+	}
+
+	if(!AiMoveToNode(ent, graph, path->curr)) {
+		return 1;
+	}
+
+	return 0;
+}
+
+u8 ExecStopmove(Entity *ent) {
+	comp_Transform *ct = &ent->comp_transform;
+	if(Vector3Length(ct->velocity) < EPSILON)
+		return 1;
+
+	return 0;
+}
+
+u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
+	//Message("ExecMakePatrolPath()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;
+
+	if(ai->navgraph_id < 0) {
+		AiSetSchedule(ai, sched_defs[ai->sched_state.sched_id].fail_sched);
+		return 0;
+	}
+
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+
+	//printf("curr_navnode_id: %d\n", ai->curr_navnode_id);
+
+	if(MakeNavPath(ent, graph, GetRandomValue(0, graph->node_count-1))) {
+		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count]].position;
+		ai->task_state.move_dest = point;
+		//Message("success", ANSI_GREEN);
+		return 1;
+	}
+
+
+	return 0;
+}
+
 // Ai tick, not every frame,
 // has it's own tick timer (every 11 frames)
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
+	AiRunTimers(handler, dt);
+
+	ai_tick -= dt;
+	if(ai_tick > 0) {
+		return;
+	}
+
 	Entity *player = &handler->ents[handler->player_id];
 	player->comp_ai.navgraph_id = -1;
 	for(u16 j = 0; j < sect->navgraph_count; j++) {
@@ -78,6 +151,18 @@ void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 
 		comp_Ai *ai = &ent->comp_ai;
 		AiComponentUpdate(ent, handler, ai, sect, dt);
+	}
+
+	ai_tick = (AI_TICKRATE*dt);
+}
+
+void AiRunTimers(EntityHandler *handler, float dt) {
+	for(u16 i = 0; i < handler->count; i++) {
+		comp_Ai *ai = &handler->ents[i].comp_ai;
+		if(!ai->component_valid) 
+			continue;
+
+		ai->task_state.timer -= dt;
 	}
 }
 
@@ -158,8 +243,12 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		}
 	}
 
-	if(!prev_seen_player && (ai->input_mask & AI_INPUT_LOST_PLAYER))
-		ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
+	if(prev_seen_player && !(ai->input_mask & AI_INPUT_LOST_PLAYER))
+		ai->input_mask |= AI_INPUT_LOST_PLAYER;
+
+	ai->input_mask &= ~AI_INPUT_DEST_REACHED;
+	if(Vector3Distance(ai->task_state.move_dest, ent->comp_transform.position) <= 1.0f)
+		ai->input_mask |= AI_INPUT_DEST_REACHED;
 }
 
 // Execute ai schedule
@@ -188,10 +277,13 @@ void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai
 }
 
 u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, u8 task_id, float dt) {
+	comp_Transform *ct = &ent->comp_transform;
+
 	u8 done = 1;
 
 	switch(task_id) {
 		case TASK_GOTO_POINT:
+			done = ExecGotoPoint(ent, sect);
 			break;
 
 		case TASK_FIRE_WEAPON:
@@ -207,12 +299,15 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 			break;
 
 		case TASK_FACE_DIR:
+			//done = ExecFaceDir(ent, Vector3Normalize(Vector3Subtract(ai->targ_data.position, ct->position)));
+			done = ExecFaceDir(ent, ct->targ_look);
 			break;
 
 		case TASK_FIND_POINT:
 			break;
 
 		case TASK_MAKE_PATROL_PATH:
+			done = ExecMakePatrolPath(ent, sect);
 			break;
 
 		case TASK_LOOK_AT_ENTITY:
@@ -226,6 +321,10 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 			break;
 
 		case TASK_THROW_PROJECTILE:
+			break;
+
+		case TASK_STOP_MOVE:
+			done = ExecStopmove(ent);
 			break;
 	}
 

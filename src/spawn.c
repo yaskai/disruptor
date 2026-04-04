@@ -154,7 +154,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 				.damage = 7,
 				.clip_size = 100,
 				.ammo = 100,
-				.reload_time_amnt = 0.5f,
+				.reload_time_amnt = 7.5f,
 			};
 
 			ent.comp_health.amount = 100;
@@ -187,7 +187,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
 			//ent.comp_ai.task_data.timer = 0.1f;
 
-			ent.comp_ai.sched_state.sched_id = SCHED_MAINTAINER_ATTACK;
+			ent.comp_ai.sched_state.sched_id = SCHED_PATROL;
 			//ent.comp_ai.curr_schedule = SCHED_IDLE;
 			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
 
@@ -237,6 +237,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	};
 
 	ent.comp_transform.start_forward = ent.comp_transform.forward;
+	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
 	ent.flags = (ENT_ACTIVE | ENT_COLLIDERS);
 
 	ent.comp_ai.navgraph_id = -1;
