@@ -249,6 +249,25 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	if(AI_LOG) Message("ExecMakeChasePath()", ANSI_BLUE);
 
 	comp_Ai *ai = &ent->comp_ai;
+	comp_Transform *ct = &ent->comp_transform;
+
+	Bsp_Data *bsp = &sect->bsp_data;
+	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+
+	Vector3 tr_start = ct->position;
+	tr_start.z += 24;
+
+	Vector3 tr_dest = ai->targ_data.known_position;
+	tr_dest.z += 24;
+
+	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
+	if(tr.fraction >= 1.0f) {
+		ai->task_state.move_dest = ai->targ_data.known_position;
+		ai->task_state.use_path = false;
+		return 1;
+	} 
 
 	if(ai->navgraph_id < 0) {
 		AiSetSchedule(ai, sched_defs[ai->sched_state.sched_id].fail_sched);

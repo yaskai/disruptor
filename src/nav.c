@@ -18,11 +18,6 @@ int FindClosestNavNode(Vector3 ent_position, MapSection *sect) {
 		if(dist > closest_dist) 
 			continue;
 
-		/*
-		if(!CheckCollisionSpheres(ent_position, 32, node->position, 32))
-			continue;
-		*/
-
 		closest_dist = dist;
 		id = node->id;
 

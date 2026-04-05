@@ -39,7 +39,7 @@ static Ai_SchedDef sched_defs[] = {
 
 	[SCHED_CHASE_PLAYER] = {
 		//.tasks = { TASK_FIND_POS, TASK_GOTO_POS, TASK_STOP_MOVE }, 
-		.tasks = { TASK_MAKE_CHASE_PATH, TASK_GOTO_POINT, TASK_STOP_MOVE },
+		.tasks = { TASK_MAKE_CHASE_PATH, TASK_GOTO_POS, TASK_STOP_MOVE },
 		.num_tasks = 3,
 		.interrupt_mask = ( AI_INPUT_MEELEE_RANGE ),
 		.interrupt_sched = SCHED_MAINTAINER_ATTACK,
