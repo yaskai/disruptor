@@ -181,15 +181,10 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.25f;
-			//ent.comp_ai.curr_schedule = SCHED_CHASE_PLAYER;
-			//ent.comp_ai.curr_schedule = SCHED_PATROL;
-			//ent.comp_ai.task_data.task_id = TASK_MAKE_PATROL_PATH;
-			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
-			//ent.comp_ai.task_data.timer = 0.1f;
+			ent.comp_ai.hear_distance = 30.0f;
 
-			ent.comp_ai.sched_state.sched_id = SCHED_PATROL;
-			//ent.comp_ai.curr_schedule = SCHED_IDLE;
-			//ent.comp_ai.task_data.task_id = TASK_WAIT_TIME;
+			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
+			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);
 
 			ent.comp_health.amount = 10;
 			ent.comp_health.on_hit = 2;
@@ -243,6 +238,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	ent.comp_ai.navgraph_id = -1;
 	ent.comp_ai.speed = 50;
 	ent.comp_ai.wish_dir = Vector3Zero();
+	ent.comp_ai.targ_data.ent_id = -1;
 
 	ent.cell_id = -1;
 

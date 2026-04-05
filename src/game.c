@@ -297,6 +297,8 @@ void GameDraw(Game *game, float dt) {
 		ClearBackground(ColorAlpha(BLACK, clear_alpha));
 
 		BeginMode3D(game->camera_debug);
+			DrawMap(&game->test_section, game->camera.position);
+			PlayerDisplayDebugInfo(&game->ent_handler.ents[game->ent_handler.player_id]);
 
 			if(IsKeyPressed(KEY_U)) debug_draw_flags ^= DEBUG_DRAW_FULL_MODEL;
 			//if(debug_draw_flags & DEBUG_DRAW_FULL_MODEL) DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));

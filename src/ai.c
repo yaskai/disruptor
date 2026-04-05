@@ -9,6 +9,10 @@
 #define AI_TICKRATE 11.0f
 float ai_tick = 0.0f;
 
+#define MEELEE_RANGE (48.0f*48.0f)
+
+const bool AI_LOG = false;
+
 u8 ExecWaitTime(comp_Ai *ai, float dt) {
 	if(ai->task_state.timer <= 0) {
 		ai->task_state.timer = 0;
@@ -19,8 +23,7 @@ u8 ExecWaitTime(comp_Ai *ai, float dt) {
 }
 
 u8 ExecFireWeapon(Entity *ent, comp_Ai *ai) {
-	//Message("ExecFireWeapon()", ANSI_BLUE);
-	//printf("ammo: %d\n", ent->comp_weapon.ammo);
+	if(AI_LOG) Message("ExecFireWeapon()", ANSI_BLUE);
 
 	if(ent->comp_weapon.ammo <= 0)
 		return 1;
@@ -29,6 +32,8 @@ u8 ExecFireWeapon(Entity *ent, comp_Ai *ai) {
 }
 
 u8 ExecReloadWeapon(Entity *ent, comp_Ai *ai, float dt) {
+	if(AI_LOG) Message("ExecReloadWeapon()", ANSI_BLUE);
+
 	if(ai->task_state.timer <= 0 && !ai->task_state.is_init) {
 		ai->task_state.timer = ent->comp_weapon.reload_time_amnt;
 		ai->task_state.is_init = true;
@@ -45,6 +50,9 @@ u8 ExecReloadWeapon(Entity *ent, comp_Ai *ai, float dt) {
 
 u8 ExecLookAtEntity(Entity *ent, EntityHandler *handler, comp_Ai *ai) {
 	// Actual rotation happens in per-frame update
+	if(ai->targ_data.ent_id < 0)
+		return 1;
+
 	Entity *targ = &handler->ents[ai->targ_data.ent_id];
 	comp_Transform *ct = &ent->comp_transform;
 
@@ -68,7 +76,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 
 #define NODE_REACH_RADIUS (32.0f*32.0f)
 u8 ExecGotoPoint(Entity *ent, MapSection *sect) {		
-	//Message("ExecGotoPoint()", ANSI_BLUE);
+	if(AI_LOG) Message("ExecGotoPoint()", ANSI_BLUE);
 
 	comp_Ai *ai = &ent->comp_ai;
 	comp_Transform *ct = &ent->comp_transform;
@@ -88,15 +96,23 @@ u8 ExecGotoPoint(Entity *ent, MapSection *sect) {
 }
 
 u8 ExecStopmove(Entity *ent) {
+	if(AI_LOG) Message("ExecStopmove()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;
 	comp_Transform *ct = &ent->comp_transform;
-	if(Vector3Length(ct->velocity) < EPSILON)
+
+	if(Vector3Length(ct->velocity) < 1.0f) {
+		ai->wish_dir = Vector3Zero();
+		ct->velocity.x = 0;
+		ct->velocity.y = 0;
 		return 1;
+	}
 
 	return 0;
 }
 
 u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
-	//Message("ExecMakePatrolPath()", ANSI_BLUE);
+	if(AI_LOG) Message("ExecMakePatrolPath()", ANSI_BLUE);
 
 	comp_Ai *ai = &ent->comp_ai;
 
@@ -123,9 +139,56 @@ u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
 u8 ExecFindPoint(Entity *ent, MapSection *sect) {
 	comp_Ai *ai = &ent->comp_ai;
 
-	Vector3 dest = ai->targ_data.position;
+	if(ai->navgraph_id < 0) {
+		return 1;
+	}
+
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+	i16 node = FindClosestNavNodeInGraph(ai->targ_data.known_position, graph);
+
+	if(node < 0) {
+		return 1;
+	}
+
+	MakeNavPath(ent, graph, node);
+
+	return 1;
+}
+
+u8 ExecGotoPos(Entity *ent) {
+	if(AI_LOG) Message("ExecGotoPos()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;
+	comp_Transform *ct = &ent->comp_transform;
+
+	Vector3 to_dest = Vector3Subtract(ai->targ_data.known_position, ct->position);
+	if(Vector3LengthSqr(to_dest) < MEELEE_RANGE) {
+		return 1;
+	}
+
+	ai->wish_dir = to_dest;
+	ai->wish_dir.z = 0;
+	ai->wish_dir = Vector3Normalize(ai->wish_dir);
+	ct->targ_look = ai->wish_dir; 
 
 	return 0;
+}
+
+u8 ExecMeeleeAttack(Entity *ent, EntityHandler *handler) {
+	if(AI_LOG) Message("ExecMeeleeAttack()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;	
+	comp_Transform *ct = &ent->comp_transform;
+
+	if(ai->task_state.timer > 0)
+		return 0;
+
+	Entity *victim = &handler->ents[ai->targ_data.ent_id];
+
+	if(Vector3DistanceSqr(ct->position, victim->comp_transform.position) <= MEELEE_RANGE)
+		OnHitEnt(victim, 10);
+
+	return 1;
 }
 
 // Ai tick, not every frame,
@@ -230,33 +293,42 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		if(!tr.hit && ent_tr.hit_ent == handler->player_id) {
 			ai->input_mask |= AI_INPUT_SEE_PLAYER;
 			ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
+
+			// * NOTE: 
+			// Remove later, might want to prioritize other entities as targets
+			//ai->targ_data.ent_id = handler->player_id;
 		}
 	}
 
 	if(ai->targ_data.ent_id == handler->player_id && (ai->input_mask & AI_INPUT_SEE_PLAYER)) {
 		ai->targ_data.known_position = player_ent->comp_transform.position;
-		// * NOTE: 
-		// Remove later, might want to prioritize other entities as targets
-		ai->targ_data.ent_id = handler->player_id;
 	}
 	// ***
 
 	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
 	bool in_hearing_range = (d_to_player < ai->hear_distance*ai->hear_distance);
-	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f) {
+	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f && ai->targ_data.ent_id == handler->player_id) {
 		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
 
 		if(!(ai->input_mask & AI_INPUT_LOST_PLAYER)) {
 			ai->targ_data.known_position = player_ent->comp_transform.position;
+			// *
+			ai->targ_data.ent_id = handler->player_id;
 		}
 	}
 
 	if(prev_seen_player && !(ai->input_mask & AI_INPUT_LOST_PLAYER))
 		ai->input_mask |= AI_INPUT_LOST_PLAYER;
+	
+	if(ai->targ_data.ent_id < 0)
+		return;
 
-	ai->input_mask &= ~AI_INPUT_DEST_REACHED;
-	if(Vector3Distance(ai->task_state.move_dest, ent->comp_transform.position) <= 1.0f)
-		ai->input_mask |= AI_INPUT_DEST_REACHED;
+	ai->input_mask &= ~AI_INPUT_MEELEE_RANGE;
+	Entity *targ_ent = &handler->ents[ai->targ_data.ent_id];
+	
+	if(Vector3DistanceSqr(targ_ent->comp_transform.position, ent->comp_transform.position) <= MEELEE_RANGE) {	
+		ai->input_mask |= AI_INPUT_MEELEE_RANGE;
+	}
 }
 
 // Execute ai schedule
@@ -307,11 +379,11 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 			break;
 
 		case TASK_FACE_DIR:
-			//done = ExecFaceDir(ent, Vector3Normalize(Vector3Subtract(ai->targ_data.position, ct->position)));
 			done = ExecFaceDir(ent, ct->targ_look);
 			break;
 
 		case TASK_FIND_POINT:
+			done = ExecFindPoint(ent, sect);
 			break;
 
 		case TASK_MAKE_PATROL_PATH:
@@ -333,6 +405,14 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 
 		case TASK_STOP_MOVE:
 			done = ExecStopmove(ent);
+			break;
+
+		case TASK_GOTO_POS:
+			done = ExecGotoPos(ent);
+			break;
+
+		case TASK_MEELEE_ATTACK:
+			done = ExecMeeleeAttack(ent, handler);
 			break;
 	}
 
@@ -363,5 +443,4 @@ void DoFix(Entity *ent) {
 			break;
 	}
 }
-
 

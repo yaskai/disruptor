@@ -902,7 +902,7 @@ void BuildNavGraph(MapSection *sect) {
 	SubdivideNavGraph(sect, navgraph);
 }
 
-#define MAX_EDGE_LENGTH (1024.0f*1024.0f)
+#define MAX_EDGE_LENGTH (2048.0f*2048.0f)
 void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 	MessageDiag("BuildNavEdges()", NULL, ANSI_BLUE);
 
@@ -927,14 +927,22 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 			// doing this in case I want to integrate actual level geometry later 
 			Vector3 v = Vector3Subtract(node_A->position, node_B->position);
 			float length = Vector3LengthSqr(v);	
-
-			//Ray ray = (Ray) { .position = node_A->position, .direction = Vector3Normalize(v) };
-			//BvhTraceData tr = TraceDataEmpty();
-			//BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, FLT_MAX);
 			
 			Bsp_TraceData tr = Bsp_TraceDataEmpty();
-			if(!(Bsp_RecursiveTraceEx(&sect->bsp[0], 0, 0, 1, node_A->position, node_B->position, &tr)))
+			Bsp_RecursiveTraceEx(&sect->bsp[1], sect->bsp[1].first_node, 0, 1, node_B->position, node_A->position, &tr);
+
+			if(tr.fraction < 1.0f) {
 				continue;
+			}
+
+			/*
+			BvhTraceData tr = TraceDataEmpty();
+			Ray ray = (Ray) { .position = node_B->position, .direction = Vector3Normalize(v) };
+			BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, FLT_MAX);
+
+			if(tr.hit)
+				continue;
+			*/
 
 			// Don't build edges if line between nodes are obstructed by level geometry
 			//if(tr.hit) continue;
@@ -1142,31 +1150,6 @@ bool IsNodeInGraph(NavGraph *graph, NavNode *node) {
 	}
 
 	return false;
-}
-
-int FindClosestNavNodeInGraph(Vector3 position, NavGraph *graph) {
-	int id = -1;
-
-	float closest_dist = FLT_MAX;
-
-	for(u16 i = 0; i < graph->node_count; i++) {
-		NavNode *node = &graph->nodes[i];
-
-		float dist = Vector3DistanceSqr(node->position, position);	
-		if(dist > closest_dist) 
-			continue;
-
-		if(!CheckCollisionSpheres(position, 32, node->position, 32))
-			continue;
-
-		closest_dist = dist;
-		id = i;
-
-		if(dist < 4*4)
-			break;
-	}
-
-	return id;
 }
 
 void DebugDrawNavGraphs(MapSection *sect, Model model) {

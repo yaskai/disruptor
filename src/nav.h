@@ -4,7 +4,7 @@
 #ifndef NAV_H_
 #define NAV_H_
 
-#define MAX_EDGES_PER_NODE	32
+#define MAX_EDGES_PER_NODE	64
 typedef struct {
 	Vector3 position;
 

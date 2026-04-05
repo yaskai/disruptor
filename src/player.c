@@ -266,6 +266,7 @@ void PlayerDie(Entity *player) {
 
 void PlayerDisplayDebugInfo(Entity *player) {
 	DrawBoundingBox(player->comp_transform.bounds, RED);
+	/*
 	DrawSphere(player->comp_transform.position, 1, RED);
 
 	//DrawCubeV(player->comp_transform.position, Vector3Scale(BODY_VOLUME_MEDIUM, 1), LIGHTGRAY);
@@ -291,13 +292,6 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	} else {
 		DrawRay(view_ray, SKYBLUE);
 	}
-
-	/*
-	if(tr.hit) {
-		Tri *tri = &ptr_sect->bvh[0].tris.arr[tr.tri_id];
-		DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(SKYBLUE, 0.25f));
-		DrawTriangle3D(tri->vertices[2], tri->vertices[1], tri->vertices[0], ColorAlpha(SKYBLUE, 0.25f));
-	}
 	*/
 
 	// Draw box points
@@ -317,11 +311,13 @@ void PlayerDisplayDebugInfo(Entity *player) {
 	DrawRay(rayZ, SKYBLUE);
 	*/
 
+	/*
 	Ray vel_ray = (Ray) { .position = player->comp_transform.position, .direction = Vector3Normalize(debug_vel_full) };
 	DrawRay(vel_ray, RAYWHITE);
 
 	Ray clip_ray = (Ray) { .position = player->comp_transform.position, .direction = Vector3Normalize(debug_vel_clipped) };
 	DrawRay(clip_ray, GREEN);
+	*/
 }
 
 // Player movement loop

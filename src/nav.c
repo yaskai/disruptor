@@ -18,13 +18,40 @@ int FindClosestNavNode(Vector3 ent_position, MapSection *sect) {
 		if(dist > closest_dist) 
 			continue;
 
+		/*
 		if(!CheckCollisionSpheres(ent_position, 32, node->position, 32))
 			continue;
+		*/
 
 		closest_dist = dist;
 		id = node->id;
 
 		if(dist < BREAK_RADIUS)
+			break;
+	}
+
+	return id;
+}
+
+int FindClosestNavNodeInGraph(Vector3 position, NavGraph *graph) {
+	int id = -1;
+
+	float closest_dist = FLT_MAX;
+
+	for(u16 i = 0; i < graph->node_count; i++) {
+		NavNode *node = &graph->nodes[i];
+
+		float dist = Vector3DistanceSqr(node->position, position);	
+		if(dist > closest_dist) 
+			continue;
+
+		if(!CheckCollisionSpheres(position, 32, node->position, 32))
+			continue;
+
+		closest_dist = dist;
+		id = i;
+
+		if(dist < 4*4)
 			break;
 	}
 
