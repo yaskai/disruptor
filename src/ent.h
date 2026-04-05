@@ -342,19 +342,9 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect);
 int FindClosestNavNodeInGraph(Vector3 position, NavGraph *graph);
 bool MakeNavPath(Entity *ent, NavGraph *graph, i16 target_id);
 
+int FindNavNodeTo(Vector3 pos_A, Vector3 pos_B, NavGraph *graph, MapSection *sect);
+
 bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id);
-void AiPatrol(Entity *ent, MapSection *sect, float dt);
-
-void AiFixFriendSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-
-void AiSentrySchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-void AiSentryDisruptionSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-
-void AiChasePlayerSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-
-void AiMaintainerAttackSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-void AiMaintainerMakeNewSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-
 // ----------------------------------------------------------------------------------------------------------------------------
 // **** Bullets ****
 

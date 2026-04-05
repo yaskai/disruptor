@@ -25,9 +25,15 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 
 	MaintainerThink(ent, handler, dt);
 
-	ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
-	ct->forward.z = 0;
-	ct->forward = Vector3Normalize(ct->forward);
+	if(ai->state != STATE_MOVE) {
+		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
+		ct->forward.z = 0;
+		ct->forward = Vector3Normalize(ct->forward);
+	} else {
+		ct->forward = Vector3Lerp(ct->forward, Vector3Normalize(ct->velocity), 10*dt);
+		ct->forward.z = 0;
+		ct->forward = Vector3Normalize(ct->forward);
+	}
 
 	if(ai->task_state.task_id != TASK_FACE_DIR) {
 		if(Vector3DotProduct(ct->forward, ct->targ_look) < 0.8f) {
@@ -71,7 +77,8 @@ void MaintainerDraw(Entity *ent, float dt) {
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 10)), GREEN);
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->targ_look, 10)), RED);
 
-	DrawSphere(ai->targ_data.position, 10, RED);
-	DrawSphere(ai->targ_data.known_position, 10, ColorAlpha(RED, 0.5f));
+	//DrawSphere(ai->targ_data.position, 2, PURPLE);
+	//DrawSphere(ai->targ_data.known_position, 2, ColorAlpha(PURPLE, 0.5f));
+	DrawSphere(ai->task_state.move_dest, 5, PURPLE);
 }
 

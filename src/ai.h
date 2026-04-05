@@ -17,6 +17,7 @@
 #define AI_INPUT_LOST_PLAYER	0x0020
 #define AI_INPUT_HEAR_PLAYER	0x0040
 #define AI_INPUT_MEELEE_RANGE	0x0080
+#define AI_INPUT_DEST_REACHED	0x0100
 // *** 
 
 enum ANIM_STATES : u8 {
@@ -53,6 +54,7 @@ enum TASK_TYPES : u8 {
 	TASK_THROW_PROJECTILE,
 	TASK_STOP_MOVE,
 	TASK_GOTO_POS,
+	TASK_FIND_POS,
 	TASK_MEELEE_ATTACK,
 };
 
@@ -92,6 +94,8 @@ typedef struct {
 	u8 task_id;
 
 	bool is_init;
+	bool use_path;
+
 	bool complete;
 
 } Ai_TaskState;

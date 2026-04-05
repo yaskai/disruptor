@@ -266,6 +266,13 @@ void PlayerDie(Entity *player) {
 
 void PlayerDisplayDebugInfo(Entity *player) {
 	DrawBoundingBox(player->comp_transform.bounds, RED);
+	if(player->comp_ai.curr_navnode_id > -1 && player->comp_ai.navgraph_id > -1) {
+		NavGraph *graph = &ptr_sect->navgraphs[player->comp_ai.navgraph_id];
+		NavNode *node = &graph->nodes[player->comp_ai.curr_navnode_id];
+
+		DrawSphere(node->position, 10, WHITE);
+	}
+
 	/*
 	DrawSphere(player->comp_transform.position, 1, RED);
 

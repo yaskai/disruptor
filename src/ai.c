@@ -1,6 +1,7 @@
-#include <raylib.h>
-#include <raymath.h>
+#include <float.h>
 #include <stdio.h>
+#include "raylib.h"
+#include "raymath.h"
 #include "ai.h"
 #include "ent.h"
 #include "sched_defs.c"
@@ -95,7 +96,7 @@ u8 ExecGotoPoint(Entity *ent, MapSection *sect) {
 	return 0;
 }
 
-u8 ExecStopmove(Entity *ent) {
+u8 ExecStopMove(Entity *ent) {
 	if(AI_LOG) Message("ExecStopmove()", ANSI_BLUE);
 
 	comp_Ai *ai = &ent->comp_ai;
@@ -155,13 +156,16 @@ u8 ExecFindPoint(Entity *ent, MapSection *sect) {
 	return 1;
 }
 
-u8 ExecGotoPos(Entity *ent) {
+u8 ExecGotoPos(Entity *ent, MapSection *sect) {
 	if(AI_LOG) Message("ExecGotoPos()", ANSI_BLUE);
 
 	comp_Ai *ai = &ent->comp_ai;
 	comp_Transform *ct = &ent->comp_transform;
 
-	Vector3 to_dest = Vector3Subtract(ai->targ_data.known_position, ct->position);
+	if(ai->task_state.use_path)
+		return ExecGotoPoint(ent, sect);
+
+	Vector3 to_dest = Vector3Subtract(ai->task_state.move_dest, ct->position);
 	if(Vector3LengthSqr(to_dest) < MEELEE_RANGE) {
 		return 1;
 	}
@@ -172,6 +176,44 @@ u8 ExecGotoPos(Entity *ent) {
 	ct->targ_look = ai->wish_dir; 
 
 	return 0;
+}
+
+u8 ExecFindPos(Entity *ent, MapSection *sect) {
+	comp_Ai *ai = &ent->comp_ai;
+	comp_Transform *ct = &ent->comp_transform;
+
+	Bsp_Data *bsp = &sect->bsp_data;
+	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+
+	Vector3 tr_start = ct->position;
+	tr_start.z += 24;
+
+	Vector3 tr_dest = ai->targ_data.known_position;
+	tr_dest.z += 24;
+
+	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
+	if(tr.fraction >= 1.0f) {
+		ai->task_state.move_dest = ai->targ_data.known_position;
+		ai->task_state.use_path = false;
+		return 1;
+	} 
+		
+	if(ai->navgraph_id < 0) {
+		return 1;
+	}
+
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+	i16 node = FindClosestNavNodeInGraph(ai->targ_data.known_position, graph);
+
+	if(node < 0)
+		return 1;
+
+	MakeNavPath(ent, graph, node);
+	ai->task_state.move_dest = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.curr]].position;
+
+	return 1;
 }
 
 u8 ExecMeeleeAttack(Entity *ent, EntityHandler *handler) {
@@ -203,14 +245,18 @@ void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 
 	Entity *player = &handler->ents[handler->player_id];
 	player->comp_ai.navgraph_id = -1;
+	float best = FLT_MAX;
 	for(u16 j = 0; j < sect->navgraph_count; j++) {
 		NavGraph *graph = &sect->navgraphs[j];
 
 		int closest_node = FindClosestNavNodeInGraph(player->comp_transform.position, graph);
 		if(closest_node > -1) {
-			player->comp_ai.navgraph_id = j;
-			player->comp_ai.curr_navnode_id = closest_node;
-			break;
+			float d = Vector3DistanceSqr(graph->nodes[closest_node].position, player->comp_transform.position); 
+			if(d < best) {
+				player->comp_ai.navgraph_id = j;
+				player->comp_ai.curr_navnode_id = closest_node;
+				best = d;
+			}
 		}
 	}
 
@@ -241,6 +287,21 @@ void AiRunTimers(EntityHandler *handler, float dt) {
 void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, MapSection *sect, float dt) {
 	if(ent->comp_ai.state == STATE_DEAD)
 		return;
+
+	float best = FLT_MAX;
+	for(int i = 0; i < sect->navgraph_count; i++) {
+		NavGraph *graph = &sect->navgraphs[i];
+
+		int closest_node = FindClosestNavNodeInGraph(ent->comp_transform.position, graph);
+		if(closest_node > -1) {
+			float d = Vector3DistanceSqr(graph->nodes[closest_node].position, ent->comp_transform.position); 
+			if(d < best) {
+				ent->comp_ai.navgraph_id = i;
+				ent->comp_ai.curr_navnode_id = closest_node;
+				best = d;
+			}
+		}
+	}
 
 	// Update input mask
 	AiCheckInputs(ent, handler, sect);
@@ -301,6 +362,23 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	}
 
 	if(ai->targ_data.ent_id == handler->player_id && (ai->input_mask & AI_INPUT_SEE_PLAYER)) {
+		/*
+		Bsp_Data *bsp = &sect->bsp_data;
+		Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
+
+		Bsp_TraceData targ_tr = Bsp_TraceDataEmpty();
+
+		Vector3 tr_start = ct->position;
+		tr_start.z += 24;
+
+		Vector3 tr_dest = ai->targ_data.known_position;
+		tr_dest.z += 24;
+
+		Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &targ_tr);
+
+		if(targ_tr.fraction >= 1.0f)
+			ai->targ_data.known_position = player_ent->comp_transform.position;
+		*/
 		ai->targ_data.known_position = player_ent->comp_transform.position;
 	}
 	// ***
@@ -311,7 +389,7 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
 
 		if(!(ai->input_mask & AI_INPUT_LOST_PLAYER)) {
-			ai->targ_data.known_position = player_ent->comp_transform.position;
+			//ai->targ_data.known_position = player_ent->comp_transform.position;
 			// *
 			ai->targ_data.ent_id = handler->player_id;
 		}
@@ -319,6 +397,10 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 	if(prev_seen_player && !(ai->input_mask & AI_INPUT_LOST_PLAYER))
 		ai->input_mask |= AI_INPUT_LOST_PLAYER;
+
+	if(Vector3DistanceSqr(ai->task_state.move_dest, ent->comp_transform.position) <= 16.0f) {	
+		ai->input_mask |= AI_INPUT_DEST_REACHED;
+	}
 	
 	if(ai->targ_data.ent_id < 0)
 		return;
@@ -404,11 +486,15 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 			break;
 
 		case TASK_STOP_MOVE:
-			done = ExecStopmove(ent);
+			done = ExecStopMove(ent);
 			break;
 
 		case TASK_GOTO_POS:
-			done = ExecGotoPos(ent);
+			done = ExecGotoPos(ent, sect);
+			break;
+
+		case TASK_FIND_POS:
+			done = ExecFindPos(ent, sect);
 			break;
 
 		case TASK_MEELEE_ATTACK:

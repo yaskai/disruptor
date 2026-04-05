@@ -45,14 +45,8 @@ int FindClosestNavNodeInGraph(Vector3 position, NavGraph *graph) {
 		if(dist > closest_dist) 
 			continue;
 
-		if(!CheckCollisionSpheres(position, 32, node->position, 32))
-			continue;
-
 		closest_dist = dist;
 		id = i;
-
-		if(dist < 4*4)
-			break;
 	}
 
 	return id;
@@ -66,20 +60,25 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 		if(!ai->component_valid) continue;
 
 		comp_Transform *ct = &ent->comp_transform;
+		float best = FLT_MAX;
 
 		for(u16 j = 0; j < sect->navgraph_count; j++) {
 			NavGraph *graph = &sect->navgraphs[j];
 
 			int closest_node = FindClosestNavNodeInGraph(ct->position, graph);
 			if(closest_node > -1) {
-				ai->navgraph_id = j;
-				ai->curr_navnode_id = closest_node;
+				float d = Vector3DistanceSqr(ct->position, graph->nodes[j].position);
 
-				NavNode *node = &graph->nodes[closest_node];
+				if(d < best) {
+					ai->navgraph_id = j;
+					ai->curr_navnode_id = closest_node;
+
+					NavNode *node = &graph->nodes[closest_node];
+
+					best = d;
+				}
 				//ct->position.x = node->position.x;
 				//ct->position.y = node->position.y;
-
-				break;
 			}
 		}
 	}
@@ -198,9 +197,11 @@ bool MakeNavPath(Entity *ent, NavGraph *graph, i16 target_id) {
 	
 	path->curr = 0;
 	ai->task_state.is_init = true;
+	ai->task_state.use_path = true;
 	ai->curr_navnode_id = path->nodes[0];
 
 	dest_found = true;
+
 	return dest_found;
 }
 
@@ -244,5 +245,41 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 	ai->state = STATE_MOVE;
 
 	return true;
+}
+
+int FindNavNodeTo(Vector3 pos_A, Vector3 pos_B, NavGraph *graph, MapSection *sect) {
+	Bsp_Data *bsp = &sect->bsp_data;
+	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
+
+	pos_A.z += 24;
+	pos_B.z += 24;
+
+	int id = -1;
+
+	int node_A = FindClosestNavNodeInGraph(pos_A, graph); 
+	int node_B = FindClosestNavNodeInGraph(pos_B, graph);
+
+	if(node_A < 0 || node_B < 0)
+		return id;
+
+	for(u16 i = 0; i < graph->node_count; i++) {
+		if(i == node_A || i == node_B)
+			continue;
+
+		NavNode *node = &graph->nodes[i];
+
+		Bsp_TraceData tr_A = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, pos_A, node->position, &tr_A);
+
+		Bsp_TraceData tr_B = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, pos_B, node->position, &tr_B);
+
+		if(tr_A.fraction + tr_B.fraction >= 2.0f) {
+			id = i;
+			break;
+		}
+	}
+
+	return id;
 }
 

@@ -180,7 +180,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
 
 			ent.comp_ai.component_valid = true;
-			ent.comp_ai.sight_cone = 0.25f;
+			ent.comp_ai.sight_cone = 0.5f;
 			ent.comp_ai.hear_distance = 30.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
