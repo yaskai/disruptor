@@ -84,10 +84,22 @@ u8 ExecGotoPoint(Entity *ent, MapSection *sect) {
 	NavPath *path = &ai->task_state.path;
 	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
 
-	Vector3 to_targ = Vector3Subtract(ai->targ_data.position, ent->comp_transform.position);
-	if(Vector3LengthSqr(to_targ) <= NODE_REACH_RADIUS) {
-		path->curr++;
+	if(path->curr >= path->count) {
+		return 1;
 	}
+
+	Vector3 node_pos = graph->nodes[path->nodes[path->curr]].position;
+	Vector3 to_node = Vector3Subtract(node_pos, ct->position);
+	if(Vector3LengthSqr(to_node) <= NODE_REACH_RADIUS) {
+		if(path->curr++ >= path->count)
+			return 1;
+	}
+
+	//Vector3 to_targ = Vector3Subtract(ai->targ_data.known_position, ent->comp_transform.position);
+	//Vector3 to_targ = Vector3Subtract(ai->task_state.move_dest, ent->comp_transform.position);
+	//if(Vector3LengthSqr(to_targ) <= NODE_REACH_RADIUS) {
+		//path->curr++;
+	//}
 
 	if(!AiMoveToNode(ent, graph, path->curr)) {
 		return 1;
@@ -127,7 +139,7 @@ u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
 	//printf("curr_navnode_id: %d\n", ai->curr_navnode_id);
 
 	if(MakeNavPath(ent, graph, GetRandomValue(0, graph->node_count-1))) {
-		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count]].position;
+		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
 		ai->task_state.move_dest = point;
 		//Message("success", ANSI_GREEN);
 		return 1;
@@ -231,6 +243,36 @@ u8 ExecMeeleeAttack(Entity *ent, EntityHandler *handler) {
 		OnHitEnt(victim, 10);
 
 	return 1;
+}
+
+u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
+	if(AI_LOG) Message("ExecMakeChasePath()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;
+
+	if(ai->navgraph_id < 0) {
+		AiSetSchedule(ai, sched_defs[ai->sched_state.sched_id].fail_sched);
+		return 0;
+	}
+
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+
+	int node = FindClosestNavNodeInGraph(ai->targ_data.known_position, graph);
+	if(node < 0) {
+		AiSetSchedule(ai, sched_defs[ai->sched_state.sched_id].fail_sched);
+		return 0;
+	} 
+
+	//printf("curr_navnode_id: %d\n", ai->curr_navnode_id);
+
+	if(MakeNavPath(ent, graph, node)) {
+		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
+		ai->task_state.move_dest = point;
+		//Message("success", ANSI_GREEN);
+		return 1;
+	}
+
+	return 0;
 }
 
 // Ai tick, not every frame,
@@ -499,6 +541,10 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 
 		case TASK_MEELEE_ATTACK:
 			done = ExecMeeleeAttack(ent, handler);
+			break;
+
+		case TASK_MAKE_CHASE_PATH:
+			done = ExecMakeChasePath(ent, sect);
 			break;
 	}
 

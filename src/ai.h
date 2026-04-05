@@ -56,6 +56,7 @@ enum TASK_TYPES : u8 {
 	TASK_GOTO_POS,
 	TASK_FIND_POS,
 	TASK_MEELEE_ATTACK,
+	TASK_MAKE_CHASE_PATH,
 };
 
 typedef struct {

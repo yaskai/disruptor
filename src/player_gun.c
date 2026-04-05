@@ -326,7 +326,8 @@ void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
 	models[WEAP_REVOLVER].transform = mat;
 
 	float lerp_t = (recoil_angle < 50) ? 30 : 30; 
-	cam_recoil = Lerp(cam_recoil, recoil*0.0003f, dt*lerp_t);
+	//cam_recoil = Lerp(cam_recoil, recoil*0.0016f, dt*lerp_t);
+	cam_recoil = Lerp(cam_recoil, recoil*0.0013f, dt*lerp_t);
 	//cam_recoil = Clamp(cam_recoil, 0.0f, 0.33f);
 	PlayerSetRecoilInput(gun_refs.player, cam_recoil);
 }

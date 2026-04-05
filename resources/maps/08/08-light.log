@@ -5,7 +5,7 @@ INFO: using built-in palette.
 Loading extended texinfo flags from ./08.texinfo.json...
 Loading extended content flags from ./08.content.json...
 WARNING: entity at (944 -672 240) (light) has empty key/value "_dirt" ""
-45 entities read, 22 are lights.
+50 entities read, 22 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -36,9 +36,9 @@ BSPX light directions output requested on command line.
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	115 sky faces
-	1866 solid faces
-	382 filtered faces
+	124 sky faces
+	2009 solid faces
+	395 filtered faces
 	0 shadow-casting skip faces
 SetupLights: 22 initial lights
 SetupLights: 22 after surface lights
@@ -47,14 +47,14 @@ Final count: 22 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 2025688
+lightmap size (total): 2099440
 Lighting Completed.
 
 Writing ./08.lit
 DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
 Writing ./08.bsp as Quake BSP bsp29
-5.546s seconds elapsed
+6.521s seconds elapsed
 0 empty lightmaps
 
 

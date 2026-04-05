@@ -194,6 +194,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			// * NOTE:
 			// Modify later as needed
 			ent.comp_health.hit_box = ent.comp_transform.bounds;
+			
+			ent.comp_ai.speed = 150;
 
 		} break;
 

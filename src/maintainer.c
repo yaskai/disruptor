@@ -35,18 +35,12 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ct->forward = Vector3Normalize(ct->forward);
 	}
 
-	if(ai->task_state.task_id != TASK_FACE_DIR) {
-		if(Vector3DotProduct(ct->forward, ct->targ_look) < 0.8f) {
-			ai->speed = 0;
-		} else {
-			ai->speed = 100;
-		}
-	}
-
 	if(ai->task_state.task_id == TASK_STOP_MOVE || (ai->input_mask & AI_INPUT_MEELEE_RANGE)) {
 		ct->velocity = Vector3Lerp(ct->velocity, Vector3Zero(), 10*dt);
 		ai->speed = 0;
 		ai->wish_dir = Vector3Zero();
+	} else {
+		ai->speed = 150;
 	}
 }
 
@@ -77,8 +71,8 @@ void MaintainerDraw(Entity *ent, float dt) {
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 10)), GREEN);
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->targ_look, 10)), RED);
 
-	//DrawSphere(ai->targ_data.position, 2, PURPLE);
-	//DrawSphere(ai->targ_data.known_position, 2, ColorAlpha(PURPLE, 0.5f));
+	DrawSphere(ai->targ_data.position, 2, PURPLE);
+	DrawSphere(ai->targ_data.known_position, 2, ColorAlpha(PURPLE, 0.5f));
 	DrawSphere(ai->task_state.move_dest, 5, PURPLE);
 }
 

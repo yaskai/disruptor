@@ -67,7 +67,7 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 
 			int closest_node = FindClosestNavNodeInGraph(ct->position, graph);
 			if(closest_node > -1) {
-				float d = Vector3DistanceSqr(ct->position, graph->nodes[j].position);
+				float d = Vector3DistanceSqr(ct->position, graph->nodes[closest_node].position);
 
 				if(d < best) {
 					ai->navgraph_id = j;
@@ -228,6 +228,7 @@ bool AiMoveToNode(Entity *ent, NavGraph *graph, u16 path_id) {
 
 	Vector3 point = graph->nodes[path->nodes[path_id]].position;
 	ai->targ_data.position = point;
+	//ai->task_state.move_dest = point;
 	
 	Vector3 dir = (Vector3Subtract(point, ct->position));
 	dir.z = 0;
