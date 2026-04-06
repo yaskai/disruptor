@@ -181,7 +181,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.5f;
-			ent.comp_ai.hear_distance = 16.0f;
+			ent.comp_ai.hear_distance = 255.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);
@@ -240,8 +240,10 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
 	ent.flags = (ENT_ACTIVE | ENT_COLLIDERS);
 
+	/*
 	if(ent.type == ENT_TURRET)
 		ent.flags &= ~ENT_ACTIVE;
+	*/
 
 	ent.comp_ai.navgraph_id = -1;
 	ent.comp_ai.speed = 50;
