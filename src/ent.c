@@ -68,6 +68,12 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager) {
 }
 
 void EntHandlerClose(EntityHandler *handler) {
+	for(int i = 0; i < handler->count; i++) {
+		anim_Close(&handler->ents[i].anim_state);
+		if(handler->ents[i].animations)
+			UnloadModelAnimations(handler->ents[i].animations, handler->ents[i].anim_count);
+	}
+
 	if(handler->ents) 
 		free(handler->ents);
 
@@ -346,6 +352,10 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				DrawBoundingBox(ent->comp_transform.bounds, RED);
 				break;
 			*/
+
+			case ENT_HEALTHPACK:
+				DrawBoundingBox(ent->comp_transform.bounds, PINK);
+				break;
 		}
 	}
 
@@ -644,6 +654,8 @@ void OnHitEnt(Entity *ent, short damage) {
 	if(ent->type == ENT_PLAYER) {
 		OnHitPlayer(ent, damage);
 	}
+
+	ai->input_mask |= AI_INPUT_TAKE_DAMAGE;
 }
 
 // Maintainer hit

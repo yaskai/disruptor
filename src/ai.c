@@ -202,9 +202,11 @@ u8 ExecFindPos(Entity *ent, MapSection *sect) {
 
 	Vector3 tr_start = ct->position;
 	//tr_start.z += 24;
+	tr_start.z += 8;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
 	//tr_dest.z += 24;
+	tr_dest.z += 8;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {
@@ -259,9 +261,11 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 
 	Vector3 tr_start = ct->position;
 	//tr_start.z += 24;
+	tr_start.z += 8;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
 	//tr_dest.z += 24;
+	tr_dest.z += 8;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {
@@ -538,6 +542,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	if(Vector3DistanceSqr(targ_ent->comp_transform.position, ent->comp_transform.position) <= MEELEE_RANGE) {	
 		ai->input_mask |= AI_INPUT_MEELEE_RANGE;
 	}
+
+	ai->input_mask &= ~AI_INPUT_TAKE_DAMAGE;
 }
 
 // Execute ai schedule

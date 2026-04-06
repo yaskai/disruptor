@@ -61,12 +61,6 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 				// **
 				// Skip things that are not valid targets
 				// (dead entities, player, self, etc.)
-				if(enemy_ent->type == ENT_DISRUPTOR)
-					continue;
-
-				if(enemy_ent->type == ENT_PLAYER)
-					continue;
-
 				if(enemy_ai->state == STATE_DEAD)
 					continue;
 

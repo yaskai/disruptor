@@ -234,6 +234,12 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		} break;
 
 		case ENT_HEALTHPACK: {
+			ent.comp_transform.bounds = (BoundingBox) {
+				.min = Vector3Scale(BODY_VOLUME_SMALL, -0.5f),
+				.max = Vector3Scale(BODY_VOLUME_SMALL,  0.5f)
+			};
+
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 
 		} break;
 
@@ -249,7 +255,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 	ent.comp_transform.start_forward = ent.comp_transform.forward;
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
-	ent.flags = (ENT_ACTIVE | ENT_COLLIDERS);
+	ent.flags |= (ENT_ACTIVE);
 
 	/*
 	if(ent.type == ENT_TURRET)

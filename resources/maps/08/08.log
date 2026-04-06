@@ -11,12 +11,12 @@ INFO: using built-in palette.
      86 entities
       9 unique textures
      59 texinfos
-    610 unique planes
+    606 unique planes
 
 INFO: world extents calculated to 7496 units
       326 brushes
-    1,972 sides
-       44 side bevels
+    1,971 sides
+       43 side bevels
 
             0 texture frames added
 Processing hull 0...
@@ -24,49 +24,49 @@ Processing hull 0...
     297 SOLID brushes
       6 SKY brushes
     314 brushes total
-    1,900 visible sides
-INFO: calculating BSP for 314 brushes with 1900 sides
+    1,899 visible sides
+INFO: calculating BSP for 314 brushes with 1899 sides
       314 brushes
-    1,900 visible faces
-    1,244 nodes
-    1,244 expensive split nodes
-    1,245 leaves
+    1,899 visible faces
+    1,271 nodes
+    1,271 expensive split nodes
+    1,272 leaves
        11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      423 SOLID leafs
-      181 SKY leafs
-      630 EMPTY leafs
-    1,245 leafs total
-    20 max tree height
+      418 SOLID leafs
+      195 SKY leafs
+      648 EMPTY leafs
+    1,272 leafs total
+    22 max tree height
     13 avg tree height
-    5,969 tree portals
-    185 outside leaves
+    6,064 tree portals
+    197 outside leaves
     0 detail filled leafs
       314 brushes
-    1,069 visible faces
-      831 non-visible faces
-    1,365 nodes
-      367 non-visible nodes
-    1,365 expensive split nodes
-    1,366 leaves
+    1,066 visible faces
+      833 non-visible faces
+    1,378 nodes
+      375 non-visible nodes
+    1,378 expensive split nodes
+    1,379 leaves
        11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      448 SOLID leafs
-      213 SKY leafs
-      694 EMPTY leafs
-    1,366 leafs total
+      447 SOLID leafs
+      219 SKY leafs
+      702 EMPTY leafs
+    1,379 leafs total
     19 max tree height
     12 avg tree height
-    6,368 tree portals
-    252 outside leaves
+    6,406 tree portals
+    258 outside leaves
     0 detail filled leafs
-    6,368 tree portals
-    4,496 sides visible
-    2,404 makefaces
-      570 merged
-    1,334 subdivided
-    81 nodes pruned
-      666 player-occupiable leaves
-      661 clusters of leaves
-    1,633 vis portals
+    6,406 tree portals
+    4,468 sides visible
+    2,392 makefaces
+      555 merged
+    1,339 subdivided
+    80 nodes pruned
+      674 player-occupiable leaves
+      669 clusters of leaves
+    1,659 vis portals
 fixing up cluster at 1832 344 104
 fixing up cluster at 1364 444 72
 fixing up cluster at 1436 220 108
@@ -78,18 +78,18 @@ fixing up cluster at 928 -812 160
 fixing up cluster at 888 476 -68
 fixing up cluster at 1240 -436 -32
        11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      442 EMPTY leafs
-      213 SKY leafs
-      619 SOLID leafs
-    1,285 leafs total
+      444 EMPTY leafs
+      219 SKY leafs
+      625 SOLID leafs
+    1,299 leafs total
     19 max tree height
     12 avg tree height
-    2,508 edges added by tjunctions
-    3,020 faces optimized through MWT
-    8,570 triangles computed from MWT
-      685 faces created via optimization of MWT triangles
-    8,480 edges
-    3,729 faces
+    2,501 edges added by tjunctions
+    3,029 faces optimized through MWT
+    8,580 triangles computed from MWT
+      688 faces created via optimization of MWT triangles
+    8,486 edges
+    3,737 faces
 Processing hull 1...
 Processing hull 2...
 Writing 08.bsp as Quake BSP bsp29
@@ -97,24 +97,24 @@ Wrote 08.bsp
 
 count   lump name    byte size 
       5 models              320
-    459 planes             9180
-   4227 vertexes          50724
-   1324 nodes             31776
+    452 planes             9040
+   4237 vertexes          50844
+   1338 nodes             32112
      43 texinfos           1720
-   3805 faces             76100
-   1516 clipnodes         12128
-    711 leafs             19908
-   4432 marksurfaces       8864
-   8633 edges             34532
-  16356 surfedges         65424
+   3813 faces             76260
+   1492 clipnodes         11936
+    719 leafs             20132
+   4427 marksurfaces       8854
+   8639 edges             34556
+  16378 surfedges         65512
       9 textures         486068
         lightdata             0
         visdata               0
-        entdata            8732
+        entdata            8758
 
 BSPX lump name   byte size 
-BRUSHLIST             10168
+BRUSHLIST             10136
 
-0.359s seconds elapsed
+0.358s seconds elapsed
 
 

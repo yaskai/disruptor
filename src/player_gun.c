@@ -117,6 +117,8 @@ void LoadCrosshairTextures() {
 }
 
 Texture2D muz_flash;
+Vector2 muz_pos;
+float muz_rot[12] = {0};
 
 void PlayerGunInit(
 	PlayerGun *player_gun,
@@ -162,6 +164,8 @@ void PlayerGunInit(
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
+	curr_gun->cooldown -= dt;
+
 	int scroll = 0;
 
 	if(recoil <= 1.0f) {
@@ -366,6 +370,32 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		}
 	}
 
+	if(player_gun->current_gun == WEAP_REVOLVER) {
+		BeginBlendMode(BLEND_ADDITIVE);
+		if(curr_gun->cooldown > 0) {
+			//DrawTexture(muz_flash, 1920/2, 1080/2, WHITE);
+			Vector3 world_pos = REVOLVER_REST;
+			world_pos.y += 1.25f;
+			muz_pos = GetWorldToScreen(world_pos, player_gun->cam);
+			muz_pos.x -= 16;
+			muz_pos.y += 16;
+			//muz_pos.y -= muz_flash.height * 0.5f;
+			//DrawTextureEx(muz_flash, muz_pos, muz_rot, 1.0f, WHITE);
+
+			for(short i = 0; i < 12; i++) {
+				DrawTexturePro(
+					muz_flash, 
+					(Rectangle) { 0, 0, muz_flash.width, muz_flash.height },
+					(Rectangle) { muz_pos.x, muz_pos.y, muz_flash.width, muz_flash.height },
+					(Vector2) { muz_flash.width * 0.5f, muz_flash.height * 0.5f }, 
+					muz_rot[i],
+					ColorBrightness(ColorAlpha(WHITE, 0.45f), 10.5f)
+				);
+			}
+		}
+		EndBlendMode();
+	}
+
 	if(!skip_draw) {
 		float scale = 1.0f;
 		if(player_gun->current_gun == WEAP_DISRUPTOR)
@@ -495,6 +525,10 @@ void PlayerShootShotgun(PlayerGun *player_gun, EntityHandler *handler, MapSectio
 }
 
 void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
+	curr_gun->cooldown = 0.02f;
+	muz_rot[0] = -30;
+	for(short i = 1; i < 12; i++) muz_rot[i] = muz_rot[0] + GetRandomValue(-360, 360);
+
 	comp_Transform *ct = &gun_refs.player->comp_transform;
 
 	Vector3 trace_start = ct->position;
