@@ -22,10 +22,10 @@ static Ai_SchedDef sched_defs[] = {
 	[SCHED_PATROL] = {
 		.tasks = { TASK_MAKE_PATROL_PATH, TASK_FACE_DIR, TASK_GOTO_POINT, TASK_STOP_MOVE, TASK_WAIT_TIME },
 		.num_tasks = 5,
-		.interrupt_mask = (0),
-		.interrupt_sched = SCHED_PATROL,
+		.interrupt_mask = ( AI_INPUT_SEE_PLAYER | AI_INPUT_HEAR_PLAYER ),
+		.interrupt_sched = SCHED_CHASE_PLAYER,
 		.fail_sched = SCHED_PATROL,
-		.next_sched = SCHED_PATROL
+		.next_sched = SCHED_MAINTAINER_IDLE
 	},
 
 	[SCHED_MAINTAINER_IDLE] = {
@@ -54,6 +54,15 @@ static Ai_SchedDef sched_defs[] = {
 		.interrupt_sched = SCHED_MAINTAINER_IDLE,
 		.fail_sched = SCHED_MAINTAINER_IDLE,
 		.next_sched = SCHED_CHASE_PLAYER
+	},
+
+	[SCHED_FIX_FRIEND] = {
+		.tasks = { TASK_MAKE_CHASE_PATH, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_DO_FIX },
+		.num_tasks = 4,
+		.interrupt_mask = ( 0 ), 
+		.interrupt_sched = SCHED_MAINTAINER_IDLE,
+		.fail_sched = SCHED_MAINTAINER_IDLE, 
+		.next_sched = SCHED_PATROL
 	},
 };
 

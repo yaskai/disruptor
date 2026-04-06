@@ -7,7 +7,7 @@
 #include "sched_defs.c"
 #include "../include/log_message.h"
 
-#define AI_TICKRATE 11.0f
+#define AI_TICKRATE 8.0f
 float ai_tick = 0.0f;
 
 #define MEELEE_RANGE (48.0f*48.0f)
@@ -75,7 +75,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 	return 0;
 }
 
-#define NODE_REACH_RADIUS (32.0f*32.0f)
+#define NODE_REACH_RADIUS (64.0f*64.0f)
 u8 ExecGotoPoint(Entity *ent, MapSection *sect) {		
 	if(AI_LOG) Message("ExecGotoPoint()", ANSI_BLUE);
 
@@ -114,12 +114,12 @@ u8 ExecStopMove(Entity *ent) {
 	comp_Ai *ai = &ent->comp_ai;
 	comp_Transform *ct = &ent->comp_transform;
 
-	if(Vector3Length(ct->velocity) < 1.0f) {
-		ai->wish_dir = Vector3Zero();
-		ct->velocity.x = 0;
-		ct->velocity.y = 0;
-		return 1;
-	}
+	//if(Vector3Length(ct->velocity) < 1.0f) {
+	ai->wish_dir = Vector3Zero();
+	ct->velocity.x = 0;
+	ct->velocity.y = 0;
+	return 1;
+	//}
 
 	return 0;
 }
@@ -141,10 +141,10 @@ u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
 	if(MakeNavPath(ent, graph, GetRandomValue(0, graph->node_count-1))) {
 		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
 		ai->task_state.move_dest = point;
+		ai->targ_data.known_position = point;
 		//Message("success", ANSI_GREEN);
 		return 1;
 	}
-
 
 	return 0;
 }
@@ -178,7 +178,7 @@ u8 ExecGotoPos(Entity *ent, MapSection *sect) {
 		return ExecGotoPoint(ent, sect);
 
 	Vector3 to_dest = Vector3Subtract(ai->task_state.move_dest, ct->position);
-	if(Vector3LengthSqr(to_dest) < MEELEE_RANGE) {
+	if(Vector3LengthSqr(to_dest) <= MEELEE_RANGE) {
 		return 1;
 	}
 
@@ -252,15 +252,15 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	comp_Transform *ct = &ent->comp_transform;
 
 	Bsp_Data *bsp = &sect->bsp_data;
-	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
+	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[0];
 
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 
 	Vector3 tr_start = ct->position;
-	tr_start.z += 24;
+	//tr_start.z += 24;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
-	tr_dest.z += 24;
+	//tr_dest.z += 24;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {
@@ -292,6 +292,58 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	}
 
 	return 0;
+}
+
+u8 ExecDoFix(Entity *ent, EntityHandler *handler) {
+	//if(AI_LOG) Message("ExecMakeChasePath()", ANSI_BLUE);
+	//Message("ExecDoFix()", ANSI_BLUE);
+
+	comp_Ai *ai = &ent->comp_ai;
+	comp_Transform *ct = &ent->comp_transform;
+
+	Entity *other = &handler->ents[ai->targ_data.ent_id];
+	DoFix(other);
+
+	ai->targ_data.ent_id = -1;
+	ai->input_mask &= ~AI_INPUT_SEE_GLITCHED;
+	
+	return 1;
+}
+
+void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
+	comp_Ai *ai = &ent->comp_ai;	
+	comp_Transform *ct = &ent->comp_transform;
+
+	if(ai->sched_state.sched_id == SCHED_FIX_FRIEND) {
+		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
+		return;
+	}
+
+	for(u16 i = 0; i < handler->count; i++) {
+		Entity *other = &handler->ents[i];
+
+		if(i == ent->id)
+			continue;
+
+		if(!other->comp_ai.component_valid)
+			continue;
+
+		if(!(other->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED))
+			continue;
+
+		if(other->comp_ai.navgraph_id != ai->navgraph_id)
+			continue;
+
+		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
+		ai->targ_data.ent_id = i;
+		ai->targ_data.known_position = other->comp_transform.position;
+		ai->targ_data.position = other->comp_transform.position;
+
+		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+			AiSetSchedule(ai, SCHED_FIX_FRIEND);
+
+		break;
+	}
 }
 
 // Ai tick, not every frame,
@@ -385,6 +437,9 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	comp_Transform *ct = &ent->comp_transform;
 	BvhTree *bvh = &sect->bvh[0];
 
+	if(ent->type == ENT_MAINTAINER && ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+		CheckForBrokenAlly(ent, handler);
+
 	// ** Check if player is visible **	
 	//
 	// Clear 'see player' flag
@@ -396,6 +451,10 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	Vector3 eye_pos = Vector3Add(ct->position, Vector3Scale(UP, 0.0f));
 	Vector3 to_player = Vector3Normalize(Vector3Subtract(player_ent->comp_transform.position, eye_pos));
 	float d_to_player = Vector3LengthSqr(to_player);
+
+	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
+	if(d_to_player <= ai->hear_distance*ai->hear_distance)
+		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
 
 	// Player is in ai's sight cone
 	if(Vector3DotProduct(ct->forward, to_player) >= ai->sight_cone && d_to_player <= 1000.0f) { 
@@ -452,7 +511,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		if(!(ai->input_mask & AI_INPUT_LOST_PLAYER)) {
 			//ai->targ_data.known_position = player_ent->comp_transform.position;
 			// *
-			ai->targ_data.ent_id = handler->player_id;
+			if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+				ai->targ_data.ent_id = handler->player_id;
 		}
 	}
 
@@ -462,6 +522,7 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	if(Vector3DistanceSqr(ai->task_state.move_dest, ent->comp_transform.position) <= 16.0f) {	
 		ai->input_mask |= AI_INPUT_DEST_REACHED;
 	}
+
 	
 	if(ai->targ_data.ent_id < 0)
 		return;
@@ -541,6 +602,7 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 			break;
 
 		case TASK_DO_FIX:
+			done = ExecDoFix(ent, handler);
 			break;
 
 		case TASK_THROW_PROJECTILE:

@@ -181,7 +181,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.5f;
-			ent.comp_ai.hear_distance = 30.0f;
+			ent.comp_ai.hear_distance = 128.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);

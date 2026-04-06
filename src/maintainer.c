@@ -40,7 +40,7 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ai->speed = 0;
 		ai->wish_dir = Vector3Zero();
 	} else {
-		ai->speed = 150;
+		ai->speed = 175;
 	}
 }
 
@@ -71,8 +71,8 @@ void MaintainerDraw(Entity *ent, float dt) {
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 10)), GREEN);
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->targ_look, 10)), RED);
 
-	DrawSphere(ai->targ_data.position, 2, PURPLE);
-	DrawSphere(ai->targ_data.known_position, 2, ColorAlpha(PURPLE, 0.5f));
-	DrawSphere(ai->task_state.move_dest, 5, PURPLE);
+	//DrawSphere(ai->targ_data.position, 2, PURPLE);
+	//DrawSphere(ai->targ_data.known_position, 2, ColorAlpha(PURPLE, 0.5f));
+	//DrawSphere(ai->task_state.move_dest, 5, PURPLE);
 }
 

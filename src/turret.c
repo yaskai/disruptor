@@ -13,14 +13,18 @@ void OnHitTurret(Entity *ent, short damage) {
 }
 
 void OnFixTurret(Entity *ent) {
-	/*
 	comp_Ai *ai = &ent->comp_ai;
 
+	/*
 	ai->curr_schedule = SCHED_SENTRY;
 	ai->task_data.schedule_id = SCHED_SENTRY;
 	ai->task_data.task_id = TASK_WAIT_TIME;
 	ai->task_data.timer = 1;
 	*/
+
+	ai->state = STATE_IDLE;
+	ai->input_mask &= ~AI_INPUT_SELF_GLITCHED;
+	AiSetSchedule(ai, SCHED_SENTRY);
 }
 
 // Update logic for turret

@@ -8,111 +8,113 @@ Input file: /home/kai/projects/disruptor/resources/maps/08/08.map
 Output file: /home/kai/projects/disruptor/resources/maps/08/08.bsp
 
 INFO: using built-in palette.
-     63 entities
+     80 entities
       9 unique textures
-     58 texinfos
-    476 unique planes
+     59 texinfos
+    614 unique planes
 
 INFO: world extents calculated to 7496 units
-      247 brushes
-    1,494 sides
-       35 side bevels
+      327 brushes
+    1,978 sides
+       44 side bevels
 
             0 texture frames added
 Processing hull 0...
-      9 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
-    222 SOLID brushes
+     11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+    298 SOLID brushes
       6 SKY brushes
-    237 brushes total
-    1,434 visible sides
-INFO: calculating BSP for 237 brushes with 1434 sides
-      237 brushes
-    1,434 visible faces
-    1,006 nodes
-    1,006 expensive split nodes
-    1,007 leaves
-        9 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      306 SOLID leafs
-      174 SKY leafs
-      518 EMPTY leafs
-    1,007 leafs total
-    21 max tree height
+    315 brushes total
+    1,906 visible sides
+INFO: calculating BSP for 315 brushes with 1906 sides
+      315 brushes
+    1,906 visible faces
+    1,247 nodes
+    1,247 expensive split nodes
+    1,248 leaves
+       11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      424 SOLID leafs
+      181 SKY leafs
+      632 EMPTY leafs
+    1,248 leafs total
+    20 max tree height
     13 avg tree height
-    4,705 tree portals
-    179 outside leaves
+    5,988 tree portals
+    185 outside leaves
     0 detail filled leafs
-    237 brushes
-    806 visible faces
-    628 non-visible faces
-    1,080 nodes
-      338 non-visible nodes
-    1,080 expensive split nodes
-    1,081 leaves
-        9 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      317 SOLID leafs
-      192 SKY leafs
-      563 EMPTY leafs
-    1,081 leafs total
+      315 brushes
+    1,072 visible faces
+      834 non-visible faces
+    1,368 nodes
+      367 non-visible nodes
+    1,368 expensive split nodes
+    1,369 leaves
+       11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      449 SOLID leafs
+      213 SKY leafs
+      696 EMPTY leafs
+    1,369 leafs total
     19 max tree height
     12 avg tree height
-    4,964 tree portals
-    236 outside leaves
+    6,387 tree portals
+    252 outside leaves
     0 detail filled leafs
-    4,964 tree portals
-    3,283 sides visible
-    1,780 makefaces
-      437 merged
-    1,132 subdivided
-    67 nodes pruned
-      528 player-occupiable leaves
-      522 clusters of leaves
-    1,278 vis portals
+    6,387 tree portals
+    4,522 sides visible
+    2,418 makefaces
+      576 merged
+    1,336 subdivided
+    81 nodes pruned
+      668 player-occupiable leaves
+      663 clusters of leaves
+    1,637 vis portals
 fixing up cluster at 1832 344 104
 fixing up cluster at 1364 444 72
 fixing up cluster at 1436 220 108
 fixing up cluster at 768 248 200
-fixing up cluster at -16 144 112
+fixing up cluster at -16 56 112
 fixing up cluster at -528 -344 96
 fixing up cluster at 928 -660 160
 fixing up cluster at 928 -812 160
-        9 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      327 EMPTY leafs
-      192 SKY leafs
-      486 SOLID leafs
-    1,014 leafs total
+fixing up cluster at 888 476 -68
+fixing up cluster at 1240 -436 -32
+       11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      444 EMPTY leafs
+      213 SKY leafs
+      620 SOLID leafs
+    1,288 leafs total
     19 max tree height
     12 avg tree height
-    1,887 edges added by tjunctions
-    2,348 faces optimized through MWT
-    6,596 triangles computed from MWT
-      513 faces created via optimization of MWT triangles
-    6,573 edges
-    2,879 faces
+    2,520 edges added by tjunctions
+    3,030 faces optimized through MWT
+    8,602 triangles computed from MWT
+      689 faces created via optimization of MWT triangles
+    8,510 edges
+    3,743 faces
 Processing hull 1...
 Processing hull 2...
 Writing 08.bsp as Quake BSP bsp29
 Wrote 08.bsp
 
 count   lump name    byte size 
-      3 models              192
-    383 planes             7660
-   3292 vertexes          39504
-   1041 nodes             24984
-     41 texinfos           1640
-   2943 faces             58860
-   1164 clipnodes          9312
-    559 leafs             15652
-   3426 marksurfaces       6852
-   6702 edges             26808
-  12628 surfedges         50512
+      5 models              320
+    466 planes             9320
+   4243 vertexes          50916
+   1327 nodes             31848
+     43 texinfos           1720
+   3819 faces             76380
+   1533 clipnodes         12264
+    713 leafs             19964
+   4476 marksurfaces       8952
+   8663 edges             34652
+  16416 surfedges         65664
       9 textures         486068
         lightdata             0
         visdata               0
-        entdata            6144
+        entdata            8160
 
 BSPX lump name   byte size 
-BRUSHLIST              7716
+BRUSHLIST             10196
 
-0.248s seconds elapsed
+0.445s seconds elapsed
 
 
