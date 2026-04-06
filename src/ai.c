@@ -24,7 +24,7 @@ u8 ExecWaitTime(comp_Ai *ai, float dt) {
 }
 
 u8 ExecFireWeapon(Entity *ent, comp_Ai *ai) {
-	if(AI_LOG) Message("ExecFireWeapon()", ANSI_BLUE);
+	//if(AI_LOG) Message("ExecFireWeapon()", ANSI_BLUE);
 
 	if(ent->comp_weapon.ammo <= 0)
 		return 1;
@@ -33,7 +33,7 @@ u8 ExecFireWeapon(Entity *ent, comp_Ai *ai) {
 }
 
 u8 ExecReloadWeapon(Entity *ent, comp_Ai *ai, float dt) {
-	if(AI_LOG) Message("ExecReloadWeapon()", ANSI_BLUE);
+	//if(AI_LOG) Message("ExecReloadWeapon()", ANSI_BLUE);
 
 	if(ai->task_state.timer <= 0 && !ai->task_state.is_init) {
 		ai->task_state.timer = ent->comp_weapon.reload_time_amnt;
@@ -75,7 +75,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 	return 0;
 }
 
-#define NODE_REACH_RADIUS (64.0f*64.0f)
+#define NODE_REACH_RADIUS (40.0f*40.0f)
 u8 ExecGotoPoint(Entity *ent, MapSection *sect) {		
 	if(AI_LOG) Message("ExecGotoPoint()", ANSI_BLUE);
 
@@ -142,6 +142,7 @@ u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
 		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
 		ai->task_state.move_dest = point;
 		ai->targ_data.known_position = point;
+		ai->targ_data.ent_id = -1;
 		//Message("success", ANSI_GREEN);
 		return 1;
 	}
@@ -257,10 +258,10 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 
 	Vector3 tr_start = ct->position;
-	//tr_start.z += 24;
+	tr_start.z += 16;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
-	//tr_dest.z += 24;
+	tr_dest.z += 16;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {
@@ -334,13 +335,17 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 		if(other->comp_ai.navgraph_id != ai->navgraph_id)
 			continue;
 
+		if(other->comp_ai.task_state.task_id == TASK_FIRE_WEAPON)
+			continue;
+
 		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
 		ai->targ_data.ent_id = i;
 		ai->targ_data.known_position = other->comp_transform.position;
 		ai->targ_data.position = other->comp_transform.position;
 
-		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND) {
 			AiSetSchedule(ai, SCHED_FIX_FRIEND);
+		}
 
 		break;
 	}

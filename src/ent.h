@@ -5,6 +5,7 @@
 #include "map.h"
 #include "ai.h"
 #include "v_effect.h"
+#include "anim.h"
 
 #ifndef ENT_H_
 #define ENT_H_
@@ -179,7 +180,11 @@ enum TRIGGER_CONDITION_TYPES : u8 {
 
 typedef struct {
 	Model model;
+
 	ModelAnimation *animations;
+	int num_anims;
+
+	AnimState anim_state;
 
 	comp_Ai comp_ai;
 	comp_Transform comp_transform;

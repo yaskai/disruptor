@@ -181,7 +181,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.5f;
-			ent.comp_ai.hear_distance = 128.0f;
+			ent.comp_ai.hear_distance = 16.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);
@@ -196,6 +196,9 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.comp_health.hit_box = ent.comp_transform.bounds;
 			
 			ent.comp_ai.speed = 150;
+
+			ent.anim_state = anim_Init(ent.model);
+			ent.animations = LoadModelAnimations("resources/models/enemies/maintainer.glb", &ent.num_anims);
 
 		} break;
 
@@ -236,6 +239,9 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	ent.comp_transform.start_forward = ent.comp_transform.forward;
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
 	ent.flags = (ENT_ACTIVE | ENT_COLLIDERS);
+
+	if(ent.type == ENT_TURRET)
+		ent.flags &= ~ENT_ACTIVE;
 
 	ent.comp_ai.navgraph_id = -1;
 	ent.comp_ai.speed = 50;

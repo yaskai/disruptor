@@ -1,57 +1,30 @@
+#include <stdlib.h>
+#include <string.h>
 #include "raylib.h"
-#include "raymath.h"
 #include "anim.h"
 
-void FabrikSolve(FabrikChain *chain) {
-	if(chain->count < 2)
-		return;
+AnimState anim_Init(Model model) {
+	AnimState anim_state = (AnimState) {0}; 
 
-	float total_length = 0.0f;
-	for(int i = 0; i < chain->count; i++) {
-		total_length += chain->lengths[i];
-	}
+	anim_state.num_bones = model.boneCount;
+	int mem_size = anim_state.num_bones * sizeof(Transform);
 
-	Vector3 root_to_targ = Vector3Subtract(chain->targ_pos, chain->root_pos); 
-	float rt_dist = Vector3Length(root_to_targ);
+	anim_state.bone_trs = malloc(mem_size);
+	memcpy(anim_state.bone_trs, model.bindPose, mem_size);
 
-	// Target is unreachable, stretch
-	if(rt_dist > total_length) {
-		Vector3 dir = Vector3Normalize(root_to_targ);
-
-		chain->points[0] = chain->root_pos;
-
-		for(int i = 1; i < chain->count; i++) {
-			chain->points[i] = Vector3Add(chain->points[i-1], Vector3Scale(dir, chain->lengths[i-1]));
-		}
-	}
-	
-	// Target can be reached, iterate solve
-	for(int i = 0; i < FABRIK_MAX_ITERS; i++) {
-		// Backwards
-		chain->points[chain->count-1] = chain->targ_pos;
-
-		for(int j = chain->count-2; j >= 0; j--) {
-			Vector3 dir = Vector3Subtract(chain->points[j], chain->points[j+1]);
-			dir = Vector3Normalize(dir);
-
-			chain->points[j] = Vector3Add(chain->points[j+1], Vector3Scale(dir, chain->lengths[j]));
-		}
-
-		// Forwards
-		// move root to end 
-		chain->points[0] = chain->root_pos;
-
-		for(int j = 1; j < chain->count; j++) {
-			Vector3 dir = Vector3Subtract(chain->points[j], chain->points[j-1]);
-			dir = Vector3Normalize(dir);
-
-			chain->points[j] = Vector3Add(chain->points[j-1], Vector3Scale(dir, chain->lengths[j-1]));
-		}
-
-		if(Vector3Distance(chain->points[chain->count-1], chain->targ_pos) <= 0.001f)
-			break;
-	}
+	return anim_state;
 }
 
+void anim_Close(AnimState *anim_state) {
+	if(anim_state->bone_trs) free(anim_state->bone_trs);
+}
 
+void anim_Update(AnimState *anim_state, ModelAnimation *anims) {
+	anim_state->curr_frame = (anim_state->curr_frame + 1) % anims[anim_state->anim_id].frameCount;
+}
+
+void anim_Apply(AnimState *anim_state, Model *model, ModelAnimation *anims) {
+	model->bindPose = anim_state->bone_trs;
+	UpdateModelAnimation(*model, anims[anim_state->anim_id], anim_state->curr_frame);
+}
 

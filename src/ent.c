@@ -641,10 +641,10 @@ void OnHitEnt(Entity *ent, short damage) {
 		on_hit_funcs[health->on_hit](ent, damage);
 	}
 
-	if(ent->type == ENT_PLAYER)
+	if(ent->type == ENT_PLAYER) {
 		OnHitPlayer(ent, damage);
+	}
 }
-
 
 // Maintainer hit
 void OnHitMaintainer(Entity *ent, short damage) {

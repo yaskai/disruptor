@@ -128,8 +128,8 @@ ___
 
 ** (-) maintainer behaviour
 *** (x) idle
-*** (-) attack (go to & pickup projectile and/or meelee)
-*** (-) fix disrupted entities (*_navigation system is blocker_*)
+*** (x) attack (go to & pickup projectile and/or meelee)
+*** (x) fix disrupted entities (*_navigation system is blocker_*)
 *** (-) disrupted (*_design is blocker_*)
 
 ___
@@ -171,9 +171,10 @@ ___
 
   *_Choose Method!_*
    options are:
-   - vertex frames (possibly with interpolation)
-   - gpu skinning
-   - procedural through FABRIK
+  - -vertex frames (possibly with interpolation)-
+  - -gpu skinning-
+  - -procedural through FABRIK-
+  - cpu skinning ended up being fine 
 
 ___
 * *Other*

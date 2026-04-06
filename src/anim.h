@@ -1,22 +1,21 @@
-#include "../include/num_redefs.h"
 #include "raylib.h"
 
 #ifndef ANIM_H_
 #define ANIM_H_
 
-#define FABRIK_MAX_BONES 32
 typedef struct {
-	Vector3 points[FABRIK_MAX_BONES];
-	float lengths[FABRIK_MAX_BONES - 1];
+	Transform *bone_trs;
+	int num_bones;
 
-	Vector3 root_pos;
-	Vector3 targ_pos;
+	int curr_frame;
+	int anim_id;
 
-	int count;
+} AnimState;
 
-} FabrikChain;
+AnimState anim_Init(Model model); 
+void anim_Close(AnimState *anim_state);
 
-#define FABRIK_MAX_ITERS 8
-void FabrikSolve(FabrikChain *chain);
+void anim_Update(AnimState *anim_state, ModelAnimation *anims);
+void anim_Apply(AnimState *anim_state, Model *model, ModelAnimation *anims);
 
-#endif // !ANIM_H_
+#endif

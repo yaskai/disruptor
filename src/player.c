@@ -73,6 +73,9 @@ bool step_frame = false;
 
 float recoil_input = 0.0f;
 
+bool walk_mod = false;
+bool crouch = false;
+
 // **
 // -----------------------------------------------------------------------------
 // Movement tracing,
@@ -205,6 +208,14 @@ void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section,
 }
 
 void PlayerUpdate(Entity *player, float dt) {
+	crouch = false;
+	if(IsKeyDown(KEY_C))
+		crouch = true;
+
+	walk_mod = false;
+	if(IsKeyDown(KEY_LEFT_SHIFT))
+		walk_mod = true;
+
 	player->comp_transform.bounds = BoxTranslate(player->comp_transform.bounds, player->comp_transform.position);
 	land_frame = false;
 
@@ -227,12 +238,15 @@ void PlayerUpdate(Entity *player, float dt) {
 		ptr_cam->position.x = player->comp_transform.position.x;
 		ptr_cam->position.y = player->comp_transform.position.y;
 
+		float z_mod = (crouch) ? 0 : 16;
+		z_mod = 16;
+
 		if(!step_frame) {
 			//ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 12, dt * 100);
-			ptr_cam->position.z = player->comp_transform.position.z + 16;
+			ptr_cam->position.z = player->comp_transform.position.z + z_mod;
 		} else {
-			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 16, dt * 17.5f);
-			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + 16)) <= 0.75f) 
+			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + z_mod, dt * 17.5f);
+			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + z_mod)) <= 0.75f) 
 				step_frame = false;
 		}
 
@@ -339,10 +353,17 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 		wish_dir = pm_GetWishDir(ct, input);
 
 	float wish_speed = (ct->on_ground) ? PLAYER_GROUND_SPEED : PLAYER_AIR_SPEED;
-	if(hurt_frame) wish_speed *= 0.33f;
+
+	if(hurt_frame)
+		wish_speed *= 0.33f;
+
+	if(ct->on_ground && walk_mod)
+		wish_speed *= 0.5f;
+
 	if(wish_speed > PLAYER_MAX_SPEED) {
 		wish_speed = PLAYER_MAX_SPEED;
 	} 
+
 	Vector3 wish_vel = Vector3Scale(wish_dir, wish_speed);
 	
 	// 3. Apply friction

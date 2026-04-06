@@ -8,8 +8,8 @@ void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
 
 	//ai->targ_data.ent_id = handler->player_id;
 
-	if(ai->input_mask & AI_INPUT_SEE_PLAYER || ai->input_mask & AI_INPUT_HEAR_PLAYER) {
-		if(!(ai->input_mask & AI_INPUT_SEE_GLITCHED)) {
+	if(ai->sched_state.sched_id != SCHED_FIX_FRIEND) {
+		if(ai->input_mask & AI_INPUT_SEE_PLAYER || ai->input_mask & AI_INPUT_HEAR_PLAYER) {
 			ai->targ_data.ent_id = handler->player_id;
 			ai->targ_data.position = handler->ents[handler->player_id].comp_transform.position;
 			ai->targ_data.known_position = ai->targ_data.position;
@@ -29,13 +29,26 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
 		ct->forward.z = 0;
 		ct->forward = Vector3Normalize(ct->forward);
+
 	} else {
 		ct->forward = Vector3Lerp(ct->forward, Vector3Normalize(ct->velocity), 10*dt);
 		ct->forward.z = 0;
 		ct->forward = Vector3Normalize(ct->forward);
 	}
 
-	if(ai->task_state.task_id == TASK_STOP_MOVE || (ai->input_mask & AI_INPUT_MEELEE_RANGE)) {
+	//if(ai->task_state.task_id == TASK_STOP_MOVE || (ai->input_mask & AI_INPUT_MEELEE_RANGE)) {
+	bool stop = false;
+	if(ai->task_state.task_id == TASK_STOP_MOVE)
+		stop = true;
+
+	if(
+		(ai->input_mask & AI_INPUT_MEELEE_RANGE) &&
+		(ai->sched_state.sched_id == SCHED_CHASE_PLAYER || ai->sched_state.sched_id == SCHED_MAINTAINER_ATTACK)
+	) {
+		stop = true;
+	}
+
+	if(stop) {
 		ct->velocity = Vector3Lerp(ct->velocity, Vector3Zero(), 10*dt);
 		ai->speed = 0;
 		ai->wish_dir = Vector3Zero();
@@ -49,6 +62,10 @@ void MaintainerDraw(Entity *ent, float dt) {
 	comp_Ai *ai = &ent->comp_ai;
 
 	if(ai->state == STATE_DEAD) {
+		ent->anim_state.curr_frame = 0;
+		ent->anim_state.anim_id = 0;
+		anim_Apply(&ent->anim_state, &ent->model, ent->animations);
+
 		Vector3 pos = ent->comp_transform.position;		
 		pos.z -= 20;
 
@@ -57,16 +74,24 @@ void MaintainerDraw(Entity *ent, float dt) {
 			pos,
 			Vector3CrossProduct(ct->forward, UP),
 			90,
-			Vector3Scale(Vector3One(), 0.1f),
+			Vector3Scale(Vector3One(), 1.0f),
 			LIGHTGRAY 
 		);
+
 		return;
 	}
+
+	ent->anim_state.anim_id = 0;
+	if(Vector3Length(ai->wish_dir))
+		ent->anim_state.anim_id = 1;
 	
+	anim_Update(&ent->anim_state, ent->animations);
+	anim_Apply(&ent->anim_state, &ent->model, ent->animations);
+
 	Vector3 pos = ent->comp_transform.position;
 	float yaw = atan2f(-ct->forward.x, ct->forward.y);
 	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(yaw+(90*DEG2RAD)*-1));
-	DrawModel(ent->model, pos, 0.1f, LIGHTGRAY);
+	DrawModel(ent->model, pos, 1.0f, LIGHTGRAY);
 
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 10)), GREEN);
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->targ_look, 10)), RED);
