@@ -724,6 +724,8 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 
 	} else { 
 		//step_pm.end_vel.z += down_vel.z;
+		*pm = base_pm;
+		return;
 	}
 
 	if(step_pm.end_pos.z > base_pm.end_pos.z + 0.1f)

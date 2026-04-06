@@ -19,12 +19,37 @@ void anim_Close(AnimState *anim_state) {
 	if(anim_state->bone_trs) free(anim_state->bone_trs);
 }
 
-void anim_Update(AnimState *anim_state, ModelAnimation *anims) {
-	anim_state->curr_frame = (anim_state->curr_frame + 1) % anims[anim_state->anim_id].frameCount;
+void anim_Update(AnimState *anim_state, ModelAnimation *anims, float dt) {
+	anim_state->acc += anim_state->speed * dt;
+	if(anim_state->acc < 1.0f) {
+		return;
+	}
+
+	int next = anim_state->curr_frame + 1;
+	if(next >= anims[anim_state->anim_id].frameCount) {
+		next = 0;
+		anim_state->loop_count++;
+	}
+
+	anim_state->curr_frame = next; 
+	anim_state->acc = 0.0f;
 }
 
 void anim_Apply(AnimState *anim_state, Model *model, ModelAnimation *anims) {
 	model->bindPose = anim_state->bone_trs;
 	UpdateModelAnimation(*model, anims[anim_state->anim_id], anim_state->curr_frame);
+}
+
+void anim_Switch(AnimState *anim_state, int anim_id) {
+	if(anim_id == anim_state->anim_id) {
+		return;
+	}
+
+	anim_state->anim_id = anim_id;
+
+	anim_state->curr_frame = 0;
+	anim_state->acc = 0;
+	
+	anim_state->loop_count = 0;
 }
 

@@ -181,7 +181,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.5f;
-			ent.comp_ai.hear_distance = 255.0f;
+			ent.comp_ai.hear_distance = 512.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);
@@ -197,8 +197,11 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			
 			ent.comp_ai.speed = 150;
 
+			ent.comp_health.component_valid = true;
+
 			ent.anim_state = anim_Init(ent.model);
 			ent.animations = LoadModelAnimations("resources/models/enemies/maintainer.glb", &ent.num_anims);
+			ent.anim_state.speed = 120.0f;
 
 		} break;
 
@@ -226,7 +229,15 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 				
 			//ent.comp_transform.position = BoxCenter(ent.comp_transform.bounds);
 
-			printf("made ff, %d\n", ent.bsp_model);
+			//printf("made ff, %d\n", ent.bsp_model);
+
+		} break;
+
+		case ENT_HEALTHPACK: {
+
+		} break;
+
+		case ENT_AMMO_REVOLVER: {
 
 		} break;
 	}

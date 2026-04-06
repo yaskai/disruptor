@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "../include/num_redefs.h"
 
 #ifndef ANIM_H_
 #define ANIM_H_
@@ -10,12 +11,19 @@ typedef struct {
 	int curr_frame;
 	int anim_id;
 
+	float speed;
+	float acc;
+
+	u8 loop_count;
+
 } AnimState;
 
 AnimState anim_Init(Model model); 
 void anim_Close(AnimState *anim_state);
 
-void anim_Update(AnimState *anim_state, ModelAnimation *anims);
+void anim_Update(AnimState *anim_state, ModelAnimation *anims, float dt);
 void anim_Apply(AnimState *anim_state, Model *model, ModelAnimation *anims);
+
+void anim_Switch(AnimState *anim_state, int anim_id);
 
 #endif

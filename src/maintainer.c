@@ -81,11 +81,16 @@ void MaintainerDraw(Entity *ent, float dt) {
 		return;
 	}
 
-	ent->anim_state.anim_id = 0;
-	if(Vector3Length(ai->wish_dir))
-		ent->anim_state.anim_id = 1;
+	//ent->anim_state.anim_id = 0;
+	//anim_Switch(&ent->anim_state, 0);
+	if(Vector3Length(ai->wish_dir)) { 
+		//ent->anim_state.anim_id = 1;
+		anim_Switch(&ent->anim_state, 1);
+	} else {
+		anim_Switch(&ent->anim_state, 0);
+	}
 	
-	anim_Update(&ent->anim_state, ent->animations);
+	anim_Update(&ent->anim_state, ent->animations, dt);
 	anim_Apply(&ent->anim_state, &ent->model, ent->animations);
 
 	Vector3 pos = ent->comp_transform.position;

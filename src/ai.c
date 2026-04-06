@@ -201,10 +201,10 @@ u8 ExecFindPos(Entity *ent, MapSection *sect) {
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 
 	Vector3 tr_start = ct->position;
-	tr_start.z += 24;
+	//tr_start.z += 24;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
-	tr_dest.z += 24;
+	//tr_dest.z += 24;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {
@@ -253,15 +253,15 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	comp_Transform *ct = &ent->comp_transform;
 
 	Bsp_Data *bsp = &sect->bsp_data;
-	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[0];
+	Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
 
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 
 	Vector3 tr_start = ct->position;
-	tr_start.z += 16;
+	//tr_start.z += 24;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
-	tr_dest.z += 16;
+	//tr_dest.z += 24;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {

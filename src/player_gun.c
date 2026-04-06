@@ -67,7 +67,7 @@ comp_Weapon weapons[] = {
 	// Revolver
 	(comp_Weapon) {
 		.id = WEAP_REVOLVER,
-		.damage = 3,
+		.damage = 4,
 
 		.clip_size = 6,
 		.in_clip = 6,
@@ -116,6 +116,8 @@ void LoadCrosshairTextures() {
 	crosshair_textures[1] = LoadTexture("resources/ui/crosshair/arrow.png");
 }
 
+Texture2D muz_flash;
+
 void PlayerGunInit(
 	PlayerGun *player_gun,
 	Entity *player,
@@ -155,6 +157,8 @@ void PlayerGunInit(
 	mat = player_gun->model.transform;
 
 	LoadCrosshairTextures();
+
+	muz_flash = LoadTexture("resources/fx/muz.png");
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
@@ -180,6 +184,7 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 	//gun_refs.player->comp_weapon = weapons[gun_refs.player->comp_weapon.id];
 
 	curr_gun = &weapons[player_gun->current_gun];
+	gun_refs.player->comp_weapon = *curr_gun;
 
 	if(gun_refs.player->comp_ai.state == STATE_DEAD)
 		return;

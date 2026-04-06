@@ -651,10 +651,11 @@ void OnHitMaintainer(Entity *ent, short damage) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
-	if(ai->input_mask & AI_INPUT_SELF_GLITCHED) {
+	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
 		ent->comp_health.amount = 0;
+
+	if(ent->comp_health.amount <= 0)
 		ai->state = STATE_DEAD;
-	}
 
 	Vector3 to_player = Vector3Subtract(ptr_handler_self->ents[ptr_handler_self->player_id].comp_transform.position, ct->position);
 	to_player = Vector3Normalize(to_player);
@@ -670,12 +671,12 @@ void OnHitMaintainer(Entity *ent, short damage) {
 	else {
 		short dice = GetRandomValue(0, 6);
 		if(dice == 6) {
-			knockback.z = 0.99f;
+			//knockback.z = 0.99f;
+			knockback.z = 0.1f;
 			ai->speed = 2500;
 		}
 	}
 	knockback = Vector3Normalize(knockback);
-
 
 	ai->wish_dir = knockback;
 	EntMove(ent, ptr_handler_sect, ptr_handler_self, GetFrameTime());
