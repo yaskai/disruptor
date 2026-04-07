@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <float.h>
 #include "raylib.h"
 #include "raymath.h"
@@ -16,6 +17,9 @@ int FindClosestNavNode(Vector3 ent_position, MapSection *sect) {
 
 		float dist = Vector3DistanceSqr(node->position, ent_position);	
 		if(dist > closest_dist) 
+			continue;
+		
+		if(dist > (2048*2048))
 			continue;
 
 		closest_dist = dist;
@@ -40,6 +44,9 @@ int FindClosestNavNodeInGraph(Vector3 position, NavGraph *graph) {
 		if(dist > closest_dist) 
 			continue;
 
+		if(dist > (2048*2048))
+			continue;
+
 		closest_dist = dist;
 		id = i;
 	}
@@ -52,6 +59,7 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 		Entity *ent = &handler->ents[i];	
 
 		comp_Ai *ai = &ent->comp_ai;
+		ai->navgraph_id = -1;
 		if(!ai->component_valid) continue;
 
 		comp_Transform *ct = &ent->comp_transform;
@@ -63,6 +71,9 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 			int closest_node = FindClosestNavNodeInGraph(ct->position, graph);
 			if(closest_node > -1) {
 				float d = Vector3DistanceSqr(ct->position, graph->nodes[closest_node].position);
+
+				if(d > (1024*1024))
+					continue;
 
 				if(d < best) {
 					ai->navgraph_id = j;
@@ -76,6 +87,10 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 				//ct->position.y = node->position.y;
 			}
 		}
+	}
+
+	for(u16 i = 0; i < handler->count; i++) {
+		if(handler->ents[i].type == ENT_MAINTAINER) printf("graph: %d\n", handler->ents[i].comp_ai.navgraph_id);
 	}
 }
 

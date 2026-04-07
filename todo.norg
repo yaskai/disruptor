@@ -51,7 +51,7 @@ ___
 *** (-) reload animation
 
 ** (-) ammo system
-*** (-) pickups
+*** (x) pickups
 *** (-) reload mechanic
 
 ** (-) camera effects
@@ -95,6 +95,8 @@ ___
 
 ** Extra:
 *** (x) separate draw steps for translucent brushes (eg. forcefield, fence, etc.)
+*** use light grid for entities
+*** dynamic point lights
 
 ___
 * *UI*
@@ -174,7 +176,7 @@ ___
   - -vertex frames (possibly with interpolation)-
   - -gpu skinning-
   - -procedural through FABRIK-
-  - cpu skinning ended up being fine 
+  - (x) cpu skinning ended up being fine 
 
 ___
 * *Other*

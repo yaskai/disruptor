@@ -6,6 +6,7 @@
 #include <string.h>
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 #include "ent.h"
 #include "geo.h"
 #include "ai.h"
@@ -367,8 +368,10 @@ void RenderEntities(EntityHandler *handler, float dt) {
 }
 
 void RenderBrushEntities(EntityHandler *handler) {
-	//for(int i = handler->brush_ents_offset; i < handler->count; i++) {
-	for(int i = 0; i < handler->count; i++) {
+	u16 ff_ids[128] = {0};
+	u16 ff_count = 0;
+
+	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
 
 		if(!ent->bsp_model)
@@ -377,9 +380,20 @@ void RenderBrushEntities(EntityHandler *handler) {
 		if(!(ent->flags & ENT_ACTIVE)) 
 			continue;
 
+		if(ent->type == ENT_FORCEFIELD) {
+			ff_ids[ff_count++] = i;
+			continue;
+		}
+
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
-		DrawBoundingBox(ent->comp_transform.bounds, RED);
 	}
+
+	rlDisableDepthMask();
+	for(u16 i = 0; i < ff_count; i++) {
+		Entity *ent = &handler->ents[ff_ids[i]];
+		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
+	}
+	rlEnableDepthMask();
 }
 
 // Default entity trace data

@@ -319,7 +319,9 @@ typedef struct {
 
 	Lightmap lm;
 	Shader lm_shader;	// Default lightmap shader
+
 	Shader ff_shader;	// Force field shader
+	int ff_locs[8];
 
 	u8 *lm_rgb;
 
@@ -379,5 +381,6 @@ Model BspModelToRenderModel(Bsp_Data *bsp, int submodel_id);
 Lightmap BuildLightmap(Bsp_Data *bsp);
 
 void BspRenderSetup(Bsp_Data *bsp);
+void UpdateBspShaders(Bsp_Data *bsp);
 
 #endif

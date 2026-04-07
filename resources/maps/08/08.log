@@ -8,14 +8,14 @@ Input file: /home/kai/projects/disruptor/resources/maps/08/08.map
 Output file: /home/kai/projects/disruptor/resources/maps/08/08.bsp
 
 INFO: using built-in palette.
-     85 entities
+     93 entities
       9 unique textures
      59 texinfos
     606 unique planes
 
 INFO: world extents calculated to 7496 units
-      326 brushes
-    1,971 sides
+      325 brushes
+    1,965 sides
        43 side bevels
 
             0 texture frames added
@@ -28,44 +28,44 @@ Processing hull 0...
 INFO: calculating BSP for 314 brushes with 1899 sides
       314 brushes
     1,899 visible faces
-    1,271 nodes
-    1,271 expensive split nodes
-    1,272 leaves
+    1,274 nodes
+    1,274 expensive split nodes
+    1,275 leaves
        11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
       418 SOLID leafs
       195 SKY leafs
-      648 EMPTY leafs
-    1,272 leafs total
+      651 EMPTY leafs
+    1,275 leafs total
     22 max tree height
     13 avg tree height
-    6,064 tree portals
+    6,073 tree portals
     197 outside leaves
     0 detail filled leafs
       314 brushes
-    1,066 visible faces
-      833 non-visible faces
-    1,378 nodes
+    1,065 visible faces
+      834 non-visible faces
+    1,375 nodes
       375 non-visible nodes
-    1,378 expensive split nodes
-    1,379 leaves
+    1,375 expensive split nodes
+    1,376 leaves
        11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      447 SOLID leafs
+      442 SOLID leafs
       219 SKY leafs
-      702 EMPTY leafs
-    1,379 leafs total
+      704 EMPTY leafs
+    1,376 leafs total
     19 max tree height
     12 avg tree height
-    6,406 tree portals
+    6,379 tree portals
     258 outside leaves
     0 detail filled leafs
-    6,406 tree portals
-    4,468 sides visible
-    2,392 makefaces
-      555 merged
-    1,339 subdivided
+    6,379 tree portals
+    4,463 sides visible
+    2,387 makefaces
+      549 merged
+    1,331 subdivided
     80 nodes pruned
-      674 player-occupiable leaves
-      669 clusters of leaves
+      676 player-occupiable leaves
+      671 clusters of leaves
     1,659 vis portals
 fixing up cluster at 1832 344 104
 fixing up cluster at 1364 444 72
@@ -78,43 +78,43 @@ fixing up cluster at 928 -812 160
 fixing up cluster at 888 476 -68
 fixing up cluster at 1240 -436 -32
        11 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      444 EMPTY leafs
+      446 EMPTY leafs
       219 SKY leafs
-      625 SOLID leafs
-    1,299 leafs total
+      620 SOLID leafs
+    1,296 leafs total
     19 max tree height
     12 avg tree height
-    2,501 edges added by tjunctions
-    3,029 faces optimized through MWT
-    8,580 triangles computed from MWT
-      688 faces created via optimization of MWT triangles
-    8,486 edges
-    3,737 faces
+    2,523 edges added by tjunctions
+    3,022 faces optimized through MWT
+    8,588 triangles computed from MWT
+      691 faces created via optimization of MWT triangles
+    8,485 edges
+    3,733 faces
 Processing hull 1...
 Processing hull 2...
 Writing 08.bsp as Quake BSP bsp29
 Wrote 08.bsp
 
 count   lump name    byte size 
-      5 models              320
-    452 planes             9040
-   4237 vertexes          50844
-   1338 nodes             32112
+      4 models              256
+    461 planes             9220
+   4236 vertexes          50832
+   1329 nodes             31896
      43 texinfos           1720
-   3813 faces             76260
-   1492 clipnodes         11936
-    719 leafs             20132
-   4427 marksurfaces       8854
-   8639 edges             34556
-  16378 surfedges         65512
+   3803 faces             76060
+   1559 clipnodes         12472
+    714 leafs             19992
+   4439 marksurfaces       8878
+   8626 edges             34504
+  16354 surfedges         65416
       9 textures         486068
         lightdata             0
         visdata               0
-        entdata            8736
+        entdata            9190
 
 BSPX lump name   byte size 
-BRUSHLIST             10136
+BRUSHLIST             10092
 
-0.356s seconds elapsed
+0.360s seconds elapsed
 
 

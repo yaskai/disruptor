@@ -120,6 +120,10 @@ Texture2D muz_flash;
 Vector2 muz_pos;
 float muz_rot[12] = {0};
 
+bool freeze_frame = false;
+
+Font hud_font;
+
 void PlayerGunInit(
 	PlayerGun *player_gun,
 	Entity *player,
@@ -161,6 +165,9 @@ void PlayerGunInit(
 	LoadCrosshairTextures();
 
 	muz_flash = LoadTexture("resources/fx/muz.png");
+	//hud_font = LoadFont("resources/fonts/shuretech.ttf");
+	hud_font = LoadFontEx("resources/fonts/shuretech.ttf", 96, NULL, 0);
+	SetTextureFilter(hud_font.texture, TEXTURE_FILTER_TRILINEAR);
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
@@ -246,72 +253,11 @@ void PlayerGunUpdateShotgun(PlayerGun *player_gun, float dt) {
 }
 
 void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
-	/*
-	float recoil_angle = Clamp(recoil + gun_rot, -30, 90.0f);
-	mat = MatrixRotateX(-recoil_angle * DEG2RAD);
-	mat = MatrixMultiply(mat, MatrixRotateY(REVOLVER_ANGLE_REST * DEG2RAD));
-
-	float lerp_t = (recoil_angle > 80) ? 10 : 30; 
-
-	cam_recoil = Lerp(cam_recoil, recoil*0.00033f, dt*lerp_t);
-	cam_recoil = Clamp(cam_recoil, 0.0f, 0.33f);
-	PlayerSetRecoilInput(gun_refs.player, cam_recoil);
-
-	friction = (recoil > 40) ? 4.9f : 10.5f;
-	//if(recoil_angle >= 80.0f) friction *= 0.5f;
-
-	recoil -= (recoil * friction) * dt; 
-	if(recoil <= -EPSILON) recoil = 0;
-
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && recoil <= 1.0f) {
-		PlayerShootRevolver(player_gun, gun_refs.handler, gun_refs.sect);
-
-		recoil_add = false;
-		recoil += 130 + (GetRandomValue(10, 30) * 0.1f);
-	}
-
-	gun_pos = REVOLVER_REST;
-	gun_pos.z = REVOLVER_REST.z - (recoil * 0.05f);
-
-	models[WEAP_REVOLVER].transform = mat;
-	*/
-
-	/*
-	friction = (recoil_force < 40) ? 4.9f : 10.5f;
-
-	if(recoil_force <= 1.0f) {
-		recoil_force = 0;
-		//recoil = Lerp(recoil, recoil-friction, dt*30);
-		recoil -= friction * dt * 50;
-
-	} else {
-		//recoil_force = Lerp(recoil_force, 0.0f, dt*10);
-		recoil += recoil_force * dt * 10;
-		recoil_force -= friction * dt * 50;
-	}
-
-	//recoil += (recoil_force) * dt*50;
-
-	float recoil_angle = Clamp(recoil + gun_rot, 0.0f, 60.0f);
-	mat = MatrixRotateX(-recoil_angle * DEG2RAD);
-	mat = MatrixMultiply(mat, MatrixRotateY(REVOLVER_ANGLE_REST * DEG2RAD));
-
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && recoil <= 1.0f) {
-		PlayerShootRevolver(player_gun, gun_refs.handler, gun_refs.sect);
-		recoil = 0;
-		recoil_force += 130 + (GetRandomValue(10, 30) * 0.1f);
-	}
-
-	gun_pos = REVOLVER_REST;
-
-	float rest_ofs = (recoil * 0.05f);
-	rest_ofs = Clamp(rest_ofs, 0.0f, 0.01f); 	
-	gun_pos.z = REVOLVER_REST.z - (rest_ofs);
-
-	models[WEAP_REVOLVER].transform = mat;
-	*/
-
 	float recoil_angle = Clamp(recoil + gun_rot, -30, 55.0f);
+
+	if(freeze_frame)
+		recoil_angle = 0;
+
 	mat = MatrixRotateX(-recoil_angle * DEG2RAD);
 	mat = MatrixMultiply(mat, MatrixRotateY(REVOLVER_ANGLE_REST * DEG2RAD));
 
@@ -323,8 +269,8 @@ void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
 	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && recoil <= 1.0f) {
 		PlayerShootRevolver(player_gun, gun_refs.handler, gun_refs.sect);
 
-		recoil_add = false;
-		recoil += 130 + (GetRandomValue(10, 30) * 0.1f);
+		//recoil_add = false;
+		//recoil += 130 + (GetRandomValue(10, 30) * 0.1f);
 	}
 
 	gun_pos = REVOLVER_REST;
@@ -339,6 +285,8 @@ void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
 	cam_recoil = Lerp(cam_recoil, recoil*0.0013f, dt*lerp_t);
 	//cam_recoil = Clamp(cam_recoil, 0.0f, 0.33f);
 	PlayerSetRecoilInput(gun_refs.player, cam_recoil);
+
+	freeze_frame = false;
 }
 
 void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt) {
@@ -406,6 +354,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		EndMode3D();
 	}
 
+	/*
 	DrawText(TextFormat("_H_%d", gun_refs.player->comp_health.amount), 64, 980, 80, ColorAlpha(SKYBLUE, 0.95f));	
 	DrawText(
 		TextFormat("%d | %d", curr_gun->in_clip, curr_gun->ammo),
@@ -414,15 +363,25 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		80,
 		ColorAlpha(SKYBLUE, 0.95f)
 	);
-	/*
-	DrawText(
-		TextFormat("%d | %d", 6, 24),
-		1640,
-		980,
-		80,
+	*/
+
+	DrawTextEx(
+		hud_font,
+		TextFormat("_H_%d", gun_refs.player->comp_health.amount),
+		(Vector2) { 64, 980 },
+		80, 
+		1, 
 		ColorAlpha(SKYBLUE, 0.95f)
 	);
-	*/
+
+	DrawTextEx(
+		hud_font,
+		TextFormat("%d | %d", curr_gun->in_clip, curr_gun->ammo),
+		(Vector2) { 1640, 980 },
+		80,
+		1, 
+		ColorAlpha(SKYBLUE, 0.95f)
+	);
 
 	short crosshair_type = CROSSHAIR_DEFAULT;
 	switch(player_gun->current_gun) {
@@ -525,6 +484,11 @@ void PlayerShootShotgun(PlayerGun *player_gun, EntityHandler *handler, MapSectio
 }
 
 void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
+	recoil_add = false;
+	recoil += 130 + (GetRandomValue(10, 30) * 0.1f);
+
+	freeze_frame = true;
+
 	curr_gun->cooldown = 0.02f;
 	muz_rot[0] = -30;
 	for(short i = 1; i < 12; i++) muz_rot[i] = muz_rot[0] + GetRandomValue(-360, 360);

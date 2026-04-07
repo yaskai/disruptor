@@ -8,10 +8,15 @@ uniform mat4 mvp;			// Model view projection matrix
 
 out vec2 fragTexCoord;		// Pass texture coordinates to fragment shader
 out vec2 fragTexCoord2;		// Pass texture coordinates to fragment shader
+out vec3 fragPosition;
 
 void main() {
 	fragTexCoord = vertexTexCoord;	
 	fragTexCoord2 = vertexTexCoord2;
+
+	fragPosition = vec3(mvp * vec4(vertexPosition, 1.0));
+	//gl_Position = fragPosition;
+	
 	gl_Position = mvp * vec4(vertexPosition, 1.0);
 }
 

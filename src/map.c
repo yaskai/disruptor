@@ -902,7 +902,8 @@ void BuildNavGraph(MapSection *sect) {
 	SubdivideNavGraph(sect, navgraph);
 }
 
-#define MAX_EDGE_LENGTH (2048.0f*2048.0f)
+#define MAX_EDGE_LENGTH (1024.0f*1024.0f)
+#define MAX_EDGE_ANGLE (95.0f*DEG2RAD)
 void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 	MessageDiag("BuildNavEdges()", NULL, ANSI_BLUE);
 
@@ -921,12 +922,21 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 		for(u16 j = 0; j < navgraph->node_count; j++) {
 			NavNode *node_B = &navgraph->nodes[j];
 
-			if(j == i) continue;
+			if(j == i)
+				continue;
 
 			// Using vector subtraction to get distance,
 			// doing this in case I want to integrate actual level geometry later 
 			Vector3 v = Vector3Subtract(node_A->position, node_B->position);
 			float length = Vector3LengthSqr(v);	
+
+			// Don't build edges if nodes are too far apart
+			if(length > MAX_EDGE_LENGTH)
+				continue;
+
+			float angle = Vector3Angle(node_A->position, node_B->position);
+			if(angle > MAX_EDGE_ANGLE || angle < -MAX_EDGE_ANGLE)
+				continue;
 			
 			Bsp_TraceData tr = Bsp_TraceDataEmpty();
 			Bsp_RecursiveTraceEx(&sect->bsp[1], sect->bsp[1].first_node, 0, 1, node_B->position, node_A->position, &tr);
@@ -935,19 +945,7 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 				continue;
 			}
 
-			/*
-			BvhTraceData tr = TraceDataEmpty();
-			Ray ray = (Ray) { .position = node_B->position, .direction = Vector3Normalize(v) };
-			BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, FLT_MAX);
-
-			if(tr.hit)
-				continue;
-			*/
-
 			// Don't build edges if line between nodes are obstructed by level geometry
-			//if(tr.hit) continue;
-			// Don't build edges if nodes are too far apart
-			if(length > MAX_EDGE_LENGTH) continue;
 
 			// All checks passed, create edge
 			NavEdge edge = (NavEdge) { .id_A = i, .id_B = j };
@@ -1245,6 +1243,8 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 int translucent_count = 0;
 int translucent_ids[TRANSLUCENT_MAX] = {0};
 void DrawMap(MapSection *sect, Vector3 pos) {
+	UpdateBspShaders(&sect->bsp_data);
+
 	translucent_count = 0;
 	
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
@@ -1276,11 +1276,13 @@ void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
 	}
 	rlEnableDepthMask();
 
+	/*
 	BeginBlendMode(BLEND_MULTIPLIED);
 	for(int i = 0; i < ff_count; i++) {
 		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[ff_ids[i]];
 		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
 	}	
 	EndBlendMode();
+	*/
 }
 

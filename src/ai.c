@@ -7,7 +7,7 @@
 #include "sched_defs.c"
 #include "../include/log_message.h"
 
-#define AI_TICKRATE 8.0f
+#define AI_TICKRATE 6.0f
 float ai_tick = 0.0f;
 
 #define MEELEE_RANGE (48.0f*48.0f)
@@ -319,6 +319,9 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 	comp_Ai *ai = &ent->comp_ai;	
 	comp_Transform *ct = &ent->comp_transform;
 
+	if(ai->navgraph_id < 0)
+		return;
+
 	if(ai->sched_state.sched_id == SCHED_FIX_FRIEND) {
 		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
 		return;
@@ -336,10 +339,13 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 		if(!(other->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED))
 			continue;
 
-		if(other->comp_ai.navgraph_id != ai->navgraph_id)
+		if(other->comp_ai.navgraph_id != ai->navgraph_id || other->comp_ai.navgraph_id == -1)
 			continue;
 
 		if(other->comp_ai.task_state.task_id == TASK_FIRE_WEAPON)
+			continue;
+
+		if(Vector3DistanceSqr(other->comp_transform.position, ct->position) > (1024*1024))
 			continue;
 
 		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
@@ -446,7 +452,7 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	comp_Transform *ct = &ent->comp_transform;
 	BvhTree *bvh = &sect->bvh[0];
 
-	if(ent->type == ENT_MAINTAINER && ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+	if(ent->type == ENT_MAINTAINER && ai->sched_state.sched_id != SCHED_FIX_FRIEND && ai->navgraph_id >= 0)
 		CheckForBrokenAlly(ent, handler);
 
 	// ** Check if player is visible **	

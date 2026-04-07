@@ -1099,6 +1099,7 @@ Model BspModelToRenderModel(Bsp_Data *bsp, int submodel_id) {
 void BspRenderSetup(Bsp_Data *bsp) {
 	bsp->lm_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/lit_f.glsl");
 	bsp->ff_shader = LoadShader("resources/shaders/lit_v.glsl", "resources/shaders/force_field_f.glsl");
+	bsp->ff_locs[0] = GetShaderLocation(bsp->ff_shader, "time");
 
 	FilePathList mat_list = LoadDirectoryFiles("tools/Disruptor/textures/custom");	
 
@@ -1126,5 +1127,10 @@ void BspRenderSetup(Bsp_Data *bsp) {
 	}
 
 	//DisplayNodes(&material_hashmap);
+}
+
+void UpdateBspShaders(Bsp_Data *bsp) {
+	float t = GetTime();
+	SetShaderValue(bsp->ff_shader, bsp->ff_locs[0], &t, SHADER_UNIFORM_FLOAT);
 }
 
