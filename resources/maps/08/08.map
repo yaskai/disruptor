@@ -3639,13 +3639,20 @@
 }
 // entity 82
 {
+"classname" "ammo_revolver"
+"origin" "88 -200 24"
+"enum_id" "8"
+"angle" "0"
+}
+// entity 83
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 83
+// entity 84
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

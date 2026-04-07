@@ -41,4 +41,6 @@ void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt);
 
 void PlayerGunReload(PlayerGun *player_gun, float dt);
 
+void SendAmmoPickupEvent(int pickup_type);
+
 #endif

@@ -211,11 +211,8 @@ void CheckForPickups(Entity *player, EntityHandler *handler, i16 cell_id) {
 	for(short i = 0; i < cell->ent_count; i++) {
 		Entity *ent = &handler->ents[cell->ents[i]];
 
-		if(!(ent->flags & ENT_ACTIVE))
-			continue;
-
-		if(!(ent->flags & ENT_IS_PICKUP))
-			continue;
+		if(!(ent->flags & ENT_ACTIVE))		continue;
+		if(!(ent->flags & ENT_IS_PICKUP)) 	continue;
 
 		if(!CheckCollisionSpheres(player->comp_transform.position, 32, ent->comp_transform.position, 16))
 			continue;
@@ -227,6 +224,12 @@ void CheckForPickups(Entity *player, EntityHandler *handler, i16 cell_id) {
 
 				PlayerHeal(player, 30);
 				
+				break;
+
+			case ENT_AMMO_PISTOL:
+			case ENT_AMMO_SHOTGUN:
+			case ENT_AMMO_REVOLVER:
+				SendAmmoPickupEvent(ent->type);
 				break;
 		}
 

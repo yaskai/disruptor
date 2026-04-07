@@ -356,6 +356,10 @@ void RenderEntities(EntityHandler *handler, float dt) {
 			case ENT_HEALTHPACK:
 				DrawBoundingBox(ent->comp_transform.bounds, PINK);
 				break;
+
+			case ENT_AMMO_REVOLVER:
+				DrawBoundingBox(ent->comp_transform.bounds, DARKGREEN);
+				break;
 		}
 	}
 

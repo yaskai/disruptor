@@ -212,6 +212,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		} break;
 
 		case ENT_SWITCH: {
+			ent.flags |= ( ENT_COLLIDERS ); 
+
 			ent.comp_transform.bounds = (BoundingBox) {
 				.min = Vector3Scale(BODY_VOLUME_SMALL, -0.5f),
 				.max = Vector3Scale(BODY_VOLUME_SMALL,  0.5f)
@@ -248,6 +250,14 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		} break;
 
 		case ENT_AMMO_REVOLVER: {
+			ent.flags |= (ENT_IS_PICKUP);
+
+			ent.comp_transform.bounds = (BoundingBox) {
+				.min = Vector3Scale(BODY_VOLUME_SMALL, -0.5f),
+				.max = Vector3Scale(BODY_VOLUME_SMALL,  0.5f)
+			};
+
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 
 		} break;
 	}

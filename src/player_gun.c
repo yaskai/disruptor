@@ -389,7 +389,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 					(Rectangle) { muz_pos.x, muz_pos.y, muz_flash.width, muz_flash.height },
 					(Vector2) { muz_flash.width * 0.5f, muz_flash.height * 0.5f }, 
 					muz_rot[i],
-					ColorBrightness(ColorAlpha(WHITE, 0.45f), 10.5f)
+					ColorBrightness(ColorAlpha(WHITE, 0.25f), 1.5f)
 				);
 			}
 		}
@@ -645,5 +645,21 @@ void PlayerGunReload(PlayerGun *player_gun, float dt) {
 
 	// Set timer
 	curr_gun->reload_timer = curr_gun->reload_time_amnt;
+}
+
+void SendAmmoPickupEvent(int pickup_type) {
+	switch(pickup_type) {
+		case ENT_AMMO_PISTOL:
+			weapons[WEAP_PISTOL].ammo += 20;
+			break;
+
+		case ENT_AMMO_SHOTGUN:
+			weapons[WEAP_SHOTGUN].ammo += 16;
+			break;
+
+		case ENT_AMMO_REVOLVER:
+			weapons[WEAP_REVOLVER].ammo += 6;
+			break;
+	}	
 }
 
