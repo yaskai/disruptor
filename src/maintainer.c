@@ -9,7 +9,7 @@ void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
 	//ai->targ_data.ent_id = handler->player_id;
 
 	if(ai->sched_state.sched_id != SCHED_FIX_FRIEND) {
-		if(ai->input_mask & AI_INPUT_SEE_PLAYER || ai->input_mask & AI_INPUT_HEAR_PLAYER) {
+		if((ai->input_mask & AI_INPUT_SEE_PLAYER) || (ai->input_mask & AI_INPUT_HEAR_PLAYER)) {
 			ai->targ_data.ent_id = handler->player_id;
 			ai->targ_data.position = handler->ents[handler->player_id].comp_transform.position;
 			ai->targ_data.known_position = ai->targ_data.position;
@@ -34,6 +34,18 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ct->forward = Vector3Lerp(ct->forward, Vector3Normalize(ct->velocity), 10*dt);
 		ct->forward.z = 0;
 		ct->forward = Vector3Normalize(ct->forward);
+	}
+
+	if(ai->task_state.task_id == TASK_FACE_DIR) {
+		if(ai->targ_data.ent_id == handler->player_id) {
+			Vector3 to_player = Vector3Subtract(handler->ents[handler->player_id].comp_transform.position, ct->position);
+			to_player.z = 0;
+			to_player = Vector3Normalize(to_player);
+
+			ct->targ_look = to_player; 
+		}
+
+		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
 	}
 
 	//if(ai->task_state.task_id == TASK_STOP_MOVE || (ai->input_mask & AI_INPUT_MEELEE_RANGE)) {
@@ -104,5 +116,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 	//DrawSphere(ai->targ_data.position, 2, PURPLE);
 	//DrawSphere(ai->targ_data.known_position, 2, ColorAlpha(PURPLE, 0.5f));
 	//DrawSphere(ai->task_state.move_dest, 5, PURPLE);
+
+	//DrawSphere(ct->position, ai->hear_distance, ColorAlpha(YELLOW, 0.5f));
 }
 

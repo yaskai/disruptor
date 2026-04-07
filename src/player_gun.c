@@ -489,7 +489,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 
 	freeze_frame = true;
 
-	curr_gun->cooldown = 0.02f;
+	curr_gun->cooldown = 0.05f;
 	muz_rot[0] = -30;
 	for(short i = 1; i < 12; i++) muz_rot[i] = muz_rot[0] + GetRandomValue(-360, 360);
 

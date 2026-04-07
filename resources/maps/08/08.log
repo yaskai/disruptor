@@ -8,7 +8,7 @@ Input file: /home/kai/projects/disruptor/resources/maps/08/08.map
 Output file: /home/kai/projects/disruptor/resources/maps/08/08.bsp
 
 INFO: using built-in palette.
-     93 entities
+     99 entities
       9 unique textures
      59 texinfos
     606 unique planes
@@ -38,7 +38,7 @@ INFO: calculating BSP for 314 brushes with 1899 sides
     1,275 leafs total
     22 max tree height
     13 avg tree height
-    6,073 tree portals
+    6,071 tree portals
     197 outside leaves
     0 detail filled leafs
       314 brushes
@@ -55,12 +55,12 @@ INFO: calculating BSP for 314 brushes with 1899 sides
     1,376 leafs total
     19 max tree height
     12 avg tree height
-    6,379 tree portals
+    6,378 tree portals
     258 outside leaves
     0 detail filled leafs
-    6,379 tree portals
-    4,463 sides visible
-    2,387 makefaces
+    6,378 tree portals
+    4,461 sides visible
+    2,386 makefaces
       549 merged
     1,331 subdivided
     80 nodes pruned
@@ -84,12 +84,12 @@ fixing up cluster at 1240 -436 -32
     1,296 leafs total
     19 max tree height
     12 avg tree height
-    2,523 edges added by tjunctions
-    3,022 faces optimized through MWT
-    8,588 triangles computed from MWT
-      691 faces created via optimization of MWT triangles
-    8,485 edges
-    3,733 faces
+    2,521 edges added by tjunctions
+    3,021 faces optimized through MWT
+    8,584 triangles computed from MWT
+      690 faces created via optimization of MWT triangles
+    8,481 edges
+    3,731 faces
 Processing hull 1...
 Processing hull 2...
 Writing 08.bsp as Quake BSP bsp29
@@ -98,23 +98,23 @@ Wrote 08.bsp
 count   lump name    byte size 
       4 models              256
     461 planes             9220
-   4236 vertexes          50832
+   4234 vertexes          50808
    1329 nodes             31896
      43 texinfos           1720
-   3803 faces             76060
-   1559 clipnodes         12472
+   3801 faces             76020
+   1542 clipnodes         12336
     714 leafs             19992
-   4439 marksurfaces       8878
-   8626 edges             34504
-  16354 surfedges         65416
+   4437 marksurfaces       8874
+   8622 edges             34488
+  16346 surfedges         65384
       9 textures         486068
         lightdata             0
         visdata               0
-        entdata            9190
+        entdata            9499
 
 BSPX lump name   byte size 
 BRUSHLIST             10092
 
-0.360s seconds elapsed
+0.350s seconds elapsed
 
 

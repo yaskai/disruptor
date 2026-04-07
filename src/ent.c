@@ -388,12 +388,14 @@ void RenderBrushEntities(EntityHandler *handler) {
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
 	}
 
+	//rlDisableBackfaceCulling();
 	rlDisableDepthMask();
 	for(u16 i = 0; i < ff_count; i++) {
 		Entity *ent = &handler->ents[ff_ids[i]];
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
 	}
 	rlEnableDepthMask();
+	//rlEnableBackfaceCulling();
 }
 
 // Default entity trace data

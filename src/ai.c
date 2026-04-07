@@ -467,9 +467,11 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	Vector3 to_player = Vector3Normalize(Vector3Subtract(player_ent->comp_transform.position, eye_pos));
 	float d_to_player = Vector3LengthSqr(to_player);
 
+	/*
 	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
-	if(d_to_player <= ai->hear_distance*ai->hear_distance)
+	if(d_to_player <= ai->hear_distance)
 		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
+	*/
 
 	// Player is in ai's sight cone
 	if(Vector3DotProduct(ct->forward, to_player) >= ai->sight_cone && d_to_player <= 1000.0f) { 
@@ -519,15 +521,21 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	// ***
 
 	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
-	bool in_hearing_range = (d_to_player < ai->hear_distance*ai->hear_distance);
-	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f && ai->targ_data.ent_id == handler->player_id) {
+	bool in_hearing_range = (Vector3Distance(player_ent->comp_transform.position, ct->position) <= ai->hear_distance);
+	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f) {
 		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
+
+		prev_seen_player = true;
+		ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
+
+		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+			ai->targ_data.ent_id = handler->player_id;
 
 		if(!(ai->input_mask & AI_INPUT_LOST_PLAYER)) {
 			//ai->targ_data.known_position = player_ent->comp_transform.position;
 			// *
-			if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
-				ai->targ_data.ent_id = handler->player_id;
+			//if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+				//ai->targ_data.ent_id = handler->player_id;
 		}
 	}
 
