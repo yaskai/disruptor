@@ -9,7 +9,11 @@ void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
 	//ai->targ_data.ent_id = handler->player_id;
 
 	if(ai->sched_state.sched_id != SCHED_FIX_FRIEND) {
-		if((ai->input_mask & AI_INPUT_SEE_PLAYER) || (ai->input_mask & AI_INPUT_HEAR_PLAYER)) {
+		if(
+			(ai->input_mask & AI_INPUT_SEE_PLAYER) || (ai->input_mask & AI_INPUT_HEAR_PLAYER) || 
+			(ai->sched_state.sched_id == SCHED_CHASE_PLAYER && !ai->task_state.use_path)) 
+		{
+
 			ai->targ_data.ent_id = handler->player_id;
 			ai->targ_data.position = handler->ents[handler->player_id].comp_transform.position;
 			ai->targ_data.known_position = ai->targ_data.position;
@@ -48,7 +52,6 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
 	}
 
-	//if(ai->task_state.task_id == TASK_STOP_MOVE || (ai->input_mask & AI_INPUT_MEELEE_RANGE)) {
 	bool stop = false;
 	if(ai->task_state.task_id == TASK_STOP_MOVE)
 		stop = true;
@@ -61,11 +64,13 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 	}
 
 	if(stop) {
-		ct->velocity = Vector3Lerp(ct->velocity, Vector3Zero(), 10*dt);
-		ai->speed = 0;
+		ct->velocity = Vector3Lerp(ct->velocity, Vector3Zero(), 2*dt);
+		ai->speed = Lerp(ai->speed, 0.0f, 2*dt);
+		//ai->speed = 0;
 		ai->wish_dir = Vector3Zero();
 	} else {
-		ai->speed = 175;
+		//ai->speed = 175;
+		ai->speed = Lerp(ai->speed, 200.0f, 10*dt);
 	}
 }
 

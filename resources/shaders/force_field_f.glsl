@@ -22,7 +22,7 @@ float noise(vec2 co) {
     //return fract(sin(dot(co, vec2(0, 1 + time))) * time);
 	float val = sin((co.y*100.5) - (time*20.1));
 
-    val -= fract(cos(dot(co, vec2(12.9898, 78.233))) * 43758.5453 + time);
+    val -= fract(cos(dot(co, vec2(12.9898, 78.233))) * 43758.5453 + time) * 0.5;
 	val = clamp(val, 0.0, 1.25);
 
 	return val;

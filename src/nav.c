@@ -44,6 +44,10 @@ int FindClosestNavNodeInGraph(Vector3 position, NavGraph *graph) {
 		if(dist > closest_dist) 
 			continue;
 
+		float z_dist = fabsf(position.z - node->position.z);
+		if(z_dist > 128)
+			continue;
+
 		if(dist > (2048*2048))
 			continue;
 

@@ -114,12 +114,12 @@ u8 ExecStopMove(Entity *ent) {
 	comp_Ai *ai = &ent->comp_ai;
 	comp_Transform *ct = &ent->comp_transform;
 
-	//if(Vector3Length(ct->velocity) < 1.0f) {
-	ai->wish_dir = Vector3Zero();
-	ct->velocity.x = 0;
-	ct->velocity.y = 0;
-	return 1;
-	//}
+	if(Vector3Length(ct->velocity) < 1.0f) {
+		ai->wish_dir = Vector3Zero();
+		ct->velocity.x = 0;
+		ct->velocity.y = 0;
+		return 1;
+	}
 
 	return 0;
 }
@@ -539,8 +539,12 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		}
 	}
 
-	if(prev_seen_player && !(ai->input_mask & AI_INPUT_LOST_PLAYER))
+	if(
+		prev_seen_player &&
+		!(ai->input_mask & AI_INPUT_LOST_PLAYER) && !(ai->input_mask & AI_INPUT_HEAR_PLAYER || ai->input_mask & AI_INPUT_SEE_PLAYER)
+	) {
 		ai->input_mask |= AI_INPUT_LOST_PLAYER;
+	}
 
 	if(Vector3DistanceSqr(ai->task_state.move_dest, ent->comp_transform.position) <= 16.0f) {	
 		ai->input_mask |= AI_INPUT_DEST_REACHED;
