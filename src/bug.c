@@ -434,6 +434,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				continue;
 			}
 
+			if(enemy_ent->flags & ENT_IS_PICKUP)
+				continue;
+
 			bool height_check =
 				(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 64);
 

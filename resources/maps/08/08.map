@@ -3308,16 +3308,6 @@
 }
 // entity 48
 {
-"classname" "nav_node"
-"origin" "1788 -156 92"
-}
-// entity 49
-{
-"classname" "nav_node"
-"origin" "1788 -284 92"
-}
-// entity 50
-{
 "classname" "func_detail_fence"
 // brush 0
 {
@@ -3329,22 +3319,22 @@
 ( 1440 256 152 ) ( 1440 192 64 ) ( 1440 192 152 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 51
+// entity 49
 {
 "classname" "nav_node"
 "origin" "1460 -156 92"
 }
-// entity 52
+// entity 50
 {
 "classname" "nav_node"
 "origin" "1340 -124 92"
 }
-// entity 53
+// entity 51
 {
 "classname" "nav_node"
 "origin" "1356 60 84"
 }
-// entity 54
+// entity 52
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -3357,7 +3347,7 @@
 ( 1432 448 144 ) ( 1432 440 0 ) ( 1432 440 144 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 55
+// entity 53
 {
 "classname" "light"
 "origin" "1328 440 96"
@@ -3368,7 +3358,7 @@
 "impulse" "0"
 "wait" "0.1"
 }
-// entity 56
+// entity 54
 {
 "classname" "light"
 "origin" "1320 320 96"
@@ -3379,7 +3369,7 @@
 "impulse" "0"
 "wait" "0.1"
 }
-// entity 57
+// entity 55
 {
 "classname" "light"
 "origin" "1408 320 -8"
@@ -3390,7 +3380,7 @@
 "impulse" "0"
 "wait" "0.1"
 }
-// entity 58
+// entity 56
 {
 "classname" "info_switch"
 "origin" "956 60 -132"
@@ -3400,7 +3390,7 @@
 "trigger_group" "2"
 "trigger_condition" "0"
 }
-// entity 59
+// entity 57
 {
 "classname" "func_forcefield"
 "trigger_group" "2"
@@ -3417,7 +3407,7 @@
 ( 872 -296 8 ) ( 872 -544 -144 ) ( 872 -544 8 ) {ff 0 0 0 1 1
 }
 }
-// entity 60
+// entity 58
 {
 "classname" "func_forcefield"
 "trigger_group" "2"
@@ -3434,7 +3424,7 @@
 ( 1064 -296 8 ) ( 1064 -544 -144 ) ( 1064 -544 8 ) {ff 0 0 0 1 1
 }
 }
-// entity 61
+// entity 59
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -3447,7 +3437,7 @@
 ( 1000 480 -48 ) ( 1000 480 -40 ) ( 1000 608 -40 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 62
+// entity 60
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -3460,7 +3450,7 @@
 ( 1272 -432 0 ) ( 1272 -440 -64 ) ( 1272 -440 0 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 63
+// entity 61
 {
 "classname" "light"
 "origin" "1396 -472 0"
@@ -3471,7 +3461,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 64
+// entity 62
 {
 "classname" "light"
 "origin" "1396 -128 0"
@@ -3482,7 +3472,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 65
+// entity 63
 {
 "classname" "light"
 "origin" "1324 -128 0"
@@ -3493,7 +3483,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 66
+// entity 64
 {
 "classname" "light"
 "origin" "1324 -312 0"
@@ -3504,7 +3494,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 67
+// entity 65
 {
 "classname" "light"
 "origin" "1124 -472 0"
@@ -3515,7 +3505,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 68
+// entity 66
 {
 "classname" "light"
 "origin" "724 -472 0"
@@ -3526,7 +3516,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 69
+// entity 67
 {
 "classname" "light"
 "origin" "516 -472 -8"
@@ -3537,7 +3527,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 70
+// entity 68
 {
 "classname" "light"
 "origin" "516 -216 -8"
@@ -3548,7 +3538,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 71
+// entity 69
 {
 "classname" "light"
 "origin" "892 216 -40"
@@ -3559,7 +3549,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 72
+// entity 70
 {
 "classname" "light"
 "origin" "1404 56 -16"
@@ -3570,46 +3560,46 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 73
+// entity 71
 {
 "classname" "nav_node"
 "origin" "-236 -220 52"
 }
-// entity 74
+// entity 72
 {
 "classname" "nav_node"
 "origin" "-124 -20 52"
 }
-// entity 75
+// entity 73
 {
 "classname" "nav_node"
 "origin" "-196 -76 52"
 }
-// entity 76
+// entity 74
 {
 "classname" "nav_node"
 "origin" "2132 -164 92"
 }
-// entity 77
+// entity 75
 {
 "classname" "info_maintainer_spawn"
 "origin" "1524 -156 80"
 "enum_id" "2"
 "angle" "270"
 }
-// entity 78
+// entity 76
 {
 "classname" "nav_node"
 "origin" "2188 -108 92"
 }
-// entity 79
+// entity 77
 {
 "classname" "health_pickup"
 "origin" "88 -136 24"
 "enum_id" "5"
 "angle" "0"
 }
-// entity 80
+// entity 78
 {
 "classname" "light"
 "origin" "1572 -112 88"
@@ -3620,7 +3610,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 81
+// entity 79
 {
 "classname" "light"
 "origin" "1796 -120 88"
@@ -3631,7 +3621,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 82
+// entity 80
 {
 "classname" "light"
 "origin" "2076 -120 88"
@@ -3642,12 +3632,12 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 83
+// entity 81
 {
 "classname" "nav_node"
 "origin" "2164 228 92"
 }
-// entity 84
+// entity 82
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
@@ -3655,7 +3645,7 @@
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 85
+// entity 83
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

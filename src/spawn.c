@@ -165,6 +165,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		} break;
 
 		case ENT_MAINTAINER: {
+			ent.flags |= (ENT_COLLIDERS);
+
 			ent.model = handler->base_ent_models[ENT_MAINTAINER];
 
 			ent.curr_anim = 0;
@@ -234,6 +236,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		} break;
 
 		case ENT_HEALTHPACK: {
+			ent.flags |= (ENT_IS_PICKUP);
+
 			ent.comp_transform.bounds = (BoundingBox) {
 				.min = Vector3Scale(BODY_VOLUME_SMALL, -0.5f),
 				.max = Vector3Scale(BODY_VOLUME_SMALL,  0.5f)

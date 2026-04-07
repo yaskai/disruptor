@@ -199,6 +199,41 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 	memcpy(pm->clips, clips, sizeof(Vector3) * num_clips);
 }
 
+void PlayerHeal(Entity *player, short heal_amount) {
+	comp_Health *health = &player->comp_health;
+
+	health->amount += heal_amount;
+	health->amount = Clamp(health->amount, 0, 100);	
+}
+
+void CheckForPickups(Entity *player, EntityHandler *handler, i16 cell_id) {
+	EntGridCell *cell = &handler->grid.cells[cell_id];
+	for(short i = 0; i < cell->ent_count; i++) {
+		Entity *ent = &handler->ents[cell->ents[i]];
+
+		if(!(ent->flags & ENT_ACTIVE))
+			continue;
+
+		if(!(ent->flags & ENT_IS_PICKUP))
+			continue;
+
+		if(!CheckCollisionSpheres(player->comp_transform.position, 32, ent->comp_transform.position, 16))
+			continue;
+
+		switch(ent->type) {
+			case ENT_HEALTHPACK:
+				if(player->comp_health.amount >= 100)
+					continue;
+
+				PlayerHeal(player, 30);
+				
+				break;
+		}
+
+		ent->flags &= ~ENT_ACTIVE;
+	}
+}
+
 void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section, PlayerDebugData *debug_data, EntityHandler *ent_handler) {
 	ptr_cam = camera;
 	ptr_input = input;
@@ -266,6 +301,10 @@ void PlayerUpdate(Entity *player, float dt) {
 
 	if(!player->comp_transform.on_ground)
 		step_frame = false;
+
+	Coords coords = Vec3ToCoords(player->comp_transform.position, &ptr_ent_handler->grid);
+	i16 cell_id = CellCoordsToId(coords, &ptr_ent_handler->grid);
+	CheckForPickups(player, ptr_ent_handler, cell_id);
 }
 
 void PlayerDraw(Entity *player) {

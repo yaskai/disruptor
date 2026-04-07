@@ -141,6 +141,7 @@ typedef struct {
 
 #define ENT_ACTIVE		0x01
 #define ENT_COLLIDERS	0x02
+#define ENT_IS_PICKUP	0x04
 
 enum ENT_BEHAVIORS : i8 {
 	ENT_BEHAVIOR_NONE 		= -1,
