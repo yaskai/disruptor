@@ -261,11 +261,11 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 
 	Vector3 tr_start = ct->position;
 	//tr_start.z += 24;
-	tr_start.z += 8;
+	tr_start.z += 18;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
 	//tr_dest.z += 24;
-	tr_dest.z += 8;
+	tr_dest.z += 18;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {

@@ -437,14 +437,14 @@ void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point) {
 
 	movement = Vector3Scale(movement, 300 * dt);
 	
-	if(IsKeyDown(KEY_Q)) {
+	if(IsKeyDown(KEY_O)) {
 		movement = Vector3Scale(right, -300 * dt);
 		cam->position = Vector3Add(cam->position, movement);
 		//cam->target = Vector3Subtract(cam->target, Vector3Scale(movement, 1.0f));
 		return;
 	}
 
-	if(IsKeyDown(KEY_E)) {
+	if(IsKeyDown(KEY_P)) {
 		movement = Vector3Scale(right,  300 * dt);
 		cam->position = Vector3Add(cam->position, movement);
 		//cam->target = Vector3Subtract(cam->target, Vector3Scale(movement, 1.0f));

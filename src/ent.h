@@ -413,7 +413,6 @@ void OnFixRegulator(Entity *ent);
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-Vector3 EntTraceMove(comp_Transform *ct, MapSection *sect, EntityHandler *handler, float dt);
 void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt);
 
 // ----------------------------------------------------------------------------------------------------------------------------

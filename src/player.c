@@ -611,7 +611,8 @@ void pm_ApplyGravity(comp_Transform *ct, float dt) {
 #define MIN_TRACE_DIST (0.0333f)
 #define MAX_TRACE_DIST (2000.0f)
 void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt) {
-	Bsp_Hull *bsp = &ptr_sect->bsp[1];
+	Bsp_Hull *bsp = &ptr_sect->bsp_data.hull_groups[0].hulls[1];
+	//Bsp_Hull *bsp = &ptr_sect->bsp[1];
 
 	*pm = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1, .origin = start, .block = 0, .clip_count = 0 };
 
@@ -665,7 +666,7 @@ void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceDa
 			float into = Vector3DotProduct(vel, clips[j]);
 
 			if(into < 0) {
-				pm_ClipVelocity(vel, clips[j], &vel, 1.0005f, pm->block);
+				pm->block |= pm_ClipVelocity(vel, clips[j], &vel, 1.0005f, pm->block);
 			}
 		}
 
@@ -677,6 +678,8 @@ void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceDa
 	}
 
 	pm->move_dist = Vector3Distance(start, dest);
+	pm->fraction = (pm->move_dist / Vector3Length(wish_vel));
+
 	pm->end_vel = vel;
 	pm->end_pos = dest;
 
@@ -770,8 +773,10 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 		return;
 	}
 
-	if(step_pm.end_pos.z > base_pm.end_pos.z + 0.1f)
-		step_frame = true;
+	if(ent->id == handler->player_id) {
+		if(step_pm.end_pos.z > base_pm.end_pos.z + 0.1f)
+			step_frame = true;
+	}
 
 	*pm = step_pm;
 }

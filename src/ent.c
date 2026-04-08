@@ -20,6 +20,225 @@ Vector3 debug_bullet_norm;
 MapSection *ptr_handler_sect = NULL;
 EntityHandler *ptr_handler_self = NULL;
 
+void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
+	MapSection *sect = ptr_handler_sect;
+
+	comp_Transform *ct = &ent->comp_transform;
+
+	Bsp_Data *bsp = &sect->bsp_data;
+	Bsp_Hull *hull = &bsp->hull_groups[0].hulls[1];
+
+	EntGrid *grid = &handler->grid;
+
+	*pm = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1, .origin = start, .block = 0, .clip_count = 0 };
+
+	Vector3 dest = start;
+	Vector3 vel = wish_vel;
+
+	pm->start_vel = wish_vel;
+
+	float t_remain = dt;
+
+	Vector3 clips[MAX_CLIPS] = {0};
+	u8 num_clips = 0;
+
+	for(short i = 0; i < MAX_BUMPS; i++) {
+		// End slide trace if velocity too low
+		if(Vector3LengthSqr(vel) <= STOP_EPS*STOP_EPS)
+			break;
+		
+		// Scale slide movement by time remaining
+		Vector3 move = Vector3Scale(vel, t_remain);
+
+		// Upate ray
+		Ray ray = (Ray) { .position = dest, .direction = Vector3Normalize(move) };
+
+		// Trace geometry 
+		Bsp_TraceData tr = Bsp_TraceDataEmpty();
+		float fraction = 1.0f;
+
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &tr);
+		fraction = tr.fraction;	
+
+		/*
+		for(int j = 0; j < 1; j++) {
+			if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+				continue;
+
+			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+
+			Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &temp_tr);
+
+			// Determine how much of movement was obstructed
+			float hull_frac = temp_tr.fraction;
+			hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+			if(hull_frac < fraction) {
+				tr = temp_tr;
+				fraction = hull_frac;
+			}
+		}		
+		*/
+
+		// Repeat trace steps for entity collisions,
+		// if entity hit is closer, use that collision for clipping plane 
+		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };
+		Vector3 ent_point = TraceEntities(ray, handler, Vector3Length(move) * 1.5f, ent->id, &ent_tr);
+
+		float ent_frac = 1.0f;
+		bool use_ent = (ent_tr.hit_ent != -1);
+		
+		// Prevent entity trace from using Bug,
+		if(ent_tr.hit_ent == handler->bug_id)
+			use_ent = false;
+
+		if(handler->ents[ent_tr.hit_ent].type == ENT_FORCEFIELD)
+			use_ent = false;
+
+		if(use_ent) {
+			ent_frac = (ent_tr.dist / Vector3Length(move)) - 0.05f;
+			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
+		}
+
+		if(num_clips < MAX_CLIPS && tr.fraction < 1.0f) {
+			clips[num_clips++] = *(Vector3 *) tr.plane.normal; 
+		} 
+
+		if(num_clips < MAX_CLIPS && ent_frac < 1.0f && use_ent) {
+			clips[num_clips++] = ent_tr.normal;
+		}
+
+		if(use_ent)
+			fraction = Clamp(fraction, 0.0f, ent_frac);
+
+		// Update destination, move to point
+		dest = Vector3Add(dest, Vector3Scale(move, fraction));
+
+		// No obstruction, do full movement 
+		if(fraction >= 1.0f) 
+			break;
+
+		// Update velocity by each clip plane
+		for(short j = 0; j < num_clips; j++) {
+			float into = Vector3DotProduct(vel, clips[j]);
+
+			if(into < 0) {
+				u8 block = pm_ClipVelocity(vel, clips[j], &vel, 1.005f, pm->block);
+				pm->block |= block;
+			}
+		}
+
+		// Update remaining time
+		t_remain *= (1 - fraction);
+	}
+
+	// Set movement data values
+	pm->move_dist = Vector3Distance(start, dest);
+	pm->fraction = (pm->move_dist / Vector3Length(wish_vel));
+
+	pm->end_vel = vel;
+	pm->end_pos = dest;
+
+	pm->clip_count = num_clips;
+	memcpy(pm->clips, clips, sizeof(Vector3) * num_clips);
+}
+
+void ent_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt, Vector3 wish_vel, EntityHandler *handler) {
+	MapSection *sect = ptr_handler_sect;
+	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[1];
+
+	// First try moving to destination
+	pmTraceData base_pm = (pmTraceData) { .end_in_solid = -1, .start_in_solid = -1, .origin = start, .clip_count = 0 };
+	ent_TraceMoveEx(ent, start, wish_vel, &base_pm, dt, handler);
+	//pm_TraceMoveEx(ent, start, wish_vel, &base_pm, dt, handler);
+	//pm_TraceMove(ct, start, wish_vel, pm, dt);
+
+	*pm = base_pm;
+
+	if(Vector3LengthSqr(base_pm.start_vel) <= STOP_EPS)
+		return;
+
+	if(base_pm.fraction >= 1.0f) {
+		return;
+	}
+
+	if(!(base_pm.block & BLOCK_STEP))
+		return;
+
+	// Move up stair height
+	Vector3 step_start = start; 
+	step_start.z += PM_STEP_Z;
+
+	pmTraceData step_pm = (pmTraceData) { .end_in_solid = -1, .start_in_solid = -1, .origin = step_start, .clip_count = 0 };	
+	ent_TraceMoveEx(ent, step_start, (Vector3) { wish_vel.x, wish_vel.y, 0 }, &step_pm, dt, handler);
+	//pm_TraceMove(ct, step_start, (Vector3) { wish_vel.x, wish_vel.y, 0 }, &step_pm, dt);
+
+	float dist_base = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { base_pm.end_pos.x, base_pm.end_pos.y } );
+	float dist_step = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { step_pm.end_pos.x, step_pm.end_pos.y } );
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	Bsp_RecursiveTraceEx(
+		hull,
+		hull->first_node,
+		0,
+		1,
+		step_pm.end_pos,
+		Vector3Add(base_pm.end_pos, Vector3Scale(DOWN, 1)), 
+		&tr
+	);
+
+	bool use_step = (dist_step > dist_base) && tr.plane.normal[2] >= 1.0f;
+
+	if(tr.start_solid || tr.all_solid)
+		use_step = false;
+
+	if(!use_step) {
+		return;
+	}
+
+	// Press step down
+	Vector3 down_vel = Vector3Scale(DOWN, PM_STEP_Z);
+	
+	pmTraceData down_pm = (pmTraceData) { .end_in_solid = -1, .start_in_solid = -1, .origin = step_pm.end_pos, .clip_count = 0 };	
+	ent_TraceMoveEx(ent, down_pm.origin, down_vel, &down_pm, 1, handler);
+	//pm_TraceMove(ct, down_pm.origin, down_vel, &down_pm, dt);
+
+	float down_dist = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { down_pm.end_pos.x, down_pm.end_pos.y } );
+
+	tr = Bsp_TraceDataEmpty();
+	Bsp_RecursiveTraceEx(
+		hull,
+		hull->first_node,
+		0,
+		1,
+		step_pm.end_pos,
+		Vector3Add(down_pm.end_pos, Vector3Scale(DOWN, 1)), 
+		&tr
+	);
+
+	bool use_down = false;
+	if((down_pm.block & BLOCK_GROUND) && (down_dist > dist_base + 0.001f) && (down_pm.end_pos.z > base_pm.end_pos.z + 0.1f))
+		use_down = true;
+
+	if(tr.start_solid && tr.all_solid)
+		use_down = false;
+
+	if(tr.plane.normal[2] < 1.0f)
+		use_down = false;
+
+	if(use_down) {
+		step_pm.end_pos.z = down_pm.end_pos.z;
+
+	} else { 
+		//step_pm.end_vel.z += down_vel.z;
+		*pm = base_pm;
+		return;
+	}
+
+	*pm = step_pm;
+}
+
 // -------------------------------------------------
 // Hit functions:
 typedef void (*OnHitFunc)(Entity *ent, short damage);
@@ -695,17 +914,17 @@ void OnHitMaintainer(Entity *ent, short damage) {
 	Vector3 prev_wish = ai->wish_dir;
 	float prev_speed = ai->speed;
 
-	ai->speed = 6000;
+	ai->speed = 300;
 
 	Vector3 knockback = Vector3Negate(to_player);
 	if(ai->state != STATE_DEAD)
-		knockback.z = 0;
+		knockback = Vector3Zero();
 	else {
 		short dice = GetRandomValue(0, 6);
 		if(dice == 6) {
 			//knockback.z = 0.99f;
 			knockback.z = 0.1f;
-			ai->speed = 2500;
+			ai->speed = 100;
 		}
 	}
 	knockback = Vector3Normalize(knockback);
@@ -758,7 +977,11 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 		return;
 
 	pmTraceData move_data = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1, .block = 0 };
-	pm_TraceMove(ct, ct->position, ct->velocity, &move_data, dt);
+	//pm_TraceMove(ct, ct->position, ct->velocity, &move_data, dt);
+	if(ct->on_ground) 
+		ent_GroundMove(ent, ct, ct->position, &move_data, dt, wish_vel, handler);
+	else 
+		pm_TraceMove(ct, ct->position, ct->velocity, &move_data, dt);
 
 	ct->position = move_data.end_pos;
 	ct->velocity = move_data.end_vel;

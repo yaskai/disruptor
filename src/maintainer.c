@@ -72,6 +72,8 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		//ai->speed = 175;
 		ai->speed = Lerp(ai->speed, 200.0f, 10*dt);
 	}
+
+	anim_Update(&ent->anim_state, ent->animations, dt);
 }
 
 void MaintainerDraw(Entity *ent, float dt) {
@@ -107,7 +109,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 		anim_Switch(&ent->anim_state, 0);
 	}
 	
-	anim_Update(&ent->anim_state, ent->animations, dt);
+	//anim_Update(&ent->anim_state, ent->animations, dt);
 	anim_Apply(&ent->anim_state, &ent->model, ent->animations);
 
 	Vector3 pos = ent->comp_transform.position;

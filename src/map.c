@@ -907,6 +907,8 @@ void BuildNavGraph(MapSection *sect) {
 void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 	MessageDiag("BuildNavEdges()", NULL, ANSI_BLUE);
 
+	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[1];
+
 	navgraph->edge_count = 0;
 	navgraph->edge_cap = 128;
 	if(navgraph->edges) 
@@ -939,7 +941,7 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 				continue;
 			
 			Bsp_TraceData tr = Bsp_TraceDataEmpty();
-			Bsp_RecursiveTraceEx(&sect->bsp[1], sect->bsp[1].first_node, 0, 1, node_B->position, node_A->position, &tr);
+			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, node_A->position, node_B->position, &tr);
 
 			if(tr.fraction < 1.0f) {
 				continue;

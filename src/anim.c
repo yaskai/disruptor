@@ -12,11 +12,14 @@ AnimState anim_Init(Model model) {
 	anim_state.bone_trs = malloc(mem_size);
 	memcpy(anim_state.bone_trs, model.bindPose, mem_size);
 
+	anim_state.acc = 0.0f;
+
 	return anim_state;
 }
 
 void anim_Close(AnimState *anim_state) {
 	if(anim_state->bone_trs) free(anim_state->bone_trs);
+	*anim_state = (AnimState) {0};
 }
 
 void anim_Update(AnimState *anim_state, ModelAnimation *anims, float dt) {
