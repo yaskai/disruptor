@@ -95,7 +95,7 @@ ___
 
 ** Extra:
 *** (x) separate draw steps for translucent brushes (eg. forcefield, fence, etc.)
-*** use light grid for entities
+*** (-) use light grid for entities
 *** dynamic point lights
 
 ___

@@ -467,12 +467,6 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	Vector3 to_player = Vector3Normalize(Vector3Subtract(player_ent->comp_transform.position, eye_pos));
 	float d_to_player = Vector3LengthSqr(to_player);
 
-	/*
-	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
-	if(d_to_player <= ai->hear_distance)
-		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
-	*/
-
 	// Player is in ai's sight cone
 	if(Vector3DotProduct(ct->forward, to_player) >= ai->sight_cone && d_to_player <= 1000.0f) { 
 		// Check for obstructions
@@ -491,35 +485,14 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		if(!tr.hit && ent_tr.hit_ent == handler->player_id) {
 			ai->input_mask |= AI_INPUT_SEE_PLAYER;
 			ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
-
-			// * NOTE: 
-			// Remove later, might want to prioritize other entities as targets
-			//ai->targ_data.ent_id = handler->player_id;
 		}
 	}
 
 	if(ai->targ_data.ent_id == handler->player_id && (ai->input_mask & AI_INPUT_SEE_PLAYER)) {
-		/*
-		Bsp_Data *bsp = &sect->bsp_data;
-		Bsp_Hull *bsp_hull = &bsp->hull_groups[0].hulls[1];
-
-		Bsp_TraceData targ_tr = Bsp_TraceDataEmpty();
-
-		Vector3 tr_start = ct->position;
-		tr_start.z += 24;
-
-		Vector3 tr_dest = ai->targ_data.known_position;
-		tr_dest.z += 24;
-
-		Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &targ_tr);
-
-		if(targ_tr.fraction >= 1.0f)
-			ai->targ_data.known_position = player_ent->comp_transform.position;
-		*/
 		ai->targ_data.known_position = player_ent->comp_transform.position;
 	}
-	// ***
 
+	// ***
 	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
 	bool in_hearing_range = (Vector3Distance(player_ent->comp_transform.position, ct->position) <= ai->hear_distance);
 	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f) {
@@ -530,13 +503,6 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
 			ai->targ_data.ent_id = handler->player_id;
-
-		if(!(ai->input_mask & AI_INPUT_LOST_PLAYER)) {
-			//ai->targ_data.known_position = player_ent->comp_transform.position;
-			// *
-			//if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
-				//ai->targ_data.ent_id = handler->player_id;
-		}
 	}
 
 	if(
