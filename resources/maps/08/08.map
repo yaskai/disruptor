@@ -3553,13 +3553,6 @@
 }
 // entity 76
 {
-"classname" "health_pickup"
-"origin" "88 -136 24"
-"enum_id" "5"
-"angle" "0"
-}
-// entity 77
-{
 "classname" "light"
 "origin" "1572 -112 88"
 "spawnflags" "0"
@@ -3569,7 +3562,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 78
+// entity 77
 {
 "classname" "light"
 "origin" "1796 -120 88"
@@ -3580,7 +3573,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 79
+// entity 78
 {
 "classname" "light"
 "origin" "2076 -120 88"
@@ -3591,226 +3584,212 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 80
+// entity 79
 {
 "classname" "nav_node"
 "origin" "2164 228 92"
 }
-// entity 81
-{
-"classname" "ammo_revolver"
-"origin" "88 -200 24"
-"enum_id" "8"
-"angle" "0"
-}
-// entity 82
+// entity 80
 {
 "classname" "ammo_revolver"
 "origin" "736 -288 -136"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 83
+// entity 81
 {
 "classname" "health_pickup"
 "origin" "736 -328 -136"
 "enum_id" "5"
 "angle" "0"
 }
-// entity 84
+// entity 82
 {
 "classname" "nav_node"
 "origin" "956 -196 -108"
 }
-// entity 85
+// entity 83
 {
 "classname" "nav_node"
 "origin" "940 -356 -116"
 }
-// entity 86
+// entity 84
 {
 "classname" "nav_node"
 "origin" "1148 -356 -108"
 }
-// entity 87
+// entity 85
 {
 "classname" "nav_node"
 "origin" "1308 -260 -108"
 }
-// entity 88
+// entity 86
 {
 "classname" "nav_node"
 "origin" "860 -84 -108"
 }
-// entity 89
+// entity 87
 {
 "classname" "nav_node"
 "origin" "924 124 -108"
 }
-// entity 90
+// entity 88
 {
 "classname" "info_maintainer_spawn"
 "origin" "928 -384 -120"
 "enum_id" "2"
 "angle" "270"
 }
-// entity 91
+// entity 89
 {
 "classname" "nav_node"
 "origin" "1324 -36 -116"
 }
-// entity 92
+// entity 90
 {
 "classname" "nav_node"
 "origin" "1612 -20 -108"
 }
-// entity 93
+// entity 91
 {
 "classname" "nav_node"
 "origin" "1804 92 -108"
 }
-// entity 94
+// entity 92
 {
 "classname" "nav_node"
 "origin" "1996 -4 -108"
 }
-// entity 95
+// entity 93
 {
 "classname" "nav_node"
 "origin" "1468 -28 -116"
 }
-// entity 96
+// entity 94
 {
 "classname" "nav_node"
 "origin" "1796 -180 92"
 }
-// entity 97
+// entity 95
 {
 "classname" "nav_node"
 "origin" "1332 188 -36"
 }
-// entity 98
+// entity 96
 {
 "classname" "nav_node"
 "origin" "1404 -428 -36"
 }
-// entity 99
+// entity 97
 {
 "classname" "nav_node"
 "origin" "1400 188 -36"
 }
-// entity 100
+// entity 98
 {
 "classname" "nav_node"
 "origin" "1380 236 -36"
 }
-// entity 101
+// entity 99
 {
 "classname" "nav_node"
 "origin" "1404 -36 -36"
 }
-// entity 102
+// entity 100
 {
 "classname" "nav_node"
 "origin" "540 -468 -52"
 }
-// entity 103
+// entity 101
 {
 "classname" "nav_node"
 "origin" "852 -476 -36"
 }
-// entity 104
+// entity 102
 {
 "classname" "nav_node"
 "origin" "524 -316 -100"
 }
-// entity 105
+// entity 103
 {
 "classname" "nav_node"
 "origin" "668 188 60"
 "flag" "0"
 }
-// entity 106
+// entity 104
 {
 "classname" "nav_node"
 "origin" "756 188 92"
 "flag" "0"
 }
-// entity 107
+// entity 105
 {
 "classname" "nav_node"
 "origin" "1044 188 108"
 "flag" "0"
 }
-// entity 108
+// entity 106
 {
 "classname" "nav_node"
 "origin" "1212 172 116"
 "flag" "0"
 }
-// entity 109
+// entity 107
 {
 "classname" "nav_node"
 "origin" "1196 -124 164"
 "flag" "0"
 }
-// entity 110
+// entity 108
 {
 "classname" "nav_node"
 "origin" "1196 -796 164"
 "flag" "0"
 }
-// entity 111
+// entity 109
 {
 "classname" "nav_node"
 "origin" "1164 -916 164"
 "flag" "0"
 }
-// entity 112
+// entity 110
 {
 "classname" "nav_node"
 "origin" "684 -916 164"
 "flag" "0"
 }
-// entity 113
+// entity 111
 {
 "classname" "nav_node"
 "origin" "668 -692 164"
 "flag" "0"
 }
-// entity 114
+// entity 112
 {
 "classname" "nav_node"
 "origin" "1332 -468 -36"
 }
-// entity 115
+// entity 113
 {
 "classname" "nav_node"
 "origin" "1132 -476 -36"
 }
-// entity 116
+// entity 114
 {
 "classname" "nav_node"
 "origin" "588 -468 -36"
 }
-// entity 117
+// entity 115
 {
 "classname" "nav_node"
 "origin" "572 -236 -116"
 }
-// entity 118
+// entity 116
 {
 "classname" "nav_node"
 "origin" "524 -404 -76"
 }
-// entity 119
-{
-"classname" "info_turret_spawn"
-"origin" "180 -132 48"
-"enum_id" "1"
-"angle" "90"
-}
-// entity 120
+// entity 117
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
@@ -3818,7 +3797,7 @@
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 121
+// entity 118
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

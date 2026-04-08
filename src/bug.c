@@ -5,6 +5,7 @@
 #include "ent.h"
 #include "pm.h"
 #include "kbsp.h"
+#include "../include/log_message.h"
 
 #define BUG_MAX_BOUNCES 			16
 #define BUG_MAX_RECALL_BOUNCES		16
@@ -536,7 +537,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
 
 			// Bounce off enemy when it dies
-			if(stick_ent->comp_ai.state == STATE_DEAD) {
+			if(stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED) {
 				ai->state = BUG_LAUNCHED;
 				ai->targ_data.ent_id = -1;
 
@@ -566,6 +567,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				bug_bounce = 0;
 				bug_target_picked = true;
 
+				ent->flags &= ~BUG_DISRUPTED_ENEMY;
+
 				ent->comp_ai.targ_data.ent_id = handler->player_id;
 				
 				float dist_add = 80.0f + (Vector3Distance(player_ent->comp_transform.position, ct->position) * 0.1f);
@@ -594,7 +597,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	if(ent->flags & BUG_RECALL)
 		pickup_radius *= 1.25f;
 
-	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) && launch_timer <= 0) {
+	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) && launch_timer <= EPSILON) {
 		ai->state = BUG_DEFAULT;
 	}
 	// -------------------------------------------------------------------------------------------------------------
@@ -612,6 +615,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 }
 
 void BugDraw(Entity *ent) {
+	//DrawBoundingBox(ent->comp_transform.bounds, PURPLE);
+
 	if(ent->comp_ai.state == 0)
 		return;
 
@@ -628,8 +633,6 @@ void BugDraw(Entity *ent) {
  	} else {
 		DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
 	}
-
-	//DrawBoundingBox(ent->comp_transform.bounds, GREEN);
 }
 
 void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
@@ -660,7 +663,7 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 		} break;
 	}
 
-	//AlertMaintainers(handler, ent_id);
+	//handler->ents[handler->bug_id].flags |= BUG_DISRUPTED_ENEMY;
 }
 
 // *TODO:
