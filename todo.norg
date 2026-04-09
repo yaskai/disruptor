@@ -64,7 +64,7 @@ ___
 ** (-) gates -(and switches)-
 ** (x) force fields
 ** breakable boxes
-** pickup items (health + ammo)
+** (-) pickup items (health + ammo), need models
 
 ___
 * *Audio*

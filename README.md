@@ -49,7 +49,7 @@ make
 
 ### WINDOWS
 
-* Easiest method for compiling on Windows is through w64devkit, available at https://github.com/skeeto/w64devkit/releases: 
+* Easiest method for compiling on Windows is through w64devkit, available at https://github.com/skeeto/w64devkit/releases
 
 * Launch w64devkit
 
@@ -64,8 +64,10 @@ make
 # return to project root directory
 cd ../../../..
 make
+```
   
 * Run game
 ``` bash
 ./game.exe
+```
 
