@@ -21,18 +21,18 @@
 
 ## COMPILATION
 
+### LINUX
+
 * Clone and navigate to repo
 ``` bash
 git clone https://github.com/yaskai/disruptor.git .
 cd ./disruptor
 ```
 
-### LINUX
-
 * Build libraries
 ``` bash
 cd ./build/external/raylib/src
-make
+make -f Makefile_Linux
 ```
 
 * Build game
@@ -53,10 +53,16 @@ make
 
 * Launch w64devkit
 
+* In w6devkit, clone and navigate to repo
+``` bash
+git clone https://github.com/yaskai/disruptor.git .
+cd ./disruptor
+```
+
 * Build libraries
 ``` bash
 cd ./build/external/raylib/src
-make
+make -f Makefile_Windows
 ```
 
 * Build game
