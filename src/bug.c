@@ -194,7 +194,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 		return 0;
 	}
 
-	if(handler->ents[handler->player_id].comp_transform.position.z - ct->position.z > 700.0f && launch_timer <= 0) {
+	if(handler->ents[handler->player_id].comp_transform.position.z - ct->position.z > 400.0f && launch_timer <= 0) {
 		ent->comp_health.amount = 0;
 		ent->comp_ai.state = STATE_DEAD;
 		bug_cooldown = 5;
