@@ -36,8 +36,8 @@ BSPX light directions output requested on command line.
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	166 sky faces
-	3102 solid faces
+	158 sky faces
+	3054 solid faces
 	457 filtered faces
 	0 shadow-casting skip faces
 SetupLights: 38 initial lights
@@ -47,14 +47,14 @@ Final count: 38 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 2917376
+lightmap size (total): 2915304
 Lighting Completed.
 
 Writing ./08.lit
 DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
 Writing ./08.bsp as Quake BSP bsp29
-7.609s seconds elapsed
+7.848s seconds elapsed
 0 empty lightmaps
 
 

@@ -512,6 +512,7 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 		bvh->capacity = (bvh->capacity << 1);
 		BvhNode *realloc_ptr = realloc(bvh->nodes, sizeof(BvhNode) * bvh->capacity); 
 		bvh->nodes = realloc_ptr;
+		node = &bvh->nodes[node_id];
 	}
 
 	// Create child nodes	

@@ -8,6 +8,8 @@
 #include "../include/log_message.h"
 
 Lightmap BuildLightmap(Bsp_Data *bsp) {
+	Message("BuildLightmap()", ANSI_BLUE);
+
 	Lightmap lm = (Lightmap) {0};
 	
 	lm.uvs = calloc(bsp->num_faces, sizeof(Rectangle));
