@@ -1110,6 +1110,7 @@ void BspRenderSetup(Bsp_Data *bsp) {
 		memcpy(path, mat_list.paths[i], strlen(mat_list.paths[i]));
 
 		char *sep = strrchr(path, '/');
+		if(!sep) sep = strrchr(path, '\\');	
 		*sep = '\0';
 
 		char *format = sep + 1;
