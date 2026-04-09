@@ -294,7 +294,8 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 	char *cursor = bsp->ent_str;	
 
-	Bsp_Ent ent_data[1024] = {0};
+	//Bsp_Ent ent_data[1024] = {0};
+	Bsp_Ent *ent_data = calloc(1024, sizeof(Bsp_Ent));
 	int count = 0;
 		
 	while(*cursor) {
@@ -392,6 +393,7 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 		spawn_list.arr[i] = spawn;
 	}
 
+	free(ent_data);
 
 	return spawn_list;
 }
