@@ -21,13 +21,13 @@
 
 ## COMPILATION
 
-### LINUX
-
 * Clone and navigate to repo
 ``` bash
 git clone https://github.com/yaskai/disruptor.git .
 cd ./disruptor
 ```
+
+### LINUX
 
 * Build libraries
 ``` bash
@@ -48,5 +48,24 @@ make
 ```
 
 ### WINDOWS
-* Under contruction
+
+* Easiest method for compiling on Windows is through w64devkit, available at https://github.com/skeeto/w64devkit/releases: 
+
+* Launch w64devkit
+
+* Build libraries
+``` bash
+cd ./build/external/raylib/src
+make
+```
+
+* Build game
+``` bash
+# return to project root directory
+cd ../../../..
+make
+  
+* Run game
+``` bash
+./game.exe
 

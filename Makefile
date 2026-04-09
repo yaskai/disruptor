@@ -2,12 +2,13 @@ INC_DIR := include
 
 # Compiler and flags
 CC := gcc
-#CFLAGS := -Wall -std=c99 -O3 -I$(INC_DIR) -Ibuild/external/raylib/src -I/usr/include/SDL2 -DPLATFORM_DESKTOP_SDL
-#LDFLAGS := -lSDL2 -lm -ldl -lpthread -lGL -lrt -lX11
+CFLAGS := -g -Wall -std=c99 -O2 -I$(INC_DIR) -Ibuild/external/raylib/src -I/usr/include/SDL2 -DPLATFORM_DESKTOP_SDL
+LDFLAGS := -lSDL2 -lm -ldl -lpthread -lGL -lrt -lX11
 
-CFLAGS := -g -Wall -std=c99 -O2 -I$(INC_DIR) -Ibuild/external/raylib/src -DPLATFORM_DESKTOP
-#LDFLAGS := -I include -L lib -lgdi32 -lwinmm -mwindows
-LDFLAGS := -I include -L lib -lgdi32 -lwinmm 
+#CFLAGS := -g -Wall -std=c99 -O2 -I$(INC_DIR) -Ibuild/external/raylib/src -DPLATFORM_DESKTOP
+#LDFLAGS := -lm -ldl -lpthread -lGL -lrt -lX11
+
+#PLATFORM=PLATFORM_DESKTOP_SDL3 SDL_INCLUDE_PATH=/usr/include/SDL3 SDL_LIBRARY_PATH=/usr/lib SDL_LIBRARIES="-lSDL3" GRAPHICS=GRAPHICS_API_OPENG_33
 
 # Paths
 SRC_DIR := src
@@ -21,8 +22,7 @@ SRCS := $(wildcard $(SRC_DIR)/*.c) $(wildcard $(INC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
 # Output executable
-#TARGET := $(BIN_DIR)/game
-TARGET := game
+TARGET := $(BIN_DIR)/game
 
 .PHONY: all clean directories
 
