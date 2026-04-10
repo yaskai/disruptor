@@ -27,6 +27,9 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
+	if(ai->state == STATE_DEAD)
+		return;
+
 	MaintainerThink(ent, handler, dt);
 
 	if(ai->state != STATE_MOVE) {

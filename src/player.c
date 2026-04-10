@@ -11,14 +11,14 @@
 #include "pm.h"
 
 #define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
-#define PLAYER_SPEED 245.0f
-#define PLAYER_MAX_SPEED 300.0f
-#define PLAYER_MAX_VEL 300.0f
+#define PLAYER_SPEED 205.0f
+#define PLAYER_MAX_SPEED 240.0f
+#define PLAYER_MAX_VEL 280.0f
 
-#define PLAYER_GROUND_SPEED 246.0f
-#define PLAYER_AIR_SPEED	270.0f
+#define PLAYER_GROUND_SPEED 215.0f
+#define PLAYER_AIR_SPEED	235.0f
 
-#define PLAYER_MAX_ACCEL 15.5f
+#define PLAYER_MAX_ACCEL 30.5f
 float player_accel;
 float player_accel_forward;
 float player_accel_side;
@@ -34,7 +34,7 @@ float z_vel_prev;
 
 short nudged_this_frame = 0;
 
-#define PLAYER_FRICTION 14.25f 
+#define PLAYER_FRICTION 13.25f 
 #define PLAYER_AIR_FRICTION 0.75f
 #define PLAYER_HURT_FRICTION 40.0f
 
@@ -162,8 +162,9 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			clips[num_clips++] = ent_tr.normal;
 		}
 
-		if(use_ent)
+		if(use_ent) {
 			fraction = Clamp(fraction, 0.0f, ent_frac);
+		}
 
 		Vector3 safe = dest;
 
@@ -439,7 +440,6 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	// Set new position and velocity from trace
 	ct->velocity = pm.end_vel;
 	ct->position = pm.end_pos;
-
 	land_frame = (ct->on_ground == 1 && last_pm.start_vel.z <= -600);
 	z_vel_prev = last_pm.start_vel.z;
 	last_pm = pm;
@@ -527,6 +527,7 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
 
+	/*
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 	Bsp_RecursiveTraceEx(
 		&ptr_sect->bsp[1],
@@ -537,6 +538,33 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		Vector3Add(ct->position, Vector3Scale(DOWN, 1 + GROUND_EPS)),
 		&tr
 	);
+	*/
+
+	Vector3 dest = Vector3Add(ct->position, Vector3Scale(DOWN, 1 + GROUND_EPS));
+
+	Bsp_Data *bsp = &ptr_sect->bsp_data;
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	float fraction = 1.0f;
+
+	for(int j = 0; j < bsp->num_models; j++) {
+		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			continue;
+
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+
+		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, ct->position, dest, &temp_tr);
+
+		// Determine how much of movement was obstructed
+		float hull_frac = temp_tr.fraction;
+		hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+		if(hull_frac < fraction) {
+			tr = temp_tr;
+			fraction = hull_frac;
+		}
+	}		
 
 	if(tr.fraction >= 1) {
 		ct->ground_normal = Vector3Zero();

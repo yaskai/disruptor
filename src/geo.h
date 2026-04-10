@@ -324,6 +324,5 @@ void BvhBoxIntersect(BoundingBox box, MapSection *sect, BvhTree *bvh, u16 node_i
 
 bool IsPointInHull(Vector3 point, Hull *hull);
 
-
 #endif
 

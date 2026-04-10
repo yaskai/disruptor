@@ -269,7 +269,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 	ent.comp_transform.start_forward = ent.comp_transform.forward;
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
-	ent.flags |= (ENT_ACTIVE);
+	if(spawn_point->start_active == 1) ent.flags |= (ENT_ACTIVE);
 
 	/*
 	if(ent.type == ENT_TURRET)
@@ -342,6 +342,8 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 		Bsp_Ent *bsp_ent = &ent_data[i];
 		EntSpawn spawn = (EntSpawn) {0};
 
+		spawn.start_active = 1;
+
 		Message("---------------", ANSI_GREEN);
 
 		int submodel = 0;
@@ -382,10 +384,12 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 				sscanf(prop->val, "%d", &spawn.trigger_condition);
 			}
 
-			// *NOTE:
-			// Not sure why but normal streq check on key for model doesn't work...
 			if(streq(prop->key, "model") || prop->val[0] == '*') {
 				sscanf(prop->val, "*%d", &submodel);
+			}
+
+			if(streq(prop->key, "start_active")) {
+				sscanf(prop->val, "%d", &spawn.start_active);
 			}
 		}
 

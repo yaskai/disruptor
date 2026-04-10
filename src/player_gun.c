@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include "raylib.h"
 #include "raymath.h"
@@ -16,7 +17,7 @@ Matrix mat = {0};
 
 #define LOCAL_UP (Vector3) { 0, 1, 0 }
 
-#define REVOLVER_REST (Vector3) { -0.65f, -1.95f, 5.0f }
+#define REVOLVER_REST (Vector3) { -0.65f, -1.9f, 5.0f }
 //#define REVOLVER_REST (Vector3) { -0.75f, 6.25f, -2.35f }
 #define REVOLVER_ANGLE_REST 1.5f
 
@@ -37,6 +38,8 @@ bool recoil_add = false;
 
 float recoil_force = 0.0f;
 float friction = 0.0f;
+
+Vector2 sway = { 0, 0 };
 
 typedef struct {
 	EntityHandler *handler;	
@@ -171,6 +174,23 @@ void PlayerGunInit(
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
+	Vector3 hvel = (Vector3) { gun_refs.player->comp_transform.velocity.x, gun_refs.player->comp_transform.velocity.y, 0 };
+	float vel_len = Vector3Length(hvel);
+
+	if(vel_len >= 10.1f && gun_refs.player->comp_transform.on_ground) {
+		//sway.x = sinf(GetTime() * 7) * 0.075f;
+		//sway.y = sinf(GetTime() * 14) * 0.075f;
+		float tX = sinf(GetTime() * 7) * 0.075f;
+		float tY = sinf(GetTime() * 14) * 0.075f;
+		sway.x = Lerp(sway.x, tX, dt*50);
+		sway.y = Lerp(sway.y, tY, dt*50);
+
+	} else {
+		//sway = Vector2Lerp(sway, Vector2Zero(), 4*dt);
+		sway.x = Lerp(sway.x, 0.0f, 5*dt);
+		sway.y = Lerp(sway.y, 0.0f, 2*dt);
+	}
+
 	curr_gun->cooldown -= dt;
 
 	int scroll = 0;
@@ -349,8 +369,12 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		if(player_gun->current_gun == WEAP_DISRUPTOR)
 			scale = 0.8f;
 
+		Vector3 draw_pos = Vector3Add(gun_pos, Vector3Scale( (Vector3) { 1, 0, 0 }, sway.x));
+		draw_pos = Vector3Add(draw_pos, Vector3Scale(LOCAL_UP, sway.y));
+		draw_pos.z -= sway.y * 0.01f;
+
 		BeginMode3D(player_gun->cam);
-		DrawModel(models[player_gun->current_gun], gun_pos, scale, WHITE);
+		DrawModel(models[player_gun->current_gun], draw_pos, scale, WHITE);
 		EndMode3D();
 	}
 

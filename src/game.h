@@ -1,11 +1,11 @@
 #include "raylib.h"
-#include "../include/num_redefs.h"
 #include "config.h"
 #include "input_handler.h"
 #include "geo.h"
 #include "ent.h"
 #include "player_gun.h"
 #include "v_effect.h"
+#include "../include/num_redefs.h"
 
 #ifndef GAME_H_
 #define GAME_H_

@@ -17,6 +17,7 @@ HashMap material_hashmap = (HashMap) { 0 };
 Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Data data = (Bsp_Data) {0};
 
+
 	FILE *pF = fopen(path, "rb");
 
 	if(!pF) {

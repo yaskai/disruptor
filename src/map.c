@@ -1263,28 +1263,19 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 }
 
 void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
-	//int ff_count = 0;
-	//int ff_ids[128] = {0};
+	int ff_count = 0;
+	int ff_ids[128] = {0};
 
 	rlDisableDepthMask();
 	for(int i = 0; i < translucent_rbrush_list.count; i++) {
 		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[i];
 		if(rbrush->flags & RBRUSH_FORCEFIELD) {
-			//ff_ids[ff_count++] = i;	
+			ff_ids[ff_count++] = i;	
 			continue;
 		}
 
 		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
 	}
 	rlEnableDepthMask();
-
-	/*
-	BeginBlendMode(BLEND_MULTIPLIED);
-	for(int i = 0; i < ff_count; i++) {
-		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[ff_ids[i]];
-		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
-	}	
-	EndBlendMode();
-	*/
 }
 
