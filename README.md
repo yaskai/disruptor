@@ -31,14 +31,16 @@ cd ./disruptor
 
 * Build libraries
 ``` bash
-cd ./build/external/raylib/src
-make -f Makefile_Linux
+cd ./build/external/raylib/src &&
+make clean &&
+make &&
 ```
 
 * Build game
 ``` bash
 # return to project root directory
 cd ../../../..
+make clean
 make
 ```
 
@@ -61,15 +63,18 @@ cd ./disruptor
 
 * Build libraries
 ``` bash
-cd ./build/external/raylib/src
-make -f Makefile_Windows
+cd ./build/external/raylib/src &&
+make clean &&
+make &&
 ```
+
 
 * Build game
 ``` bash
 # return to project root directory
 cd ../../../..
-make
+make clean
+make -f Makefile_Windows
 ```
   
 * Run game
