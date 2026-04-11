@@ -213,6 +213,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 		case ENT_SWITCH: {
 			ent.flags |= ( ENT_COLLIDERS ); 
+			ent.trigger_state = 0;
 
 			ent.comp_transform.bounds = (BoundingBox) {
 				.min = Vector3Scale(BODY_VOLUME_SMALL, -0.5f),
@@ -246,6 +247,12 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			};
 
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+
+			ent.model = LoadModel("resources/models/pickups/hp_00.glb");
+
+			float angle = (spawn_point->angle-90) * DEG2RAD;
+			ent.model.transform = MatrixRotateX(90*DEG2RAD);
+			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
 
 		} break;
 

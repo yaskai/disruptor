@@ -29,8 +29,9 @@ bool land_frame = false;
 bool hurt_frame = false;
 float z_vel_prev;
 
-#define FALLDAMAGE_THRESHOLD 800.0f
-#define FALLDAMAGE_MULTIPLIER -0.095f
+#define FALLDAMAGE_THRESHOLD 500.0f
+#define FALLDAMAGE_MULTIPLIER -0.099f
+//#define FALLDAMAGE_MULTIPLIER -1.099f
 
 short nudged_this_frame = 0;
 
@@ -76,6 +77,69 @@ float recoil_input = 0.0f;
 bool walk_mod = false;
 bool crouch = false;
 
+float cam_zmod = 16.0f;
+
+// Check if player can stand back up when releasing crouch input
+bool pm_StandCheck(comp_Transform *ct) {
+	Bsp_Data *bsp = &ptr_sect->bsp_data;
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	float fraction = FLT_MAX;
+
+	Vector3 check =  ct->position;
+	//Vector3 check = Vector3Subtract(ct->position, Vector3Scale(Vector3Normalize(ct->velocity), 8.0f));
+	Vector3 stand = check;
+	stand.z += 32.0f;
+
+	for(int j = 0; j < bsp->num_models; j++) {
+		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			continue;
+
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[2];
+
+		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, check, stand, &temp_tr);
+
+		float hull_frac = temp_tr.fraction;
+		hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+		if(hull_frac < fraction) {
+			tr = temp_tr;
+			fraction = hull_frac;
+		}
+	}
+
+	if(tr.fraction < 1) {
+		return false;
+	}
+
+	stand.z = ct->position.z + 2;
+
+	for(int j = 0; j < bsp->num_models; j++) {
+		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			continue;
+
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+
+		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, check, stand, &temp_tr);
+
+		float hull_frac = temp_tr.fraction;
+		hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+		if(hull_frac < fraction) {
+			tr = temp_tr;
+			fraction = hull_frac;
+		}
+	}
+
+	if(tr.fraction < 1) {
+		return false;
+	}
+
+	return true;
+}
+
 // **
 // -----------------------------------------------------------------------------
 // Movement tracing,
@@ -120,7 +184,9 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
 				continue;
 
-			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+			//Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+			u8 hull_id = (crouch) ? 2 : 1;
+			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
 			Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
 			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &temp_tr);
@@ -247,15 +313,21 @@ void PlayerInit(Camera3D *camera, InputHandler *input, MapSection *test_section,
 }
 
 void PlayerUpdate(Entity *player, float dt) {
-	crouch = false;
-	if(IsKeyDown(KEY_C))
-		crouch = true;
-
 	walk_mod = false;
 	if(IsKeyDown(KEY_LEFT_SHIFT))
 		walk_mod = true;
 
+	player->comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
+	player->comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
+
 	player->comp_transform.bounds = BoxTranslate(player->comp_transform.bounds, player->comp_transform.position);
+	player->comp_health.hit_box = player->comp_transform.bounds;
+	
+	if(crouch) {
+		player->comp_transform.bounds.max.z -= 24.0f;
+		player->comp_health.hit_box.max.z -= 24.0f;
+	}
+
 	land_frame = false;
 
 	if(player->comp_health.damage_cooldown <= 0)
@@ -277,15 +349,15 @@ void PlayerUpdate(Entity *player, float dt) {
 		ptr_cam->position.x = player->comp_transform.position.x;
 		ptr_cam->position.y = player->comp_transform.position.y;
 
-		float z_mod = (crouch) ? 0 : 16;
-		z_mod = 16;
+		//float z_mod = (crouch) ? 0 : 16;
+		//z_mod = 16;
 
 		if(!step_frame) {
 			//ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 12, dt * 100);
-			ptr_cam->position.z = player->comp_transform.position.z + z_mod;
+			ptr_cam->position.z = player->comp_transform.position.z + cam_zmod;
 		} else {
-			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + z_mod, dt * 17.5f);
-			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + z_mod)) <= 0.75f) 
+			ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + cam_zmod, dt * 17.5f);
+			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + cam_zmod)) <= 0.75f) 
 				step_frame = false;
 		}
 
@@ -313,6 +385,7 @@ void PlayerUpdate(Entity *player, float dt) {
 
 void PlayerDraw(Entity *player) {
 	//PlayerDisplayDebugInfo(player);
+	//DrawBoundingBox(player->comp_transform.bounds, RED);
 }
 
 void PlayerDamage(Entity *player, short amount) {
@@ -388,6 +461,12 @@ void PlayerDisplayDebugInfo(Entity *player) {
 void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler *handler, float dt) {
 	// 1. Categorize position
 	ct->on_ground = pm_CheckGround(ct, ct->position);
+
+	if(IsKeyDown(KEY_C) && ct->on_ground) {
+		crouch = true;
+
+	}
+
 	
 	// 2. Get wishdir
 	Vector3 wish_dir = Vector3Zero();
@@ -400,7 +479,7 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	if(hurt_frame)
 		wish_speed *= 0.33f;
 
-	if(ct->on_ground && walk_mod)
+	if(ct->on_ground && (walk_mod || crouch))
 		wish_speed *= 0.5f;
 
 	if(wish_speed > PLAYER_MAX_SPEED) {
@@ -443,6 +522,13 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	land_frame = (ct->on_ground == 1 && last_pm.start_vel.z <= -600);
 	z_vel_prev = last_pm.start_vel.z;
 	last_pm = pm;
+
+	if(crouch) {
+		if(pm_StandCheck(ct) && IsKeyUp(KEY_C)) { 
+			crouch = false;
+			ct->velocity.z = 0;
+		}
+	}
 
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 
@@ -527,19 +613,6 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
 
-	/*
-	Bsp_TraceData tr = Bsp_TraceDataEmpty();
-	Bsp_RecursiveTraceEx(
-		&ptr_sect->bsp[1],
-		ptr_sect->bsp[1].first_node,
-		0,
-		1,
-		ct->position,
-		Vector3Add(ct->position, Vector3Scale(DOWN, 1 + GROUND_EPS)),
-		&tr
-	);
-	*/
-
 	Vector3 dest = Vector3Add(ct->position, Vector3Scale(DOWN, 1 + GROUND_EPS));
 
 	Bsp_Data *bsp = &ptr_sect->bsp_data;
@@ -551,7 +624,8 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
 			continue;
 
-		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+		u8 hull_id = (crouch) ? 2 : 1;
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
 		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
 		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, ct->position, dest, &temp_tr);
@@ -639,7 +713,8 @@ void pm_ApplyGravity(comp_Transform *ct, float dt) {
 #define MIN_TRACE_DIST (0.0333f)
 #define MAX_TRACE_DIST (2000.0f)
 void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt) {
-	Bsp_Hull *bsp = &ptr_sect->bsp_data.hull_groups[0].hulls[1];
+	u8 hull_id = (crouch) ? 2 : 1;
+	Bsp_Hull *bsp = &ptr_sect->bsp_data.hull_groups[0].hulls[hull_id];
 	//Bsp_Hull *bsp = &ptr_sect->bsp[1];
 
 	*pm = (pmTraceData) { .start_in_solid = -1, .end_in_solid = -1, .origin = start, .block = 0, .clip_count = 0 };
@@ -684,7 +759,7 @@ void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceDa
 
 		// Add clip plane
 		if(num_clips < MAX_CLIPS) {
-			clips[num_clips] = (Vector3) { tr.plane.normal[0], tr.plane.normal[1], tr.plane.normal[2] };
+			clips[num_clips] = *(Vector3 *) tr.plane.normal;
 			num_clips++;
 		} else 
 			break;
@@ -835,9 +910,20 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 	Vector3 horizontal_velocity = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 
 	if(input->actions[ACTION_JUMP].state == 2) {
+		bool jump = true;
+		float mult = 1.0f;
+
+		if(crouch) {
+			if(!pm_StandCheck(ct)) jump = false;
+			mult = 0.85f;
+		}
+
+		if(!jump)
+			return;
+
 		ct->on_ground = false;
 		//ct->velocity.z += (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.2f);
-		ct->velocity.z = (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.33f);
+		ct->velocity.z = (BASE_JUMP_FORCE * mult) + (Vector3Length(horizontal_velocity) * 0.33f);
 	}
 }
 
@@ -845,6 +931,21 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 // Update camera effects, tilt, bob, etc.
 #define TILT_MAX 0.1f
 void cam_Adjust(comp_Transform *ct, float dt) {
+	if(crouch) {
+		/*
+		cam_zmod = Lerp(cam_zmod, 0, dt*10);
+		if(cam_zmod <= 0.1f)
+			cam_zmod = 0;
+		*/
+		cam_zmod = Lerp(cam_zmod, -2, dt*10.0f);
+		if(cam_zmod <= -1.9f)
+			cam_zmod = -2;
+	} else {
+		cam_zmod = Lerp(cam_zmod, 16, dt*8.5f);
+		if(cam_zmod >= 15.9f)
+			cam_zmod = 16;
+	}
+
 	// Apply camera motion effects (bob, tilt) 
 	float t = GetTime();
 
@@ -857,6 +958,9 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	if(step_frame)
 		bob_input *= 0.1f;
 
+	if(crouch)
+		bob_input *= 0.5f;
+
 	float bob_targ = (4.5f * bob_input * sin(t * 15.5f + (cam_input_forward)));	
 	cam_bob = Lerp(cam_bob, bob_targ, dt * 10);
 	
@@ -867,6 +971,10 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 	if(land_frame) {
 		//cam_bob += (18.5f * z_vel_prev * 0.00125f);
 		tilt_input += 1.5f;
+	}
+
+	if(crouch) {
+		tilt_input *= 0.25f;
 	}
 
 	if(fabsf(tilt_input) >= EPSILON) tilt_targ = Vector3RotateByAxisAngle(UP, ct->forward, tilt_input);

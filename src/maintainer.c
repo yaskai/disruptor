@@ -128,5 +128,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 	//DrawSphere(ai->task_state.move_dest, 5, PURPLE);
 
 	//DrawSphere(ct->position, ai->hear_distance, ColorAlpha(YELLOW, 0.5f));
+
+	//DrawBoundingBox(ent->comp_health.hit_box, RED);
 }
 

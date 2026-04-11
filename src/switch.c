@@ -43,9 +43,14 @@ void SwitchSetup(EntityHandler *handler) {
 			continue;
 
 		ent->comp_health.on_hit = -1;
+		ent->trigger_state = 0;
 
-		if(ent->trigger_condition == TRIGGER_COND_HIT)
+		if(ent->trigger_condition == TRIGGER_COND_HIT) {
 			ent->comp_health.on_hit = 5;
+			ent->comp_health.hit_box = ent->comp_transform.bounds;
+			ent->comp_health.hit_box.min = Vector3Subtract(ent->comp_transform.bounds.min, BODY_VOLUME_SMALL);
+			ent->comp_health.hit_box.max = Vector3Add(ent->comp_transform.bounds.min, BODY_VOLUME_SMALL);
+		}
 	}
 }
 

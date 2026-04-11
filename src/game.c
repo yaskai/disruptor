@@ -154,7 +154,8 @@ void GameLoadScene(Game *game, char *path) {
 		&game->ent_handler,
 		&game->test_section,
 		&game->effect_manager,
-		game->conf
+		game->conf,
+		&game->camera
 	);
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -225,6 +226,7 @@ void GameDraw(Game *game, float dt) {
 			vEffectsRun(&game->effect_manager, dt);
 			DrawMapTranslucent(&game->test_section, game->camera.position);
 			RenderBrushEntities(&game->ent_handler);
+			PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
 
 			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
 				for(u16 j = 0; j < game->test_section.bvh[2].tris.count; j++) {

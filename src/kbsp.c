@@ -30,10 +30,12 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Header header = {0};
 	fread(&header, sizeof(header), 1, pF);
 
+	/*
 	if(header.version != BSP_VERSION) {
 		MessageError("ERROR: BSP version mismatch", NULL);
 		return data;
 	}
+	*/
 
 	if(print_output)
 		printf("%d\n", header.version);

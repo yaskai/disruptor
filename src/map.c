@@ -887,6 +887,10 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 			continue;
 		}
 
+		for(int j = 1; j < 3; j++) {
+			hg->bvh[j] = sect.bvh[j];
+		}
+
 		hg->flags |= HULLGROUP_ACTIVE;
 	}
 

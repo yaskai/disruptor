@@ -422,6 +422,8 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 
 		comp_Health *health = &ent->comp_health;
 		if(health->component_valid) {
+			health->hit_box = BoxTranslate(health->hit_box, ent->comp_transform.position);
+
 			health->damage_cooldown -= dt;
 
 			if(health->damage_cooldown < 0)
@@ -563,7 +565,10 @@ void RenderEntities(EntityHandler *handler, float dt) {
 			// Placeholder, replace later
 			case ENT_SWITCH:
 				//DrawCubeV(ent->comp_transform.position, (Vector3) { 12, 12, 12 }, DARKGREEN);
-				DrawBoundingBox(ent->comp_transform.bounds, GREEN);
+				if(ent->trigger_condition > 1)
+					DrawBoundingBox(ent->comp_transform.bounds, GREEN);
+				else 
+					DrawBoundingBox(ent->comp_health.hit_box, RED);
 				break;
 
 			/*
@@ -574,7 +579,8 @@ void RenderEntities(EntityHandler *handler, float dt) {
 			*/
 
 			case ENT_HEALTHPACK:
-				DrawBoundingBox(ent->comp_transform.bounds, PINK);
+				//DrawBoundingBox(ent->comp_transform.bounds, PINK);
+				DrawModel(ent->model, ent->comp_transform.position, 1, LIGHTGRAY);
 				break;
 
 			case ENT_AMMO_REVOLVER:
@@ -774,7 +780,8 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 			
 			// * NOTE:
 			// Change from transform bounds to actual damage hit box later 
-			RayCollision coll = GetRayCollisionBox(ray, ent->comp_transform.bounds);
+			//RayCollision coll = GetRayCollisionBox(ray, ent->comp_transform.bounds);
+			RayCollision coll = GetRayCollisionBox(ray, ent->comp_health.hit_box);
 				
 			if(coll.hit && coll.distance <= ent_hit_dist) {
 				ent_hit_dist = coll.distance;
@@ -1280,6 +1287,7 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 
 	// Set up ai navigation
 	AiNavSetup(handler, sect);
+	SwitchSetup(handler);
 
 	// Reset ai tick
 	handler->ai_tick = 1.0f; 

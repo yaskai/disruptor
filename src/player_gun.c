@@ -40,6 +40,7 @@ float recoil_force = 0.0f;
 float friction = 0.0f;
 
 Vector2 sway = { 0, 0 };
+float sway_t = 0;
 
 typedef struct {
 	EntityHandler *handler;	
@@ -133,8 +134,12 @@ void PlayerGunInit(
 	EntityHandler *handler,
 	MapSection *sect,
 	vEffect_Manager *effect_manager,
-	Config *conf) 
+	Config *conf,
+	Camera3D *world_cam
+	) 
 {
+	gun_refs.world_cam = world_cam;
+
 	player_gun->cam = (Camera3D) {
 		.position = (Vector3) { 0, 0, -1 },
 		.target = (Vector3) { 0, 0, 1 },
@@ -171,24 +176,49 @@ void PlayerGunInit(
 	//hud_font = LoadFont("resources/fonts/shuretech.ttf");
 	hud_font = LoadFontEx("resources/fonts/shuretech.ttf", 96, NULL, 0);
 	SetTextureFilter(hud_font.texture, TEXTURE_FILTER_TRILINEAR);
+
+	//sway_t = GetTime();
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 	Vector3 hvel = (Vector3) { gun_refs.player->comp_transform.velocity.x, gun_refs.player->comp_transform.velocity.y, 0 };
 	float vel_len = Vector3Length(hvel);
 
-	if(vel_len >= 10.1f && gun_refs.player->comp_transform.on_ground) {
-		//sway.x = sinf(GetTime() * 7) * 0.075f;
-		//sway.y = sinf(GetTime() * 14) * 0.075f;
-		float tX = sinf(GetTime() * 7) * 0.075f;
-		float tY = sinf(GetTime() * 14) * 0.075f;
-		sway.x = Lerp(sway.x, tX, dt*50);
-		sway.y = Lerp(sway.y, tY, dt*50);
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	Bsp_Hull *hull = &gun_refs.sect->bsp_data.hull_groups[0].hulls[1];
+
+	Vector3 tr_start = gun_refs.player->comp_transform.position;
+	Vector3 tr_dest = Vector3Add(tr_start, Vector3Scale(DOWN, 10));
+
+	Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, tr_start, tr_dest, &tr);
+	bool ground = (tr.fraction < 1);
+
+	bool plr_crouch = (fabsf(gun_refs.player->comp_transform.position.z - gun_refs.world_cam->position.z) <= 8.0f);
+
+	if(vel_len >= 10.1f && (ground || gun_refs.player->comp_transform.on_ground)) {
+		float lt = (plr_crouch) ? 0.35f : 1.0f;
+		float y_lt = (plr_crouch) ? 0.35f : 1.0f;
+
+		float tX = sinf(sway_t * 7) * (((0.0125f * lt) + (vel_len * 0.0002f)));
+		float tY = sinf(sway_t * 14) * (((0.0125f * y_lt ) + (vel_len * 0.0002f)));
+
+		sway.x = Lerp(sway.x, tX, dt*10);
+		sway.y = Lerp(sway.y, tY, dt*10);
+
+		sway_t += dt;
 
 	} else {
 		//sway = Vector2Lerp(sway, Vector2Zero(), 4*dt);
-		sway.x = Lerp(sway.x, 0.0f, 5*dt);
-		sway.y = Lerp(sway.y, 0.0f, 2*dt);
+
+		if(gun_refs.player->comp_transform.velocity.z >= 50.0f) {
+			sway.y = Lerp(sway.y, -0.5f,  2.5f*dt);
+			//sway.x = Lerp(sway.x,  0.0f,  15*dt);
+		} else if(gun_refs.player->comp_transform.velocity.z <= -100.0f) {
+			sway.y = Lerp(sway.y,  0.2f,  2.5f*dt);
+		} else { 
+			sway.x = Lerp(sway.x, 0.0f, 2.5f*dt);
+			sway.y = Lerp(sway.y, 0.0f, 2.5f*dt);
+		}
 	}
 
 	curr_gun->cooldown -= dt;
@@ -520,7 +550,9 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	comp_Transform *ct = &gun_refs.player->comp_transform;
 
 	Vector3 trace_start = ct->position;
-	trace_start.z += 12;
+	//Vector3 trace_start = gun_refs.world_cam->position; 
+	//trace_start.z += 12;
+	trace_start.z = gun_refs.world_cam->position.z - 2;
 
 	bool trace_hit = false;
 	Vector3 point = TraceBullet(
@@ -573,7 +605,7 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 	bug_ent->flags |= ENT_COLLIDERS;
 
 	ct->position = player_ent->comp_transform.position;
-	ct->position.z += 10;
+	ct->position.z = gun_refs.world_cam->position.z;
 
 	ct->forward = player_ent->comp_transform.forward;
 	

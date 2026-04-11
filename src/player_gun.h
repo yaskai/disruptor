@@ -22,7 +22,8 @@ void PlayerGunInit(
 	EntityHandler *handler,
 	MapSection *sect,
 	vEffect_Manager *effect_manager,
-	Config *conf
+	Config *conf,
+	Camera3D *world_cam
 );
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt);

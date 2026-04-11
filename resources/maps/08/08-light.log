@@ -1,11 +1,11 @@
 ---- light / ericw-tools 2.0.0-alpha10 ----
-LoadBSPFile: './08.bsp'
+LoadBSPFile: '08.bsp'
 BSP is version Quake BSP bsp29
 INFO: using built-in palette.
-Loading extended texinfo flags from ./08.texinfo.json...
-Loading extended content flags from ./08.content.json...
+Loading extended texinfo flags from 08.texinfo.json...
+Loading extended content flags from 08.content.json...
 WARNING: entity at (944 -672 240) (light) has empty key/value "_dirt" ""
-119 entities read, 42 are lights.
+147 entities read, 53 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -36,25 +36,25 @@ BSPX light directions output requested on command line.
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	208 sky faces
-	5730 solid faces
-	547 filtered faces
+	214 sky faces
+	7625 solid faces
+	605 filtered faces
 	0 shadow-casting skip faces
-SetupLights: 42 initial lights
-SetupLights: 42 after surface lights
-SetupLights: 42 after jittering
-Final count: 42 lights, 194 suns in use.
+SetupLights: 53 initial lights
+SetupLights: 53 after surface lights
+SetupLights: 53 after jittering
+Final count: 53 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 4446680
+lightmap size (total): 5361440
 Lighting Completed.
 
-Writing ./08.lit
+Writing 08.lit
 DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
-Writing ./08.bsp as Quake BSP bsp29
-19.032s seconds elapsed
+Writing 08.bsp as Quake BSP bsp29
+18.329s seconds elapsed
 0 empty lightmaps
 
 

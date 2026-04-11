@@ -1,0 +1,60 @@
+---- light / ericw-tools 2.0.0-alpha10 ----
+LoadBSPFile: './08.bsp'
+BSP is version Quake BSP bsp29
+INFO: using built-in palette.
+Loading extended texinfo flags from ./08.texinfo.json...
+Loading extended content flags from ./08.content.json...
+WARNING: entity at (944 -672 240) (light) has empty key/value "_dirt" ""
+149 entities read, 52 are lights.
+.lit colored light output requested on command line.
+BSPX colored light output requested on command line.
+BSPX light directions output requested on command line.
+
+--- Options Summary ---
+    "dist" was set to "1.000000" (from map)
+    "anglescale" was set to "1.000000" (from map)
+    "light" was set to "30.000000" (from map)
+    "dirt" was set to "1" (from map)
+    "minlight_dirt" was set to "1" (from command line)
+    "bounce" was set to "1" (from map)
+    "bouncescale" was set to "8.500000" (from map)
+    "bouncecolorscale" was set to "1.000000" (from map)
+    "sunlight" was set to "300.000000" (from map)
+    "sunlight_color" was set to "255 196 192" (from map)
+    "sunlight2" was set to "200.000000" (from map)
+    "sunlight2_color" was set to "255 196 192" (from map)
+    "sunlight3" was set to "200.000000" (from map)
+    "sunlight3_color" was set to "255 196 192" (from map)
+    "sunlight_dirt" was set to "1.000000" (from map)
+    "sunlight2_dirt" was set to "1.000000" (from command line)
+    "sunlight_mangle" was set to "0.45315388 -0.7848856 -0.42261827" (from map)
+    "sunlight_penumbra" was set to "2.000000" (from map)
+    "surflight_radiosity" was set to "1" (from command line)
+    "soft" was set to "5" (from command line)
+    "extra" was set to "4" (from command line)
+    "world_units_per_luxel" was set to "16.000000" (from command line)
+
+Embree_TraceInit: Embree version: 4.4.0
+Embree_TraceInit: 
+	231 sky faces
+	7477 solid faces
+	565 filtered faces
+	0 shadow-casting skip faces
+SetupLights: 52 initial lights
+SetupLights: 52 after surface lights
+SetupLights: 52 after jittering
+Final count: 52 lights, 194 suns in use.
+       48 dirtmap vectors
+0 surface light points in use.
+map uses color: true
+lightmap size (total): 5353460
+Lighting Completed.
+
+Writing ./08.lit
+DECOUPLED_LM BSPX lump written
+0 switchable light styles (32 max)
+Writing ./08.bsp as Quake BSP bsp29
+23.953s seconds elapsed
+0 empty lightmaps
+
+

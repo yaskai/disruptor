@@ -35,7 +35,7 @@ void vEffectsRun(vEffect_Manager *manager, float dt) {
 		}
 
 		float alpha = trail->timer;
-		alpha = Clamp(alpha, 0.0f, 0.75f);
+		alpha = Clamp(alpha, 0.0f, 0.5f);
 
 		//trail->point_A.z += trail->timer * dt;
 		//trail->point_B.z += trail->timer * dt;
