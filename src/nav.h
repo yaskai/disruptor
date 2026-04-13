@@ -25,6 +25,8 @@ typedef struct {
 	NavNode *nodes;
 	NavEdge *edges;
 
+	BoundingBox bounds;
+
 	u16 node_count, node_cap;
 	u16 edge_count, edge_cap;
 

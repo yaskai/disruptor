@@ -8,7 +8,7 @@
 // * NOTE:
 // Nothing right now, 
 // unsure design-wise what to do here...
-void OnHitTurret(Entity *ent, short damage) {
+void OnHitTurret(Entity *ent, short damage, Vector3 bullet_pos) {
 
 }
 
@@ -44,6 +44,8 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 
 		float angle = sinf(GetTime() * 1.5f);
 		angle = Clamp(angle, angle_min, angle_max);
+		
+		ct->targ_look.z = Lerp(ct->targ_look.z, GetRandomValue(-9, 9) * 0.01f, dt*5);
 
 		if(ent->comp_weapon.ammo > 0) {
 			ct->forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
@@ -106,6 +108,8 @@ void TurretDraw(Entity *ent) {
 
 	DrawMesh(ent->model.meshes[1], ent->model.materials[1], mat_gun);
 	DrawMesh(ent->model.meshes[0], ent->model.materials[1], mat_base);
+
+	DrawBoundingBox(ent->comp_transform.bounds, RED);
 }
 
 void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {

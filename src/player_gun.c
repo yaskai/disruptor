@@ -174,8 +174,8 @@ void PlayerGunInit(
 
 	muz_flash = LoadTexture("resources/fx/muz.png");
 	//hud_font = LoadFont("resources/fonts/shuretech.ttf");
-	hud_font = LoadFontEx("resources/fonts/shuretech.ttf", 96, NULL, 0);
-	SetTextureFilter(hud_font.texture, TEXTURE_FILTER_TRILINEAR);
+	hud_font = LoadFontEx("resources/fonts/shuretech.ttf", 64, NULL, 0);
+	SetTextureFilter(hud_font.texture, TEXTURE_FILTER_POINT);
 
 	//sway_t = GetTime();
 }
@@ -220,6 +220,13 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 			sway.y = Lerp(sway.y, 0.0f, 2.5f*dt);
 		}
 	}
+
+	Vector2 md = GetMouseDelta();
+	if(fabsf(md.x) >= 1.5f)
+		sway.x += (md.x * dt * 0.025f);
+
+	if(fabsf(md.y) >= 1.5f)
+		sway.y += (md.y * dt * 0.025f);
 
 	curr_gun->cooldown -= dt;
 
@@ -363,7 +370,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 	bool skip_draw = false;
 
 	if(player_gun->current_gun == WEAP_DISRUPTOR) {
-		if(bug_ent->comp_ai.state > 0) {
+		if(bug_ent->comp_ai.state != BUG_DEFAULT) {
 			skip_draw = true;
 		}
 	}
@@ -425,7 +432,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		(Vector2) { 64, 980 },
 		80, 
 		1, 
-		ColorAlpha(SKYBLUE, 0.95f)
+		ColorAlpha(SKYBLUE, 0.75f)
 	);
 
 	DrawTextEx(
@@ -434,8 +441,48 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		(Vector2) { 1640, 980 },
 		80,
 		1, 
-		ColorAlpha(SKYBLUE, 0.95f)
+		ColorAlpha(SKYBLUE, 0.75f)
 	);
+
+	/*
+	DrawTextEx(
+		hud_font,
+		TextFormat("%d", bug_ent->comp_ai.state),
+		(Vector2) { 0, 64 },
+		32,
+		1, 
+		ColorAlpha(GREEN, 0.95f)
+	);
+
+	DrawTextEx(
+		hud_font,
+		TextFormat("%f %f %f", bug_ent->comp_transform.position.x, bug_ent->comp_transform.position.y, bug_ent->comp_transform.position.z),
+		(Vector2) { 0, 96 },
+		32,
+		1, 
+		ColorAlpha(GREEN, 0.95f)
+	);
+
+	int bug_active = gun_refs.handler->ents[gun_refs.handler->bug_id].flags & ENT_ACTIVE;
+	DrawTextEx(
+		hud_font,
+		TextFormat("%d", bug_active),
+		(Vector2) { 0, 128 },
+		32,
+		1, 
+		ColorAlpha(GREEN, 0.95f)
+	);
+
+
+	DrawTextEx(
+		hud_font,
+		TextFormat("%d", bug_ent->comp_ai.state),
+		(Vector2) { 0, 64 },
+		32,
+		1, 
+		ColorAlpha(GREEN, 0.95f)
+	);
+	*/
 
 	short crosshair_type = CROSSHAIR_DEFAULT;
 	switch(player_gun->current_gun) {

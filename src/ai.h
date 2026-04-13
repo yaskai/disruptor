@@ -18,15 +18,17 @@
 #define AI_INPUT_HEAR_PLAYER	0x0040
 #define AI_INPUT_MEELEE_RANGE	0x0080
 #define AI_INPUT_DEST_REACHED	0x0100
+#define AI_INPUT_TARG_DEAD		0x0200
 // *** 
 
 enum ANIM_STATES : u8 {
-	STATE_IDLE,
-	STATE_MOVE,	
-	STATE_ATTACK,
-	STATE_RELOAD,
-	STATE_DEAD,
-	STATE_DISABLED
+	STATE_IDLE		= 0,
+	STATE_MOVE		= 1,	
+	STATE_ATTACK    = 2,
+	STATE_RELOAD	= 3,
+	STATE_DEAD		= 4,
+	STATE_DISABLED  = 5,
+	STATE_STUNNED	= 6
 };
 
 enum SCHED_TYPES : u8 {
@@ -38,7 +40,9 @@ enum SCHED_TYPES : u8 {
 	SCHED_PATROL,
 	SCHED_MAINTAINER_ATTACK,
 	SCHED_CHASE_PLAYER,
-	SCHED_FIX_FRIEND,
+	SCHED_FIX_FRIEND_A,
+	SCHED_FIX_FRIEND_B,
+	SCHED_STUN,
 };
 
 enum TASK_TYPES : u8 {
@@ -58,10 +62,12 @@ enum TASK_TYPES : u8 {
 	TASK_FIND_POS,
 	TASK_MEELEE_ATTACK,
 	TASK_MAKE_CHASE_PATH,
+	TASK_GOTO_ENT,
+	TASK_RESTORE_SCHED,
 };
 
 typedef struct {
-	u32 sched_id;
+	u32 sched_id, prev_sched;
 	u32 interrupt_mask;
 
 	u8 curr_task;
@@ -73,6 +79,8 @@ typedef struct {
 	u8 num_tasks;			// Number of tasks
 
 	u32 interrupt_mask;		// Which inputs end the schedule
+	u32 fail_mask;			// Which inputs count as failure 
+
 	u8 interrupt_sched;		// What schedule to switch to upon interrupt
 
 	u8 fail_sched;			// What schedule to switch to upon failure
@@ -132,5 +140,17 @@ typedef struct {
 } comp_Ai;
 
 void AiSetSchedule(comp_Ai *ai, u8 sched_id);
+
+#define MAX_ALERT_SPHERES	16
+#define ALERT_SPHERE_ACTIVE 0x01
+typedef struct {
+	Vector3 position;
+	float radius;
+
+	u16 graph_id;
+
+	u8 flags;
+
+} AlertSphere;
 
 #endif

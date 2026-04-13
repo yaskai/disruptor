@@ -14,6 +14,35 @@ float ai_tick = 0.0f;
 
 const bool AI_LOG = false;
 
+short alert_sphere_count = 0;
+AlertSphere alert_spheres[MAX_ALERT_SPHERES] = {0};
+float alert_clear_tick = 0;
+
+void AddAlertSphere(Entity *ent, float radius) {
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+
+	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
+		return;
+
+	short id = alert_sphere_count++;
+	short iters = 0;
+	while(alert_spheres[id].flags & ALERT_SPHERE_ACTIVE) {
+		id = (id + 1) % MAX_ALERT_SPHERES;
+		iters++;
+
+		if(iters >= MAX_ALERT_SPHERES)
+			break;
+	}
+
+	alert_spheres[id] = (AlertSphere) {
+		.position = ct->position,
+		.radius = radius,
+		.graph_id = ai->navgraph_id,
+		.flags = ( ALERT_SPHERE_ACTIVE )
+	};
+};
+
 u8 ExecWaitTime(comp_Ai *ai, float dt) {
 	if(ai->task_state.timer <= 0) {
 		ai->task_state.timer = 0;
@@ -90,7 +119,7 @@ u8 ExecGotoPoint(Entity *ent, MapSection *sect) {
 
 	Vector3 node_pos = graph->nodes[path->nodes[path->curr]].position;
 	Vector3 to_node = Vector3Subtract(node_pos, ct->position);
-	if(Vector3LengthSqr(to_node) <= NODE_REACH_RADIUS) {
+	if(Vector3LengthSqr(to_node) <= MEELEE_RANGE) {
 		if(path->curr++ >= path->count)
 			return 1;
 	}
@@ -243,7 +272,7 @@ u8 ExecMeeleeAttack(Entity *ent, EntityHandler *handler) {
 	Entity *victim = &handler->ents[ai->targ_data.ent_id];
 
 	if(Vector3DistanceSqr(ct->position, victim->comp_transform.position) <= MEELEE_RANGE)
-		OnHitEnt(victim, 10);
+		OnHitEnt(victim, 10, ct->position);
 
 	return 1;
 }
@@ -261,11 +290,11 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 
 	Vector3 tr_start = ct->position;
 	//tr_start.z += 24;
-	tr_start.z += 18;
+	tr_start.z += 14;
 
 	Vector3 tr_dest = ai->targ_data.known_position;
 	//tr_dest.z += 24;
-	tr_dest.z += 18;
+	tr_dest.z += 14;
 
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	if(tr.fraction >= 1.0f) {
@@ -282,10 +311,12 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
 
 	int node = FindClosestNavNodeInGraph(ai->targ_data.known_position, graph);
+	/*
 	if(node < 0) {
 		AiSetSchedule(ai, sched_defs[ai->sched_state.sched_id].fail_sched);
 		return 0;
 	} 
+	*/
 
 	//printf("curr_navnode_id: %d\n", ai->curr_navnode_id);
 
@@ -309,9 +340,26 @@ u8 ExecDoFix(Entity *ent, EntityHandler *handler) {
 	Entity *other = &handler->ents[ai->targ_data.ent_id];
 	DoFix(other);
 
-	ai->targ_data.ent_id = -1;
+	//ai->targ_data.ent_id = -1;
+	ai->targ_data.ent_id = handler->player_id;
 	ai->input_mask &= ~AI_INPUT_SEE_GLITCHED;
-	
+
+	return 1;
+}
+
+u8 ExecGotoEnt(Entity *ent, EntityHandler *handler) {
+	comp_Ai *ai = &ent->comp_ai;	
+	comp_Transform *ct = &ent->comp_transform;
+
+	Entity *targ = &handler->ents[ai->targ_data.ent_id];
+	if(Vector3DistanceSqr(ct->position, targ->comp_transform.position) > MEELEE_RANGE)
+		return 0;
+
+	return 1;
+}
+
+u8 ExecRestoreSched(Entity *ent) {
+	AiSetSchedule(&ent->comp_ai, ent->comp_ai.sched_state.prev_sched);
 	return 1;
 }
 
@@ -322,10 +370,15 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 	if(ai->navgraph_id < 0)
 		return;
 
-	if(ai->sched_state.sched_id == SCHED_FIX_FRIEND) {
+	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
+		return;
+
+	/*
+	if(ai->sched_state.sched_id == SCHED_FIX_FRIEND_A || ai->sched_state.sched_id == SCHED_FIX_FRIEND_B) {
 		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
 		return;
 	}
+	*/
 
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *other = &handler->ents[i];
@@ -348,17 +401,23 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 		if(Vector3DistanceSqr(other->comp_transform.position, ct->position) > (1024*1024))
 			continue;
 
+		if(other->comp_ai.state == STATE_DEAD)
+			continue;
+
 		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
 		ai->targ_data.ent_id = i;
 		ai->targ_data.known_position = other->comp_transform.position;
 		ai->targ_data.position = other->comp_transform.position;
 
-		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND) {
-			AiSetSchedule(ai, SCHED_FIX_FRIEND);
+		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND_A && ai->sched_state.sched_id != SCHED_FIX_FRIEND_B) {
+			AiSetSchedule(ai, SCHED_FIX_FRIEND_A);
+			return;
 		}
 
 		break;
 	}
+
+	ai->input_mask &= ~AI_INPUT_SEE_GLITCHED;
 }
 
 // Ai tick, not every frame,
@@ -386,6 +445,16 @@ void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 				best = d;
 			}
 		}
+	}
+
+	alert_clear_tick--;
+	if(alert_clear_tick <= 0) {
+		alert_sphere_count = 0;
+		for(short i = 0; i < MAX_ALERT_SPHERES; i++) {
+			alert_spheres[i].flags = 0;
+		}
+
+		alert_clear_tick = 2;
 	}
 
 	for(u16 i = 0; i < handler->count; i++) {
@@ -416,9 +485,18 @@ void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, MapSect
 	if(ent->comp_ai.state == STATE_DEAD)
 		return;
 
+	// Tempororarily do nothing if stunned
+	if(ent->comp_ai.state == STATE_STUNNED) {
+		if(ent->comp_health.damage_cooldown <= 0) ent->comp_ai.state = STATE_IDLE;
+		return;
+	}
+
 	float best = FLT_MAX;
 	for(int i = 0; i < sect->navgraph_count; i++) {
 		NavGraph *graph = &sect->navgraphs[i];
+
+		if(!CheckCollisionBoxes(ent->comp_transform.bounds, graph->bounds))
+			continue;
 
 		int closest_node = FindClosestNavNodeInGraph(ent->comp_transform.position, graph);
 		if(closest_node > -1) {
@@ -439,7 +517,6 @@ void AiComponentUpdate(Entity *ent, EntityHandler *handler, comp_Ai *ai, MapSect
 
 	// Tick disrupt timer down (if disrupted)
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED) {
-		//ai->disrupt_timer -= dt;
 		ai->disrupt_timer--;
 	}
 }
@@ -452,7 +529,12 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	comp_Transform *ct = &ent->comp_transform;
 	BvhTree *bvh = &sect->bvh[0];
 
-	if(ent->type == ENT_MAINTAINER && ai->sched_state.sched_id != SCHED_FIX_FRIEND && ai->navgraph_id >= 0)
+	if(ai->state == STATE_DEAD) {
+		ai->input_mask = 0;
+		return;
+	}
+
+	if(ent->type == ENT_MAINTAINER && ai->navgraph_id >= 0)
 		CheckForBrokenAlly(ent, handler);
 
 	// ** Check if player is visible **	
@@ -492,16 +574,35 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		ai->targ_data.known_position = player_ent->comp_transform.position;
 	}
 
+	if((ai->input_mask & AI_INPUT_SEE_PLAYER) || (ai->input_mask & AI_INPUT_HEAR_PLAYER)) {
+		AddAlertSphere(ent, 255.0f);
+	}
+
+	bool alert = false;
+	for(short i = 0; i < MAX_ALERT_SPHERES; i++) {
+		AlertSphere *sphere = &alert_spheres[i];
+		if(!(sphere->flags & ALERT_SPHERE_ACTIVE))
+			continue;
+
+		if(sphere->graph_id != ai->navgraph_id)
+			continue;
+
+		if(CheckCollisionSpheres(sphere->position, sphere->radius*sphere->radius, ct->position, ai->hear_distance)) {
+			alert = true;
+			break;
+		}
+	}
+
 	// ***
 	ai->input_mask &= ~AI_INPUT_HEAR_PLAYER;
 	bool in_hearing_range = (Vector3Distance(player_ent->comp_transform.position, ct->position) <= ai->hear_distance);
-	if(in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f) {
+	if((in_hearing_range && Vector3LengthSqr(player_ent->comp_transform.velocity) >= 0.1f) || alert) {
 		ai->input_mask |= AI_INPUT_HEAR_PLAYER;
 
 		prev_seen_player = true;
 		ai->input_mask &= ~AI_INPUT_LOST_PLAYER;
 
-		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND)
+		if(ai->sched_state.sched_id != SCHED_FIX_FRIEND_A && ai->sched_state.sched_id != SCHED_FIX_FRIEND_B)
 			ai->targ_data.ent_id = handler->player_id;
 	}
 
@@ -515,7 +616,6 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	if(Vector3DistanceSqr(ai->task_state.move_dest, ent->comp_transform.position) <= 16.0f) {	
 		ai->input_mask |= AI_INPUT_DEST_REACHED;
 	}
-
 	
 	if(ai->targ_data.ent_id < 0)
 		return;
@@ -528,6 +628,10 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	}
 
 	ai->input_mask &= ~AI_INPUT_TAKE_DAMAGE;
+
+	ai->input_mask &= ~AI_INPUT_TARG_DEAD;
+	if(targ_ent->comp_ai.state == STATE_DEAD)
+		ai->input_mask |= AI_INPUT_TARG_DEAD;
 }
 
 // Execute ai schedule
@@ -538,6 +642,12 @@ void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai
 	// Interrupt
 	if(ai->input_mask & sched_def->interrupt_mask) {
 		AiSetSchedule(ai, sched_def->interrupt_sched);
+		return;
+	}
+
+	// Failure
+	if(ai->input_mask & sched_def->fail_mask) {
+		AiSetSchedule(ai, sched_def->fail_sched);
 		return;
 	}
 
@@ -622,12 +732,21 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 		case TASK_MAKE_CHASE_PATH:
 			done = ExecMakeChasePath(ent, sect);
 			break;
+
+		case TASK_GOTO_ENT:
+			done = ExecGotoEnt(ent, handler);
+			break;
+
+		case TASK_RESTORE_SCHED:
+			done = ExecRestoreSched(ent);
+			break;
 	}
 
 	return done;
 }
 
 void AiSetSchedule(comp_Ai *ai, u8 sched_id) {
+	ai->sched_state.prev_sched = ai->sched_state.sched_id;
 	ai->sched_state.sched_id = sched_id;
 	ai->sched_state.curr_task = 0;
 	ai->task_state = (Ai_TaskState) {0};

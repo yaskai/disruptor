@@ -144,6 +144,52 @@ void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *
 	memcpy(pm->clips, clips, sizeof(Vector3) * num_clips);
 }
 
+u8 ent_CheckGround(comp_Transform *ct, Vector3 position, MapSection *sect) {
+	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
+
+	Vector3 dest = Vector3Add(ct->position, Vector3Scale(DOWN, 0.1f));
+
+	Bsp_Data *bsp = &sect->bsp_data;
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	float fraction = 1.0f;
+
+	for(int j = 0; j < 1; j++) {
+		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			continue;
+
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+
+		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, ct->position, dest, &temp_tr);
+
+		// Determine how much of movement was obstructed
+		float hull_frac = temp_tr.fraction;
+		hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+		if(hull_frac < fraction) {
+			tr = temp_tr;
+			fraction = hull_frac;
+		}
+	}		
+
+	if(tr.fraction >= 1) {
+		ct->ground_normal = Vector3Zero();
+		return 0;
+	}
+
+	// Set stored ground normal
+	ct->ground_normal = *(Vector3 *) tr.plane.normal;
+
+	// Clip velocity going into ground
+	pm_ClipVelocity(ct->velocity, ct->ground_normal, &ct->velocity, 1.001f, 0);
+
+	if(fabsf(ct->velocity.z) < STOP_EPS)
+		ct->velocity.z = 0;
+
+	return 1;
+}
+
 void ent_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt, Vector3 wish_vel, EntityHandler *handler) {
 	MapSection *sect = ptr_handler_sect;
 	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[1];
@@ -184,7 +230,7 @@ void ent_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData 
 		0,
 		1,
 		step_pm.end_pos,
-		Vector3Add(base_pm.end_pos, Vector3Scale(DOWN, 1)), 
+		Vector3Add(base_pm.end_pos, Vector3Scale(DOWN, 1.01f)), 
 		&tr
 	);
 
@@ -193,9 +239,11 @@ void ent_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData 
 	if(tr.start_solid || tr.all_solid)
 		use_step = false;
 
+	/*
 	if(!use_step) {
 		return;
 	}
+	*/
 
 	// Press step down
 	Vector3 down_vel = Vector3Scale(DOWN, PM_STEP_Z);
@@ -221,27 +269,29 @@ void ent_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData 
 	if((down_pm.block & BLOCK_GROUND) && (down_dist > dist_base + 0.001f) && (down_pm.end_pos.z > base_pm.end_pos.z + 0.1f))
 		use_down = true;
 
-	if(tr.start_solid && tr.all_solid)
-		use_down = false;
+	//if(tr.start_solid && tr.all_solid)
+		//use_down = false;
 
 	if(tr.plane.normal[2] < 1.0f)
 		use_down = false;
 
-	if(use_down) {
+	if(use_down && use_step) {
 		step_pm.end_pos.z = down_pm.end_pos.z;
+		*pm = step_pm;
 
-	} else { 
+	} else if(use_down) { 
 		//step_pm.end_vel.z += down_vel.z;
+		base_pm.end_pos.z = down_pm.end_pos.z;
 		*pm = base_pm;
-		return;
-	}
 
-	*pm = step_pm;
+	} else {
+		*pm = base_pm;
+	}
 }
 
 // -------------------------------------------------
 // Hit functions:
-typedef void (*OnHitFunc)(Entity *ent, short damage);
+typedef void (*OnHitFunc)(Entity *ent, short damage, Vector3 bullet_pos);
 OnHitFunc on_hit_funcs[] = {
 	&OnHitPlayer,
 	&OnHitTurret,
@@ -358,7 +408,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	PlayerUpdate(player_ent, dt);
 
 	if(player_ent->comp_ai.state == STATE_DEAD && player_ent->comp_ai.task_state.timer >= 2) {
-		ReloadEntities(handler, sect, 1);
+		ReloadEntities(handler, sect, 0);
 		return;
 	}
 
@@ -380,6 +430,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 			sect->bvh_hullgroups[ent->bsp_model].flags |= HULLGROUP_ACTIVE;
 		}
 	}
+
 
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
@@ -539,6 +590,8 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 void RenderEntities(EntityHandler *handler, float dt) {
 	EntGrid *grid = &handler->grid;
 
+	//BugDraw(&handler->ents[handler->bug_id]);
+
 	for(u16 i = 0; i < handler->count; i++) {;
 		Entity *ent = &handler->ents[i];
 
@@ -565,10 +618,13 @@ void RenderEntities(EntityHandler *handler, float dt) {
 			// Placeholder, replace later
 			case ENT_SWITCH:
 				//DrawCubeV(ent->comp_transform.position, (Vector3) { 12, 12, 12 }, DARKGREEN);
+				/*
 				if(ent->trigger_condition > 1)
 					DrawBoundingBox(ent->comp_transform.bounds, GREEN);
 				else 
 					DrawBoundingBox(ent->comp_health.hit_box, RED);
+				*/
+				SwitchDraw(ent, handler, dt);
 				break;
 
 			/*
@@ -584,7 +640,8 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				break;
 
 			case ENT_AMMO_REVOLVER:
-				DrawBoundingBox(ent->comp_transform.bounds, DARKGREEN);
+				//DrawBoundingBox(ent->comp_transform.bounds, DARKGREEN);
+				DrawModel(ent->model, ent->comp_transform.position, 1, DARKGREEN);
 				break;
 		}
 	}
@@ -826,7 +883,7 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 
 	if(*hit && ent_hit_id > -1 && !dummy) {
 		Entity *hit_ent = &handler->ents[ent_hit_id];
-		OnHitEnt(hit_ent, handler->ents[sender].comp_weapon.damage);
+		OnHitEnt(hit_ent, handler->ents[sender].comp_weapon.damage, dest);
 	}
 
 	debug_bullet_dest = dest;
@@ -875,7 +932,7 @@ void DebugDrawEntText(EntityHandler *handler, Camera3D cam) {
 
 
 // When entity is hit with bullet or other damaging thing
-void OnHitEnt(Entity *ent, short damage) {
+void OnHitEnt(Entity *ent, short damage, Vector3 bullet_pos) {
 	comp_Health *health = &ent->comp_health;
 	
 	if(health->damage_cooldown > 0)
@@ -894,23 +951,30 @@ void OnHitEnt(Entity *ent, short damage) {
 	}
 
 	if(health->on_hit > -1) {
-		on_hit_funcs[health->on_hit](ent, damage);
+		on_hit_funcs[health->on_hit](ent, damage, bullet_pos);
 	}
 
 	if(ent->type == ENT_PLAYER) {
-		OnHitPlayer(ent, damage);
+		OnHitPlayer(ent, damage, bullet_pos);
 	}
 
 	ai->input_mask |= AI_INPUT_TAKE_DAMAGE;
 }
 
 // Maintainer hit
-void OnHitMaintainer(Entity *ent, short damage) {
+void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
 		ent->comp_health.amount = 0;
+
+	if(CheckCollisionBoxSphere(ent->comp_health.crit_box, bullet_pos, 3.5f)) {
+		ent->comp_health.amount -= damage;
+		ent->comp_ai.state = STATE_STUNNED;
+		//AiSetSchedule(ai, SCHED_STUN);
+		ent->comp_health.damage_cooldown = 0.25f;
+	}
 
 	if(ent->comp_health.amount <= 0)
 		ai->state = STATE_DEAD;
@@ -921,18 +985,20 @@ void OnHitMaintainer(Entity *ent, short damage) {
 	Vector3 prev_wish = ai->wish_dir;
 	float prev_speed = ai->speed;
 
-	ai->speed = 300;
+	ai->speed = 1000;
 
 	Vector3 knockback = Vector3Negate(to_player);
 	if(ai->state != STATE_DEAD)
 		knockback = Vector3Zero();
 	else {
 		short dice = GetRandomValue(0, 6);
+		/*
 		if(dice == 6) {
 			//knockback.z = 0.99f;
 			knockback.z = 0.1f;
-			ai->speed = 100;
+			ai->speed = 3000;
 		}
+		*/
 	}
 	knockback = Vector3Normalize(knockback);
 
@@ -953,11 +1019,7 @@ void OnHitMaintainer(Entity *ent, short damage) {
 // Regulator hit
 // * NOTE:
 // Nothing right now as that enemy isn't implemented yet...
-void OnHitRegulator(Entity *ent, short damage) {
-
-}
-
-void OnFixMaintainer(Entity *ent) {
+void OnHitRegulator(Entity *ent, short damage, Vector3 bullet_pos) {
 }
 
 void OnFixRegulator(Entity *ent) {
@@ -970,8 +1032,11 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 
 	ct->bounds = BoxTranslate(ct->bounds, ct->position);
 
-	ct->on_ground = pm_CheckGround(ct, ct->position);
+	//ct->on_ground = pm_CheckGround(ct, ct->position);
+	ct->on_ground = ent_CheckGround(ct, ct->position, sect); 
 	pm_ApplyGravity(ct, dt);
+	if(ct->on_ground)
+		ct->velocity.z = 0;
 
 	Vector3 wish_dir = ai->wish_dir;
 	float wish_speed = ai->speed;
@@ -988,10 +1053,13 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 	if(ct->on_ground) 
 		ent_GroundMove(ent, ct, ct->position, &move_data, dt, wish_vel, handler);
 	else 
-		pm_TraceMove(ct, ct->position, ct->velocity, &move_data, dt);
+		ent_TraceMoveEx(ent, ct->position, ct->velocity, &move_data, dt, handler);
+		//pm_TraceMove(ct, ct->position, ct->velocity, &move_data, dt);
 
 	ct->position = move_data.end_pos;
 	ct->velocity = move_data.end_vel;
+
+	ct->on_ground = ent_CheckGround(ct, ct->position, sect); 
 }
 
 // Projectile movement tracing
@@ -1220,7 +1288,7 @@ void ProjectileImpact(Projectile *projectile, EntityHandler *handler, i16 ent_id
 	float damage = Vector3Length(projectile->ct.velocity) * 0.01f;
 	damage = Clamp(damage, 0, 100);
 
-	OnHitEnt(ent, (short)damage);
+	OnHitEnt(ent, (short)damage, projectile->ct.position);
 
 	Vector3 knockback = (Vector3) { projectile->ct.velocity.x, projectile->ct.velocity.z, 0 };
 	knockback = Vector3Scale(knockback, 0.33f);

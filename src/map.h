@@ -51,6 +51,8 @@ typedef struct {
 	Vector3 position;
 	
 	int angle;
+	int radius;
+
 	int ent_type;
 
 	int bsp_model;

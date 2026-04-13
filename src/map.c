@@ -991,6 +991,21 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 
 	navgraph->edges = realloc(navgraph->edges, sizeof(NavEdge) * navgraph->edge_count);
 	navgraph->nodes = realloc(navgraph->nodes, sizeof(NavNode) * navgraph->node_count);
+
+	navgraph->bounds = (BoundingBox) {
+		Vector3Scale(Vector3One(),  FLT_MAX),
+		Vector3Scale(Vector3One(), -FLT_MAX)
+	};
+
+	for(u16 i = 0; i < navgraph->node_count; i++) {
+		NavNode *node = &navgraph->nodes[i]; 
+
+		navgraph->bounds.min = Vector3Min(navgraph->bounds.min, node->position);
+		navgraph->bounds.max = Vector3Max(navgraph->bounds.max, node->position);
+	}
+
+	navgraph->bounds.min = Vector3Add(navgraph->bounds.min, Vector3Scale( (Vector3) { 1, 1, 0.1f }, -256)); 
+	navgraph->bounds.max = Vector3Add(navgraph->bounds.max, Vector3Scale( (Vector3) { 1, 1, 0.1f },  256)); 
 }
 
 void GetConnectedNodes(NavNode *node, u16 connected[MAX_EDGES_PER_NODE], u8 *count, NavGraph *navgraph) {
@@ -1195,6 +1210,8 @@ void DebugDrawNavGraphs(MapSection *sect, Model model) {
 			Color line_color = (i % 2 == 0) ? MAGENTA : GREEN; 
 			DrawLine3D(node_A->position, node_B->position, line_color);
 		}
+
+		DrawBoundingBox(navgraph->bounds, (i % 2 == 0) ? MAGENTA : GREEN);
 	}
 }
 

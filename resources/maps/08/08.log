@@ -7,119 +7,127 @@ Input file: /home/kai/projects/disruptor/resources/maps/08/08.map
 Output file: /home/kai/projects/disruptor/resources/maps/08/08.bsp
 
 INFO: using built-in palette.
-      167 entities
+      215 entities
        10 unique textures
-      157 texinfos
-    1,204 unique planes
+      379 texinfos
+    1,552 unique planes
 
-INFO: world extents calculated to 7432 units
-      712 brushes
-    4,372 sides
-       97 side bevels
+INFO: world extents calculated to 5608 units
+      961 brushes
+    5,885 sides
+      160 side bevels
 
             0 texture frames added
 Processing hull 0...
-     18 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
-    683 SOLID brushes
-      6 SKY brushes
-    707 brushes total
-    4,342 visible sides
-INFO: calculating BSP for 707 brushes with 4342 sides
-      707 brushes
-    4,342 visible faces
-    2,779 nodes
-    2,779 expensive split nodes
-    2,780 leaves
-       20 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-    1,011 SOLID leafs
+     19 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+      9 SKY brushes
+    926 SOLID brushes
+    954 brushes total
+    5,843 visible sides
+INFO: calculating BSP for 954 brushes with 5843 sides
+      954 brushes
+    5,843 visible faces
+    3,580 nodes
+    3,580 expensive split nodes
+    3,581 leaves
+       20 SOLID | SKY leafs
+       22 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    1,368 SOLID leafs
+        1 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
       243 SKY leafs
-    1,506 EMPTY leafs
-    2,780 leafs total
-    27 max tree height
-    15 avg tree height
-    13,960 tree portals
-    246 outside leaves
+    1,927 EMPTY leafs
+    3,581 leafs total
+    30 max tree height
+    16 avg tree height
+    18,125 tree portals
+    234 outside leaves
     0 detail filled leafs
-      707 brushes
-    2,652 visible faces
-    1,690 non-visible faces
-    3,008 nodes
-      530 non-visible nodes
-    3,008 expensive split nodes
-    3,009 leaves
-       20 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-    1,116 SOLID leafs
-      278 SKY leafs
-    1,595 EMPTY leafs
-    3,009 leafs total
-    26 max tree height
+      954 brushes
+    3,573 visible faces
+    2,270 non-visible faces
+    3,952 nodes
+      609 non-visible nodes
+    3,952 expensive split nodes
+    3,953 leaves
+       25 SOLID | SKY leafs
+       22 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    1,515 SOLID leafs
+        1 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
+      310 SKY leafs
+    2,080 EMPTY leafs
+    3,953 leafs total
+    28 max tree height
     15 avg tree height
-    14,843 tree portals
-    323 outside leaves
+    19,535 tree portals
+    365 outside leaves
     0 detail filled leafs
-    14,843 tree portals
-    12,008 sides visible
-    6,206 makefaces
-    1,524 merged
-    2,290 subdivided
-    206 nodes pruned
-    1,570 player-occupiable leaves
-    1,558 clusters of leaves
-    4,295 vis portals
-fixing up cluster at 1848 260 104
-fixing up cluster at 1364 444 72
+    19,535 tree portals
+    15,871 sides visible
+    8,141 makefaces
+    1,797 merged
+    3,246 subdivided
+    262 nodes pruned
+    2,047 player-occupiable leaves
+    2,035 clusters of leaves
+    5,698 vis portals
+fixing up cluster at 1848 276 104
+fixing up cluster at 1364 440 80
 fixing up cluster at 1436 220 108
-fixing up cluster at 1436 60 -28
 fixing up cluster at 768 248 200
-fixing up cluster at 460 -391.99999999999994 80
-fixing up cluster at 332 -352 80
-fixing up cluster at 888 476 -68
-fixing up cluster at 292 -408 -64
+fixing up cluster at 460 -116 80
+fixing up cluster at 1436 60 -28
+fixing up cluster at 1364 416 8
 fixing up cluster at 1240 -436 -32
-fixing up cluster at 292 -436 -64
-fixing up cluster at 292 -460 -64
-fixing up cluster at 928 -660 160
-fixing up cluster at 928 -812 160
+fixing up cluster at 888 476 -68
+fixing up cluster at 292 -412 -64
+fixing up cluster at 292 -456 -64
+fixing up cluster at 292 -476 -64
 fixing up cluster at -16 56 112
 fixing up cluster at -256 -268 -176
 fixing up cluster at -704 168 -60
 fixing up cluster at -528 -344 96
-fixing up cluster at -196 -1236 92
-       20 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-    1,272 EMPTY leafs
-      278 SKY leafs
-    1,233 SOLID leafs
-    2,803 leafs total
-    26 max tree height
+fixing up cluster at 1148 -660 160
+fixing up cluster at 928 -812 160
+fixing up cluster at 708 -660 160
+fixing up cluster at -764 -1196 -72
+fixing up cluster at -644 -1312 -72
+       20 SOLID | SKY leafs
+       22 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    1,715 EMPTY leafs
+        1 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
+      310 SKY leafs
+    1,623 SOLID leafs
+    3,691 leafs total
+    28 max tree height
     15 avg tree height
-     6,196 edges added by tjunctions
-     6,653 faces optimized through MWT
-    19,587 triangles computed from MWT
-     1,643 faces created via optimization of MWT triangles
-    18,922 edges
-     8,444 faces
+     8,816 edges added by tjunctions
+     9,132 faces optimized through MWT
+    27,187 triangles computed from MWT
+     2,365 faces created via optimization of MWT triangles
+    26,001 edges
+    11,722 faces
 Processing hull 1...
 Processing hull 2...
 Writing 08.bsp as Quake BSP bsp29
 Wrote 08.bsp
 
 count   lump name    byte size 
-      6 models              384
-    875 planes            17500
-   9354 vertexes         112248
-   2832 nodes             67968
-    126 texinfos           5040
-   8482 faces            169640
-   7068 clipnodes         56544
-   1606 leafs             44968
-  10566 marksurfaces      21132
-  18999 edges             75996
-  36775 surfedges        147100
+      8 models              512
+   1112 planes            22240
+  12987 vertexes         155844
+   3732 nodes             89568
+    313 texinfos          12520
+  11794 faces            235880
+   9303 clipnodes         74424
+   2097 leafs             58716
+  14143 marksurfaces      28286
+  26152 edges            104608
+  51156 surfedges        204624
      10 textures         535844
         lightdata             0
         visdata               0
-        entdata           14885
+        entdata           20132
 
-0.958s seconds elapsed
+1.342s seconds elapsed
 
 

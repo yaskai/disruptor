@@ -8,7 +8,24 @@ void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
 
 	//ai->targ_data.ent_id = handler->player_id;
 
-	if(ai->sched_state.sched_id != SCHED_FIX_FRIEND) {
+	if(ai->input_mask & AI_INPUT_SELF_GLITCHED) {
+		if(ai->sched_state.sched_id != SCHED_PATROL)
+			AiSetSchedule(ai, SCHED_PATROL);
+		else {
+			if(ai->disrupt_timer <= 0) {
+				AiSetSchedule(ai, SCHED_MAINTAINER_IDLE);
+				ai->input_mask &= ~AI_INPUT_SELF_GLITCHED;
+			}
+		}
+
+		return;
+	}
+
+	if(     ai->sched_state.sched_id != SCHED_FIX_FRIEND_A &&
+			ai->sched_state.sched_id != SCHED_FIX_FRIEND_B &&
+			!(ai->input_mask & AI_INPUT_SEE_GLITCHED) &&
+			ai->state != STATE_STUNNED) {
+
 		if(
 			(ai->input_mask & AI_INPUT_SEE_PLAYER) || (ai->input_mask & AI_INPUT_HEAR_PLAYER) || 
 			(ai->sched_state.sched_id == SCHED_CHASE_PLAYER && !ai->task_state.use_path)) 
@@ -16,6 +33,12 @@ void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
 
 			ai->targ_data.ent_id = handler->player_id;
 			ai->targ_data.position = handler->ents[handler->player_id].comp_transform.position;
+			ai->targ_data.known_position = ai->targ_data.position;
+		}
+
+	} else {
+		if(!ai->task_state.use_path) {
+			ai->targ_data.position = handler->ents[ai->targ_data.ent_id].comp_transform.position;
 			ai->targ_data.known_position = ai->targ_data.position;
 		}
 	}
@@ -26,6 +49,10 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
+
+	ent->comp_health.crit_box.min = (Vector3) { -9, -9, -9 };
+	ent->comp_health.crit_box.max = (Vector3) {  9,  9,  9 };
+	ent->comp_health.crit_box = BoxTranslate(ent->comp_health.crit_box, Vector3Add(ct->position, Vector3Scale(UP, 22)));
 
 	if(ai->state == STATE_DEAD)
 		return;
@@ -66,6 +93,16 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		stop = true;
 	}
 
+	if(
+		(ai->input_mask & AI_INPUT_MEELEE_RANGE) &&
+		(ai->sched_state.sched_id == SCHED_FIX_FRIEND_A || ai->sched_state.sched_id == SCHED_FIX_FRIEND_B)
+	) {
+		stop = true;
+	}
+
+	if(ai->state == STATE_STUNNED)
+		stop = true;
+
 	if(stop) {
 		ct->velocity = Vector3Lerp(ct->velocity, Vector3Zero(), 2*dt);
 		ai->speed = Lerp(ai->speed, 0.0f, 2*dt);
@@ -73,10 +110,13 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ai->wish_dir = Vector3Zero();
 	} else {
 		//ai->speed = 175;
-		ai->speed = Lerp(ai->speed, 200.0f, 10*dt);
+		float wish = (ai->input_mask & AI_INPUT_SELF_GLITCHED) ? 200.0f : 200.0f;
+		ai->speed = Lerp(ai->speed, wish, 10*dt);
+
 	}
 
-	anim_Update(&ent->anim_state, ent->animations, dt);
+	if(ai->state != STATE_STUNNED)
+		anim_Update(&ent->anim_state, ent->animations, dt);
 }
 
 void MaintainerDraw(Entity *ent, float dt) {
@@ -129,6 +169,19 @@ void MaintainerDraw(Entity *ent, float dt) {
 
 	//DrawSphere(ct->position, ai->hear_distance, ColorAlpha(YELLOW, 0.5f));
 
-	//DrawBoundingBox(ent->comp_health.hit_box, RED);
+	/*
+	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
+		DrawBoundingBox(ent->comp_health.hit_box, PURPLE);
+
+	if(ai->input_mask & AI_INPUT_SEE_GLITCHED)
+		DrawBoundingBox(ent->comp_health.hit_box, RED);
+	*/
+
+	//DrawBoundingBox(ent->comp_health.hit_box, GREEN);
+	//DrawBoundingBox(ent->comp_health.crit_box, RED);
+}
+
+void OnFixMaintainer(Entity *ent) {
+	AiSetSchedule(&ent->comp_ai, SCHED_MAINTAINER_IDLE);
 }
 

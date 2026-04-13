@@ -9,7 +9,7 @@
 
 #define BUG_MAX_BOUNCES 			16
 #define BUG_MAX_RECALL_BOUNCES		16
-#define BUG_MAX_VEL 				550.0f
+#define BUG_MAX_VEL 				450.0f
 #define BUG_GRAV					975.0f
 
 u8 bug_bounce = 0;
@@ -23,6 +23,8 @@ float bug_cooldown = 0;
 bool bug_target_picked = false;
 
 float bug_z_vel_prev = 0;
+
+Vector3 plr_ent_pos;
 
 // This function handles setting Bug's target as well as moving towards it. 
 void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHandler *handler, u8 *bounce, float dt) {
@@ -130,7 +132,14 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		*bounce = 0;
 	}
 
-	Vector3 to_enemy = Vector3Subtract( enemy_ent->comp_transform.position, ct->position );	
+	Vector3 h_fwd = Vector3Normalize( (Vector3) { enemy_ent->comp_transform.forward.x, enemy_ent->comp_transform.forward.y, 0 } );
+	float h_add = (ct->position.z - enemy_ent->id > 64.0f) ? 16 : 8;
+
+	Vector3 targ_point = (enemy_ent->id == handler->player_id) 
+		? Vector3Add(enemy_ent->comp_transform.position, Vector3Scale(h_fwd, h_add))
+		: enemy_ent->comp_transform.position;
+
+	Vector3 to_enemy = Vector3Subtract( targ_point, ct->position );	
 	float d = Vector3Length(to_enemy);
 	to_enemy.z = 0;
 	to_enemy = Vector3Normalize(to_enemy);
@@ -142,7 +151,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		to_enemy = Vector3Normalize(to_enemy);
 	}
 
-	if(d > 100 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 64)) {
+	if(d > 100 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 64) && *bounce > 0) {
 		ct->velocity.x = to_enemy.x * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
 		ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
 	} else {
@@ -160,9 +169,13 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 				big_bounce_used = true;
 			}
 		} else {
-			ct->velocity.z += 100.0f + (1.15f*(*bounce));
-			if(enemy_ent->comp_transform.position.z > ct->position.z + 64.0f) {
+			ct->velocity.z += 60.0f + (1.15f*(*bounce));
+			if(enemy_ent->comp_transform.position.z > ct->position.z + 128.0f) {
 				ct->velocity.z += 500.0f;
+
+			} else if(enemy_ent->comp_transform.position.z < ct->position.z) {
+				ct->velocity.x *= 0.95f;
+				ct->velocity.y *= 0.95f;
 			}
 		}
 	}
@@ -170,11 +183,13 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	// * NOTE: 
 	// Forgiveness,
 	// feels very bad when bug doesn't hit and lands super close to enemy
-	if(d <= 128 && *bounce >= BUG_MAX_BOUNCES ) {
+	if(d <= 128 && *bounce >= BUG_MAX_BOUNCES) {
 		bug_ent->comp_ai.state = BUG_LAUNCHED;
 		ct->velocity.z += 100.0f;
 		(*bounce)--;
 	}
+
+	ct->forward = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0 } );
 }
 
 u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection *sect, u8 *bounce, EntityHandler *handler, float dt) {
@@ -183,6 +198,18 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	BvhTraceData tr = TraceDataEmpty();	
 	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
 	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
+
+	for(int j = 1; j < sect->bvh_hullgroup_count; j++) {
+		if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
+			continue;
+		
+		BvhTraceData temp_tr = TraceDataEmpty();
+		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
+
+		if(temp_tr.distance < tr.distance) {
+			tr = temp_tr;
+		}
+	}
 	
 	if(!tr.hit) {
 		ct->ground_normal = Vector3Zero();
@@ -238,7 +265,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		// Scale slide movement by time remaining
 		Vector3 move = Vector3Scale(vel, t_remain);
 
-		// Upate ray
+		// Update ray
 		Ray ray = (Ray) { .position = dest, .direction = Vector3Normalize(move) };
 
 		// Trace geometry 
@@ -271,6 +298,13 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		if((other_ent->comp_ai.state == STATE_DEAD && other_ent->type != ENT_TURRET) || other_ent->type == ENT_PLAYER)
 			use_ent = false;
 
+		if(other_ent->type == ENT_SWITCH && other_ent->trigger_condition == TRIGGER_COND_COLL_BUG) {
+			use_ent = false;
+		}
+
+		if(launch_timer >= 0.1f || bug_ent->flags & BUG_RECALL)
+			use_ent = false;
+
 		if(use_ent) {
 			ent_frac = (ent_tr.dist / Vector3Length(move));
 			ent_frac = Clamp(ent_frac, 0.0f, 1.0f);
@@ -285,6 +319,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 				for(short j = 0; j < num_clips; j++) {
 					float into = Vector3DotProduct(vel, clips[j]);
 					float clip_bounce = (use_ent && j == num_clips - 1) ? 1.8f : 1.5005f;
+					clip_bounce *= 0.5f;
 					if(clips[j].z < 0) {
 						clip_bounce = Clamp(clip_bounce, 1.001f, 1.025f);
 					}
@@ -349,6 +384,9 @@ void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
 void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	Entity *player_ent = &handler->ents[handler->player_id];
 
+	// *
+	plr_ent_pos = player_ent->comp_transform.position;
+
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
@@ -380,6 +418,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		bug_target_picked = false;
 		ent->comp_ai.targ_data.ent_id = -1;
+
+		ai->state = BUG_DEFAULT;
 	}
 
 	ct->bounds = BoxTranslate(ct->bounds, ct->position);
@@ -419,6 +459,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		for(u8 i = 0; i < cell->ent_count; i++) {
 			Entity *enemy_ent = &handler->ents[cell->ents[i]];
 
+			if(ent->flags & BUG_RECALL)
+				continue;
+
 			if(enemy_ent->type == ENT_PLAYER)
 				continue;
 
@@ -438,35 +481,37 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->flags & ENT_IS_PICKUP)
 				continue;
 
+			if(enemy_ent->type == ENT_SWITCH) {
+				if(enemy_ent->trigger_condition != TRIGGER_COND_COLL_BUG)
+					continue;
+
+				if(enemy_ent->trigger_state || (launch_timer > 0.0f && (ent->flags & BUG_RECALL)))
+					continue;
+			}
+
 			bool height_check =
-				(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 64);
+				(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 48);
 
 			if(bug_bounce == 0) {
 				height_check = true;
 			}
 
-			/*
-			if(enemy_ent->type == ENT_FORCEFIELD) {
-				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds)) {
-					Vector3 hdir = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
-					hdir = Vector3Negate(hdir);
-					ct->velocity.x = hdir.x;
-					ct->velocity.y = hdir.y;
+			if(!(ent->flags & BUG_DISRUPTED_ENEMY)) {
+				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check && !(ent->flags & BUG_RECALL)) {
+					ct->on_ground = true;
+					ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
+					ai->targ_data.ent_id = enemy_ent->id;
+					ct->forward = enemy_ent->comp_transform.forward;
+					//ent->comp_health.damage_cooldown = 10;
+					ct->velocity = Vector3Zero();
+
+					/*
+					if(enemy_ent->type == ENT_SWITCH && enemy_ent->trigger_condition == TRIGGER_COND_COLL_BUG)
+						ent->model.transform = enemy_ent->model.transform;
+						*/
+
+					break;
 				}
-
-				break;
-			}
-			*/
-
-			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check) {
-				ct->on_ground = true;
-				ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
-				ai->targ_data.ent_id = enemy_ent->id;
-				ct->forward = enemy_ent->comp_transform.forward;
-				ent->comp_health.damage_cooldown = 10;
-				ct->velocity = Vector3Zero();
-
-				break;
 			}
 
 			if(bug_target_picked) {
@@ -476,11 +521,11 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				Vector3 hvel = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 				Vector3 self_xy = (Vector3) { ct->position.x, ct->position.y, 0 }; 
 				Vector3 targ_xy = (Vector3) { enemy_ent->comp_transform.position.x, enemy_ent->comp_transform.position.y, 0 }; 
-				if(Vector3Distance(self_xy, targ_xy) <= 18.0f && height_check) {
+				if(Vector3Distance(self_xy, targ_xy) <= 16.0f && height_check) {
 					Vector3 to_targ = Vector3Subtract(targ_xy, self_xy);
 
 					float into = Vector3DotProduct(to_targ, Vector3Normalize(hvel));
-					if(into <= -0.1f) {
+					if(into <= -0.5f) {
 						hvel = Vector3Subtract(hvel, Vector3Scale(to_targ, into));
 					}
 
@@ -498,6 +543,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			ai->state = BUG_LANDED;
 			ct->velocity = Vector3Zero();
 		}
+
+		launch_timer -= dt;
 	}
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -507,7 +554,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ct->velocity = Vector3Zero();
 		
 		// Check if there is an enemy to disrupt
-		if(!(ent->flags & BUG_DISRUPTED_ENEMY)) {
+		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL)) {
 			i16 cell_id = CellCoordsToId(coords, grid);
 			EntGridCell *cell = &grid->cells[cell_id];
 
@@ -523,6 +570,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				if(!enemy_ent->comp_ai.component_valid)
 					continue;
 
+				if(enemy_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)
+					continue;
+
 				if(!CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds))
 					continue;
 
@@ -534,25 +584,37 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->targ_data.ent_id > -1 && ai->targ_data.ent_id < handler->count
 		   && !(ent->flags & BUG_RECALL)) {
 			Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];			
-			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
+
+			bool do_recall = (stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED);
+			bool recall_to_player = false;
+
+			if(stick_ent->comp_ai.component_valid && !(stick_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
+				do_recall = true;
+				recall_to_player = true;
+			}
 
 			// Bounce off enemy when it dies
-			if(stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED) {
+			if(do_recall) {
 				ai->state = BUG_LAUNCHED;
 				ai->targ_data.ent_id = -1;
 
-				ent->flags &= ~BUG_DISRUPTED_ENEMY;
 				bug_bounce = 0;
 				bug_target_picked = false;
 
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+				if(!recall_to_player) { 
+					ent->flags &= ~BUG_DISRUPTED_ENEMY;
+					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+				}
 
-				if(ai->targ_data.ent_id == -1) {
+				if(ai->targ_data.ent_id == -1 || recall_to_player) {
 					ai->targ_data.ent_id = handler->player_id;
 					bug_target_picked = true;
 					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 				}
 			}
+
+			if(!recall_to_player)
+				ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
 		}
 
 		// * NOTE:
@@ -583,7 +645,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 
-				return;
+				launch_timer = 0.49f;
+
+				//return;
 			}
 		}
 
@@ -599,7 +663,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) && launch_timer <= EPSILON) {
 		ai->state = BUG_DEFAULT;
+		return;
 	}
+
 	// -------------------------------------------------------------------------------------------------------------
 
 	if(ai->state == STATE_DEAD) {
@@ -615,7 +681,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 }
 
 void BugDraw(Entity *ent) {
-	//DrawBoundingBox(ent->comp_transform.bounds, PURPLE);
+	//DrawBoundingBox(BoxTranslate(ent->comp_transform.bounds, ent->comp_transform.position), PURPLE);
+	//DrawSphere(ent->comp_transform.position, 8, PURPLE);
+	//DrawLine3D(ent->comp_transform.position, plr_ent_pos, PURPLE);
 
 	if(ent->comp_ai.state == 0)
 		return;
@@ -623,13 +691,16 @@ void BugDraw(Entity *ent) {
 	if(launch_timer >= 0.4725f)
 		return;
 
-	float angle = atan2f(-ent->comp_transform.forward.x, ent->comp_transform.forward.y);
-	ent->model.transform = MatrixRotateY(angle);
-	ent->model.transform = MatrixMultiply(ent->model.transform, MatrixRotateX(90*DEG2RAD));
+	if(!(ent->flags & BUG_ON_SWITCH)) {
+		float angle = atan2f(-ent->comp_transform.forward.x, ent->comp_transform.forward.y);
+		ent->model.transform = MatrixRotateY(angle);
+		ent->model.transform = MatrixMultiply(ent->model.transform, MatrixRotateX(90*DEG2RAD));
+	}
 
 	if(ent->comp_ai.state == STATE_DEAD) {
 		model_dead.transform = ent->model.transform;
-		DrawModel(model_dead, ent->comp_transform.position, 3, LIGHTGRAY);	
+		//DrawModel(model_dead, ent->comp_transform.position, 3, LIGHTGRAY);	
+		DrawModel(model_dead, ent->comp_transform.position, 3, DARKGRAY);	
  	} else {
 		DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
 	}
@@ -661,13 +732,18 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 			ai->targ_data.position = Vector3Add(ct->position, ct->forward);
 
 		} break;
+
+		case ENT_MAINTAINER: {
+			ai->disrupt_timer = 500;
+
+		} break;
 	}
 
 	//handler->ents[handler->bug_id].flags |= BUG_DISRUPTED_ENEMY;
 }
 
 // *TODO:
-void OnHitBug(Entity *ent, short damage) {
+void OnHitBug(Entity *ent, short damage, Vector3 bullet_pos) {
 	// ...
 }
 

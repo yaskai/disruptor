@@ -15,10 +15,10 @@
 #define PLAYER_MAX_SPEED 240.0f
 #define PLAYER_MAX_VEL 280.0f
 
-#define PLAYER_GROUND_SPEED 215.0f
-#define PLAYER_AIR_SPEED	235.0f
+#define PLAYER_GROUND_SPEED 200.0f
+#define PLAYER_AIR_SPEED	205.0f
 
-#define PLAYER_MAX_ACCEL 30.5f
+#define PLAYER_MAX_ACCEL 12.5f
 float player_accel;
 float player_accel_forward;
 float player_accel_side;
@@ -29,8 +29,8 @@ bool land_frame = false;
 bool hurt_frame = false;
 float z_vel_prev;
 
-#define FALLDAMAGE_THRESHOLD 500.0f
-#define FALLDAMAGE_MULTIPLIER -0.099f
+#define FALLDAMAGE_THRESHOLD 450.0f
+#define FALLDAMAGE_MULTIPLIER -0.085f
 //#define FALLDAMAGE_MULTIPLIER -1.099f
 
 short nudged_this_frame = 0;
@@ -368,6 +368,7 @@ void PlayerUpdate(Entity *player, float dt) {
 	if(land_frame) {
 		//printf("land frame!\n");
 		if(z_vel_prev < -FALLDAMAGE_THRESHOLD) player->comp_health.amount -= (short)(z_vel_prev * FALLDAMAGE_MULTIPLIER);
+		if(z_vel_prev < -800.0f) player->comp_health.amount = 0;
 	}
 
 	player->comp_health.damage_cooldown -= dt;
@@ -462,11 +463,9 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	// 1. Categorize position
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 
-	if(IsKeyDown(KEY_C) && ct->on_ground) {
+	if(IsKeyDown(KEY_C)) {
 		crouch = true;
-
 	}
-
 	
 	// 2. Get wishdir
 	Vector3 wish_dir = Vector3Zero();
@@ -678,7 +677,8 @@ void pm_GroundFriction(comp_Transform *ct, float dt) {
 	}
 
 	// Remove velocity scaled by player's current speed
-	float remove = speed * PLAYER_FRICTION * dt;
+	float modifier = (crouch) ? 1.15f : 1.0f;
+	float remove = (speed * PLAYER_FRICTION * modifier) * dt;
 	float new_speed = fmaxf(speed - remove, 0);
 
 	vel = Vector3Scale(vel, new_speed / speed);
@@ -923,7 +923,7 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 
 		ct->on_ground = false;
 		//ct->velocity.z += (BASE_JUMP_FORCE) + (Vector3Length(horizontal_velocity) * 0.2f);
-		ct->velocity.z = (BASE_JUMP_FORCE * mult) + (Vector3Length(horizontal_velocity) * 0.33f);
+		ct->velocity.z = (BASE_JUMP_FORCE * mult) + (Vector3Length(horizontal_velocity) * 0.27f);
 	}
 }
 
@@ -937,9 +937,9 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 		if(cam_zmod <= 0.1f)
 			cam_zmod = 0;
 		*/
-		cam_zmod = Lerp(cam_zmod, -2, dt*10.0f);
-		if(cam_zmod <= -1.9f)
-			cam_zmod = -2;
+		cam_zmod = Lerp(cam_zmod, 4.0f, dt*10.0f);
+		if(cam_zmod <= 4.1f)
+			cam_zmod = 4.0f;
 	} else {
 		cam_zmod = Lerp(cam_zmod, 16, dt*8.5f);
 		if(cam_zmod >= 15.9f)
@@ -1045,7 +1045,7 @@ void pm_AirFriction(comp_Transform *ct, float dt) {
 }
 
 // Take damage
-void OnHitPlayer(Entity *ent, short damage) {
+void OnHitPlayer(Entity *ent, short damage, Vector3 bullet_pos) {
 	comp_Health *health = &ent->comp_health;
 	comp_Transform *ct = &ent->comp_transform;
 

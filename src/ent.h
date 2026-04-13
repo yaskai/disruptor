@@ -81,6 +81,7 @@ typedef struct {
 
 typedef struct {
 	BoundingBox hit_box;
+	BoundingBox crit_box;
 
 	// Hitbox for bug 
 	BoundingBox bug_box;
@@ -162,6 +163,7 @@ enum ENT_TYPES : u8 {
 	ENT_SWITCH				=  10,
 	ENT_BRUSH				=  11,
 	ENT_FORCEFIELD			=  12,
+	ENT_BULLSEYE			=  13,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {
@@ -241,6 +243,8 @@ typedef struct {
 	CheckPointList checkpoint_list;
 
 	vEffect_Manager *effect_manager;
+
+	Shader holo_shader;
 
 	Vector3 player_start;
 
@@ -378,16 +382,18 @@ void DebugDrawEntText(EntityHandler *handler, Camera3D cam);
 
 // Bug states
 enum BUG_STATES : u8 {
-	BUG_DEFAULT,		// Default state, attached to player
-	BUG_LAUNCHED,		// In air
-	BUG_LANDED			// On ground/enemy
+	BUG_DEFAULT     = 0,		// Default state, attached to player
+	BUG_LAUNCHED    = 1,		// In air
+	BUG_LANDED		= 2			// On ground/enemy
 };
 
 // Bug flags
 // 0x01 reserved for ENT_ACTIVE
 // 0x02 reserved for ENT_COLLIDERS
-#define BUG_DISRUPTED_ENEMY 0x04
-#define BUG_RECALL			0x08
+// 0x04 reserved for ENT_IS_PICKUP
+#define BUG_DISRUPTED_ENEMY 0x20
+#define BUG_RECALL			0x40
+#define BUG_ON_SWITCH		0x80
 
 void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect);
 void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
@@ -398,13 +404,13 @@ void AlertMaintainers(EntityHandler *handler, u16 disrupted_id);
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-void OnHitEnt(Entity *ent, short damage);
-void OnHitPlayer(Entity *ent, short damage);
-void OnHitBug(Entity *ent, short damage);
-void OnHitTurret(Entity *ent, short damage);
-void OnHitMaintainer(Entity *ent, short damage);
-void OnHitRegulator(Entity *ent, short damage);
-void OnHitSwitch(Entity *ent, short damage);
+void OnHitEnt(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitPlayer(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitBug(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitTurret(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitRegulator(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitSwitch(Entity *ent, short damage, Vector3 bullet_pos);
 
 void DoFix(Entity *ent);
 void OnFixTurret(Entity *ent);
@@ -438,6 +444,7 @@ void SetEntityTriggers(EntityHandler *handler);
 // ----------------------------------------------------------------------------------------------------------------------------
 void SwitchSetup(EntityHandler *handler);
 void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt);
+void SwitchDraw(Entity *ent, EntityHandler *handker, float dt);
 void DoTrigger(EntityHandler *handler, Entity *switch_ent);
 
 #endif

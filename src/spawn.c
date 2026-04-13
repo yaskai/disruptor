@@ -115,6 +115,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	ent.type = spawn_point->ent_type;
 	switch(ent.type) {
 		case ENT_TURRET: {
+			ent.flags |= ( ENT_COLLIDERS ); 
+
 			ent.model = handler->base_ent_models[ENT_TURRET];
 
 			//ent.comp_transform.position.y -= 20;
@@ -182,13 +184,13 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
 
 			ent.comp_ai.component_valid = true;
-			ent.comp_ai.sight_cone = 0.15f;
+			ent.comp_ai.sight_cone = 0.05f;
 			ent.comp_ai.hear_distance = 96.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);
 
-			ent.comp_health.amount = 10;
+			ent.comp_health.amount = 20;
 			ent.comp_health.on_hit = 2;
 
 			ent.comp_health.bug_point = BUG_POINT_MAINTAINER;
@@ -196,6 +198,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			// * NOTE:
 			// Modify later as needed
 			ent.comp_health.hit_box = ent.comp_transform.bounds;
+			ent.comp_health.hit_box.min = Vector3Add(ent.comp_transform.bounds.min,  Vector3Scale(Vector3One(), 3));
+			ent.comp_health.hit_box.max = Vector3Add(ent.comp_transform.bounds.max, Vector3Scale(Vector3One(), -3));
 			
 			ent.comp_ai.speed = 150;
 
@@ -265,6 +269,11 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			};
 
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+
+			ent.model = LoadModel("resources/models/pickups/ammo_box.glb");
+			float angle = (spawn_point->angle-90) * DEG2RAD;
+			ent.model.transform = MatrixRotateX(90*DEG2RAD);
+			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
 
 		} break;
 	}
@@ -397,6 +406,10 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 			if(streq(prop->key, "start_active")) {
 				sscanf(prop->val, "%d", &spawn.start_active);
+			}
+
+			if(streq(prop->key, "radius")) {
+				sscanf(prop->val, "%d", &spawn.radius);
 			}
 		}
 
