@@ -301,6 +301,20 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitSwitch,
 };
 
+int shader_holo_t_loc;
+void LoadEntityShaders(EntityHandler *handler) {
+	char *prefix = "resources/shaders";
+	handler->holo_shader = LoadShader(TextFormat("%s/lit_v.glsl", prefix), TextFormat("%s/holo_f.glsl", prefix));
+
+	shader_holo_t_loc = GetShaderLocation(handler->holo_shader, "time");
+}
+
+void UpdateEntityShaders(EntityHandler *handler) {
+	float t = GetTime();
+
+	SetShaderValue(handler->holo_shader, shader_holo_t_loc, &t, SHADER_UNIFORM_FLOAT);
+}
+
 void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
 	handler->base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
@@ -316,12 +330,14 @@ void LoadEntityBaseAnims() {
 
 Model projectile_models[4];
 
+
 void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager) {
 	handler->count = 0;
 	handler->capacity = 128;
 	handler->ents = calloc(handler->capacity, sizeof(Entity));
 	handler->player_id = 0;
 
+	LoadEntityShaders(handler);
 	LoadEntityBaseModels(handler);
 	LoadEntityBaseAnims();
 
@@ -358,9 +374,14 @@ void EntHandlerClose(EntityHandler *handler) {
 
 	if(handler->checkpoint_list.points)
 		free(handler->checkpoint_list.points);
+	
+	if(handler->checkpoint_list.angles)
+		free(handler->checkpoint_list.angles);
 
 	if(handler->checkpoint_list.cells)
 		free(handler->checkpoint_list.cells);
+
+	UnloadShader(handler->holo_shader);
 }
 
 // **
@@ -394,6 +415,9 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	if(!ptr_handler_sect)
 		ptr_handler_sect = sect;
 
+	//if(handler->flags & AT_LEVEL_END)
+		//return;
+
 	prev_pos_tick -= dt;
 	if(prev_pos_tick < 0.0f) {
 		for(u16 i = 0; i < handler->count; i++) {
@@ -404,11 +428,13 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		prev_pos_tick = 4*dt;
 	}
 
+	UpdateEntityShaders(handler);
+
 	Entity *player_ent = &handler->ents[handler->player_id];
 	PlayerUpdate(player_ent, dt);
 
 	if(player_ent->comp_ai.state == STATE_DEAD && player_ent->comp_ai.task_state.timer >= 2) {
-		ReloadEntities(handler, sect, 0);
+		ReloadEntities(handler, sect, 1);
 		return;
 	}
 
@@ -647,6 +673,17 @@ void RenderEntities(EntityHandler *handler, float dt) {
 	}
 
 	RenderProjectiles(handler);
+
+	/*
+	for(int i = 0; i < handler->checkpoint_list.count; i++) {
+		Vector3 pos = handler->checkpoint_list.points[i];
+		Vector3 fwd = handler->checkpoint_list.angles[i];
+
+		DrawSphere(pos, 2, YELLOW);
+		DrawLine3D(pos, Vector3Add(pos, Vector3Scale(fwd, 10)), YELLOW);
+		DrawSphere(Vector3Add(pos, Vector3Scale(fwd, 10)), 1, BLUE);
+	} 
+	*/
 }
 
 void RenderBrushEntities(EntityHandler *handler) {
@@ -1346,11 +1383,15 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 		}
 	}
 
-	// Handle checkpoint logic
-	if(handler->checkpoint_list.active > -1)
-		handler->player_start = handler->checkpoint_list.points[handler->checkpoint_list.active];
+	Vector3 player_fwd = Vector3Zero();
 
-	SpawnPlayer(&handler->ents[handler->player_id], handler->player_start);
+	// Handle checkpoint logic
+	if(handler->checkpoint_list.active > -1) {
+		handler->player_start = handler->checkpoint_list.points[handler->checkpoint_list.active];
+		player_fwd = handler->checkpoint_list.angles[handler->checkpoint_list.active];
+	}
+
+	SpawnPlayer(&handler->ents[handler->player_id], handler->player_start, player_fwd);
 	handler->ents[handler->bug_id].comp_ai.state = 0;	
 
 	// Set up ai navigation
@@ -1358,6 +1399,6 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 	SwitchSetup(handler);
 
 	// Reset ai tick
-	handler->ai_tick = 1.0f; 
+	// handler->ai_tick = 0.1f; 
 }
 

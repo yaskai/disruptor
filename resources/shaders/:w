@@ -7,8 +7,6 @@ in vec2 fragTexCoord2;
 
 in vec3 fragPosition;
 
-noperspective in vec3 fragWorldPos;
-
 out vec4 finalColor;
 
 uniform float time;
@@ -22,24 +20,13 @@ float noise(vec2 co) {
 
 float noise(vec3 co) {
     //return fract(sin(dot(co, vec2(12.9898, 1))) * 43758.5453 * time);
-    //return fract(sin(dot(co, vec2(0, 1 + time))) * time);
-	//float val = sin((co.y*50.5) - (time*10.1));
-	//float val = sin(co.x*50.5);
+    //return fract(sin(dot(co, vec3(0, 1 + time, 0))) * time);
 
-    //val -= fract(cos(dot(co, vec3(12.9898, 78.233, 12.9898))) * 43758.5453 + time) * 0.05;
-	//val = clamp(val, 0.0, 1.0);
+	float val = sin((co.y*50.5) - (time*10.1));
+    val -= fract(cos(dot(co, vec3(12.9898, 78.233))) * 43758.5453 + time) * 0.05;
+	val = clamp(val, 0.0, 1.0);
 
-	float val1 = sin(co.x * 100.0 + time * 3.0) * 0.5 + 0.5;
-	val1 = pow(val1, 2.0);
-
-	return val1;
-
-	float val2 = sin(co.y * 5.0 + time * 3.0) * 0.5 + 0.5;
-	val2 = pow(val2, 2.0);
-
-	return val2;
-
-	return val1 + val2;
+	return val;
 
 	//return 1.0;
 }
@@ -54,9 +41,6 @@ void main() {
 	vec4 diffuse = vec4(1.0, 0.7, 0.2, 0.9);
 
 	//float dither1 = noise(fragTexCoord);
-	//float dither1 = noise(vec3(fragTexCoord, 0.0));
-	//float dither1 = noise(fragPosition);
-	//float dither1 = noise(fragWorldPos);
 	float dither1 = noise(fragPosition);
 	diffuse = diffuse * dither1;
 

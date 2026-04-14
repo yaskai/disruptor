@@ -38,6 +38,8 @@ typedef struct {
 
 	i16 cell_count;	
 
+	i16 level_end;
+
 } EntGrid;
 
 int16_t CellCoordsToId(Coords coords, EntGrid *grid);
@@ -232,6 +234,9 @@ typedef struct {
 
 } Projectile;
 
+// Entity handler state flags
+#define AT_LEVEL_END 	0x01
+
 typedef struct {
 	Model base_ent_models[16];
 
@@ -261,6 +266,8 @@ typedef struct {
 	u16 player_id;
 	u16 bug_id;
 
+	u8 flags;
+
 } EntityHandler;
 
 void LoadEntityBaseModels(EntityHandler *handler);
@@ -280,7 +287,7 @@ void UpdateGrid(EntityHandler *handler);
 
 void DrawEntsDebugInfo();
 
-void SpawnPlayer(Entity *ent, Vector3 position);
+void SpawnPlayer(Entity *ent, Vector3 position, Vector3 fwd);
 
 // ----------------------------------------------------------------------------------------------------------------------------
 

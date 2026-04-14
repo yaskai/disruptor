@@ -50,7 +50,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	if(print_output) {
 		Message("-------- ENTITY DATA --------", ANSI_GREEN);
 		MessageDiagInt("bytes", ents_lump.file_size, ANSI_YELLOW);
-		printf("%s\n", data.ent_str);
+		//printf("%s\n", data.ent_str);
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -268,7 +268,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	} else {
 		int num_lumps = 0;
 		fread(&num_lumps, 4, 1, pF);
-		printf("BSPX num_lumps: %d\n", num_lumps);
+		MessageDiagInt("BSPX num_lumps", num_lumps, ANSI_GREEN);
 
 		char names[num_lumps][24];
 		int offsets[num_lumps];

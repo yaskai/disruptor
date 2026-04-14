@@ -109,7 +109,7 @@ void TurretDraw(Entity *ent) {
 	DrawMesh(ent->model.meshes[1], ent->model.materials[1], mat_gun);
 	DrawMesh(ent->model.meshes[0], ent->model.materials[1], mat_base);
 
-	DrawBoundingBox(ent->comp_transform.bounds, RED);
+	//DrawBoundingBox(ent->comp_transform.bounds, RED);
 }
 
 void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {

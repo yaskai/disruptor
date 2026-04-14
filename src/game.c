@@ -12,6 +12,7 @@
 #include "map.h"
 
 void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point);
+void EndScreen(Game *game, float dt);
 
 #define VIRT_W (1920)
 #define VIRT_H (1080)
@@ -49,8 +50,8 @@ void GameInit(Game *game, Config *conf) {
 
 	InputInit(&game->input_handler);
 	game->input_handler.mouse_sensitivity = game->conf->mouse_sensitivity * 0.0001f;
-	
-	SetLogState(1);
+
+	//SetLogState(1);
 }
 
 void GameClose(Game *game) {
@@ -177,13 +178,13 @@ void GameLoadScene(Game *game, char *path) {
 	// -----------------------------------------------------------------------------------------------------------------
 
 	BugInit(&game->ent_handler.ents[game->ent_handler.bug_id], &game->ent_handler, &game->test_section);
-	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], game->ent_handler.player_start);
+	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], game->ent_handler.player_start, Vector3Zero());
 
 	game->ent_handler.spawn_list.count = spawn_list.count;
 	game->ent_handler.spawn_list.arr = calloc(spawn_list.count, sizeof(EntSpawn));
 	memcpy(game->ent_handler.spawn_list.arr, spawn_list.arr, sizeof(EntSpawn) * spawn_list.count);
 
-	//ReloadEntities(&game->ent_handler, &game->test_section, 0);
+	ReloadEntities(&game->ent_handler, &game->test_section, 0);
 
 	// Setup checkpoints	
 	for(u16 i = 0; i < game->ent_handler.checkpoint_list.count; i++) {
@@ -195,6 +196,11 @@ void GameLoadScene(Game *game, char *path) {
 void GameUpdate(Game *game, float dt) {
 	if(IsKeyPressed(KEY_ESCAPE))
 		game->flags |= FLAG_EXIT_REQUEST;
+
+	if(game->ent_handler.flags & AT_LEVEL_END) {
+		EndScreen(game, dt);
+		return;
+	}
 
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[0].comp_transform.position);
 
@@ -210,6 +216,19 @@ void GameUpdate(Game *game, float dt) {
 #define DEBUG_DRAW_FULL_MODEL	0x08
 #define DEBUG_DRAW_BVH			0x10
 u8 debug_draw_flags = (0);
+
+void EndScreen(Game *game, float dt) {
+	if(IsKeyPressed(KEY_ESCAPE))
+		game->flags |= FLAG_EXIT_REQUEST;
+
+	if(IsKeyPressed(KEY_Y)) {
+		game->ent_handler.flags &= ~AT_LEVEL_END;
+		game->ent_handler.checkpoint_list.active = -1;
+		ReloadEntities(&game->ent_handler, &game->test_section, 0);  
+		game->ent_handler.ents[game->ent_handler.player_id].comp_transform.forward = 
+			game->ent_handler.ents[game->ent_handler.player_id].comp_transform.start_forward;
+	}
+}
 
 void GameDraw(Game *game, float dt) {
 	Entity *player_ent = &game->ent_handler.ents[game->ent_handler.player_id];
@@ -417,7 +436,7 @@ void GameDraw(Game *game, float dt) {
 	*/
 
 	int fps = GetFPS();
-	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 
 	//EntDebugText();
 

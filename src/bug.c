@@ -384,6 +384,10 @@ void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
 void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	Entity *player_ent = &handler->ents[handler->player_id];
 
+	if(player_ent->comp_health.amount <= 0 || player_ent->comp_ai.state == STATE_DEAD) {
+		ent->comp_ai.state = BUG_DEFAULT;
+	}
+
 	// *
 	plr_ent_pos = player_ent->comp_transform.position;
 

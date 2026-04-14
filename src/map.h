@@ -76,6 +76,7 @@ typedef struct {
 
 typedef struct {
 	Vector3 *points;
+	Vector3 *angles;
 	i16 *cells;
 
 	u16 count;

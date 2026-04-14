@@ -368,10 +368,10 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 	for(u16 i = 0; i < brush_pool->count; i++) {
 		Brush *brush = &brush_pool->brushes[i];
 
-		puts("--------------------------");
-		printf("%s\n", brush->class_name);
-		printf("%s\n", brush->tex_name);
-		puts("--------------------------");
+		//puts("--------------------------");
+		//printf("%s\n", brush->class_name);
+		//printf("%s\n", brush->tex_name);
+		//puts("--------------------------");
 	
 		// Build vertices, AABBs
 		BrushGetVertices(brush);
@@ -1138,7 +1138,7 @@ void SubdivideNavGraph(MapSection *sect, NavGraph *navgraph) {
 		*/
 	}
 
-	printf("graph count: %d\n", sect->navgraph_count);
+	//printf("graph count: %d\n", sect->navgraph_count);
 
 	free(traveled);
 }

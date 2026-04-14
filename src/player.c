@@ -541,6 +541,12 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 			break;
 		}
 	}
+
+	//handler->flags &= ~AT_LEVEL_END;
+	if(cell_id == handler->grid.level_end) {
+		//ent->comp_health.amount = 0;
+		handler->flags |= AT_LEVEL_END;
+	}
 }
 
 // Take input, apply to velocity
@@ -1055,11 +1061,24 @@ void OnHitPlayer(Entity *ent, short damage, Vector3 bullet_pos) {
 	hurt_frame = true;
 }
 
-void SpawnPlayer(Entity *ent, Vector3 position) {
+void SpawnPlayer(Entity *ent, Vector3 position, Vector3 fwd) {
 	player_curr_checkpoint = -1;
 
 	ent->comp_transform.position = position;
+	ent->comp_transform.forward = fwd;
+
+	ent->comp_transform.pitch = asinf(fwd.z);
+	ent->comp_transform.yaw = atan2f(fwd.x, fwd.y);
+
+	cam_bob = 0;
+	cam_tilt = 0;
+
 	ent->comp_transform.position.z += 20;
+
+	//ptr_cam->position = position;
+	//ptr_cam->target = Vector3Add(position, fwd);
+	//cam_Adjust(&ent->comp_transform, 1);
+	ptr_cam->up = UP;
 
 	ent->comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
 	ent->comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);

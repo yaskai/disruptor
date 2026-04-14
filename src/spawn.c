@@ -13,6 +13,15 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		return;
 	}
 
+	if(streq(spawn_point->classname, "level_end")) {
+		EntGrid *grid = &handler->grid;
+
+		Coords coords = Vec3ToCoords(spawn_point->position, grid);
+		i16 id = CellCoordsToId(coords, grid);
+
+		grid->level_end = id;
+	}
+
 	if(nav_graph) {
 		if(!strcmp(spawn_point->classname, "nav_node")) {
 			if(nav_graph->node_count + 1 >= nav_graph->node_cap) {
@@ -39,20 +48,29 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 			if(handler->checkpoint_list.capacity <= 0) {
 				handler->checkpoint_list.capacity = 2;
 				handler->checkpoint_list.points = malloc(sizeof(Vector3) * 2);
+				handler->checkpoint_list.angles = malloc(sizeof(Vector3) * 2);
 				handler->checkpoint_list.cells = malloc(sizeof(u16) * 2);
 
 			} else {
 				handler->checkpoint_list.capacity = (handler->checkpoint_list.capacity << 1);
 				handler->checkpoint_list.points = realloc(handler->checkpoint_list.points, sizeof(Vector3) * handler->checkpoint_list.capacity);	
+				handler->checkpoint_list.angles = realloc(handler->checkpoint_list.angles, sizeof(Vector3) * handler->checkpoint_list.capacity);	
 				handler->checkpoint_list.cells = realloc(handler->checkpoint_list.cells, sizeof(u16) * handler->checkpoint_list.capacity);	
 			}
 		}
 
 		handler->checkpoint_list.points[handler->checkpoint_list.count++] = spawn_point->position;
+
+		//float rad = (-spawn_point->angle) * DEG2RAD;
+		Vector3 fwd = Vector3Zero();
+		fwd.x = sinf(spawn_point->angle*DEG2RAD);
+		fwd.y = cosf(spawn_point->angle*DEG2RAD);
+		fwd = Vector3Normalize(fwd);
+		handler->checkpoint_list.angles[handler->checkpoint_list.count-1] = fwd;
 	}
 
 	if(!strcmp(spawn_point->classname, "info_player_start")) {
-		puts("player_start");
+		//puts("player_start");
 
 		handler->player_start = spawn_point->position;
 		handler->player_start.z += BODY_VOLUME_MEDIUM.z * 0.5f;
@@ -73,7 +91,6 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 
 	if(strcmp(spawn_point->classname, "func_forcefield") == 0) {
 		spawn_point->ent_type = ENT_FORCEFIELD;
-		printf("forced ent type of forcefield\n");
 	}
 
 	if(spawn_point->ent_type <= 0)
@@ -285,7 +302,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 	ent.comp_transform.start_forward = ent.comp_transform.forward;
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
-	if(spawn_point->start_active == 1) ent.flags |= (ENT_ACTIVE);
+	if(spawn_point->start_active) ent.flags |= (ENT_ACTIVE);
 
 	/*
 	if(ent.type == ENT_TURRET)

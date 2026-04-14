@@ -90,7 +90,7 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		(ai->input_mask & AI_INPUT_MEELEE_RANGE) &&
 		(ai->sched_state.sched_id == SCHED_CHASE_PLAYER || ai->sched_state.sched_id == SCHED_MAINTAINER_ATTACK)
 	) {
-		stop = true;
+		//stop = true;
 	}
 
 	if(
@@ -110,9 +110,12 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ai->wish_dir = Vector3Zero();
 	} else {
 		//ai->speed = 175;
-		float wish = (ai->input_mask & AI_INPUT_SELF_GLITCHED) ? 200.0f : 200.0f;
-		ai->speed = Lerp(ai->speed, wish, 10*dt);
+		float wish = (ai->input_mask & AI_INPUT_SELF_GLITCHED) ? 200.0f : 260.0f;
 
+		if(ai->task_state.task_id == TASK_MEELEE_ATTACK)
+			wish = 220.0f;
+
+		ai->speed = Lerp(ai->speed, wish, 10*dt);
 	}
 
 	if(ai->state != STATE_STUNNED)

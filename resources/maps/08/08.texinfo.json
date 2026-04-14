@@ -903,35 +903,35 @@
 	},
 	"301" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"302" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"303" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"304" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"305" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"306" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"307" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"308" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"309" : 
 	{
@@ -954,9 +954,41 @@
 	{
 		"phong_angle" : 88.0
 	},
+	"313" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"314" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"315" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"316" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"317" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"318" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"319" : 
+	{
+		"phong_angle" : 88.0
+	},
 	"32" : 
 	{
 		"minlight" : 30.0
+	},
+	"320" : 
+	{
+		"phong_angle" : 88.0
 	},
 	"33" : 
 	{
@@ -1126,11 +1158,11 @@
 	{
 		"minlight" : 30.0
 	},
-	"72" : {},
-	"73" : 
+	"72" : 
 	{
 		"minlight" : 30.0
 	},
+	"73" : {},
 	"74" : 
 	{
 		"minlight" : 30.0

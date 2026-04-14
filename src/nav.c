@@ -92,10 +92,6 @@ void AiNavSetup(EntityHandler *handler, MapSection *sect) {
 			}
 		}
 	}
-
-	for(u16 i = 0; i < handler->count; i++) {
-		if(handler->ents[i].type == ENT_MAINTAINER) printf("graph: %d\n", handler->ents[i].comp_ai.navgraph_id);
-	}
 }
 
 #define NULL_NODE -1

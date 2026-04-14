@@ -54,7 +54,13 @@ void SwitchSetup(EntityHandler *handler) {
 		}
 
 		if(ent->trigger_condition == TRIGGER_COND_COLL_BUG) {
-			ent->model = LoadModel("resources/models/weapons/bug_00.glb");
+			//ent->model = LoadModel("resources/models/weapons/bug_00.glb");
+			ent->model = LoadModel("resources/models/bug_plat_00.glb");
+
+			ent->comp_transform.bounds = (BoundingBox) {
+				Vector3Subtract(ent->comp_transform.bounds.min, Vector3Scale(BODY_VOLUME_SMALL, 0.5f)),
+				Vector3Add(ent->comp_transform.bounds.max, Vector3Scale(BODY_VOLUME_SMALL, 0.5f)),
+			};
 		}
 	}
 }
@@ -83,6 +89,9 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 			case TRIGGER_COND_COLL_BUG: {
 				if(ent->type == ENT_DISRUPTOR) {
 					ent->flags &= ~BUG_ON_SWITCH;
+
+					if(!(ent->flags & ENT_COLLIDERS))
+						continue;
 
 					if(ent->flags & BUG_RECALL)
 						collide = false;
@@ -122,18 +131,19 @@ void SwitchDraw(Entity *ent, EntityHandler *handler, float dt) {
 			break;
 
 		case TRIGGER_COND_COLL_BUG:
-
-			DrawBoundingBox(ent->comp_transform.bounds, GREEN);
+			//DrawBoundingBox(ent->comp_transform.bounds, GREEN);
 			
 			ent->comp_transform.yaw += dt;
 			if(ent->comp_transform.yaw > 360.0f)
 				ent->comp_transform.yaw = 0.0f;
 
+			ent->model.transform = MatrixRotateX(90*DEG2RAD);
 			ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(ent->comp_transform.yaw));
 			ent->model.transform = MatrixMultiply(ent->model.transform, MatrixTranslate(0, 0, sinf(GetTime() * 2) * 0.25f));
 
-			if(!(handler->ents[handler->bug_id].flags & BUG_ON_SWITCH))
-				DrawModel(ent->model, ent->comp_transform.position, 3, ColorAlpha(WHITE, 0.5f));
+			//if(!(handler->ents[handler->bug_id].flags & BUG_ON_SWITCH)) {
+				DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);
+			//}
 
 			break;
 	}
