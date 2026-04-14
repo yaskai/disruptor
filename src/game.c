@@ -307,7 +307,7 @@ void GameDraw(Game *game, float dt) {
 		PlayerGunDraw(&game->player_gun);
 	EndTextureMode();
 
-	if(IsKeyPressed(KEY_Z))
+	if(IsKeyPressed(KEY_RIGHT_CONTROL))
 		debug_draw_flags ^= DEBUG_ENABLE;
 
 	if(debug_draw_flags & DEBUG_ENABLE) {

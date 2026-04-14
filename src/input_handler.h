@@ -31,10 +31,12 @@ typedef struct {
 #define ACTION_MOVE_D		2
 #define ACTION_MOVE_R		3
 #define ACTION_JUMP			4
+#define ACTION_WALK			5
+#define ACTION_CROUCH		6
 
-#define ACTION_SHOOT		5
-#define ACTION_SHOOT_ALT 	6
-#define ACTION_RELOAD		7
+#define ACTION_SHOOT		7
+#define ACTION_SHOOT_ALT 	8
+#define ACTION_RELOAD		9
 
 typedef struct {
 	InputAction actions[INPUT_ACTION_COUNT];

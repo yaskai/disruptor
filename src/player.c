@@ -463,9 +463,8 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	// 1. Categorize position
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 
-	if(IsKeyDown(KEY_C)) {
+	if(input->actions[ACTION_CROUCH].state == 1) 
 		crouch = true;
-	}
 	
 	// 2. Get wishdir
 	Vector3 wish_dir = Vector3Zero();
@@ -523,7 +522,7 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	last_pm = pm;
 
 	if(crouch) {
-		if(pm_StandCheck(ct) && IsKeyUp(KEY_C)) { 
+		if(pm_StandCheck(ct) && !input->actions[ACTION_CROUCH].state) { 
 			crouch = false;
 			ct->velocity.z = 0;
 		}
