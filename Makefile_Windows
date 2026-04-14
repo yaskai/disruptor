@@ -1,9 +1,8 @@
 INC_DIR := include
 
 # Compiler and flags
-CC := gcc
-#CFLAGS := -Wall -std=c99 -O3 -I$(INC_DIR) -Ibuild/external/raylib/src -I/usr/include/SDL2 -DPLATFORM_DESKTOP_SDL
-#LDFLAGS := -lSDL2 -lm -ldl -lpthread -lGL -lrt -lX11
+#CC := gcc
+CC := x86_64_w64-mingw32-gcc
 
 CFLAGS := -g -Wall -std=c99 -O2 -I$(INC_DIR) -Ibuild/external/raylib/src -DPLATFORM_DESKTOP
 LDFLAGS := -I include -L lib -lgdi32 -lwinmm -mwindows

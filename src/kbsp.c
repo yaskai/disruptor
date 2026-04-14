@@ -17,7 +17,6 @@ HashMap material_hashmap = (HashMap) { 0 };
 Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Data data = (Bsp_Data) {0};
 
-
 	FILE *pF = fopen(path, "rb");
 
 	if(!pF) {
@@ -814,8 +813,10 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 
 		Texture2D mat_texture = materials[HashFetch(&material_hashmap, bsp->miptex[tex_id].name)].maps->texture;
 		models[i].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat_texture;
-		char pref[3];
-		memcpy(pref, bsp->miptex[tex_id].name, sizeof(pref));
+
+		char pref[4];
+		memcpy(pref, bsp->miptex[tex_id].name, 3);
+		pref[3] = '\0';
 
 		if(strcmp(pref, "sky") == 0) {
 			continue;
