@@ -140,6 +140,12 @@ void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *
 	pm->end_vel = vel;
 	pm->end_pos = dest;
 
+	/*
+	if(ent->comp_ai.state == STATE_MOVE) {
+		ct->targ_look = Vector3Normalize( (Vector3) { vel.x, vel.y, 0 } );
+	}
+	*/
+
 	pm->clip_count = num_clips;
 	memcpy(pm->clips, clips, sizeof(Vector3) * num_clips);
 }

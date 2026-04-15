@@ -75,7 +75,7 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 		} else if(ai->input_mask & AI_INPUT_LOST_PLAYER) {
 			targ_look = Vector3Normalize(Vector3Subtract(ai->targ_data.known_position, ct->position));
 			if(Vector3DotProduct(targ_look, ct->start_forward) >= 0.1f)
-				ct->targ_look = Vector3Lerp(ct->targ_look, targ_look, 80*dt);
+				ct->targ_look = Vector3Lerp(ct->targ_look, targ_look, 100*dt);
 		}
 	}
 
@@ -233,7 +233,7 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	float dist = Vector3Distance(trace_start, trail_end);
 	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
 
-	weap->cooldown = 0.065f;
+	weap->cooldown = 0.055f;
 	weap->ammo--;
 }
 

@@ -906,7 +906,7 @@ void BuildNavGraph(MapSection *sect) {
 	SubdivideNavGraph(sect, navgraph);
 }
 
-#define MAX_EDGE_LENGTH (1024.0f*1024.0f)
+#define MAX_EDGE_LENGTH (368.0f*368.0f)
 #define MAX_EDGE_ANGLE (95.0f*DEG2RAD)
 void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 	MessageDiag("BuildNavEdges()", NULL, ANSI_BLUE);

@@ -14,6 +14,8 @@ AnimState anim_Init(Model model) {
 
 	anim_state.acc = 0.0f;
 
+	anim_state.speed = 166.66f;
+
 	return anim_state;
 }
 

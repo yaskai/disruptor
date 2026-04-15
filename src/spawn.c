@@ -173,7 +173,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 				.damage = 7,
 				.clip_size = 100,
 				.ammo = 100,
-				.reload_time_amnt = 7.5f,
+				.reload_time_amnt = 4.5f,
 			};
 
 			ent.comp_health.amount = 100;
@@ -256,6 +256,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			//ent.comp_transform.position = BoxCenter(ent.comp_transform.bounds);
 
 			//printf("made ff, %d\n", ent.bsp_model);
+
+			ent.flags &= ~ENT_COLLIDERS;
 
 		} break;
 

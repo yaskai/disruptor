@@ -212,6 +212,13 @@ u8 ExecGotoPos(Entity *ent, MapSection *sect) {
 		return 1;
 	}
 
+	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[1];
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, ct->position, ai->targ_data.position, &tr);
+	
+	if(tr.fraction < 1)
+		return 1;
+
 	ai->wish_dir = to_dest;
 	ai->wish_dir.z = 0;
 	ai->wish_dir = Vector3Normalize(ai->wish_dir);
@@ -277,7 +284,7 @@ u8 ExecMeeleeAttack(Entity *ent, EntityHandler *handler) {
 	return 1;
 }
 
-u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
+u8 ExecMakeChasePath(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	if(AI_LOG) Message("ExecMakeChasePath()", ANSI_BLUE);
 
 	comp_Ai *ai = &ent->comp_ai;
@@ -296,12 +303,40 @@ u8 ExecMakeChasePath(Entity *ent, MapSection *sect) {
 	//tr_dest.z += 24;
 	tr_dest.z += 14;
 
+	u8 block = 0;
+
 	Bsp_RecursiveTraceEx(bsp_hull, bsp_hull->first_node, 0, 1, tr_start, tr_dest, &tr);
+	/*
 	if(tr.fraction >= 1.0f) {
+		//ai->task_state.move_dest = ai->targ_data.known_position;
+		//ai->task_state.use_path = false;
+		//return 1;
+	}
+	*/
+	if(tr.fraction < 1.0f)
+		block = 1;
+
+	EntTraceData ent_tr = EntTraceDataEmpty();
+	Vector3 dir = Vector3Subtract(ai->targ_data.known_position, ct->position);
+	float dist = Vector3Length(dir);
+	dir.z = 0;
+	dir = Vector3Normalize(dir);
+
+	Ray ray = (Ray) { .position = tr_start, .direction = dir };
+
+	TraceEntities(ray, handler, MEELEE_RANGE, ent->id, &ent_tr);
+	if(ent_tr.hit_ent != ai->targ_data.ent_id && ent_tr.hit_ent != -1)
+		block |= 0x01;
+
+	if(!block) {
 		ai->task_state.move_dest = ai->targ_data.known_position;
 		ai->task_state.use_path = false;
 		return 1;
-	} 
+	}
+
+	if(block & 0x02) {
+		AiSetSchedule(ai, ai->sched_state.sched_id);
+	}
 
 	if(ai->navgraph_id < 0) {
 		AiSetSchedule(ai, sched_defs[ai->sched_state.sched_id].fail_sched);
@@ -575,7 +610,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	}
 
 	if((ai->input_mask & AI_INPUT_SEE_PLAYER) || (ai->input_mask & AI_INPUT_HEAR_PLAYER)) {
-		AddAlertSphere(ent, 255.0f);
+		float r = (ai->input_mask & AI_INPUT_LOST_PLAYER) ? 400.0f : 255.0f;
+		AddAlertSphere(ent, r);
 	}
 
 	bool alert = false;
@@ -730,7 +766,7 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 			break;
 
 		case TASK_MAKE_CHASE_PATH:
-			done = ExecMakeChasePath(ent, sect);
+			done = ExecMakeChasePath(ent, handler, sect);
 			break;
 
 		case TASK_GOTO_ENT:
