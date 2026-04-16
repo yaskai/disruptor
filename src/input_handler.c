@@ -15,7 +15,8 @@ void InputInit(InputHandler *handler) {
 	handler->actions[ACTION_MOVE_U].key 	= KEY_W;
 	handler->actions[ACTION_MOVE_D].key 	= KEY_S;
 
-	handler->actions[ACTION_CROUCH].key		= KEY_Z;
+	//handler->actions[ACTION_CROUCH].key		= KEY_Z;
+	handler->actions[ACTION_CROUCH].key		= KEY_LEFT_CONTROL;
 	handler->actions[ACTION_WALK].key		= KEY_LEFT_SHIFT;
 
 	handler->actions[ACTION_JUMP].key 		= KEY_SPACE;
