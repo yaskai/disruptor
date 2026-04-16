@@ -503,7 +503,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 	DrawTextEx(
 		hud_font,
 		TextFormat("_H_%d", gun_refs.player->comp_health.amount),
-		(Vector2) { 64, 980 },
+		(Vector2) { 64, gun_refs.conf->window_height - 120 },
 		80, 
 		1, 
 		ColorAlpha(SKYBLUE, 0.75f)
@@ -512,7 +512,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 	DrawTextEx(
 		hud_font,
 		TextFormat("%d | %d", curr_gun->in_clip, curr_gun->ammo),
-		(Vector2) { 1640, 980 },
+		(Vector2) { 1640, gun_refs.conf->window_height - 120 },
 		80,
 		1, 
 		ColorAlpha(SKYBLUE, 0.75f)

@@ -89,10 +89,12 @@ void GameRenderSetup(Game *game) {
 	//game->render_target2D = LoadRenderTexture(game->conf->window_width, game->conf->window_height);
 	//game->render_target_debug = LoadRenderTexture(game->conf->window_width * 0.5f, game->conf->window_height * 0.5f);
 
-	game->render_target3D = LoadRenderTexture(VIRT_W, VIRT_H);
-	game->render_target2D = LoadRenderTexture(VIRT_W, VIRT_H);
+	int vw = game->conf->window_width, vh = game->conf->window_height;
+
+	game->render_target3D = LoadRenderTexture(vw, vh);
+	game->render_target2D = LoadRenderTexture(vw, vh);
 	//game->render_target_debug = LoadRenderTexture(game->conf->window_width * 0.5f, game->conf->window_height * 0.5f);
-	game->render_target_debug = LoadRenderTexture(VIRT_W, VIRT_H);
+	game->render_target_debug = LoadRenderTexture(vw, vh);
 
 	SetTextureFilter(game->render_target3D.texture, TEXTURE_FILTER_TRILINEAR);
 	SetTextureFilter(game->render_target2D.texture, TEXTURE_FILTER_TRILINEAR);

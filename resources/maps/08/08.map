@@ -9577,168 +9577,161 @@
 }
 // entity 74
 {
-"classname" "health_pickup"
-"origin" "832 -272 -136"
-"enum_id" "5"
-"angle" "0"
+"classname" "nav_node"
+"origin" "956 -196 -108"
 }
 // entity 75
 {
 "classname" "nav_node"
-"origin" "956 -196 -108"
+"origin" "940 -356 -116"
 }
 // entity 76
 {
 "classname" "nav_node"
-"origin" "940 -356 -116"
+"origin" "1148 -356 -108"
 }
 // entity 77
 {
 "classname" "nav_node"
-"origin" "1148 -356 -108"
+"origin" "1308 -260 -108"
 }
 // entity 78
 {
 "classname" "nav_node"
-"origin" "1308 -260 -108"
+"origin" "860 -84 -108"
 }
 // entity 79
 {
 "classname" "nav_node"
-"origin" "860 -84 -108"
-}
-// entity 80
-{
-"classname" "nav_node"
 "origin" "844 52 -108"
 }
-// entity 81
+// entity 80
 {
 "classname" "info_maintainer_spawn"
 "origin" "928 -384 -120"
 "enum_id" "2"
 "angle" "270"
 }
-// entity 82
+// entity 81
 {
 "classname" "nav_node"
 "origin" "1324 -36 -116"
 }
-// entity 83
+// entity 82
 {
 "classname" "nav_node"
 "origin" "1796 -180 92"
 }
-// entity 84
+// entity 83
 {
 "classname" "nav_node"
 "origin" "1316 224 -44"
 }
-// entity 85
+// entity 84
 {
 "classname" "nav_node"
 "origin" "1404 -428 -36"
 }
-// entity 86
+// entity 85
 {
 "classname" "nav_node"
 "origin" "1408 224 -36"
 }
-// entity 87
+// entity 86
 {
 "classname" "nav_node"
 "origin" "540 -468 -52"
 }
-// entity 88
+// entity 87
 {
 "classname" "nav_node"
 "origin" "852 -476 -36"
 }
-// entity 89
+// entity 88
 {
 "classname" "nav_node"
 "origin" "524 -316 -100"
 }
-// entity 90
+// entity 89
 {
 "classname" "nav_node"
 "origin" "668 188 60"
 "flag" "0"
 }
-// entity 91
+// entity 90
 {
 "classname" "nav_node"
 "origin" "756 188 92"
 "flag" "0"
 }
-// entity 92
+// entity 91
 {
 "classname" "nav_node"
 "origin" "1044 188 108"
 "flag" "0"
 }
-// entity 93
+// entity 92
 {
 "classname" "nav_node"
 "origin" "1204 204 124"
 "flag" "0"
 }
-// entity 94
+// entity 93
 {
 "classname" "nav_node"
 "origin" "1212 -124 164"
 "flag" "0"
 }
-// entity 95
+// entity 94
 {
 "classname" "nav_node"
 "origin" "1196 -732 164"
 "flag" "0"
 }
-// entity 96
+// entity 95
 {
 "classname" "nav_node"
 "origin" "1196 -844 164"
 "flag" "0"
 }
-// entity 97
+// entity 96
 {
 "classname" "nav_node"
 "origin" "684 -916 164"
 "flag" "0"
 }
-// entity 98
+// entity 97
 {
 "classname" "nav_node"
 "origin" "668 -692 164"
 "flag" "0"
 }
-// entity 99
+// entity 98
 {
 "classname" "nav_node"
 "origin" "1332 -468 -36"
 }
-// entity 100
+// entity 99
 {
 "classname" "nav_node"
 "origin" "1132 -476 -36"
 }
-// entity 101
+// entity 100
 {
 "classname" "nav_node"
 "origin" "588 -468 -36"
 }
-// entity 102
+// entity 101
 {
 "classname" "nav_node"
 "origin" "572 -236 -116"
 }
-// entity 103
+// entity 102
 {
 "classname" "nav_node"
 "origin" "524 -404 -76"
 }
-// entity 104
+// entity 103
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -9751,7 +9744,7 @@
 ( 536 -424.6666666666667 72 ) ( 536 -424.6666666666667 88 ) ( 536 -296.6666666666667 88 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 105
+// entity 104
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -9764,7 +9757,7 @@
 ( 296 -384 0 ) ( 296 -480 -144 ) ( 296 -480 0 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 106
+// entity 105
 {
 "classname" "info_turret_spawn"
 "origin" "-644 -732 -80"
@@ -9772,7 +9765,7 @@
 "angle" "270"
 "trigger_group" "10"
 }
-// entity 107
+// entity 106
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -9785,7 +9778,7 @@
 ( -368 -336 72 ) ( -368 -336 80 ) ( -368 -208 80 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 108
+// entity 107
 {
 "classname" "func_forcefield"
 "trigger_group" "0"
@@ -9803,7 +9796,7 @@
 ( -376 -1440 8 ) ( -376 -1120 8 ) ( -376 -1120 0 ) {ff 0 0 180 1 1
 }
 }
-// entity 109
+// entity 108
 {
 "classname" "light"
 "origin" "-240 -1296 144"
@@ -9814,7 +9807,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 110
+// entity 109
 {
 "classname" "light"
 "origin" "-664 -1288 144"
@@ -9825,7 +9818,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 111
+// entity 110
 {
 "classname" "light"
 "origin" "-48 -1256 144"
@@ -9836,7 +9829,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 112
+// entity 111
 {
 "classname" "info_switch"
 "origin" "-100 -1132 44"
@@ -9846,14 +9839,14 @@
 "trigger_group" "4"
 "trigger_condition" "3"
 }
-// entity 113
+// entity 112
 {
 "classname" "checkpoint"
 "origin" "-32 -1168 32"
 "enum_id" "0"
 "angle" "270"
 }
-// entity 114
+// entity 113
 {
 "classname" "light"
 "origin" "-56 -1008 120"
@@ -9864,54 +9857,54 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 115
+// entity 114
 {
 "classname" "nav_node"
 "origin" "-876 -660 44"
 }
-// entity 116
+// entity 115
 {
 "classname" "nav_node"
 "origin" "-876 -364 60"
 }
-// entity 117
+// entity 116
 {
 "classname" "nav_node"
 "origin" "-876 -788 44"
 }
-// entity 118
+// entity 117
 {
 "classname" "nav_node"
 "origin" "-876 -948 44"
 }
-// entity 119
+// entity 118
 {
 "classname" "nav_node"
 "origin" "-804 -1012 44"
 }
-// entity 120
+// entity 119
 {
 "classname" "nav_node"
 "origin" "-708 -1052 44"
 }
-// entity 121
+// entity 120
 {
 "classname" "info_maintainer_spawn"
 "origin" "-880 -328 56"
 "enum_id" "2"
 "angle" "180"
 }
-// entity 122
+// entity 121
 {
 "classname" "nav_node"
 "origin" "-684 -708 -84"
 }
-// entity 123
+// entity 122
 {
 "classname" "nav_node"
 "origin" "-876 -708 -84"
 }
-// entity 124
+// entity 123
 {
 "classname" "func_forcefield"
 "trigger_group" "5"
@@ -9929,7 +9922,7 @@
 ( -336 248 88 ) ( -336 64 80 ) ( -336 64 88 ) {ff 0 0 0 1 1
 }
 }
-// entity 125
+// entity 124
 {
 "classname" "info_switch"
 "origin" "-348 148 140"
@@ -9939,7 +9932,7 @@
 "trigger_group" "5"
 "trigger_condition" "3"
 }
-// entity 126
+// entity 125
 {
 "classname" "light"
 "origin" "-224 -312 -104"
@@ -9950,7 +9943,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 127
+// entity 126
 {
 "classname" "light"
 "origin" "-448 -312 -40"
@@ -9961,7 +9954,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 128
+// entity 127
 {
 "classname" "light"
 "origin" "-584 -312 -40"
@@ -9972,7 +9965,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 129
+// entity 128
 {
 "classname" "light"
 "origin" "456 -1376 64"
@@ -9983,7 +9976,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 130
+// entity 129
 {
 "classname" "light"
 "origin" "-384 224 144"
@@ -9994,7 +9987,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 131
+// entity 130
 {
 "classname" "light"
 "origin" "-384 88 144"
@@ -10005,7 +9998,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 132
+// entity 131
 {
 "classname" "light"
 "origin" "-304 224 -32"
@@ -10016,7 +10009,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 133
+// entity 132
 {
 "classname" "light"
 "origin" "-304 88 -32"
@@ -10027,7 +10020,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 134
+// entity 133
 {
 "classname" "light"
 "origin" "-832 160 64"
@@ -10038,20 +10031,20 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 135
+// entity 134
 {
 "classname" "checkpoint"
 "origin" "-840 144 112"
 "enum_id" "0"
 "angle" "0"
 }
-// entity 136
+// entity 135
 {
 "classname" "checkpoint"
 "origin" "-840 144 112"
 "enum_id" "0"
 }
-// entity 137
+// entity 136
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -10064,68 +10057,68 @@
 ( -672 104 -112 ) ( -672 104 -8 ) ( -728 232 -8 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 138
+// entity 137
 {
 "classname" "info_maintainer_spawn"
 "origin" "-664 -304 -200"
 "enum_id" "2"
 "angle" "270"
 }
-// entity 139
+// entity 138
 {
 "classname" "nav_node"
 "origin" "-548 28 -108"
 }
-// entity 140
+// entity 139
 {
 "classname" "nav_node"
 "origin" "-372 -228 -188"
 }
-// entity 141
+// entity 140
 {
 "classname" "nav_node"
 "origin" "-364 -12 -124"
 }
-// entity 142
+// entity 141
 {
 "classname" "nav_node"
 "origin" "-380 -284 -196"
 }
-// entity 143
+// entity 142
 {
 "classname" "nav_node"
 "origin" "-636 -300 -196"
 }
-// entity 144
+// entity 143
 {
 "classname" "nav_node"
 "origin" "-700 -12 -84"
 }
-// entity 145
+// entity 144
 {
 "classname" "nav_node"
 "origin" "-772 -280 -84"
 }
-// entity 146
+// entity 145
 {
 "classname" "info_maintainer_spawn"
 "origin" "-776 -304 -88"
 "enum_id" "2"
 "angle" "0"
 }
-// entity 147
+// entity 146
 {
 "classname" "nav_node"
 "origin" "-180 -300 -188"
 }
-// entity 148
+// entity 147
 {
 "classname" "checkpoint"
 "origin" "1408 184 -48"
 "enum_id" "0"
 "angle" "270"
 }
-// entity 149
+// entity 148
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -10138,7 +10131,7 @@
 ( 1448 176 0 ) ( 1448 -56 -56 ) ( 1448 -56 0 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 150
+// entity 149
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -10151,12 +10144,12 @@
 ( -200 -272 -128 ) ( -200 -264 -128 ) ( -200 -264 -224 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 151
+// entity 150
 {
 "classname" "nav_node"
 "origin" "-644 20 -84"
 }
-// entity 152
+// entity 151
 {
 "classname" "light"
 "origin" "-264 -48 -160"
@@ -10167,49 +10160,49 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 153
+// entity 152
 {
 "classname" "nav_node"
 "origin" "-420 36 -124"
 }
-// entity 154
+// entity 153
 {
 "classname" "nav_node"
 "origin" "-308 -308 -196"
 }
-// entity 155
+// entity 154
 {
 "classname" "nav_node"
 "origin" "-708 -200 -84"
 }
-// entity 156
+// entity 155
 {
 "classname" "nav_node"
 "origin" "-788 -120 -84"
 }
-// entity 157
+// entity 156
 {
 "classname" "nav_node"
 "origin" "-788 -32 -84"
 }
-// entity 158
+// entity 157
 {
 "classname" "nav_node"
 "origin" "1220 156 124"
 "flag" "0"
 }
-// entity 159
+// entity 158
 {
 "classname" "nav_node"
 "origin" "1164 -908 164"
 "flag" "0"
 }
-// entity 160
+// entity 159
 {
 "classname" "nav_node"
 "origin" "2212 196 92"
 }
-// entity 161
+// entity 160
 {
 "classname" "light"
 "origin" "-720 0 -32"
@@ -10220,7 +10213,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 162
+// entity 161
 {
 "classname" "light"
 "origin" "-384 32 -40"
@@ -10231,7 +10224,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 163
+// entity 162
 {
 "classname" "func_forcefield"
 "trigger_group" "7"
@@ -10249,7 +10242,7 @@
 ( -376 -1440 -112 ) ( -376 -1120 -112 ) ( -376 -1120 -120 ) {ff 0 72 0 1 1
 }
 }
-// entity 164
+// entity 163
 {
 "classname" "light"
 "origin" "-512 -1168 -152"
@@ -10260,7 +10253,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 165
+// entity 164
 {
 "classname" "light"
 "origin" "-888 -1168 -280"
@@ -10271,7 +10264,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 166
+// entity 165
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -10284,7 +10277,7 @@
 ( -840 -1432 -32 ) ( -840 -1200 -32 ) ( -840 -1200 -112 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 167
+// entity 166
 {
 "classname" "light"
 "origin" "-616 -1424 -488"
@@ -10295,7 +10288,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 168
+// entity 167
 {
 "classname" "light"
 "origin" "-624 -1192 -488"
@@ -10306,7 +10299,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 169
+// entity 168
 {
 "classname" "light"
 "origin" "-624 -1328 -488"
@@ -10317,7 +10310,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 170
+// entity 169
 {
 "classname" "func_forcefield"
 "trigger_group" "4"
@@ -10335,7 +10328,7 @@
 ( -120 -1328 8 ) ( -120 -1336 8 ) ( -120 -1336 136 ) {ff 0 0 0 1 1
 }
 }
-// entity 171
+// entity 170
 {
 "classname" "func_forcefield"
 "trigger_group" "8"
@@ -10353,7 +10346,7 @@
 ( -128 -1240 -656 ) ( -128 -1264 -656 ) ( -128 -1264 -528 ) {ff 0 -88 90 1 1
 }
 }
-// entity 172
+// entity 171
 {
 "classname" "info_switch"
 "origin" "-292 -1284 -564"
@@ -10363,7 +10356,7 @@
 "trigger_group" "8"
 "trigger_condition" "3"
 }
-// entity 173
+// entity 172
 {
 "classname" "light"
 "origin" "-256 -1280 -496"
@@ -10374,7 +10367,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 174
+// entity 173
 {
 "classname" "light"
 "origin" "-136 -1264 -568"
@@ -10385,7 +10378,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 175
+// entity 174
 {
 "classname" "light"
 "origin" "-904 -1424 -592"
@@ -10396,21 +10389,14 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 176
-{
-"classname" "health_pickup"
-"origin" "-888 -1424 -648"
-"angle" "125"
-"enum_id" "5"
-}
-// entity 177
+// entity 175
 {
 "classname" "ammo_revolver"
 "origin" "1424 -16 -136"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 178
+// entity 176
 {
 "classname" "light"
 "origin" "-888 -1280 -752"
@@ -10421,7 +10407,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 179
+// entity 177
 {
 "classname" "light"
 "origin" "-616 -1296 -416"
@@ -10432,33 +10418,26 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 180
-{
-"classname" "health_pickup"
-"origin" "-720 124 -172"
-"enum_id" "5"
-"angle" "60"
-}
-// entity 181
+// entity 178
 {
 "classname" "nav_node"
 "origin" "484 124 -108"
 }
-// entity 182
+// entity 179
 {
 "classname" "info_maintainer_spawn"
 "origin" "600 -104 -120"
 "enum_id" "2"
 "angle" "270"
 }
-// entity 183
+// entity 180
 {
 "classname" "info_maintainer_spawn"
 "origin" "464 80 -120"
 "enum_id" "2"
 "angle" "340"
 }
-// entity 184
+// entity 181
 {
 "classname" "light"
 "origin" "652 272 -40"
@@ -10469,7 +10448,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 185
+// entity 182
 {
 "classname" "light"
 "origin" "692 -64 -40"
@@ -10480,7 +10459,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 186
+// entity 183
 {
 "classname" "light"
 "origin" "396 -104 -24"
@@ -10491,37 +10470,37 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 187
+// entity 184
 {
 "classname" "nav_node"
 "origin" "524 348 -108"
 }
-// entity 188
+// entity 185
 {
 "classname" "nav_node"
 "origin" "676 156 -108"
 }
-// entity 189
+// entity 186
 {
 "classname" "nav_node"
 "origin" "660 428 -108"
 }
-// entity 190
+// entity 187
 {
 "classname" "nav_node"
 "origin" "668 4 -108"
 }
-// entity 191
+// entity 188
 {
 "classname" "nav_node"
 "origin" "468 36 -108"
 }
-// entity 192
+// entity 189
 {
 "classname" "nav_node"
 "origin" "452 -92 -108"
 }
-// entity 193
+// entity 190
 {
 "classname" "light"
 "origin" "-616 -1280 -752"
@@ -10532,7 +10511,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 194
+// entity 191
 {
 "classname" "light"
 "origin" "-392 -1280 -752"
@@ -10543,7 +10522,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 195
+// entity 192
 {
 "classname" "light"
 "origin" "-872 -1384 -32"
@@ -10554,7 +10533,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 196
+// entity 193
 {
 "classname" "light"
 "origin" "-864 -80 -16"
@@ -10565,17 +10544,17 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 197
+// entity 194
 {
 "classname" "nav_node"
 "origin" "652 -68 -108"
 }
-// entity 198
+// entity 195
 {
 "classname" "nav_node"
 "origin" "708 292 -108"
 }
-// entity 199
+// entity 196
 {
 "classname" "info_bullseye"
 "origin" "404 -620 -100"
@@ -10583,7 +10562,7 @@
 "trigger_group" "10"
 "radius" "128"
 }
-// entity 200
+// entity 197
 {
 "classname" "info_switch"
 "origin" "-396 -1180 -44"
@@ -10593,7 +10572,7 @@
 "trigger_group" "7"
 "trigger_condition" "3"
 }
-// entity 201
+// entity 198
 {
 "classname" "light"
 "origin" "504 -1200 104"
@@ -10604,7 +10583,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 202
+// entity 199
 {
 "classname" "light"
 "origin" "408 -1200 8"
@@ -10615,7 +10594,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 203
+// entity 200
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -10628,7 +10607,7 @@
 ( -680 -1432 -32 ) ( -680 -1200 -32 ) ( -680 -1200 -112 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 204
+// entity 201
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -10641,34 +10620,34 @@
 ( -688 -1192 -16 ) ( -688 -1200 -112 ) ( -688 -1200 -16 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 205
+// entity 202
 {
 "classname" "checkpoint"
 "origin" "-880 -1120 -88"
 "enum_id" "0"
 "angle" "270"
 }
-// entity 206
+// entity 203
 {
 "classname" "level_end"
 "origin" "-2240 -1288 -848"
 }
-// entity 207
+// entity 204
 {
 "classname" "nav_node"
 "origin" "892 300 -108"
 }
-// entity 208
+// entity 205
 {
 "classname" "nav_node"
 "origin" "660 244 -108"
 }
-// entity 209
+// entity 206
 {
 "classname" "nav_node"
 "origin" "516 252 -108"
 }
-// entity 210
+// entity 207
 {
 "classname" "light"
 "origin" "940 8 -40"
@@ -10679,31 +10658,31 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 211
+// entity 208
 {
 "classname" "nav_node"
 "origin" "988 332 -108"
 }
-// entity 212
+// entity 209
 {
 "classname" "info_player_start"
 "origin" "-680 -108 40"
 "enum_id" "0"
 "angle" "270"
 }
-// entity 213
+// entity 210
 {
 "classname" "nav_node"
 "origin" "-412 -300 -196"
 }
-// entity 214
+// entity 211
 {
 "classname" "checkpoint"
 "origin" "400 -456 -120"
 "enum_id" "0"
 "angle" "270"
 }
-// entity 215
+// entity 212
 {
 "classname" "light"
 "origin" "512 -1272 24"
@@ -10714,7 +10693,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 216
+// entity 213
 {
 "classname" "light"
 "origin" "1216 -664 96"
@@ -10725,7 +10704,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 217
+// entity 214
 {
 "classname" "light"
 "origin" "1520 -664 96"
@@ -10736,7 +10715,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 218
+// entity 215
 {
 "classname" "light"
 "origin" "1640 -664 120"
@@ -10747,7 +10726,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 219
+// entity 216
 {
 "classname" "light"
 "origin" "944 -672 224"
@@ -10759,7 +10738,7 @@
 "impulse" "0"
 "_dirt" ""
 }
-// entity 220
+// entity 217
 {
 "classname" "light"
 "origin" "1784 -504 144"
@@ -10770,85 +10749,106 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 221
+// entity 218
 {
 "classname" "nav_node"
 "origin" "404 -204 -108"
 }
-// entity 222
+// entity 219
 {
 "classname" "nav_node"
 "origin" "388 -140 -108"
 }
-// entity 223
+// entity 220
 {
 "classname" "nav_node"
 "origin" "372 -332 -108"
 }
-// entity 224
+// entity 221
 {
 "classname" "nav_node"
 "origin" "388 -492 -108"
 }
-// entity 225
+// entity 222
 {
 "classname" "nav_node"
 "origin" "436 -604 -108"
 }
-// entity 226
+// entity 223
 {
 "classname" "nav_node"
 "origin" "420 -876 -108"
 }
-// entity 227
+// entity 224
 {
 "classname" "nav_node"
 "origin" "1924 228 92"
 }
-// entity 228
+// entity 225
 {
 "classname" "nav_node"
 "origin" "1020 -492 -36"
 }
-// entity 229
+// entity 226
 {
 "classname" "nav_node"
 "origin" "1196 -292 -108"
 }
-// entity 230
+// entity 227
 {
 "classname" "nav_node"
 "origin" "1228 -356 -108"
 }
-// entity 231
+// entity 228
 {
 "classname" "nav_node"
 "origin" "1396 12 -36"
 }
-// entity 232
+// entity 229
 {
 "classname" "nav_node"
 "origin" "1396 -332 -36"
 }
-// entity 233
+// entity 230
 {
 "classname" "nav_node"
 "origin" "1316 84 -68"
 }
-// entity 234
+// entity 231
 {
 "classname" "nav_node"
 "origin" "1316 124 -60"
 }
-// entity 235
+// entity 232
 {
 "classname" "nav_node"
 "origin" "628 68 -108"
 }
-// entity 236
+// entity 233
 {
 "classname" "nav_node"
 "origin" "588 436 -108"
+}
+// entity 234
+{
+"classname" "pickup_health"
+"origin" "836 -292 -140"
+"enum_id" "5"
+"angle" "0"
+}
+// entity 235
+{
+"classname" "pickup_health"
+"origin" "-724 124 -172"
+"enum_id" "5"
+"angle" "60"
+}
+// entity 236
+{
+"classname" "pickup_health"
+"origin" "-884 -1428 -652"
+"enum_id" "5"
+"angle" "-30"
 }
 // entity 237
 {

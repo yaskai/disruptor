@@ -977,8 +977,9 @@ RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_coun
 		UploadMesh(&meshes[i], false);
 		render_brushes[i].model = LoadModelFromMesh(meshes[i]);
 
-		char pref[3];
-		memcpy(pref, bsp->miptex[tex_id].name, sizeof(pref));
+		char pref[4];
+		memcpy(pref, bsp->miptex[tex_id].name, 3);
+		pref[3] = '\0';
 
 		if(pref[0] == '{') {
 			render_brushes[i].flags |= RBRUSH_TRANSLUCENT;
