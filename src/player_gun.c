@@ -44,6 +44,8 @@ float friction = 0.0f;
 Vector2 sway = { 0, 0 };
 float sway_t = 0;
 
+float init_t = 1.0f;
+
 typedef struct {
 	EntityHandler *handler;	
 	MapSection *sect;
@@ -192,9 +194,15 @@ void PlayerGunInit(
 	SetTextureFilter(hud_font.texture, TEXTURE_FILTER_POINT);
 
 	//sway_t = GetTime();
+
+	init_t = 1.0f;
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
+	init_t -= dt;
+	if(init_t > 0)
+		return;
+
 	Vector3 hvel = (Vector3) { gun_refs.player->comp_transform.velocity.x, gun_refs.player->comp_transform.velocity.y, 0 };
 	float vel_len = Vector3Length(hvel);
 
@@ -331,26 +339,23 @@ void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
 		//return;
 
 	//float angle_targ = Clamp((recoil*1.0f) + gun_rot, -30, 60.0f);
-	float recoil_angle = Clamp((recoil*10.35f), -30, 60.0f);
+	float recoil_angle = Clamp((recoil*10.35f), -30, 40.0f);
 
 	/*
 	if(freeze_frame)
 		recoil_angle = 0;
 		*/
 
-	gun_angle = Lerp(gun_angle, recoil_angle, dt * (recoil >= 50.0f ? 35.0f : 55.0f) );
-	gun_angle = Clamp(gun_angle, REVOLVER_ANGLE_REST, 60.0f);
+	gun_angle = recoil_angle;
+	gun_angle = Clamp(gun_angle, REVOLVER_ANGLE_REST, 30.0f);
 
 	//mat = MatrixRotateX(-recoil_angle * DEG2RAD);
 	mat = MatrixRotateX(-gun_angle * DEG2RAD);
 	mat = MatrixMultiply(mat, MatrixRotateY(REVOLVER_ANGLE_REST * DEG2RAD));
 
-	float friction_targ = (recoil_angle >= 45.0f) ? 7.9f : 8.5f;
-	//friction_targ += sinf(recoil*0.5f);
-	if(gun_angle >= 55.0f) friction_targ *= 0.5f;
-	if(gun_angle >= 60.0f) friction_targ *= 0.50f;
-	if(gun_angle <= 25.0f) friction_targ *= 1.45f;
-	//friction = (recoil_angle > 50) ? 8.9f : 10.5f;
+	//float friction_targ = (recoil_angle >= 25.0f) ? 7.9f : 20.5f;
+	float friction_targ = 10.0f;
+	if(gun_angle >= 35.0f && recoil >= 80.0f) friction_targ *= 0.85f;
 	friction = Lerp(friction, friction_targ, dt);
 
 	recoil -= (recoil * friction) * dt; 
@@ -366,10 +371,10 @@ void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
 
 	//float rest_ofs = (recoil * 0.0554f);
 	rest_ofs = Clamp(rest_ofs, 0.0f, 10.0f); 	
-	gun_pos.z = REVOLVER_REST.z - (rest_ofs);
-	//gun_pos.y = REVOLVER_REST.y - (rest_ofs*0.25f);
+	gun_pos.z = REVOLVER_REST.z - (rest_ofs*0.55f);
+	gun_pos.y = REVOLVER_REST.y + (rest_ofs*0.11f);
 
-	player_gun->cam.target.y = Lerp(player_gun->cam.target.y, rest_ofs*0.2f, 10*dt);
+	//player_gun->cam.target.y = Lerp(player_gun->cam.target.y, -rest_ofs*0.2f, 5*dt);
 	//player_gun->cam.position.y = player_gun->cam.target.y;
 	//player_gun->cam.position.y = Lerp(player_gun->cam.target.y, rest_ofs*0.5f, 30*dt);
 
@@ -380,7 +385,7 @@ void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
 	//cam_recoil = Lerp(cam_recoil, recoil*0.0016f, dt*lerp_t);
 	//cam_recoil = Lerp(cam_recoil, recoil*0.0013f, dt*lerp_t);
 	//cam_recoil = Lerp(cam_recoil, recoil*0.0035f, dt*lerp_t);
-	cam_recoil = Lerp(cam_recoil, recoil*0.005f, dt*lerp_t);
+	cam_recoil = Lerp(cam_recoil, fmaxf(recoil*0.006f, (gun_angle*0.001f)), dt*lerp_t);
 	//cam_recoil = Clamp(cam_recoil, 0.0f, 0.33f);
 	PlayerSetRecoilInput(gun_refs.player, cam_recoil);
 
@@ -454,7 +459,8 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		if(curr_gun->cooldown > 0) {
 			//DrawTexture(muz_flash, 1920/2, 1080/2, WHITE);
 			Vector3 world_pos = REVOLVER_REST;
-			world_pos.y += 2.0f;
+			world_pos.x += 0.1f;
+			world_pos.y += 1.25f;
 			muz_pos = GetWorldToScreen(world_pos, player_gun->cam);
 			muz_pos.x -= 16;
 			muz_pos.y += 16;
@@ -668,8 +674,11 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	if(curr_gun->cooldown > 0)
 		return;
 
+	if(gun_angle > REVOLVER_ANGLE_REST + 1)
+		return;
+
 	recoil_add = false;
-	recoil += 90 + (GetRandomValue(1, 5) * 0.1f);
+	recoil = 90 + (GetRandomValue(1, 5) * 0.1f);
 
 	freeze_frame = true;
 

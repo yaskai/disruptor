@@ -335,7 +335,9 @@ u8 ExecMakeChasePath(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	}
 
 	if(block & 0x02) {
-		AiSetSchedule(ai, ai->sched_state.sched_id);
+		//AiSetSchedule(ai, ai->sched_state.sched_id);
+		return ExecMakePatrolPath(ent, sect);
+		ai->state = STATE_STUNNED;
 	}
 
 	if(ai->navgraph_id < 0) {

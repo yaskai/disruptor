@@ -1,7 +1,27 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "raylib.h"
 #include "config.h"
 #include "game.h"
+
+enum PLATFORMS : u8 {
+	LINUX	= 0,
+	WIN64	= 1,
+	MACOS	= 2
+}; 
+u8 platform = LINUX;
+
+unsigned int plat_flags[3] = {
+	// Linux
+	(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT),						
+	
+	// Windows
+	(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_MAXIMIZED | FLAG_VSYNC_HINT),		
+
+	// MacOS
+	(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT)
+};
 
 void GameTick(bool *exit, Game *game);
 void OnExit(Config *conf, Game *game);
@@ -14,14 +34,19 @@ int main() {
 	Game game = (Game) {0};
 	GameInit(&game, &conf);
 
-	//SetTraceLogLevel(LOG_ERROR);
+	// Disable raylib logs
 	SetTraceLogLevel(LOG_NONE);
-	SetConfigFlags(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT);
 
+	// Set window flags
+	SetConfigFlags(plat_flags[platform]);
+
+	// * NOTE:
+	// To be fixed and tested
+	int monitor = GetCurrentMonitor();
 	if(conf.window_width == atoi("auto"))
-		conf.window_width = GetScreenWidth();
+		conf.window_width = GetMonitorWidth(monitor);
 	if(conf.window_height == atoi("auto"))
-		conf.window_height = GetScreenHeight();
+		conf.window_height = GetMonitorHeight(monitor);
 	
 	InitWindow(conf.window_width, conf.window_height, "DISRUPTOR");
 
@@ -35,6 +60,8 @@ int main() {
 	// Disable cursor,
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
+
+	pthread_t load_trhead;
 
 	//GameLoadScene(&game, "resources/maps/06");
 	//GameLoadScene(&game, "resources/maps/07");

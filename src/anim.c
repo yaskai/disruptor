@@ -14,7 +14,7 @@ AnimState anim_Init(Model model) {
 
 	anim_state.acc = 0.0f;
 
-	anim_state.speed = 166.66f;
+	anim_state.speed = 0.166f;
 
 	return anim_state;
 }
@@ -25,8 +25,8 @@ void anim_Close(AnimState *anim_state) {
 }
 
 void anim_Update(AnimState *anim_state, ModelAnimation *anims, float dt) {
-	anim_state->acc += anim_state->speed * dt;
-	if(anim_state->acc < 1.0f) {
+	anim_state->acc -= dt;
+	if(anim_state->acc > 0.0f) {
 		return;
 	}
 
@@ -37,7 +37,7 @@ void anim_Update(AnimState *anim_state, ModelAnimation *anims, float dt) {
 	}
 
 	anim_state->curr_frame = next; 
-	anim_state->acc = 0.0f;
+	anim_state->acc = anim_state->speed;
 }
 
 void anim_Apply(AnimState *anim_state, Model *model, ModelAnimation *anims) {

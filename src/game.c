@@ -17,9 +17,6 @@ void EndScreen(Game *game, float dt);
 #define VIRT_W (1920)
 #define VIRT_H (1080)
 
-bool show_qr = false;
-Texture2D qr_img;
-
 float *plr_accel;
 
 Color colors[] = {
@@ -51,7 +48,10 @@ void GameInit(Game *game, Config *conf) {
 	InputInit(&game->input_handler);
 	game->input_handler.mouse_sensitivity = game->conf->mouse_sensitivity * 0.0001f;
 
-	//SetLogState(1);
+	//SetLogState(true);
+	SetLogState(false);
+
+	game->flags = 0;
 }
 
 void GameClose(Game *game) {
@@ -105,13 +105,11 @@ void GameRenderSetup(Game *game) {
 
 	mat_default = LoadMaterialDefault();
 	mat_default.maps[MATERIAL_MAP_DIFFUSE].color = ColorAlpha(BLUE, 0.25f);
-
-	sphere_model = LoadModelFromMesh(GenMeshSphere(2, 16, 8));
-	
-	qr_img = LoadTexture("resources/qr.png");
 }
 
 void GameLoadScene(Game *game, char *path) {
+	game->flags &= ~FLAG_LOAD_COMPLETE;
+
 	SpawnList sl = (SpawnList) {0}; 
 	game->test_section = BuildMapSect(path, &sl);
 	game->test_section.navgraphs = malloc(sizeof(NavGraph) * 32);
@@ -193,6 +191,8 @@ void GameLoadScene(Game *game, char *path) {
 		game->ent_handler.checkpoint_list.cells[i] = CellCoordsToId(
 			Vec3ToCoords(game->ent_handler.checkpoint_list.points[i], &game->ent_handler.grid), &game->ent_handler.grid);	
 	}
+
+	game->flags |= FLAG_LOAD_COMPLETE;
 }
 
 void GameUpdate(Game *game, float dt) {
@@ -204,7 +204,7 @@ void GameUpdate(Game *game, float dt) {
 		return;
 	}
 
-	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[0].comp_transform.position);
+	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
 
 	PollInput(&game->input_handler);
 	PlayerGunUpdate(&game->player_gun, dt);
@@ -232,7 +232,7 @@ void EndScreen(Game *game, float dt) {
 	}
 }
 
-void GameDraw(Game *game, float dt) {
+void RenderMainLayer(Game *game, float dt) {
 	Entity *player_ent = &game->ent_handler.ents[game->ent_handler.player_id];
 
 	// 3D Rendering, main
@@ -240,141 +240,100 @@ void GameDraw(Game *game, float dt) {
 	BeginTextureMode(game->render_target3D);
 	
 	ClearBackground(BLACK);
-		BeginMode3D(game->camera);
-			//PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
-			DrawMap(&game->test_section, game->camera.position);
-			RenderEntities(&game->ent_handler, GetFrameTime());
-			vEffectsRun(&game->effect_manager, dt);
-			DrawMapTranslucent(&game->test_section, game->camera.position);
-			RenderBrushEntities(&game->ent_handler);
-			PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
+	BeginMode3D(game->camera);
 
-			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
-				for(u16 j = 0; j < game->test_section.bvh[2].tris.count; j++) {
-					Tri *tri = &game->test_section.bvh[2].tris.arr[j];
-					Color color = colors[tri->hull_id % 7];
-					/*
-					Color color = {
-						.r = tri->normal.x * 255,
-						.g = tri->normal.y * 255,
-						.b = tri->normal.z * 255,
-						255
-					};
-					*/
-					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 0.25f));
+	// Render level geometry
+	DrawMap(&game->test_section, game->camera.position);
+	// Render entities
+	RenderEntities(&game->ent_handler, GetFrameTime());
+	// Run/draw visual effects
+	vEffectsRun(&game->effect_manager, dt);
+	// Render transparent level geometry
+	DrawMapTranslucent(&game->test_section, game->camera.position);
+	// Render dynamic brush entities
+	RenderBrushEntities(&game->ent_handler);
+	// Draw player (for debug only)
+	PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
 
-					Vector3 c = TriCentroid(*tri);
-					DrawLine3D(Vector3Subtract(c, Vector3Scale(tri->normal, 10)), Vector3Add(c, Vector3Scale(tri->normal, 10)), color);
-				}
+	EndMode3D();
 
-				/*
-				for(u16 j = 0; j < game->test_section._hulls[2].count; j++) {
-					Hull *hull = &game->test_section._hulls[2].arr[j];
-					DrawBoundingBox(hull->aabb, colors[j % 7]);
-
-					for(short k = 0; k < hull->plane_count; k++) {
-						Plane *pl = &hull->planes[k];
-
-						DrawLine3D(hull->center, Vector3Add(hull->center, Vector3Scale(pl->normal, 35)), SKYBLUE);
-					}
-				}
-				*/
-			}
-			//RenderEntities(&game->ent_handler, GetFrameTime());
-
-
-			/*
-			for(int i = 0; i < game->test_section.base_navgraph.node_count; i++) {
-				NavNode *node = &game->test_section.base_navgraph.nodes[i];
-				DrawModel(sphere_model, node->position, 1, PURPLE);
-			}
-			*/
-
-			//DebugDrawNavGraphs(&game->test_section, sphere_model);
-
-		EndMode3D();
-
-		//DebugDrawNavGraphsText(&game->test_section, game->camera_debug, (Vector2) {VIRT_W, VIRT_H} );
-
-		if(player_ent->comp_ai.state == STATE_DEAD) {
-			float deathscreen_alpha = player_ent->comp_ai.task_state.timer*0.5f;
-			if(deathscreen_alpha > 1) deathscreen_alpha = 1;
-			DrawRectangleRec((Rectangle) { 0, 0, VIRT_W, VIRT_H } , ColorAlpha(BLACK, player_ent->comp_ai.task_state.timer*0.5f));
-		}
+	// Fade to black effect on player death
+	if(player_ent->comp_ai.state == STATE_DEAD) {
+		float deathscreen_alpha = player_ent->comp_ai.task_state.timer*0.5f;
+		if(deathscreen_alpha > 1) deathscreen_alpha = 1;
+		DrawRectangleRec((Rectangle) { 0, 0, VIRT_W, VIRT_H } , ColorAlpha(BLACK, player_ent->comp_ai.task_state.timer*0.5f));
+	}
 
 	EndTextureMode();
+}
 
+void RenderGunLayer(Game *game) {
 	BeginTextureMode(game->render_target2D);
 	ClearBackground(BLANK);
-		PlayerGunDraw(&game->player_gun);
+
+	PlayerGunDraw(&game->player_gun);
+
 	EndTextureMode();
+}
 
-	if(IsKeyPressed(KEY_V))
-		debug_draw_flags ^= DEBUG_ENABLE;
+void RenderDebugLayer(Game *game) {
+	if(IsKeyPressed(KEY_V)) debug_draw_flags ^= DEBUG_ENABLE;
+	if((debug_draw_flags & DEBUG_ENABLE) == 0)
+		return;
 
-	if(debug_draw_flags & DEBUG_ENABLE) {
-		// 3D Rendering, debug
-		BeginTextureMode(game->render_target_debug);
+	// 3D Rendering, debug
+	BeginTextureMode(game->render_target_debug);
 
-		float clear_alpha = (debug_draw_flags & DEBUG_DRAW_BIG) ? 1 : 0.95f;
-		ClearBackground(ColorAlpha(BLACK, clear_alpha));
+	float clear_alpha = (debug_draw_flags & DEBUG_DRAW_BIG) ? 1 : 0.95f;
+	ClearBackground(ColorAlpha(BLACK, clear_alpha));
 
-		BeginMode3D(game->camera_debug);
-			DrawMap(&game->test_section, game->camera.position);
-			PlayerDisplayDebugInfo(&game->ent_handler.ents[game->ent_handler.player_id]);
+	BeginMode3D(game->camera_debug);
 
-			if(IsKeyPressed(KEY_U)) debug_draw_flags ^= DEBUG_DRAW_FULL_MODEL;
-			//if(debug_draw_flags & DEBUG_DRAW_FULL_MODEL) DrawModel(game->test_section.model, Vector3Zero(), 1, ColorAlpha(DARKGRAY, 1.0f));
+	DrawMap(&game->test_section, game->camera.position);
+	PlayerDisplayDebugInfo(&game->ent_handler.ents[game->ent_handler.player_id]);
 
-			//DrawModelWires(game->test_section.model, Vector3Zero(), 1, RAYWHITE);
-			//DrawBoundingBox(game->test_section.bvh.nodes[0].bounds, WHITE);
+	RenderEntities(&game->ent_handler, GetFrameTime());
 
-			//PlayerDisplayDebugInfo(&game->ent_handler.ents[0]);
-			RenderEntities(&game->ent_handler, GetFrameTime());
-			//BrushTestView(&brush_pool, SKYBLUE);
-			//BrushTestView(&brush_pool_exp, RED);
-
-			/*
-			DrawRay((Ray){.position = Vector3Zero(), .direction = (Vector3) {1, 0, 0} }, RED);
-			DrawRay((Ray){.position = Vector3Zero(), .direction = UP}, GREEN);
-			DrawRay((Ray){.position = Vector3Zero(), .direction = (Vector3) {0, 0, 1} }, BLUE);
-			*/
-
-			if(IsKeyPressed(KEY_H)) debug_draw_flags ^= DEBUG_DRAW_HULLS;
-			if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
-				for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
-					Tri *tri = &game->test_section.bvh[1].tris.arr[j];
-					Color color = colors[tri->hull_id % 7];
-					DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorTint(color, BROWN));
-				}
-				for(u16 j = 0; j < game->test_section._hulls[1].count; j++) {
-					Hull *hull = &game->test_section._hulls[1].arr[j];
-					DrawBoundingBox(hull->aabb, colors[j % 7]);
-				}
-			}
-
-			if(IsKeyPressed(KEY_B)) debug_draw_flags ^= DEBUG_DRAW_BVH;
-			if(debug_draw_flags & DEBUG_DRAW_BVH) { 
-				for(u16 j = 0; j < game->test_section.bvh[0].count; j++) {
-					BvhNode *node = &game->test_section.bvh->nodes[j];
-
-					Color color = colors[j % 7];
-					bool leaf = (node->tri_count > 0);
-					if(!leaf) color = ColorAlpha(GRAY, 0.5f);
-
-					DrawBoundingBox(node->bounds, color);
-				}
-			}
-
-		DebugDrawNavGraphs(&game->test_section, sphere_model);
-
-		EndMode3D();
-
-		Vector2 dbg_window_size = (Vector2) { .x = game->render_target_debug.texture.width, .y = game->render_target_debug.texture.height };
-		//DebugDrawNavGraphsText(&game->test_section, game->camera_debug, dbg_window_size);
-		//DebugDrawEntText(&game->ent_handler, game->camera_debug);
-		EndTextureMode();
+	if(IsKeyPressed(KEY_H)) debug_draw_flags ^= DEBUG_DRAW_HULLS;
+	if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
+		for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
+			Tri *tri = &game->test_section.bvh[1].tris.arr[j];
+			Color color = colors[tri->hull_id % 7];
+			DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorTint(color, BROWN));
+		}
+		for(u16 j = 0; j < game->test_section._hulls[1].count; j++) {
+			Hull *hull = &game->test_section._hulls[1].arr[j];
+			DrawBoundingBox(hull->aabb, colors[j % 7]);
+		}
 	}
+
+	if(IsKeyPressed(KEY_B)) debug_draw_flags ^= DEBUG_DRAW_BVH;
+	if(debug_draw_flags & DEBUG_DRAW_BVH) { 
+		for(u16 j = 0; j < game->test_section.bvh[0].count; j++) {
+			BvhNode *node = &game->test_section.bvh->nodes[j];
+
+			Color color = colors[j % 7];
+			bool leaf = (node->tri_count > 0);
+			if(!leaf) color = ColorAlpha(GRAY, 0.5f);
+
+			DrawBoundingBox(node->bounds, color);
+		}
+	}
+
+	DebugDrawNavGraphs(&game->test_section, sphere_model);
+
+	EndMode3D();
+
+	Vector2 dbg_window_size = (Vector2) { .x = game->render_target_debug.texture.width, .y = game->render_target_debug.texture.height };
+	//DebugDrawNavGraphsText(&game->test_section, game->camera_debug, dbg_window_size);
+	//DebugDrawEntText(&game->ent_handler, game->camera_debug);
+	EndTextureMode();
+}
+
+void GameDraw(Game *game, float dt) {
+	RenderMainLayer(game, dt);
+	RenderGunLayer(game);
+	RenderDebugLayer(game);
 
 	// 2D Rendering
 	// 2D
@@ -396,16 +355,6 @@ void GameDraw(Game *game, float dt) {
 	if(IsKeyPressed(KEY_T))
 		debug_draw_flags ^= DEBUG_DRAW_BIG;
 
-	//if(IsKeyPressed(KEY_P)) {
-		//show_qr = !show_qr;
-	//} 
-
-	/*
-	Vector2 debug_wh = (debug_draw_flags & DEBUG_DRAW_BIG) 
-		? (Vector2) { 1920, 1080 } 
-		: (Vector2) {game->render_target_debug.texture.width, game->render_target_debug.texture.height };
-	*/
-
 	Vector2 debug_wh = (debug_draw_flags & DEBUG_DRAW_BIG) 
 		? (Vector2) { VIRT_W, VIRT_H } 
 		: (Vector2) { VIRT_W * 0.5f, VIRT_H * 0.5f };
@@ -417,29 +366,8 @@ void GameDraw(Game *game, float dt) {
 		DrawTexturePro(game->render_target_debug.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
 	}
 
-	if(show_qr) {
-		DrawTexture(qr_img, 0, 0, WHITE);
-	}
-
-	/*
-	if(game->ent_handler.checkpoint_list.active == 5 && 
-	   CheckCollisionSpheres(
-			game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position, 32, 
-			game->ent_handler.checkpoint_list.points[5], 128)) {
-
-		DrawText("That's all!  Thank you for playing!", VIRT_W/2 - 300, VIRT_H/2, 32, DARKPURPLE);
-		DrawText("Press Y to play again", VIRT_W/2 - 300, VIRT_H/2 + 40, 32, DARKPURPLE);
-
-		if(IsKeyPressed(KEY_Y)) {
-			game->ent_handler.checkpoint_list.active = -1;
-			ReloadEntities(&game->ent_handler, &game->test_section, 0);
-		}
-	}
-	*/
-
 	int fps = GetFPS();
 	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
-
 	//EntDebugText();
 
 	EndDrawing();

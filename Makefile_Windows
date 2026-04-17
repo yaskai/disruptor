@@ -4,7 +4,7 @@ INC_DIR := include
 #CC := gcc
 CC := x86_64-w64-mingw32-gcc
 
-CFLAGS := -g -Wall -std=c99 -O2 -I$(INC_DIR) -Ibuild/external/raylib-win/src -DPLATFORM_DESKTOP
+CFLAGS := -Wall -std=c99 -O2 -I$(INC_DIR) -Ibuild/external/raylib-win/src -DPLATFORM_DESKTOP
 LDFLAGS := -lgdi32 -lwinmm -lSDL2main -lSDL2 -L/home/kai/SDL2_WIN/x86_64-w64-mingw32/lib -mwindows
 
 # Paths

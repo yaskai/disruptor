@@ -83,7 +83,7 @@ Lightmap BuildLightmap(Bsp_Data *bsp) {
 	};
 	lm.tex = LoadTextureFromImage(img);
 	SetTextureFilter(lm.tex, TEXTURE_FILTER_TRILINEAR);
-	ExportImage(img, "litmap.png");
+	//ExportImage(img, "litmap.png");
 	UnloadImage(img);
 
 	return lm;

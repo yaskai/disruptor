@@ -88,6 +88,8 @@ void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *
 
 		float ent_frac = 1.0f;
 		bool use_ent = (ent_tr.hit_ent != -1);
+
+		use_ent = false;
 		
 		// Prevent entity trace from using Bug,
 		if(ent_tr.hit_ent == handler->bug_id)

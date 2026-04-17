@@ -11,6 +11,7 @@
 #define GAME_H_
 
 #define FLAG_EXIT_REQUEST	0x01
+#define FLAG_LOAD_COMPLETE 	0x02
 
 typedef struct {
 	MapSection test_section;

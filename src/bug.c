@@ -624,7 +624,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		// * NOTE:
 		// Remove later
 		// This is here for retrieval "puzzle" in alpha build 
-		if((ent->flags & BUG_DISRUPTED_ENEMY) && fabsf(player_ent->comp_transform.position.z - ct->position.z) >= 175.0f) 
+		//if((ent->flags & BUG_DISRUPTED_ENEMY) && fabsf(player_ent->comp_transform.position.z - ct->position.z) >= 175.0f) 
+		if((ent->flags) & BUG_DISRUPTED_ENEMY)
 			can_recall = false;
 
 		// Recall
@@ -664,6 +665,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	float pickup_radius = 16.0f;
 	if(ent->flags & BUG_RECALL)
 		pickup_radius *= 1.25f;
+
+	if(ent->flags & BUG_DISRUPTED_ENEMY)
+		pickup_radius = 0;
 
 	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) && launch_timer <= EPSILON) {
 		ai->state = BUG_DEFAULT;
@@ -720,6 +724,7 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 		return;
 
 	ai->input_mask |= AI_INPUT_SELF_GLITCHED;
+	ai->state = STATE_STUNNED;
 
 	// * NOTE: 
 	// Magic number, change later based on entity type maybe??

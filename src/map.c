@@ -677,8 +677,9 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 	// Make render brush models (from bsp leaves)
 	rbrush_list.count = 0;
-	rbrush_list.cap = 4096;
-	rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * rbrush_list.cap);
+	rbrush_list.cap = 8192;
+	//rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * rbrush_list.cap);
+	rbrush_list.render_brushes = calloc(rbrush_list.cap, sizeof(RenderBrush));
 	rbrush_list.ids = malloc(sizeof(int) * rbrush_list.cap);
 
 	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {

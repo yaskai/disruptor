@@ -4,8 +4,11 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from 08.texinfo.json...
 Loading extended content flags from 08.content.json...
-WARNING: entity at (944 -672 224) (light) has empty key/value "_dirt" ""
-218 entities read, 78 are lights.
+WARNING: entity at (944 -672 232) (light) has empty key/value "_dirt" ""
+WARNING: entity at (768 -864 88) (light) has empty key/value "_dirt" ""
+WARNING: entity at (784 -568 48) (light) has empty key/value "_dirt" ""
+WARNING: entity at (784 -576 168) (light) has empty key/value "_dirt" ""
+209 entities read, 83 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -13,7 +16,7 @@ BSPX light directions output requested on command line.
 --- Options Summary ---
     "dist" was set to "1.000000" (from map)
     "anglescale" was set to "1.000000" (from map)
-    "light" was set to "30.000000" (from map)
+    "light" was set to "15.000000" (from map)
     "dirt" was set to "1" (from map)
     "minlight_dirt" was set to "1" (from command line)
     "bounce" was set to "1" (from map)
@@ -21,14 +24,14 @@ BSPX light directions output requested on command line.
     "bouncecolorscale" was set to "1.000000" (from map)
     "sunlight" was set to "300.000000" (from map)
     "sunlight_color" was set to "255 196 192" (from map)
-    "sunlight2" was set to "200.000000" (from map)
+    "sunlight2" was set to "100.000000" (from map)
     "sunlight2_color" was set to "255 196 192" (from map)
-    "sunlight3" was set to "200.000000" (from map)
+    "sunlight3" was set to "0.000000" (from map)
     "sunlight3_color" was set to "255 196 192" (from map)
     "sunlight_dirt" was set to "1.000000" (from map)
     "sunlight2_dirt" was set to "1.000000" (from command line)
     "sunlight_mangle" was set to "0.45315388 -0.7848856 -0.42261827" (from map)
-    "sunlight_penumbra" was set to "2.000000" (from map)
+    "sunlight_penumbra" was set to "4.000000" (from map)
     "surflight_radiosity" was set to "1" (from command line)
     "soft" was set to "5" (from command line)
     "extra" was set to "4" (from command line)
@@ -36,25 +39,25 @@ BSPX light directions output requested on command line.
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
-	352 sky faces
-	11143 solid faces
-	473 filtered faces
+	329 sky faces
+	11440 solid faces
+	443 filtered faces
 	0 shadow-casting skip faces
-SetupLights: 78 initial lights
-SetupLights: 78 after surface lights
-SetupLights: 78 after jittering
-Final count: 78 lights, 194 suns in use.
+SetupLights: 83 initial lights
+SetupLights: 83 after surface lights
+SetupLights: 83 after jittering
+Final count: 83 lights, 129 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 7169036
+lightmap size (total): 7109508
 Lighting Completed.
 
 Writing 08.lit
 DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
 Writing 08.bsp as Quake BSP bsp29
-28.706s seconds elapsed
+28.911s seconds elapsed
 0 empty lightmaps
 
 

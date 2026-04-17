@@ -110,10 +110,13 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ai->wish_dir = Vector3Zero();
 	} else {
 		//ai->speed = 175;
-		float wish = (ai->input_mask & AI_INPUT_SELF_GLITCHED) ? 200.0f : 260.0f;
+		float wish = (ai->input_mask & AI_INPUT_SELF_GLITCHED) ? 100.0f : 220.0f;
 
 		if(ai->task_state.task_id == TASK_MEELEE_ATTACK)
 			wish = 220.0f;
+
+		if(ai->sched_state.sched_id == SCHED_FIX_FRIEND_A || ai->sched_state.sched_id == SCHED_FIX_FRIEND_B)
+			wish = 250.0f;
 
 		ai->speed = Lerp(ai->speed, wish, 10*dt);
 	}
