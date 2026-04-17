@@ -195,9 +195,6 @@ typedef struct {
 	comp_Transform comp_transform;
 	comp_Health comp_health;
 	comp_Weapon comp_weapon;
-	
-	int anim_count, curr_anim,  anim_frame;
-	float anim_timer;
 
 	int bsp_model;
 

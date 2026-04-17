@@ -11,21 +11,20 @@ typedef struct {
 	HashMap sound_hashmap;
 	HashMap track_hashmap;
 
-	Sound *sounds;
-	Music *tracks;
-
 	int sound_count;
 	int track_count;
 
 } AudioPlayer;
 
-void AudioPlayerInit(AudioPlayer *ap, Camera3D *camera);
-void AudioPlayerClose(AudioPlayer *ap);
+void AP_Init(AudioPlayer *ap, Camera3D *camera);
+void AP_Close(AudioPlayer *ap);
 
-void AudioPlayerLoadNeeded(AudioPlayer *ap, char *directory);
+void AP_Update(AudioPlayer *ap, float dt);
+
+void AP_LoadNeeded(AudioPlayer *ap, char *dir);
 
 #define MODE_SOUND	0
 #define MODE_TRACK	1
-void SetSoundPosition(AudioPlayer *ap, char *name, Vector3 pos, float max_dist, short mode);
+void AP_SetSoundPosition(AudioPlayer *ap, char *name, Vector3 pos, float max_dist, short mode);
 
 #endif

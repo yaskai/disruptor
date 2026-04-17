@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "raylib.h"
@@ -14,7 +15,7 @@ AnimState anim_Init(Model model) {
 
 	anim_state.acc = 0.0f;
 
-	anim_state.speed = 0.766f;
+	anim_state.speed = (1.0f / 100);
 
 	return anim_state;
 }

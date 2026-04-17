@@ -188,8 +188,6 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.model = handler->base_ent_models[ENT_MAINTAINER];
 
-			ent.curr_anim = 0;
-
 			ent.comp_transform.position.z += 20;
 
 			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
@@ -224,7 +222,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.anim_state = anim_Init(ent.model);
 			ent.animations = LoadModelAnimations("resources/models/enemies/maintainer.glb", &ent.num_anims);
-			ent.anim_state.speed = 0.00133f;
+			ent.anim_state.speed = (1.0f / 100);
 
 		} break;
 

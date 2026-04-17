@@ -364,8 +364,6 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager) {
 void EntHandlerClose(EntityHandler *handler) {
 	for(int i = 0; i < handler->count; i++) {
 		anim_Close(&handler->ents[i].anim_state);
-		if(handler->ents[i].animations)
-			UnloadModelAnimations(handler->ents[i].animations, handler->ents[i].anim_count);
 	}
 
 	if(handler->ents) 

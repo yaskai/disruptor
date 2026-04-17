@@ -304,7 +304,7 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 		reload_active = true;
 
 	if(reload_active)
-		PlayerGunReload(player_gun, 1);
+		PlayerGunReload(player_gun, dt);
 }
 
 void PlayerGunUpdatePistol(PlayerGun *player_gun, float dt) {
@@ -729,11 +729,13 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 		reload_active = true;
 	}
 
+	/*
 	if(!reload_active) {
 		anim_states[curr_gun->id].loop_count = 0;
 		anim_states[curr_gun->id].curr_frame = 0;
 		anim_Apply(&anim_states[curr_gun->id], &models[curr_gun->id], &anims[curr_gun->id]);
 	}
+	*/
 }
 
 void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
@@ -801,6 +803,7 @@ void PlayerGunReload(PlayerGun *player_gun, float dt) {
 		reload_active = true;
 
 		return;
+
 	} else {
 		anim_states[curr_gun->id].loop_count = 0;
 		anim_states[curr_gun->id].curr_frame = 0;
