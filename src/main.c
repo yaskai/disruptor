@@ -23,6 +23,18 @@ unsigned int plat_flags[3] = {
 	(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT)
 };
 
+void StartupScreen(Config *conf, Game *game) {
+	BeginDrawing();
+	ClearBackground(BLACK);
+
+	// * TODO:
+	// Add title, logo, etc. here:
+
+	DrawText("...", 32, 0, 80, WHITE);
+
+	EndDrawing();
+}
+
 void GameTick(bool *exit, Game *game);
 void OnExit(Config *conf, Game *game);
 
@@ -49,6 +61,9 @@ int main() {
 		conf.window_height = GetMonitorHeight(monitor);
 	
 	InitWindow(conf.window_width, conf.window_height, "DISRUPTOR");
+	//SetTargetFPS(60);
+
+	StartupScreen(&conf, &game);
 
 	GameRenderSetup(&game);
 
@@ -60,8 +75,6 @@ int main() {
 	// Disable cursor,
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
-
-	pthread_t load_trhead;
 
 	//GameLoadScene(&game, "resources/maps/06");
 	//GameLoadScene(&game, "resources/maps/07");

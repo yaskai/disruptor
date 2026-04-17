@@ -14,7 +14,7 @@ AnimState anim_Init(Model model) {
 
 	anim_state.acc = 0.0f;
 
-	anim_state.speed = 0.166f;
+	anim_state.speed = 0.766f;
 
 	return anim_state;
 }
@@ -25,19 +25,19 @@ void anim_Close(AnimState *anim_state) {
 }
 
 void anim_Update(AnimState *anim_state, ModelAnimation *anims, float dt) {
-	anim_state->acc -= dt;
-	if(anim_state->acc > 0.0f) {
-		return;
-	}
+	anim_state->acc += dt;
 
-	int next = anim_state->curr_frame + 1;
-	if(next >= anims[anim_state->anim_id].frameCount) {
-		next = 0;
-		anim_state->loop_count++;
-	}
+	while(anim_state->acc >= anim_state->speed) {
+		anim_state->acc -= anim_state->speed;
+		int next = anim_state->curr_frame + 1;
+		
+		if(next >= anims[anim_state->anim_id].frameCount) {
+			next = 0;
+			anim_state->loop_count++;
+		}
 
-	anim_state->curr_frame = next; 
-	anim_state->acc = anim_state->speed;
+		anim_state->curr_frame = next; 
+	}
 }
 
 void anim_Apply(AnimState *anim_state, Model *model, ModelAnimation *anims) {
