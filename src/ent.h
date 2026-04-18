@@ -6,6 +6,7 @@
 #include "ai.h"
 #include "v_effect.h"
 #include "anim.h"
+#include "audioplayer.h"
 
 #ifndef ENT_H_
 #define ENT_H_
@@ -245,8 +246,7 @@ typedef struct {
 	CheckPointList checkpoint_list;
 
 	vEffect_Manager *effect_manager;
-
-	Shader holo_shader;
+	AudioPlayer *ap;
 
 	Vector3 player_start;
 
@@ -269,7 +269,7 @@ typedef struct {
 
 void LoadEntityBaseModels(EntityHandler *handler);
 
-void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager);
+void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, AudioPlayer *ap);
 void EntHandlerClose(EntityHandler *handler);
 
 void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt);

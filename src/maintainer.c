@@ -2,6 +2,18 @@
 #include "raymath.h"
 #include "ent.h"
 #include "ai.h"
+#include "audioplayer.h"
+
+char *maintainer_step_sounds[8] = {
+	"metal_steps01",
+	"metal_steps02",
+	"metal_steps03",
+	"metal_steps04",
+	"metal_steps05",
+	"metal_steps06",
+	"metal_steps07",
+	"metal_steps08",
+};
 
 void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
 	comp_Ai *ai = &ent->comp_ai;	
@@ -68,6 +80,15 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ct->forward = Vector3Lerp(ct->forward, Vector3Normalize(ct->velocity), 10*dt);
 		ct->forward.z = 0;
 		ct->forward = Vector3Normalize(ct->forward);
+
+	}
+
+	if(ent->anim_state.anim_id == 1) {
+		if(ent->anim_state.curr_frame % (32 + ent->id) == 0) {
+			int sfx_id = GetRandomValue(0, 7); 
+			AP_SetSoundPosition(handler->ap, maintainer_step_sounds[sfx_id], ct->position, 0);
+			AP_RequestSound(handler->ap, maintainer_step_sounds[sfx_id]);
+		}
 	}
 
 	if(ai->task_state.task_id == TASK_FACE_DIR) {

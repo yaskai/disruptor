@@ -3,6 +3,7 @@
 #include "ent.h"
 #include "v_effect.h"
 #include "config.h"
+#include "audioplayer.h"
 
 #ifndef PLAYER_GUN_H_
 #define PLAYER_GUN_H_
@@ -23,7 +24,8 @@ void PlayerGunInit(
 	MapSection *sect,
 	vEffect_Manager *effect_manager,
 	Config *conf,
-	Camera3D *world_cam
+	Camera3D *world_cam,
+	AudioPlayer *ap
 );
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt);

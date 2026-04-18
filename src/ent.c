@@ -312,15 +312,10 @@ OnHitFunc on_hit_funcs[] = {
 int shader_holo_t_loc;
 void LoadEntityShaders(EntityHandler *handler) {
 	char *prefix = "resources/shaders";
-	handler->holo_shader = LoadShader(TextFormat("%s/lit_v.glsl", prefix), TextFormat("%s/holo_f.glsl", prefix));
-
-	shader_holo_t_loc = GetShaderLocation(handler->holo_shader, "time");
 }
 
 void UpdateEntityShaders(EntityHandler *handler) {
 	float t = GetTime();
-
-	SetShaderValue(handler->holo_shader, shader_holo_t_loc, &t, SHADER_UNIFORM_FLOAT);
 }
 
 void LoadEntityBaseModels(EntityHandler *handler) {
@@ -339,7 +334,9 @@ void LoadEntityBaseAnims() {
 Model projectile_models[4];
 
 
-void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager) {
+void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, AudioPlayer *ap) {
+	handler->ap = ap;
+
 	handler->count = 0;
 	handler->capacity = 128;
 	handler->ents = calloc(handler->capacity, sizeof(Entity));
@@ -386,8 +383,6 @@ void EntHandlerClose(EntityHandler *handler) {
 
 	if(handler->checkpoint_list.cells)
 		free(handler->checkpoint_list.cells);
-
-	UnloadShader(handler->holo_shader);
 }
 
 // **
@@ -1005,9 +1000,20 @@ void OnHitEnt(Entity *ent, short damage, Vector3 bullet_pos) {
 }
 
 // Maintainer hit
+char *maintainer_hit_sounds[4] = { "metal3", "metal4", "metal5", "metal7" };
 void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
+	
+	int sfx_id = GetRandomValue(0, 3);
+
+	Vector3 to_player = Vector3Subtract(ptr_handler_self->ents[ptr_handler_self->player_id].comp_transform.position, ct->position);
+	to_player = Vector3Normalize(to_player);
+
+	AP_SetSoundPosition(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], ct->position, 0);
+	//AP_SetSoundDir(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], to_player, 0);
+
+	AP_RequestSound(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id]);
 
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
 		ent->comp_health.amount = 0;
@@ -1021,9 +1027,6 @@ void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos) {
 
 	if(ent->comp_health.amount <= 0)
 		ai->state = STATE_DEAD;
-
-	Vector3 to_player = Vector3Subtract(ptr_handler_self->ents[ptr_handler_self->player_id].comp_transform.position, ct->position);
-	to_player = Vector3Normalize(to_player);
 
 	Vector3 prev_wish = ai->wish_dir;
 	float prev_speed = ai->speed;

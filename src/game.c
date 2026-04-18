@@ -48,7 +48,6 @@ void GameInit(Game *game, Config *conf) {
 	InputInit(&game->input_handler);
 	game->input_handler.mouse_sensitivity = game->conf->mouse_sensitivity * 0.0001f;
 
-	//SetLogState(true);
 	SetLogState(false);
 
 	game->flags = 0;
@@ -101,10 +100,14 @@ void GameRenderSetup(Game *game) {
 	SetTextureFilter(game->render_target_debug.texture, TEXTURE_FILTER_TRILINEAR);
 
 	vEffectsInit(&game->effect_manager);
-	EntHandlerInit(&game->ent_handler, &game->effect_manager);
+	EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 
 	mat_default = LoadMaterialDefault();
 	mat_default.maps[MATERIAL_MAP_DIFFUSE].color = ColorAlpha(BLUE, 0.25f);
+}
+
+void GameAudioSetup(Game *game) {
+	AP_Init(&game->audio_player, &game->camera);
 }
 
 void GameLoadScene(Game *game, char *path) {
@@ -156,7 +159,8 @@ void GameLoadScene(Game *game, char *path) {
 		&game->test_section,
 		&game->effect_manager,
 		game->conf,
-		&game->camera
+		&game->camera,
+		&game->audio_player
 	);
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -210,6 +214,7 @@ void GameUpdate(Game *game, float dt) {
 	PlayerGunUpdate(&game->player_gun, dt);
 
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
+	AP_Update(&game->audio_player, dt);
 }
 
 #define DEBUG_ENABLE			0x01
@@ -349,8 +354,6 @@ void GameDraw(Game *game, float dt) {
 	rt_src = (Rectangle) { 0, 0, game->render_target2D.texture.width, -game->render_target2D.texture.height };
 	rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
-
-	//PlayerDebugText(&game->ent_handler.ents[game->ent_handler.player_id]);
 
 	if(IsKeyPressed(KEY_T))
 		debug_draw_flags ^= DEBUG_DRAW_BIG;

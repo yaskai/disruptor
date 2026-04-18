@@ -10,11 +10,11 @@ enum PLATFORMS : u8 {
 	WIN64	= 1,
 	MACOS	= 2
 }; 
-u8 platform = WIN64;
+u8 platform = LINUX;
 
 unsigned int plat_flags[3] = {
 	// Linux
-	(FLAG_VSYNC_HINT),						
+	(FLAG_VSYNC_HINT | FLAG_FULLSCREEN_MODE),						
 	
 	// Windows
 	(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_MAXIMIZED | FLAG_VSYNC_HINT),		
@@ -65,6 +65,7 @@ int main() {
 	StartupScreen(&conf, &game);
 
 	GameRenderSetup(&game);
+	GameAudioSetup(&game);
 
 	// Disable exit key (raylib defaults to escape key)
 	// * NOTE: 
@@ -75,16 +76,9 @@ int main() {
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
 
-	float start_t = GetTime();
-
 	//GameLoadScene(&game, "resources/maps/06");
 	//GameLoadScene(&game, "resources/maps/07");
 	GameLoadScene(&game, "resources/maps/08");
-
-	float end_t = GetTime();
-
-	float load_total = end_t - start_t;
-	printf("t:%f\n", load_total);
 
 	// Run main game loop
 	bool exit = false;

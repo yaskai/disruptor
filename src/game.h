@@ -6,6 +6,7 @@
 #include "player_gun.h"
 #include "v_effect.h"
 #include "../include/num_redefs.h"
+#include "audioplayer.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -14,6 +15,8 @@
 #define FLAG_LOAD_COMPLETE 	0x02
 
 typedef struct {
+	AudioPlayer audio_player;
+
 	MapSection test_section;
 
 	EntityHandler ent_handler;
@@ -41,6 +44,8 @@ void GameInit(Game *game, Config *conf);
 void GameClose(Game *game);
 
 void GameRenderSetup(Game *game);
+void GameAudioSetup(Game *game);
+
 void GameLoadScene(Game *game, char *path);
 
 void GameUpdate(Game *game, float dt);

@@ -5,11 +5,15 @@
 #ifndef AUDIOPLAYER_H_
 #define AUDIOPLAYER_H_
 
+#define MAX_ACTIVE_SFX	16
+
 typedef struct {
 	Camera3D *camera;
 
 	HashMap sound_hashmap;
 	HashMap track_hashmap;
+
+	int sound_stack[MAX_ACTIVE_SFX];
 
 	int sound_count;
 	int track_count;
@@ -25,6 +29,9 @@ void AP_LoadNeeded(AudioPlayer *ap, char *dir);
 
 #define MODE_SOUND	0
 #define MODE_TRACK	1
-void AP_SetSoundPosition(AudioPlayer *ap, char *name, Vector3 pos, float max_dist, short mode);
+void AP_SetSoundPosition(AudioPlayer *ap, char *name, Vector3 pos, short mode);
+void AP_SetSoundDir(AudioPlayer *ap, char *name, Vector3 dir, short mode);
+
+void AP_RequestSound(AudioPlayer *ap, char *name);
 
 #endif

@@ -7,6 +7,7 @@
 #include "ent.h"
 #include "v_effect.h"
 #include "config.h"
+#include "audioplayer.h"
 
 #define USE_MWHEEL (true)
 
@@ -53,6 +54,7 @@ typedef struct {
 	vEffect_Manager *effect_manager;
 	Config *conf;
 	Camera3D *world_cam;
+	AudioPlayer *ap;
 
 } PlayerGunRefs;
 PlayerGunRefs gun_refs = {0};
@@ -118,6 +120,18 @@ ModelAnimation anims[4];
 AnimState anim_states[4];
 
 bool reload_active = false;
+bool reload_sound_set = false;
+
+char *gun_shoot_sounds[4][3] = {
+	// Disruptor
+	{ "" },					
+	// Revolver
+	{ "pistol", "pistol2", "pistol3" },
+	// Pistol
+	{ "" },
+	// Pistol
+	{ "" },
+};
 
 enum CROSSHAIR_IDS : short {
 	CROSSHAIR_DEFAULT 		= 0,
@@ -145,10 +159,12 @@ void PlayerGunInit(
 	MapSection *sect,
 	vEffect_Manager *effect_manager,
 	Config *conf,
-	Camera3D *world_cam
+	Camera3D *world_cam,
+	AudioPlayer *ap
 	) 
 {
 	gun_refs.world_cam = world_cam;
+	gun_refs.ap = ap;
 
 	player_gun->cam = (Camera3D) {
 		.position = (Vector3) { 0, 0, -1 },
@@ -300,11 +316,14 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 	if(player_gun->current_gun == WEAP_DISRUPTOR)
 		return;
 
-	if(IsKeyPressed(KEY_R) && curr_gun->ammo > 0) 
+	if(IsKeyPressed(KEY_R) && curr_gun->ammo > 0 && !reload_active) { 
 		reload_active = true;
+		reload_sound_set = false;
+	}
 
-	if(reload_active)
+	if(reload_active) {
 		PlayerGunReload(player_gun, dt);
+	}
 }
 
 void PlayerGunUpdatePistol(PlayerGun *player_gun, float dt) {
@@ -668,14 +687,19 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	if(reload_active)
 		return;
 
-	if(curr_gun->in_clip <= 0)
+	if(curr_gun->in_clip <= 0) {
+		AP_RequestSound(gun_refs.ap, "outofammo");
 		return;
+	} 
 
 	if(curr_gun->cooldown > 0)
 		return;
 
 	if(gun_angle > REVOLVER_ANGLE_REST + 1)
 		return;
+
+	int sfx_id = GetRandomValue(0, 1);
+	AP_RequestSound(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id]);
 
 	recoil_add = false;
 	recoil = 90 + (GetRandomValue(1, 5) * 0.1f);
@@ -726,6 +750,9 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	if(curr_gun->in_clip <= 0 && curr_gun->ammo > 0) {
 		curr_gun->in_clip = 0;
 		//PlayerGunReload(player_gun, 1);
+		if(!reload_active) 
+			AP_RequestSound(gun_refs.ap, "outofammo");
+
 		reload_active = true;
 	}
 
@@ -802,6 +829,12 @@ void PlayerGunReload(PlayerGun *player_gun, float dt) {
 
 		reload_active = true;
 
+		if(!reload_sound_set) {
+			AP_SetSoundPosition(gun_refs.ap, "rev_reload", gun_refs.world_cam->position, 0);
+			AP_RequestSound(gun_refs.ap, "rev_reload");
+			reload_sound_set = true;
+		}
+
 		return;
 
 	} else {
@@ -832,7 +865,9 @@ void PlayerGunReload(PlayerGun *player_gun, float dt) {
 	//curr_gun->reload_timer = curr_gun->reload_time_amnt;
 
 	curr_gun->reload_timer = 0;
+
 	reload_active = false;
+	reload_sound_set = false;
 }
 
 void SendAmmoPickupEvent(int pickup_type) {
