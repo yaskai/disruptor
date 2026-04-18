@@ -173,7 +173,11 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	weap->cooldown = 0.055f;
 	weap->ammo--;
 
-	if(weap->ammo % 2 == 0)
-		AP_ReqNearBulletSound(handler->ap, trail_end, dir);
+	if(weap->ammo % 2 == 0) {
+		Ray ray = (Ray) { .position = trace_start, .direction = dir };
+		RayCollision near_coll = GetRayCollisionSphere(ray, handler->ents[handler->player_id].comp_transform.position, 96);
+		if(near_coll.hit)
+			AP_ReqNearBulletSound(handler->ap, near_coll.point, dir);
+	}
 }
 

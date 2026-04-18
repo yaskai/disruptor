@@ -7,6 +7,27 @@
 
 #define MAX_ACTIVE_SFX	16
 
+typedef struct { 
+	float room_size;
+	float damping;	
+	float width;
+	float wet;
+	float dry;
+
+} dsp_preset_vals;
+
+
+enum DSP_PRESETS : u8 {
+	DSP_DEFAULT			= 0,
+	DSP_SMALL_ROOM		= 1
+}; 
+
+typedef struct {
+	int leaf;
+	u8 preset; 
+
+} DspNode;
+
 typedef struct {
 	Camera3D *camera;
 
@@ -40,5 +61,8 @@ void AP_ReqNearBulletSound(AudioPlayer *ap, Vector3 pos, Vector3 dir);
 void AP_ReqSoundRandPitch(AudioPlayer *ap, char *name, float min, float max);
 
 void AP_ReqMaintainerWalkSound(AudioPlayer *ap, Vector3 pos);
+
+void AP_SetDsp(AudioPlayer *ap, u8 preset_id);
+void AP_BlendDsp(AudioPlayer *ap, float dt, float speed, u8 preset_id);
 
 #endif

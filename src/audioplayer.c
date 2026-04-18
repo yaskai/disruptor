@@ -7,9 +7,38 @@
 #include "audioplayer.h"
 #include "../include/miniaudio.h" 
 #include "../include/log_message.h"
+//#include "../include/extras/nodes/ma_reverb_node/ma_reverb_node.h"
+#include "../include/ma_reverb_node.h"
+
+#define DEVICE_FORMAT       ma_format_f32
+
+static dsp_preset_vals presets[] = {
+	[DSP_DEFAULT] = {
+		.room_size = 0.1f,
+		.damping = 0.9f,
+		.wet = 0.02f,
+		.dry = 1.0f
+	},	
+
+	[DSP_SMALL_ROOM] = {
+		.room_size = 0.55,
+		.damping = 0.4f,
+		.width = 0.8f,
+		.wet = 0.55f,
+		.dry = 1.0f
+	},
+};
+
+ma_node_graph _ma_graph;
+
+ma_audio_buffer_ref supply_data;
+ma_data_source_node supply_node; 
 
 ma_engine _ma_engine;
 ma_sound *sounds;
+
+ma_reverb_node rev_node;
+ma_reverb_node_config rev_conf;
 
 char *bullet_near_sounds[5] = {
 	"bullet_near_00",
@@ -41,6 +70,12 @@ void AP_Init(AudioPlayer *ap, Camera3D *camera) {
 
 	ma_engine_listener_set_enabled(&_ma_engine, 0, MA_TRUE);
 	ma_engine_listener_set_world_up(&_ma_engine, 0, 0, 0, 1);
+
+	rev_conf = ma_reverb_node_config_init(2, ma_engine_get_sample_rate(&_ma_engine));
+	ma_reverb_node_init(ma_engine_get_node_graph(&_ma_engine), &rev_conf, NULL, &rev_node);
+	ma_node_attach_output_bus(&rev_node, 0, ma_engine_get_endpoint(&_ma_engine), 0);
+
+	AP_SetDsp(ap, DSP_DEFAULT);
 
 	AP_LoadNeeded(ap, "resources/audio/sfx");
 }
@@ -82,7 +117,7 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "rev_reload")], 	MA_FALSE);
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "disrupt")], 		MA_FALSE);
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "recall")], 		MA_FALSE);
-	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "recall1")], 		MA_FALSE);
+	//ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "recall1")], 		MA_FALSE);
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "plr_step1")], 	MA_FALSE);
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")],	MA_FALSE);
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")],	MA_FALSE);
@@ -92,6 +127,12 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 		ma_sound_set_max_distance(&sounds[i], 2500.0f);
 		ma_sound_set_rolloff(&sounds[i], 1.0f);
 		ma_sound_set_directional_attenuation_factor(&sounds[i], 0.5f);
+
+		//ma_node_detach_output_bus(&sounds[i], 0);
+		//ma_node_attach_output_bus(&sounds[i], 0, &rev_node, 0);
+
+		ma_node_attach_output_bus(&sounds[i], 0, &rev_node, 0);
+		//ma_node_attach_output_bus(&sounds[i], 0, ma_engine_get_endpoint(&_ma_engine), 0);
 	}
 
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "recall3")], 16.0f);
@@ -138,6 +179,13 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "recall")], 16.0f);
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "throw_bug")], 16.0f);
 
+	ma_sound_set_looping(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], MA_TRUE);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 32.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 64.0f);
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 0.1f);
+	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 3.5f);
+	ma_sound_start(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")]);
+
 	for(int i = 0; i < 5; i++) {
 		ma_sound *sound = &sounds[HashFetch(&ap->sound_hashmap, bullet_near_sounds[i])];
 
@@ -182,7 +230,6 @@ void AP_RequestSound(AudioPlayer *ap, char *name) {
 	ma_sound_start(&sounds[id]);
 }
 
-
 void AP_ReqSoundRandPitch(AudioPlayer *ap, char *name, float min, float max) {
 	ma_sound *sound = &sounds[HashFetch(&ap->sound_hashmap, name)];	
 
@@ -193,5 +240,27 @@ void AP_ReqSoundRandPitch(AudioPlayer *ap, char *name, float min, float max) {
 	ma_sound_set_pitch(sound, pitch);
 
 	AP_RequestSound(ap, name);
+}
+
+void AP_SetDsp(AudioPlayer *ap, u8 preset_id) {
+	verblib *verb = &rev_node.reverb;
+	dsp_preset_vals *preset = &presets[preset_id];
+
+	verblib_set_room_size(verb, preset->room_size);
+	verblib_set_damping(verb, preset->damping);
+	verblib_set_width(verb, preset->width);
+	verblib_set_wet(verb, preset->wet);
+	verblib_set_dry(verb, preset->dry);
+}
+
+void AP_BlendDsp(AudioPlayer *ap, float dt, float speed, u8 preset_id) {
+	verblib *verb = &rev_node.reverb;
+	dsp_preset_vals *preset = &presets[preset_id];
+
+	verblib_set_room_size(verb, Lerp(verblib_get_room_size(verb), preset->room_size, dt * speed));
+	verblib_set_damping(verb, Lerp(verblib_get_damping(verb), preset->damping, dt * speed));
+	verblib_set_width(verb, Lerp(verblib_get_width(verb), preset->width, dt * speed));
+	verblib_set_wet(verb, Lerp(verblib_get_wet(verb), preset->wet, dt * speed));
+	verblib_set_dry(verb, Lerp(verblib_get_dry(verb), preset->dry, dt * speed));
 }
 

@@ -442,6 +442,9 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	render_list.count = 0;
 	Vector3 view_dir = player_ent->comp_transform.forward;
 
+	float ff_closest_dist = FLT_MAX;
+	AP_SetSoundPosition(handler->ap, "ff_loop", Vector3Scale(Vector3One(), FLT_MAX), 1);
+
 	// Manage brush entity flags
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];
@@ -449,15 +452,23 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		if(!ent->bsp_model)
 			continue;
 
+
 		if(!(ent->flags & ENT_ACTIVE)) {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
 			sect->bvh_hullgroups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
 		} else {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags |=  HULLGROUP_ACTIVE;
 			sect->bvh_hullgroups[ent->bsp_model].flags |= HULLGROUP_ACTIVE;
+
+			if(ent->type == ENT_FORCEFIELD) {
+				float dist = Vector3Distance(player_ent->comp_transform.position, BoxCenter(GetModelBoundingBox(ent->model)));
+				if(dist < ff_closest_dist) {
+					AP_SetSoundPosition(handler->ap, "ff_loop", BoxCenter(GetModelBoundingBox(ent->model)), 1);
+					ff_closest_dist = dist;
+				}
+			}
 		}
 	}
-
 
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *ent = &handler->ents[i];

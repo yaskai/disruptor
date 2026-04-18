@@ -10,7 +10,7 @@
 #include "player_gun.h"
 #include "pm.h"
 
-#define PLAYER_MAX_PITCH (89.0f * DEG2RAD)
+#define PLAYER_MAX_PITCH (88.0f * DEG2RAD)
 #define PLAYER_SPEED 190.0f
 #define PLAYER_MAX_SPEED 230.0f
 #define PLAYER_MAX_VEL 270.0f
@@ -1076,6 +1076,12 @@ void pm_AirFriction(comp_Transform *ct, float dt) {
 	ct->velocity.y = vel.y;
 }
 
+char *plr_hit_sfx[] = {
+	"player_hit",
+	"player_hit1",
+	"player_hit2"
+};
+
 // Take damage
 void OnHitPlayer(Entity *ent, short damage, Vector3 bullet_pos) {
 	comp_Health *health = &ent->comp_health;
@@ -1085,6 +1091,11 @@ void OnHitPlayer(Entity *ent, short damage, Vector3 bullet_pos) {
 	ct->velocity.y *= (0.5f);
 
 	hurt_frame = true;
+
+	int sfx_id = GetRandomValue(0, 2);
+
+	AP_SetSoundPosition(ptr_ent_handler->ap, plr_hit_sfx[sfx_id], ct->position, 0);
+	AP_ReqSoundRandPitch(ptr_ent_handler->ap, plr_hit_sfx[sfx_id], 90, 110);
 }
 
 void SpawnPlayer(Entity *ent, Vector3 position, Vector3 fwd) {

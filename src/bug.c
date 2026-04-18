@@ -133,12 +133,16 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		*bounce = 0;
 	}
 
+	/*
 	Vector3 h_fwd = Vector3Normalize( (Vector3) { enemy_ent->comp_transform.forward.x, enemy_ent->comp_transform.forward.y, 0 } );
 	float h_add = (ct->position.z - enemy_ent->id > 64.0f) ? 16 : 8;
 
 	Vector3 targ_point = (enemy_ent->id == handler->player_id) 
 		? Vector3Add(enemy_ent->comp_transform.position, Vector3Scale(h_fwd, h_add))
 		: enemy_ent->comp_transform.position;
+	*/
+
+	Vector3 targ_point = enemy_ent->comp_transform.position;
 
 	Vector3 to_enemy = Vector3Subtract( targ_point, ct->position );	
 	float d = Vector3Length(to_enemy);
@@ -636,8 +640,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		// Recall
 		if(can_recall) {
 			if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-				AP_SetSoundPosition(handler->ap, "recall3", ct->position, 0);
-				AP_RequestSound(handler->ap, "recall3");
+				AP_SetSoundPosition(handler->ap, "recall1", ct->position, 0);
+				AP_RequestSound(handler->ap, "recall1");
 
 				bug_bounce = 0;
 				bug_target_picked = true;
