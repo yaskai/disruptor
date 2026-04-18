@@ -13,6 +13,8 @@ typedef struct {
 
 	u16 id;
 
+	u8 flags;
+
 } NavNode;
 
 typedef struct {

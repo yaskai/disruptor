@@ -79,6 +79,10 @@ bool crouch = false;
 
 float cam_zmod = 16.0f;
 
+#define STEP_SOUND_INTERVAL 75.0f
+float step_sound_timer;
+char *plr_step_sounds[2] = { "plr_step2", "plr_step3" };
+
 // Check if player can stand back up when releasing crouch input
 bool pm_StandCheck(comp_Transform *ct) {
 	Bsp_Data *bsp = &ptr_sect->bsp_data;
@@ -382,6 +386,29 @@ void PlayerUpdate(Entity *player, float dt) {
 	Coords coords = Vec3ToCoords(player->comp_transform.position, &ptr_ent_handler->grid);
 	i16 cell_id = CellCoordsToId(coords, &ptr_ent_handler->grid);
 	CheckForPickups(player, ptr_ent_handler, cell_id);
+
+	Vector3 hvel = ( (Vector3) { player->comp_transform.velocity.x, player->comp_transform.velocity.y, 0 } );
+
+	if(player->comp_transform.on_ground) {
+		step_sound_timer -= dt * (Vector3Length(hvel));
+		if(step_frame) step_sound_timer = 0;
+
+		if(step_sound_timer <= 0) {
+			//int sfx_id = GetRandomValue(0, 1);
+
+			Vector3 feet_pos = Vector3Add(player->comp_transform.position, Vector3Scale(DOWN, 48.0f));
+			//AP_SetSoundPosition(ptr_ent_handler->ap, plr_step_sounds[sfx_id], feet_pos, 0);
+			//AP_ReqSoundRandPitch(ptr_ent_handler->ap, plr_step_sounds[sfx_id], 90, 110);
+			AP_SetSoundPosition(ptr_ent_handler->ap, "plr_step2", feet_pos, 0);
+
+			float pitch_min = 130 + (Vector3Length(hvel)*0.01f); 
+			float pitch_max = 150 + (Vector3Length(hvel)*0.005f); 
+
+			AP_ReqSoundRandPitch(ptr_ent_handler->ap, "plr_step2", pitch_min, pitch_max);
+
+			step_sound_timer = STEP_SOUND_INTERVAL;
+		}
+	}
 }
 
 void PlayerDraw(Entity *player) {

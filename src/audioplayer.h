@@ -29,9 +29,16 @@ void AP_LoadNeeded(AudioPlayer *ap, char *dir);
 
 #define MODE_SOUND	0
 #define MODE_TRACK	1
+
 void AP_SetSoundPosition(AudioPlayer *ap, char *name, Vector3 pos, short mode);
 void AP_SetSoundDir(AudioPlayer *ap, char *name, Vector3 dir, short mode);
+void AP_SetSoundPitch(AudioPlayer *ap, char *name, float pitch);
 
 void AP_RequestSound(AudioPlayer *ap, char *name);
+
+void AP_ReqNearBulletSound(AudioPlayer *ap, Vector3 pos, Vector3 dir);
+void AP_ReqSoundRandPitch(AudioPlayer *ap, char *name, float min, float max);
+
+void AP_ReqMaintainerWalkSound(AudioPlayer *ap, Vector3 pos);
 
 #endif

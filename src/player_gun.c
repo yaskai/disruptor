@@ -808,6 +808,9 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 	float angle = atan2f(-ct->forward.x, -ct->forward.y);
 	bug_ent->model.transform = MatrixRotateY(angle);
 	bug_ent->model.transform = MatrixMultiply(bug_ent->model.transform, MatrixRotateX(90*DEG2RAD));
+
+	AP_SetSoundDir(gun_refs.ap, "throw_bug", Vector3Negate(ct->forward), 0);
+	AP_RequestSound(gun_refs.ap, "throw_bug");
 }
 
 void PlayerGunReload(PlayerGun *player_gun, float dt) {

@@ -6,6 +6,7 @@
 #include "pm.h"
 #include "kbsp.h"
 #include "../include/log_message.h"
+#include "audioplayer.h"
 
 #define BUG_MAX_BOUNCES 			16
 #define BUG_MAX_RECALL_BOUNCES		16
@@ -394,6 +395,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
+	AP_SetSoundPosition(handler->ap, "bug_throw", ct->position, 0);
+
 	EntGrid *grid = &handler->grid;
 	Coords coords = Vec3ToCoords(ct->position, grid);
 	if(!CoordsInBounds(coords, grid)) {
@@ -599,6 +602,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 			// Bounce off enemy when it dies
 			if(do_recall) {
+				AP_RequestSound(handler->ap, "recall");
+
 				ai->state = BUG_LAUNCHED;
 				ai->targ_data.ent_id = -1;
 
@@ -631,6 +636,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		// Recall
 		if(can_recall) {
 			if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+				AP_SetSoundPosition(handler->ap, "recall3", ct->position, 0);
+				AP_RequestSound(handler->ap, "recall3");
+
 				bug_bounce = 0;
 				bug_target_picked = true;
 
@@ -725,6 +733,8 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 
 	ai->input_mask |= AI_INPUT_SELF_GLITCHED;
 	ai->state = STATE_STUNNED;
+
+	AP_RequestSound(handler->ap, "disrupt");
 
 	// * NOTE: 
 	// Magic number, change later based on entity type maybe??

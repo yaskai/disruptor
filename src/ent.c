@@ -1011,7 +1011,7 @@ void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos) {
 	to_player = Vector3Normalize(to_player);
 
 	AP_SetSoundPosition(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], ct->position, 0);
-	//AP_SetSoundDir(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], to_player, 0);
+	AP_SetSoundDir(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], to_player, 0);
 
 	AP_RequestSound(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id]);
 

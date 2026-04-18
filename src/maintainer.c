@@ -5,14 +5,14 @@
 #include "audioplayer.h"
 
 char *maintainer_step_sounds[8] = {
-	"metal_steps01",
-	"metal_steps02",
-	"metal_steps03",
-	"metal_steps04",
-	"metal_steps05",
-	"metal_steps06",
-	"metal_steps07",
-	"metal_steps08",
+	"metal_steps_01",
+	"metal_steps_02",
+	"metal_steps_03",
+	"metal_steps_04",
+	"metal_steps_05",
+	"metal_steps_06",
+	"metal_steps_07",
+	"metal_steps_08",
 };
 
 void MaintainerThink(Entity *ent, EntityHandler *handler, float dt) {
@@ -81,13 +81,64 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		ct->forward.z = 0;
 		ct->forward = Vector3Normalize(ct->forward);
 
+		Coords coords = Vec3ToCoords(ct->position, &handler->grid);
+		i16 cell_id = CellCoordsToId(coords, &handler->grid);
+		EntGridCell *cell = &handler->grid.cells[cell_id];
+
+		for(int i = 0; i < cell->ent_count; i++) {
+			Entity *other = &handler->ents[cell->ents[i]];
+
+			if(other->id == ent->id)
+				continue;
+
+			if(!(other->flags & ENT_ACTIVE))
+				continue;
+
+			if(!(other->flags & ENT_COLLIDERS))
+				continue;
+
+			if(other->comp_ai.state == STATE_DEAD)
+				continue;
+
+			if(other->type == ENT_PLAYER || other->type == ENT_DISRUPTOR || other->type == ENT_SWITCH)
+				continue;
+
+			//if(!CheckCollisionBoxes(ct->bounds, other->comp_transform.bounds))
+				//continue;
+
+			if(!CheckCollisionSpheres(ct->position, 32, other->comp_transform.position, 96))
+				continue;
+
+			Vector3 to_other = Vector3Normalize(Vector3Subtract(other->comp_transform.position, ct->position));
+			float into = Vector3DotProduct(to_other, ai->wish_dir);
+			if(into > 0) {
+				float prev_speed = ai->speed;
+				Vector3 prev_wish = ai->wish_dir;
+				ai->wish_dir = Vector3Subtract(ai->wish_dir, Vector3Scale(to_other, into));
+				ai->speed = Vector3Length(to_other) * 1.1f;
+				EntMove(ent, sect, handler, dt);
+				ai->speed = prev_speed;
+				ai->wish_dir = prev_wish;
+			}
+
+			break;
+		}
 	}
 
 	if(ent->anim_state.anim_id == 1) {
 		if(ent->anim_state.curr_frame % (32 + ent->id) == 0) {
 			int sfx_id = GetRandomValue(0, 7); 
 			AP_SetSoundPosition(handler->ap, maintainer_step_sounds[sfx_id], ct->position, 0);
-			AP_RequestSound(handler->ap, maintainer_step_sounds[sfx_id]);
+
+			//Vector3 sound_dir = Vector3Scale(Vector3Add(ct->forward, DOWN), 0.5f);
+			//sound_dir = Vector3Normalize(sound_dir);
+
+			Vector3 hpos = (Vector3) { ct->position.x, ct->position.y, 0 };
+			Vector3 player_hpos = handler->ents[handler->player_id].comp_transform.position;
+			player_hpos.z = 0;
+
+			if(Vector3Distance(hpos, player_hpos) <= 500.0f)
+				AP_RequestSound(handler->ap, maintainer_step_sounds[sfx_id]);
 		}
 	}
 

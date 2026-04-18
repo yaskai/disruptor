@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "../include/log_message.h"
+#include "audioplayer.h"
 
 // When turret is hit
 // * NOTE:
@@ -113,86 +114,6 @@ void TurretDraw(Entity *ent) {
 }
 
 void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
-	/*
-	comp_Weapon *weap = &ent->comp_weapon;
-	comp_Transform *ct = &ent->comp_transform;
-	comp_Ai *ai = &ent->comp_ai;
-
-	weap->cooldown -= dt;
-	if(weap->cooldown > 0)
-		return; 
-
-	if(!(ai->input_mask & AI_INPUT_SELF_GLITCHED)) {
-		// Not disrupted and see's player
-		if(ai->input_mask & AI_INPUT_SEE_PLAYER) {
-			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
-
-			Vector3 look_point = targ_ent->comp_transform.position;
-			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 5*dt));
-
-			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
-			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
-				ct->targ_look = Vector3Lerp(ct->targ_look, targ, 80*dt);
-				//ct->targ_look = targ;
-
-		} else {
-			// Disrupted
-			Entity *targ_ent = &handler->ents[ai->task_data.target_entity];
-
-			Vector3 look_point = ai->task_data.known_target_position;
-			look_point = Vector3Add(look_point, Vector3Scale(targ_ent->comp_transform.velocity, 10*dt));
-
-			Vector3 targ = Vector3Normalize(Vector3Subtract(look_point, ct->position));
-
-			if(Vector3DotProduct(targ, ct->start_forward) >= -0.1f)
-				ct->targ_look = targ;
-			else 
-				ct->targ_look = ct->start_forward;
-		}
-	} else {
-		ct->targ_look.z = Lerp(ct->targ_look.z, 0, dt * 5);
-
-		if(ent->comp_ai.disrupt_timer >= 99.9f)
-			weap->ammo = weap->clip_size;
-	}
-
-	if(weap->ammo <= 0) 
-		return;
-
-	Vector3 trace_start = ct->position;
-	trace_start.z += 12;
-	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
-
-	Vector3 dir = ct->forward;
-	float offset = GetRandomValue(-6, 6) * 0.01f;	
-
-	Vector3 right = Vector3CrossProduct(ct->forward, UP);
-	dir = Vector3Add(dir, Vector3Scale(right, offset));
-
-	offset = GetRandomValue(-6, 6) * 0.01f;
-	dir = Vector3Add(dir, Vector3Scale(UP, offset));
-
-	dir = Vector3Normalize(dir);
-
-	bool hit = false;
-	// * NOTE:
-	// Purpose of the dummy value is to cause no dammage on the first few shots, gives the player a warning for fairness.
-	bool dummy = (ent->comp_weapon.ammo > ent->comp_weapon.clip_size - 1);
-	Vector3 bullet_dest = TraceBullet(handler, sect, trace_start, dir, ent->id, &hit, dummy);
-
-	Vector3 trail_end = Vector3Add(trace_start, Vector3Scale(dir, Vector3Distance(trace_start, bullet_dest)));
-	if(!hit) {
-		trail_end = Vector3Add(trace_start, Vector3Scale(ct->forward, 2000.0f));
-	}
-	
-	// Add bullet trail effect
-	float dist = Vector3Distance(trace_start, trail_end);
-	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
-
-	weap->cooldown = 0.065f;
-	weap->ammo--;
-	*/
-
 	comp_Weapon *weap = &ent->comp_weapon;
 	comp_Transform *ct = &ent->comp_transform;
 
@@ -202,6 +123,22 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 
 	if(weap->ammo <= 0) 
 		return;
+
+	float sfx_pitch = GetRandomValue(145, 150) * 0.01f;
+
+	if(weap->ammo % 3 == 0) {
+		AP_SetSoundPosition(handler->ap, "turret_gun_00", ct->position, 0);
+		AP_SetSoundPitch(handler->ap, "turret_gun_00", sfx_pitch);
+		AP_RequestSound(handler->ap, "turret_gun_00");
+	} else if(weap->ammo % 2 == 0) {
+		AP_SetSoundPosition(handler->ap, "turret_gun_01", ct->position, 0);
+		AP_SetSoundPitch(handler->ap, "turret_gun_01", sfx_pitch);
+		AP_RequestSound(handler->ap, "turret_gun_01");
+	}  else {
+		AP_SetSoundPosition(handler->ap, "turret_gun_02", ct->position, 0);
+		AP_SetSoundPitch(handler->ap, "turret_gun_02", sfx_pitch);
+		AP_RequestSound(handler->ap, "turret_gun_02");
+	}
 
 	Vector3 trace_start = ct->position;
 	trace_start.z += 12;
@@ -235,5 +172,8 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 
 	weap->cooldown = 0.055f;
 	weap->ammo--;
+
+	if(weap->ammo % 2 == 0)
+		AP_ReqNearBulletSound(handler->ap, trail_end, dir);
 }
 
