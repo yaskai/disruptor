@@ -10,6 +10,7 @@
 #include "geo.h"
 #include "../include/log_message.h"
 #include "map.h"
+#include "rw_save.h"
 
 void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point);
 void EndScreen(Game *game, float dt);
@@ -250,6 +251,14 @@ void GameUpdate(Game *game, float dt) {
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
 	AP_Update(&game->audio_player, dt);
 	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
+
+	if(IsKeyPressed(KEY_ONE)) {
+		rw_WriteSave(&game->ent_handler, "test", (rw_GlobalData) {0} );
+	}
+
+	if(IsKeyPressed(KEY_TWO)) {
+		rw_ReadSave(&game->ent_handler, "test");
+	}
 }
 
 #define DEBUG_ENABLE			0x01
@@ -371,7 +380,7 @@ void RenderDebugLayer(Game *game) {
 }
 
 void GameDraw(Game *game, float dt) {
-	if(game->ent_handler.flags & AT_LEVEL_END) {
+	if((game->ent_handler.flags & AT_LEVEL_END) ^ (game->ent_handler.flags & AT_LEVEL_BACK)) {
 		BeginTextureMode(game->render_target2D);
 		DrawText("...", 32, 0, 80, BLACK);
 		EndTextureMode();
