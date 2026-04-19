@@ -123,8 +123,8 @@ count   lump name    byte size
      12 textures         635396
         lightdata             0
         visdata               0
-        entdata           31170
+        entdata           31168
 
-1.308s seconds elapsed
+1.312s seconds elapsed
 
 

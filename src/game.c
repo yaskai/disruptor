@@ -110,7 +110,7 @@ void GameAudioSetup(Game *game) {
 	AP_Init(&game->audio_player, &game->camera);
 }
 
-void GameLoadScene(Game *game, char *path) {
+void GameLoadScene(Game *game, char *path, u8 flags) {
 	game->flags &= ~FLAG_LOAD_COMPLETE;
 
 	SpawnList sl = (SpawnList) {0}; 
@@ -182,13 +182,18 @@ void GameLoadScene(Game *game, char *path) {
 	// -----------------------------------------------------------------------------------------------------------------
 
 	BugInit(&game->ent_handler.ents[game->ent_handler.bug_id], &game->ent_handler, &game->test_section);
-	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], game->ent_handler.player_start, game->ent_handler.player_start_fwd);
+
+	Vector3 player_pos = (flags & AT_LEVEL_BACK) ? game->ent_handler.player_ret : game->ent_handler.player_start;
+	Vector3 player_fwd = (flags & AT_LEVEL_BACK) ? game->ent_handler.player_ret_fwd : game->ent_handler.player_start_fwd;
+	//Vector3 player_pos = game->ent_handler.player_ret;
+	//Vector3 player_fwd = game->ent_handler.player_ret_fwd;
+	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], player_pos, player_fwd);
 
 	game->ent_handler.spawn_list.count = spawn_list.count;
 	game->ent_handler.spawn_list.arr = calloc(spawn_list.count, sizeof(EntSpawn));
 	memcpy(game->ent_handler.spawn_list.arr, spawn_list.arr, sizeof(EntSpawn) * spawn_list.count);
 
-	ReloadEntities(&game->ent_handler, &game->test_section, 0);
+	//ReloadEntities(&game->ent_handler, &game->test_section, 0);
 
 	// Setup checkpoints	
 	for(u16 i = 0; i < game->ent_handler.checkpoint_list.count; i++) {
@@ -216,7 +221,7 @@ void GameUpdate(Game *game, float dt) {
 
 		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 
-		GameLoadScene(game, path);
+		GameLoadScene(game, path, game->ent_handler.flags);
 
 		game->ent_handler.flags &= ~AT_LEVEL_END;
 	}
@@ -232,7 +237,7 @@ void GameUpdate(Game *game, float dt) {
 
 		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 
-		GameLoadScene(game, path);
+		GameLoadScene(game, path, (AT_LEVEL_BACK));
 
 		game->ent_handler.flags &= ~AT_LEVEL_BACK;
 	}

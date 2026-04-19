@@ -75,10 +75,10 @@ int main() {
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
 
-	//GameLoadScene(&game, "resources/maps/06");
-	//GameLoadScene(&game, "resources/maps/07");
-	GameLoadScene(&game, "resources/maps/08");
-	//GameLoadScene(&game, "resources/maps/09");
+	//GameLoadScene(&game, "resources/maps/06", 0);
+	//GameLoadScene(&game, "resources/maps/07", 0);
+	GameLoadScene(&game, "resources/maps/08", 0);
+	//GameLoadScene(&game, "resources/maps/09", 0);
 
 	// Run main game loop
 	bool exit = false;

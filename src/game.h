@@ -46,7 +46,7 @@ void GameClose(Game *game);
 void GameRenderSetup(Game *game);
 void GameAudioSetup(Game *game);
 
-void GameLoadScene(Game *game, char *path);
+void GameLoadScene(Game *game, char *path, u8 flags);
 
 void GameUpdate(Game *game, float dt);
 void GameDraw(Game *game, float dt);

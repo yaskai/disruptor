@@ -11031,7 +11031,7 @@
 "classname" "info_player_start"
 "origin" "-680 -108 40"
 "enum_id" "0"
-"angle" "270"
+"angle" "0"
 }
 // entity 188
 {
@@ -12146,10 +12146,10 @@
 }
 // entity 365
 {
-"classname" "info_player_start"
-"origin" "-624 -1264 -848"
+"classname" "info_player_return"
+"origin" "-2000 -1280 -848"
 "enum_id" "0"
-"angle" "180"
+"angle" "0"
 }
 // entity 366
 {

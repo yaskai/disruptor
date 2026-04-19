@@ -105,6 +105,21 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		return;
 	}
 
+	if(streq(spawn_point->classname, "info_player_return")) {
+		handler->player_ret = spawn_point->position;
+		handler->player_ret.z += BODY_VOLUME_MEDIUM.z * 0.5f;
+
+		Vector3 fwd = Vector3Zero();
+		fwd.x = sinf(spawn_point->angle*DEG2RAD);
+		fwd.y = cosf(spawn_point->angle*DEG2RAD);
+		fwd = Vector3Normalize(fwd);
+		handler->player_ret_fwd = fwd;
+
+		printf("return!\n");
+
+		return;
+	}
+
 	if(!strcmp(spawn_point->classname, "func_group")) {
 		//puts("skip func_group");
 		return;

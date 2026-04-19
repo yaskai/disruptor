@@ -87,6 +87,8 @@ void AP_Init(AudioPlayer *ap, Camera3D *camera) {
 	AP_SetDsp(ap, DSP_DEFAULT);
 
 	AP_LoadNeeded(ap, "resources/audio/sfx");
+
+	ma_engine_set_volume(&_ma_engine, 0.25f);
 }
 
 void AP_Close(AudioPlayer *ap) {

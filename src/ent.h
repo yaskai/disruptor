@@ -259,6 +259,9 @@ typedef struct {
 	Vector3 player_start;
 	Vector3 player_start_fwd;
 
+	Vector3 player_ret;
+	Vector3 player_ret_fwd;
+
 	float ai_tick;
 
 	int brush_ents_offset;
