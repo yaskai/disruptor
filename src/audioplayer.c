@@ -77,8 +77,11 @@ void AP_Init(AudioPlayer *ap, Camera3D *camera) {
 		MessageError("INIT FAILURE", "ma_engine_init()");
 	}
 
+	ma_engine_set_volume(&_ma_engine, 0.1f);
 	ma_engine_listener_set_enabled(&_ma_engine, 0, MA_TRUE);
 	ma_engine_listener_set_world_up(&_ma_engine, 0, 0, 0, 1);
+
+	//ma_engine_set_volume(&_ma_engine, 0.25f);
 
 	rev_conf = ma_reverb_node_config_init(2, ma_engine_get_sample_rate(&_ma_engine));
 	ma_reverb_node_init(ma_engine_get_node_graph(&_ma_engine), &rev_conf, NULL, &rev_node);
@@ -87,8 +90,6 @@ void AP_Init(AudioPlayer *ap, Camera3D *camera) {
 	AP_SetDsp(ap, DSP_DEFAULT);
 
 	AP_LoadNeeded(ap, "resources/audio/sfx");
-
-	ma_engine_set_volume(&_ma_engine, 0.25f);
 }
 
 void AP_Close(AudioPlayer *ap) {

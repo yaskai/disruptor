@@ -185,8 +185,6 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 
 	Vector3 player_pos = (flags & AT_LEVEL_BACK) ? game->ent_handler.player_ret : game->ent_handler.player_start;
 	Vector3 player_fwd = (flags & AT_LEVEL_BACK) ? game->ent_handler.player_ret_fwd : game->ent_handler.player_start_fwd;
-	//Vector3 player_pos = game->ent_handler.player_ret;
-	//Vector3 player_fwd = game->ent_handler.player_ret_fwd;
 	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], player_pos, player_fwd);
 
 	game->ent_handler.spawn_list.count = spawn_list.count;
@@ -218,6 +216,7 @@ void GameUpdate(Game *game, float dt) {
 
 		EntHandlerClose(&game->ent_handler);
 		MapSectionClose(&game->test_section);
+		SectFreeBrushData(&game->test_section);
 
 		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 
@@ -234,6 +233,7 @@ void GameUpdate(Game *game, float dt) {
 
 		EntHandlerClose(&game->ent_handler);
 		MapSectionClose(&game->test_section);
+		SectFreeBrushData(&game->test_section);
 
 		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 

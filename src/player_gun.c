@@ -213,7 +213,7 @@ void PlayerGunInit(
 
 	//sway_t = GetTime();
 
-	init_t = 1.0f;
+	init_t = 0.0f;
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
@@ -703,6 +703,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 		return;
 
 	int sfx_id = GetRandomValue(0, 1);
+	AP_SetSoundPitch(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id], GetRandomValue(80, 90) * 0.01f);
 	AP_RequestSound(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id]);
 
 	recoil_add = false;

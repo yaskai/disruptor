@@ -104,6 +104,7 @@ Model BrushToModel(Brush *brush, Bsp_Data *bsp, u8 *out_flags);
 void BrushTestView(BrushPool *brush_pool, Color color);
 
 MapSection BuildMapSect(char *file_path, SpawnList *spawn_list);
+void SectFreeBrushData(MapSection *sect);
 
 void InitNavGraph(MapSection *sect);
 void BuildNavGraph(MapSection *sect);

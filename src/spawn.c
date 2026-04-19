@@ -9,7 +9,7 @@
 #include "../include/log_message.h"
 
 void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph, Bsp_Data *bsp) {
-	if(!strcmp(spawn_point->classname, "worldspawn")) {
+	if(streq(spawn_point->classname, "worldspawn")) {
 		return;
 	}
 
@@ -53,11 +53,11 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		}
 	}
 
-	if(!strcmp(spawn_point->classname, "dsp_node")) {
+	if(streq(spawn_point->classname, "dsp_node")) {
 		return;
 	}
 
-	if(!strcmp(spawn_point->classname, "checkpoint")) {
+	if(streq(spawn_point->classname, "checkpoint")) {
 		if(handler->checkpoint_list.count + 1 >= handler->checkpoint_list.capacity) {
 
 			if(handler->checkpoint_list.capacity <= 0) {
@@ -84,7 +84,7 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		handler->checkpoint_list.angles[handler->checkpoint_list.count-1] = fwd;
 	}
 
-	if(!strcmp(spawn_point->classname, "info_player_start")) {
+	if(streq(spawn_point->classname, "info_player_start")) {
 		//puts("player_start");
 
 		handler->player_start = spawn_point->position;
@@ -115,17 +115,15 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		fwd = Vector3Normalize(fwd);
 		handler->player_ret_fwd = fwd;
 
-		printf("return!\n");
-
 		return;
 	}
 
-	if(!strcmp(spawn_point->classname, "func_group")) {
+	if(streq(spawn_point->classname, "func_group")) {
 		//puts("skip func_group");
 		return;
 	}
 
-	if(strcmp(spawn_point->classname, "func_forcefield") == 0) {
+	if(streq(spawn_point->classname, "func_forcefield")) {
 		spawn_point->ent_type = ENT_FORCEFIELD;
 	}
 

@@ -899,6 +899,15 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	return sect;
 }
 
+void SectFreeBrushData(MapSection *sect) {
+	for(int i = 0; i < rbrush_list.count; i++) {
+		UnloadModel(rbrush_list.render_brushes[i].model);
+	}
+
+	for(int i = 0; i < translucent_rbrush_list.count; i++)
+		UnloadModel(translucent_rbrush_list.render_brushes[i].model);
+}
+
 // This function basically just constructs edges between nodes that already exist
 void BuildNavGraph(MapSection *sect) {
 	NavGraph *navgraph = &sect->base_navgraph;
