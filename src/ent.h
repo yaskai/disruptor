@@ -34,12 +34,16 @@ typedef struct {
 typedef struct {
 	EntGridCell *cells;
 
+	char sect_next[16];
+	char sect_prev[16];
+
 	Vector3 origin;
 	Coords size;
 
 	i16 cell_count;	
 
-	i16 level_end;
+	i16 level_end;		// Cell that triggers loading next section
+	i16 level_back;		// Cell that triggers loading previous section
 
 } EntGrid;
 
@@ -237,6 +241,7 @@ typedef struct {
 
 // Entity handler state flags
 #define AT_LEVEL_END 	0x01
+#define AT_LEVEL_BACK	0x02
 
 typedef struct {
 	Model base_ent_models[16];
@@ -252,6 +257,7 @@ typedef struct {
 	AudioPlayer *ap;
 
 	Vector3 player_start;
+	Vector3 player_start_fwd;
 
 	float ai_tick;
 

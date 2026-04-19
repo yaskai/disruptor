@@ -20,6 +20,17 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		i16 id = CellCoordsToId(coords, grid);
 
 		grid->level_end = id;
+		memcpy(grid->sect_next, spawn_point->extra, strlen(spawn_point->extra));
+	}
+
+	if(streq(spawn_point->classname, "level_back")) {
+		EntGrid *grid = &handler->grid;
+
+		Coords coords = Vec3ToCoords(spawn_point->position, grid);
+		i16 id = CellCoordsToId(coords, grid);
+
+		grid->level_back = id;
+		memcpy(grid->sect_prev, spawn_point->extra, strlen(spawn_point->extra));
 	}
 
 	if(nav_graph) {
@@ -78,6 +89,12 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 
 		handler->player_start = spawn_point->position;
 		handler->player_start.z += BODY_VOLUME_MEDIUM.z * 0.5f;
+
+		Vector3 fwd = Vector3Zero();
+		fwd.x = sinf(spawn_point->angle*DEG2RAD);
+		fwd.y = cosf(spawn_point->angle*DEG2RAD);
+		fwd = Vector3Normalize(fwd);
+		handler->player_start_fwd = fwd;
 
 		u16 player_id = handler->count++;
 		handler->player_id = player_id;
@@ -431,6 +448,10 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 			if(streq(prop->key, "radius")) {
 				sscanf(prop->val, "%d", &spawn.radius);
+			}
+
+			if(streq(prop->key, "goto")) {
+				memcpy(spawn.extra, prop->val, strlen(prop->val));
 			}
 		}
 

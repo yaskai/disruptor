@@ -573,6 +573,10 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 		//ent->comp_health.amount = 0;
 		handler->flags |= AT_LEVEL_END;
 	}
+
+	if(cell_id == handler->grid.level_back) {
+		handler->flags |= AT_LEVEL_BACK;
+	}
 }
 
 // Take input, apply to velocity
@@ -1106,6 +1110,11 @@ void SpawnPlayer(Entity *ent, Vector3 position, Vector3 fwd) {
 
 	ent->comp_transform.pitch = asinf(fwd.z);
 	ent->comp_transform.yaw = atan2f(fwd.x, fwd.y);
+
+	ent->comp_transform.targ_look = fwd;
+
+	ptr_cam->position = ent->comp_transform.position;
+	ptr_cam->target = Vector3Add(ent->comp_transform.position, ent->comp_transform.forward);
 
 	cam_bob = 0;
 	cam_tilt = 0;

@@ -182,7 +182,7 @@ void GameLoadScene(Game *game, char *path) {
 	// -----------------------------------------------------------------------------------------------------------------
 
 	BugInit(&game->ent_handler.ents[game->ent_handler.bug_id], &game->ent_handler, &game->test_section);
-	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], game->ent_handler.player_start, Vector3Zero());
+	SpawnPlayer(&game->ent_handler.ents[game->ent_handler.player_id], game->ent_handler.player_start, game->ent_handler.player_start_fwd);
 
 	game->ent_handler.spawn_list.count = spawn_list.count;
 	game->ent_handler.spawn_list.arr = calloc(spawn_list.count, sizeof(EntSpawn));
@@ -206,8 +206,35 @@ void GameUpdate(Game *game, float dt) {
 		game->flags |= FLAG_EXIT_REQUEST;
 
 	if(game->ent_handler.flags & AT_LEVEL_END) {
-		EndScreen(game, dt);
-		return;
+		char *path_pref = "resources/maps/";
+		char path[255] = {'\0'};
+		memcpy(path, path_pref, strlen(path_pref));
+		memcpy(path + strlen(path), game->ent_handler.grid.sect_next, strlen(game->ent_handler.grid.sect_next));
+
+		EntHandlerClose(&game->ent_handler);
+		MapSectionClose(&game->test_section);
+
+		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
+
+		GameLoadScene(game, path);
+
+		game->ent_handler.flags &= ~AT_LEVEL_END;
+	}
+
+	if(game->ent_handler.flags & AT_LEVEL_BACK) {
+		char *path_pref = "resources/maps/";
+		char path[255] = {'\0'};
+		memcpy(path, path_pref, strlen(path_pref));
+		memcpy(path + strlen(path), game->ent_handler.grid.sect_prev, strlen(game->ent_handler.grid.sect_prev));
+
+		EntHandlerClose(&game->ent_handler);
+		MapSectionClose(&game->test_section);
+
+		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
+
+		GameLoadScene(game, path);
+
+		game->ent_handler.flags &= ~AT_LEVEL_BACK;
 	}
 
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
@@ -339,9 +366,16 @@ void RenderDebugLayer(Game *game) {
 }
 
 void GameDraw(Game *game, float dt) {
-	RenderMainLayer(game, dt);
-	RenderGunLayer(game);
-	RenderDebugLayer(game);
+	if(game->ent_handler.flags & AT_LEVEL_END) {
+		BeginTextureMode(game->render_target2D);
+		DrawText("...", 32, 0, 80, BLACK);
+		EndTextureMode();
+
+	} else {
+		RenderMainLayer(game, dt);
+		RenderGunLayer(game);
+		RenderDebugLayer(game);
+	}
 
 	// 2D Rendering
 	// 2D

@@ -10993,6 +10993,7 @@
 {
 "classname" "level_end"
 "origin" "-2328 -1288 -848"
+"goto" "09"
 }
 // entity 182
 {
@@ -12145,13 +12146,20 @@
 }
 // entity 365
 {
+"classname" "info_player_start"
+"origin" "-624 -1264 -848"
+"enum_id" "0"
+"angle" "180"
+}
+// entity 366
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 366
+// entity 367
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

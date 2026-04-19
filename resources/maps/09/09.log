@@ -1,0 +1,102 @@
+---- qbsp / ericw-tools 2.0.0-alpha10-72-g67e9fd3b-dirty ----
+
+--- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
+
+Input file: /home/kai/projects/disruptor/resources/maps/09/09.map
+Output file: /home/kai/projects/disruptor/resources/maps/09/09.bsp
+
+INFO: using built-in palette.
+      6 entities
+      6 unique textures
+     90 texinfos
+    440 unique planes
+
+INFO: world extents calculated to 5608 units
+    151 brushes
+    898 sides
+     45 side bevels
+
+            0 texture frames added
+Processing hull 0...
+      6 SKY brushes
+    145 SOLID brushes
+    151 brushes total
+    898 visible sides
+INFO: calculating BSP for 151 brushes with 898 sides
+    151 brushes
+    898 visible faces
+    611 nodes
+    611 expensive split nodes
+    612 leaves
+    185 SOLID leafs
+     79 SKY leafs
+    348 EMPTY leafs
+    612 leafs total
+    20 max tree height
+    12 avg tree height
+    3,116 tree portals
+    77 outside leaves
+    0 detail filled leafs
+    151 brushes
+    659 visible faces
+    239 non-visible faces
+    663 nodes
+    130 non-visible nodes
+    663 expensive split nodes
+    664 leaves
+    186 SOLID leafs
+     93 SKY leafs
+    385 EMPTY leafs
+    664 leafs total
+    22 max tree height
+    12 avg tree height
+    3,288 tree portals
+    120 outside leaves
+    0 detail filled leafs
+    3,288 tree portals
+    2,482 sides visible
+    1,337 makefaces
+      229 merged
+    1,456 subdivided
+    6 nodes pruned
+      358 player-occupiable leaves
+      358 clusters of leaves
+    1,060 vis portals
+    265 EMPTY leafs
+     93 SKY leafs
+    300 SOLID leafs
+    658 leafs total
+    21 max tree height
+    12 avg tree height
+    2,046 edges added by tjunctions
+    2,448 faces optimized through MWT
+    6,949 triangles computed from MWT
+      476 faces created via optimization of MWT triangles
+    6,466 edges
+    2,967 faces
+Processing hull 1...
+Processing hull 2...
+Writing 09.bsp as Quake BSP bsp29
+Wrote 09.bsp
+
+count   lump name    byte size 
+      1 models               64
+    336 planes             6720
+   3357 vertexes          40284
+    657 nodes             15768
+     74 texinfos           2960
+   2967 faces             59340
+   1575 clipnodes         12600
+    359 leafs             10052
+   3304 marksurfaces       6608
+   6467 edges             25868
+  12926 surfedges         51704
+      6 textures         298660
+        lightdata             0
+        visdata               0
+        entdata             631
+
+0.120s seconds elapsed
+
+

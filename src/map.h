@@ -47,6 +47,7 @@ typedef struct {
 
 typedef struct {
 	char classname[64];
+	char extra[16];
 
 	Vector3 position;
 	

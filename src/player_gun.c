@@ -152,6 +152,8 @@ bool freeze_frame = false;
 
 Font hud_font;
 
+void DrawSectionTransition();
+
 void PlayerGunInit(
 	PlayerGun *player_gun,
 	Entity *player,
@@ -428,6 +430,7 @@ void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt) {
 }
 
 void PlayerGunDraw(PlayerGun *player_gun) {
+	/*
 	if(gun_refs.handler->flags & AT_LEVEL_END) {
 		ClearBackground(ColorAlpha(BLACK, 0.85f));
 
@@ -460,6 +463,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 
 		return;
 	}
+	*/
 
 	if(gun_refs.player->comp_ai.state == STATE_DEAD)
 		return;
@@ -889,3 +893,31 @@ void SendAmmoPickupEvent(int pickup_type) {
 	}	
 }
 
+void DrawSectionTransition() {
+	DrawTextEx(
+		hud_font,
+		"MISSION STATUS: COMPLETE",
+		(Vector2) { 0, 0 },
+		80, 
+		1, 
+		PURPLE
+	);
+
+	DrawTextEx(
+		hud_font,
+		"PRESS [Y] TO PLAY AGAIN",
+		(Vector2) { 0, 100 },
+		80, 
+		1, 
+		PURPLE
+	);
+
+	DrawTextEx(
+		hud_font,
+		"PRESS [ESC] TO EXIT",
+		(Vector2) { 0, 200 },
+		80, 
+		1, 
+		PURPLE
+	);
+}

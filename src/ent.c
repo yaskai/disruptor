@@ -333,7 +333,6 @@ void LoadEntityBaseAnims() {
 
 Model projectile_models[4];
 
-
 void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, AudioPlayer *ap) {
 	handler->ap = ap;
 
@@ -1403,7 +1402,7 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 		}
 	}
 
-	Vector3 player_fwd = Vector3Zero();
+	Vector3 player_fwd = handler->player_start_fwd;
 
 	// Handle checkpoint logic
 	if(handler->checkpoint_list.active > -1) {
