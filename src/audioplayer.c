@@ -14,8 +14,9 @@
 
 static dsp_preset_vals presets[] = {
 	[DSP_DEFAULT] = {
-		.room_size = 0.1f,
+		.room_size = 0.8f,
 		.damping = 0.9f,
+		.width = 1.0f,
 		.wet = 0.02f,
 		.dry = 1.0f
 	},	
@@ -27,6 +28,14 @@ static dsp_preset_vals presets[] = {
 		.wet = 0.55f,
 		.dry = 1.0f
 	},
+
+	[DSP_OPEN] = {
+		.room_size = 0.9f,
+		.damping = 0.95f,
+		.width = 1.0f,
+		.wet = 0.04f,
+		.dry = 0.9f
+	}
 };
 
 ma_node_graph _ma_graph;
@@ -93,7 +102,6 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 
 	for(int i = 0; i < ap->sound_count; i++) {
 		ma_sound_init_from_file(&_ma_engine, path_list.paths[i], 0, NULL, NULL, &sounds[i]);
-		printf("%s\n", path_list.paths[i]);
 
 		char path[255] = {0};
 		memcpy(path, path_list.paths[i], strlen(path_list.paths[i]));

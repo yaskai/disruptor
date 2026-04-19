@@ -12,6 +12,7 @@
 #include "config.h"
 #include "rlgl.h"
 #include "tex_utils.h"
+#include "ent.h"
 
 #define PLANE_EPS 0.001f
 
@@ -1299,5 +1300,129 @@ void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
 		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
 	}
 	rlEnableDepthMask();
+}
+
+// Set up DSP preset nodes for each leaf in BSP 
+void DSP_AudioSetup(Bsp_Data *bsp, AudioPlayer *ap, SpawnList *spawn_list) {
+	// Unload existing preset nodes (if existing)
+	if(ap->ref_presets) 
+		free(ap->ref_presets);
+
+	// Allocate memory for nodes with zero values (DSP_DEFAULT) 
+	ap->num_ref_presets = bsp->num_leaves;	
+	ap->ref_presets = calloc(ap->num_ref_presets, 1);
+
+	// Iterate through spawn list, search for DSP nodes
+	for(int i = 0; i < spawn_list->count; i++) {
+		EntSpawn *spawn = &spawn_list->arr[i];
+
+		if(strcmp(spawn->classname, "dsp_node"))	
+			continue;
+
+		int leaf = Bsp_FindLeaf(bsp, spawn->position);
+
+		u8 type = ap->ref_presets[i];
+		switch(spawn->ent_type) {
+			case ENT_DSP_DEFAULT:
+				type = DSP_DEFAULT;
+				break;
+
+			case ENT_DSP_SMALL_ROOM:
+				type = DSP_SMALL_ROOM;
+				break;
+
+			case ENT_DSP_OPEN:
+				type = DSP_OPEN;
+				break;
+		}
+
+		ap->ref_presets[leaf] = type;
+
+		if(type > 0) {
+			BoundingBox sound_box = (BoundingBox) {
+				.min = Vector3Scale(Vector3One(), -32),
+				.max = Vector3Scale(Vector3One(),  32)
+			};
+			sound_box = BoxTranslate(sound_box, spawn->position);
+
+			BoxPoints points = BoxGetPoints(sound_box);
+
+			for(short j = 0; j < 8; j++) {
+				int subleaf = Bsp_FindLeaf(bsp, points.v[j]);
+				if(!Bsp_LeafVisible(bsp, leaf, subleaf))
+					continue;
+
+				ap->ref_presets[subleaf] = type;
+			}
+		}
+	}
+}
+
+void DSP_UpdateBlend(MapSection *sect, AudioPlayer *ap, Vector3 pos, float dt) {
+	//int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
+	//AP_BlendDsp(ap, dt, 1, ap->ref_presets[curr_leaf]);
+
+	int base_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
+	//AP_BlendDsp(ap, dt, 1, ap->ref_presets[base_leaf]);
+
+	BoundingBox sound_box = (BoundingBox) {
+		.min = Vector3Scale(Vector3One(), -32),
+		.max = Vector3Scale(Vector3One(),  32)
+	};
+	sound_box = BoxTranslate(sound_box, pos);
+
+	BoxPoints points = BoxGetPoints(sound_box);
+	
+	float weights_0 = 0.0f;
+	float weights_1 = 0.0f;
+	float weights_2 = 0.0f;
+
+	for(short i = 0; i < 8; i++) {
+		int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, points.v[i]);
+		short vis = (Bsp_LeafVisible(&sect->bsp_data, base_leaf, curr_leaf)) ? 1 : -1;
+
+		if(vis < -1 && ap->ref_presets[curr_leaf])
+			continue;
+
+		//AP_BlendDsp(ap, dt, 1, ap->ref_presets[curr_leaf]);
+		if(ap->ref_presets[curr_leaf] == 0)
+			weights_0 += 0.5f * vis; 
+
+		if(ap->ref_presets[curr_leaf] == 1)
+			weights_1 += 1.0f * vis;
+
+		if(ap->ref_presets[curr_leaf] == 2)
+			weights_2 += 1.0f;
+	}
+
+	if(ap->ref_presets[base_leaf] == 0)
+		weights_0 += 1.0f; 
+
+	if(ap->ref_presets[base_leaf] == 1)
+		weights_1 += 1.0f;
+
+	if(ap->ref_presets[base_leaf] == 2)
+		weights_2 += 1.0f;
+
+	u8 preset_id = DSP_DEFAULT; 
+	if(weights_1 > weights_0)
+		preset_id = 1;
+	if(weights_2 > weights_1)
+		preset_id = 2;
+
+	AP_BlendDsp(ap, dt, 1, preset_id);
+}
+
+void DebugDrawDSP(MapSection *sect, AudioPlayer *ap, Vector3 pos) {
+	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
+	for(int i = 0; i < rbrush_list.count; i++) {
+		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, rbrush_list.ids[i])) 
+			continue;
+
+		if(!ap->ref_presets[curr_leaf])
+			continue;
+
+		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, ColorAlpha(RED, 0.25f));
+	}
 }
 

@@ -16,17 +16,11 @@ typedef struct {
 
 } dsp_preset_vals;
 
-
 enum DSP_PRESETS : u8 {
 	DSP_DEFAULT			= 0,
-	DSP_SMALL_ROOM		= 1
+	DSP_SMALL_ROOM		= 1,
+	DSP_OPEN			= 2,
 }; 
-
-typedef struct {
-	int leaf;
-	u8 preset; 
-
-} DspNode;
 
 typedef struct {
 	Camera3D *camera;
@@ -38,6 +32,9 @@ typedef struct {
 
 	int sound_count;
 	int track_count;
+
+	u8 *ref_presets;
+	int num_ref_presets;
 
 } AudioPlayer;
 

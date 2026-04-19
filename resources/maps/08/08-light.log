@@ -8,7 +8,7 @@ WARNING: entity at (944 -672 232) (light) has empty key/value "_dirt" ""
 WARNING: entity at (768 -864 88) (light) has empty key/value "_dirt" ""
 WARNING: entity at (784 -568 48) (light) has empty key/value "_dirt" ""
 WARNING: entity at (784 -576 168) (light) has empty key/value "_dirt" ""
-209 entities read, 82 are lights.
+349 entities read, 82 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -57,7 +57,7 @@ Writing 08.lit
 DECOUPLED_LM BSPX lump written
 0 switchable light styles (32 max)
 Writing 08.bsp as Quake BSP bsp29
-24.130s seconds elapsed
+27.853s seconds elapsed
 0 empty lightmaps
 
 

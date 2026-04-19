@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "hash.h"
+#include "audioplayer.h"
 
 #ifndef KBSP_H_
 #define KBSP_H_

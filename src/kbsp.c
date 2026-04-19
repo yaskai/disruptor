@@ -9,6 +9,7 @@
 #include "../include/log_message.h"
 #include "geo.h"
 #include "hash.h"
+#include "audioplayer.h"
 
 Material *materials;
 Texture2D *textures;

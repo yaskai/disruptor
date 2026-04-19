@@ -42,6 +42,10 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		}
 	}
 
+	if(!strcmp(spawn_point->classname, "dsp_node")) {
+		return;
+	}
+
 	if(!strcmp(spawn_point->classname, "checkpoint")) {
 		if(handler->checkpoint_list.count + 1 >= handler->checkpoint_list.capacity) {
 

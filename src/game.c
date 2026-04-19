@@ -196,6 +196,8 @@ void GameLoadScene(Game *game, char *path) {
 			Vec3ToCoords(game->ent_handler.checkpoint_list.points[i], &game->ent_handler.grid), &game->ent_handler.grid);	
 	}
 
+	DSP_AudioSetup(&game->test_section.bsp_data, &game->audio_player, &spawn_list);
+
 	game->flags |= FLAG_LOAD_COMPLETE;
 }
 
@@ -215,6 +217,7 @@ void GameUpdate(Game *game, float dt) {
 
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
 	AP_Update(&game->audio_player, dt);
+	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
 }
 
 #define DEBUG_ENABLE			0x01
