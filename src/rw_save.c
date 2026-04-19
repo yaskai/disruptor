@@ -20,6 +20,7 @@ u8 rw_WriteSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global
 	char glob_path[64] = {'\0'}; 
 	memcpy(glob_path, file_prefix, strlen(file_prefix));
 	glob_path[strlen(glob_path)] = 'g';
+	result += rw_WriteGlobalData(global_data, glob_path);
 
 	++needed;
 	char ent_path[64] = {'\0'};
@@ -30,7 +31,7 @@ u8 rw_WriteSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global
 	return (result == needed);
 }
 
-u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path) {
+u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData *global_data) {
 	u8 result = 0, needed = 0;
 
 	char file_prefix[64] = "data/";
@@ -42,6 +43,7 @@ u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path) {
 	char glob_path[64] = {'\0'}; 
 	memcpy(glob_path, file_prefix, strlen(file_prefix));
 	glob_path[strlen(glob_path)] = 'g';
+	result += rw_ReadGlobalData(global_data, glob_path);
 
 	++needed;
 	char ent_path[64] = {'\0'};
@@ -53,13 +55,23 @@ u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path) {
 }
 
 u8 rw_WriteGlobalData(rw_GlobalData global_data, char *file_path) {
-	FILE *pF = fopen(file_path, "rb");
+	FILE *pF = fopen(file_path, "wb");
 	fwrite(&global_data, sizeof(rw_GlobalData), 1, pF);
 	fclose(pF);
 	return 1;
 }
 
-u8 rw_ReadGlobalData(rw_GlobalData global_data, char *file_path) {
+u8 rw_ReadGlobalData(rw_GlobalData *global_data, char *file_path) {
+	FILE *pF = fopen(file_path, "rb");
+	if(!pF) {
+		MessageError("ERROR: File does not exist ", file_path);
+		return 0;
+	}
+
+	fread(global_data, sizeof(rw_GlobalData), 1, pF);
+
+	fclose(pF);
+
 	return 1;
 }
 

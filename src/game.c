@@ -49,6 +49,8 @@ void GameInit(Game *game, Config *conf) {
 	InputInit(&game->input_handler);
 	game->input_handler.mouse_sensitivity = game->conf->mouse_sensitivity * 0.0001f;
 
+	game->_gsave_state = (rw_GlobalData) {0};
+
 	SetLogState(false);
 
 	game->flags = 0;
@@ -253,11 +255,13 @@ void GameUpdate(Game *game, float dt) {
 	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
 
 	if(IsKeyPressed(KEY_ONE)) {
-		rw_WriteSave(&game->ent_handler, "test", (rw_GlobalData) {0} );
+		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
+		rw_WriteSave(&game->ent_handler, "test", game->_gsave_state);
 	}
 
 	if(IsKeyPressed(KEY_TWO)) {
-		rw_ReadSave(&game->ent_handler, "test");
+		rw_ReadSave(&game->ent_handler, "test", &game->_gsave_state);
+		PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
 	}
 }
 
@@ -445,14 +449,12 @@ void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point) {
 	if(IsKeyDown(KEY_O)) {
 		movement = Vector3Scale(right, -300 * dt);
 		cam->position = Vector3Add(cam->position, movement);
-		//cam->target = Vector3Subtract(cam->target, Vector3Scale(movement, 1.0f));
 		return;
 	}
 
 	if(IsKeyDown(KEY_P)) {
 		movement = Vector3Scale(right,  300 * dt);
 		cam->position = Vector3Add(cam->position, movement);
-		//cam->target = Vector3Subtract(cam->target, Vector3Scale(movement, 1.0f));
 		return;
 	}
 

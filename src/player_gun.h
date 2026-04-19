@@ -4,6 +4,7 @@
 #include "v_effect.h"
 #include "config.h"
 #include "audioplayer.h"
+#include "rw_save.h"
 
 #ifndef PLAYER_GUN_H_
 #define PLAYER_GUN_H_
@@ -45,5 +46,8 @@ void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt);
 void PlayerGunReload(PlayerGun *player_gun, float dt);
 
 void SendAmmoPickupEvent(int pickup_type);
+
+void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun);
+void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun);
 
 #endif

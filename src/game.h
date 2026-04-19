@@ -7,6 +7,7 @@
 #include "v_effect.h"
 #include "../include/num_redefs.h"
 #include "audioplayer.h"
+#include "rw_save.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -35,6 +36,8 @@ typedef struct {
 	Camera3D camera_debug;
 
 	Config *conf;
+
+	rw_GlobalData _gsave_state;
 
 	u8 flags;
 

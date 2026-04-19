@@ -922,3 +922,30 @@ void DrawSectionTransition() {
 		PURPLE
 	);
 }
+
+void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun) {
+	rw_PlayerWeaponData *weap_data = &data->player_weap_data;
+
+	weap_data->curr_id = player_gun->current_gun;
+	weap_data->gun_angle = gun_angle;
+	weap_data->recoil = recoil;
+	weap_data->sway = sway;
+
+	for(short i = 0; i < 4; i++)
+		weap_data->weapons[i] = weapons[i];
+
+}
+
+void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
+	rw_PlayerWeaponData *weap_data = &data->player_weap_data;
+
+	player_gun->current_gun = weap_data->curr_id;
+	gun_angle = weap_data->gun_angle;
+	recoil = weap_data->recoil;
+	sway = weap_data->sway;
+
+	for(short i = 0; i < 4; i++)
+		weapons[i] = weap_data->weapons[i];
+
+}
+
