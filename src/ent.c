@@ -13,12 +13,16 @@
 #include "../include/log_message.h"
 #include "../include/sort.h"
 #include "pm.h"
+#include "rw_save.h"
 
 Vector3 debug_bullet_dest;
 Vector3 debug_bullet_norm;
 
 MapSection *ptr_handler_sect = NULL;
 EntityHandler *ptr_handler_self = NULL;
+
+rw_GlobalData *_hgd;
+void EntHandlerPassRwState(rw_GlobalData *data) { _hgd = data; }
 
 void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
 	MapSection *sect = ptr_handler_sect;
@@ -346,6 +350,7 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, Aud
 	LoadEntityBaseAnims();
 
 	handler->ai_tick = 0;
+	handler->autosave_tick = 0;
 
 	EntGridInit(handler);
 	handler->checkpoint_list = (CheckPointList) {0}; 
@@ -433,9 +438,17 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	Entity *player_ent = &handler->ents[handler->player_id];
 	PlayerUpdate(player_ent, dt);
 
-	if(player_ent->comp_ai.state == STATE_DEAD && player_ent->comp_ai.task_state.timer >= 2) {
+	if(player_ent->comp_ai.state == STATE_DEAD && handler->player_death_timer >= 2) {
 		ReloadEntities(handler, sect, 1);
 		return;
+	}
+
+	if(player_ent->comp_ai.state != STATE_DEAD) {
+		handler->autosave_tick -= dt;
+		if(handler->autosave_tick <= 0) {
+			//handler->flags |= AUTOSAVE_REQUEST;
+			//handler->autosave_tick = AUTOSAVE_TICKRATE;
+		}
 	}
 
 	render_list.count = 0;
@@ -1380,6 +1393,11 @@ void RenderProjectiles(EntityHandler *handler) {
 
 void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states) {
 	// Get entity states
+	if(with_states) {
+		rw_LoadMostRecent(handler, _hgd);
+		return;
+	}
+
 	u8 states[handler->count];
 	for(u16 i = 0; i < handler->count; i++) {
 		states[i] = handler->ents[i].comp_ai.state;

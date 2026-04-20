@@ -1,18 +1,70 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "raylib.h"
 #include "../include/num_redefs.h"
 #include "../include/log_message.h"
 #include "rw_save.h"
+#include "config.h"
+
+void rw_WriteSaveNew(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global_data) {
+	SetLogState(1);
+
+	int iter = 0;
+	while(DirectoryExists(TextFormat("data/%s_%d", dir_path, iter))) {
+		iter++;
+	}
+
+	char path[255] = {'\0'};
+	snprintf(path, sizeof(path), "data/%s_%d", dir_path, iter);
+
+	rw_WriteSave(ent_handler, path, global_data);
+}
+
+u8 rw_LoadMostRecent(EntityHandler *ent_handler, rw_GlobalData *global_data) {
+	char *meta_path = "data/svd_meta";
+	FILE *pF = fopen(meta_path, "rb"); 
+	if(!pF) {
+		MessageError("ERROR: Save data meta file does not exist ", meta_path);
+		return 0;
+	}
+
+	int num_entries = GetFileLength(meta_path) / sizeof(rw_Meta);
+	rw_Meta meta[num_entries];
+	fread(&meta, sizeof(rw_Meta) * num_entries, 1, pF);
+
+	int latest_id = 0;
+	bool map_match = false;
+
+	for(int i = num_entries-1; i >= 0; i--) {
+		printf("%s\n", meta[i].map);
+
+		if(!streq(meta[i].map, global_data->map))
+			continue;
+
+		map_match = true;
+		latest_id = i;	
+		break;
+	}
+
+	fclose(pF);
+
+	if(!map_match)
+		return 0;
+
+	rw_ReadSave(ent_handler, meta[latest_id].name, global_data);
+
+	return 1;
+}
 
 u8 rw_WriteSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global_data) {
 	u8 result = 0, needed = 0;
 
-	MakeDirectory(TextFormat("data/%s", dir_path));
+	MakeDirectory(dir_path);
 
-	char file_prefix[64] = "data/";
-	memcpy(file_prefix + strlen(file_prefix), dir_path, strlen(dir_path));
+	char file_prefix[64] = {'\0'};
+	memcpy(file_prefix, dir_path, strlen(dir_path));
 	file_prefix[strlen(file_prefix)] = '/';
 	memcpy(file_prefix + strlen(file_prefix), "svd_", strlen("svd_"));
 
@@ -27,6 +79,26 @@ u8 rw_WriteSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global
 	memcpy(ent_path, file_prefix, strlen(file_prefix));
 	ent_path[strlen(ent_path)] = 'e';
 	result += rw_WriteEntData(ent_handler, ent_path);
+
+	rw_Meta meta = (rw_Meta) {
+		.name = {'\0'},
+		.map = {'\0'},
+		.time_stamp = 0,
+		.flags = 0
+	};
+	time(&meta.time_stamp);
+	
+	char *sep = strrchr(dir_path, '/');
+	*sep = '\0';
+	dir_path = sep+1;
+
+	memcpy(meta.map, global_data.map, sizeof(meta.map));
+	memcpy(meta.name, dir_path, sizeof(meta.name));
+
+	char *met_path = "data/svd_meta";	
+	FILE *pF = fopen(met_path, "ab"); 
+	fwrite(&meta, sizeof(rw_Meta), 1, pF);
+	fclose(pF);
 	
 	return (result == needed);
 }
@@ -50,6 +122,8 @@ u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData *global
 	memcpy(ent_path, file_prefix, strlen(file_prefix));
 	ent_path[strlen(ent_path)] = 'e';
 	result += rw_ReadEntData(ent_handler, ent_path);
+
+	ent_handler->ai_tick = global_data->ai_tick;
 	
 	return (result == needed);
 }

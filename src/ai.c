@@ -462,8 +462,8 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 	AiRunTimers(handler, dt);
 
-	ai_tick -= dt;
-	if(ai_tick > 0) {
+	handler->ai_tick -= dt;
+	if(handler->ai_tick > 0) {
 		return;
 	}
 
@@ -504,7 +504,7 @@ void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 		AiComponentUpdate(ent, handler, ai, sect, dt);
 	}
 
-	ai_tick = (AI_TICKRATE*dt);
+	handler->ai_tick = (AI_TICKRATE*dt);
 }
 
 void AiRunTimers(EntityHandler *handler, float dt) {

@@ -116,6 +116,14 @@ void GameAudioSetup(Game *game) {
 void GameLoadScene(Game *game, char *path, u8 flags) {
 	game->flags &= ~FLAG_LOAD_COMPLETE;
 
+	char *path_dup = calloc(strlen(path), 1);
+	memcpy(path_dup, path, strlen(path));
+	char *sep = strrchr(path_dup, '/');
+	*sep = '\0';
+	memcpy(game->_gsave_state.map, sep+1, strlen(path_dup));
+	free(path_dup);
+	printf("%s\n", game->_gsave_state.map);
+
 	SpawnList sl = (SpawnList) {0}; 
 	game->test_section = BuildMapSect(path, &sl);
 	game->test_section.navgraphs = malloc(sizeof(NavGraph) * 32);
@@ -212,6 +220,8 @@ void GameUpdate(Game *game, float dt) {
 		game->flags |= FLAG_EXIT_REQUEST;
 
 	if(game->ent_handler.flags & AT_LEVEL_END) {
+		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
+
 		char *path_pref = "resources/maps/";
 		char path[255] = {'\0'};
 		memcpy(path, path_pref, strlen(path_pref));
@@ -229,6 +239,8 @@ void GameUpdate(Game *game, float dt) {
 	}
 
 	if(game->ent_handler.flags & AT_LEVEL_BACK) {
+		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
+
 		char *path_pref = "resources/maps/";
 		char path[255] = {'\0'};
 		memcpy(path, path_pref, strlen(path_pref));
@@ -242,8 +254,15 @@ void GameUpdate(Game *game, float dt) {
 
 		GameLoadScene(game, path, (AT_LEVEL_BACK));
 
+		Entity player = game->ent_handler.ents[game->ent_handler.player_id];
+
+		rw_LoadMostRecent(&game->ent_handler, &game->_gsave_state);
+		game->ent_handler.ents[game->ent_handler.player_id] = player;
+
 		game->ent_handler.flags &= ~AT_LEVEL_BACK;
 	}
+
+	EntHandlerPassRwState(&game->_gsave_state);
 
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
 
@@ -256,12 +275,20 @@ void GameUpdate(Game *game, float dt) {
 
 	if(IsKeyPressed(KEY_ONE)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
-		rw_WriteSave(&game->ent_handler, "test", game->_gsave_state);
+		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
 	}
 
 	if(IsKeyPressed(KEY_TWO)) {
-		rw_ReadSave(&game->ent_handler, "test", &game->_gsave_state);
-		PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+		//rw_ReadSave(&game->ent_handler, "test", &game->_gsave_state);
+		//PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+		if(rw_LoadMostRecent(&game->ent_handler, &game->_gsave_state))
+			PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+	}
+
+	if(game->ent_handler.flags & AUTOSAVE_REQUEST) {
+		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
+		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
+		game->ent_handler.flags &= ~AUTOSAVE_REQUEST;
 	}
 }
 
@@ -312,9 +339,10 @@ void RenderMainLayer(Game *game, float dt) {
 
 	// Fade to black effect on player death
 	if(player_ent->comp_ai.state == STATE_DEAD) {
-		float deathscreen_alpha = player_ent->comp_ai.task_state.timer*0.5f;
+		//float deathscreen_alpha = player_ent->comp_ai.task_state.timer*0.5f;
+		float deathscreen_alpha = game->ent_handler.player_death_timer*0.5f;
 		if(deathscreen_alpha > 1) deathscreen_alpha = 1;
-		DrawRectangleRec((Rectangle) { 0, 0, VIRT_W, VIRT_H } , ColorAlpha(BLACK, player_ent->comp_ai.task_state.timer*0.5f));
+		DrawRectangleRec((Rectangle) { 0, 0, VIRT_W, VIRT_H } , ColorAlpha(BLACK, deathscreen_alpha));
 	}
 
 	EndTextureMode();

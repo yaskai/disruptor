@@ -341,12 +341,15 @@ void PlayerUpdate(Entity *player, float dt) {
 	if(player_dead)	{
 		player->comp_ai.state = STATE_DEAD;
 		
-		death_timer += dt;
+		//death_timer += dt;
+		ptr_ent_handler->player_death_timer += dt;
 
-		if(death_timer > 3) 
-			death_timer = 3;
+		if(ptr_ent_handler->player_death_timer > 3) 
+			ptr_ent_handler->player_death_timer = 3;
 
-		player->comp_ai.task_state.timer = death_timer;
+		//player->comp_ai.task_state.timer = death_timer;
+	} else {
+		ptr_ent_handler->player_death_timer = 0;
 	}
 
 	if(!player_dead) {
@@ -564,6 +567,10 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 		if(cell_id == handler->checkpoint_list.cells[i] && fabsf(ct->position.z - handler->checkpoint_list.points[i].z) <= 32) {
 			player_curr_checkpoint = i;
 			handler->checkpoint_list.active = player_curr_checkpoint;
+			if(handler->autosave_tick <= 0 && Vector3Distance(ct->position, handler->checkpoint_list.points[i]) <= 96.0f) {
+				handler->flags |= AUTOSAVE_REQUEST;
+				handler->autosave_tick = AUTOSAVE_TICKRATE;
+			}
 			break;
 		}
 	}

@@ -240,9 +240,9 @@ typedef struct {
 } Projectile;
 
 // Entity handler state flags
-#define AT_LEVEL_END 	0x01
-#define AT_LEVEL_BACK	0x02
-
+#define AT_LEVEL_END 		0x01
+#define AT_LEVEL_BACK		0x02
+#define AUTOSAVE_REQUEST	0x04
 typedef struct {
 	Model base_ent_models[16];
 
@@ -261,8 +261,10 @@ typedef struct {
 
 	Vector3 player_ret;
 	Vector3 player_ret_fwd;
+	float player_death_timer;
 
 	float ai_tick;
+	float autosave_tick;
 
 	int brush_ents_offset;
 
