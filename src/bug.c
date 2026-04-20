@@ -16,6 +16,7 @@
 u8 bug_bounce = 0;
 float launch_timer = 0;
 bool big_bounce_used = false;
+bool disrupt_used = false;
 
 Model model_dead;
 
@@ -75,6 +76,9 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 					continue;
 
 				if(enemy_ai->input_mask & AI_INPUT_SELF_GLITCHED)
+					continue;
+
+				if(disrupt_used)
 					continue;
 
 				Vector3 to_enemy = Vector3Subtract(
@@ -411,6 +415,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	bug_z_vel_prev = ct->velocity.z;
 
 	if(ai->state == BUG_DEFAULT) {
+		disrupt_used = false;
+
 		ct->position = player_ent->comp_transform.position;
 		ct->velocity = Vector3Zero();
 
@@ -507,7 +513,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				height_check = true;
 			}
 
-			if(!(ent->flags & BUG_DISRUPTED_ENEMY)) {
+			if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !disrupt_used) {
 				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check && !(ent->flags & BUG_RECALL)) {
 					ct->on_ground = true;
 					ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
@@ -565,7 +571,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ct->velocity = Vector3Zero();
 		
 		// Check if there is an enemy to disrupt
-		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL)) {
+		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL) && !disrupt_used) {
 			i16 cell_id = CellCoordsToId(coords, grid);
 			EntGridCell *cell = &grid->cells[cell_id];
 
@@ -584,11 +590,18 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				if(enemy_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)
 					continue;
 
-				if(!CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds))
+				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds)) {
+					DisruptEntity(handler, enemy_ent->id, sect);	
+					ent->flags |= BUG_DISRUPTED_ENEMY;
+					break;
+				}
+
+				if(!CheckCollisionSpheres(ct->position, 128, enemy_ent->comp_transform.position, 128))
 					continue;
 
-				DisruptEntity(handler, enemy_ent->id, sect);	
-				ent->flags |= BUG_DISRUPTED_ENEMY;
+				bug_bounce = 0;
+				ent->comp_ai.state = BUG_LAUNCHED;
+				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 			}
 		}
 
@@ -737,6 +750,8 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 
 	ai->input_mask |= AI_INPUT_SELF_GLITCHED;
 	ai->state = STATE_STUNNED;
+
+	disrupt_used = true;
 
 	AP_RequestSound(handler->ap, "disrupt");
 

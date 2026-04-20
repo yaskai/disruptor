@@ -65,7 +65,7 @@ void AP_ReqNearBulletSound(AudioPlayer *ap, Vector3 pos, Vector3 dir) {
 
 	AP_SetSoundPosition(ap, bullet_near_sounds[sfx_id], pos, 0);
 	AP_SetSoundDir(ap, bullet_near_sounds[sfx_id], (dir), 0);
-	ma_sound_set_velocity(&sounds[HashFetch(&ap->sound_hashmap, bullet_near_sounds[sfx_id])], dir.x*10, dir.y*10, dir.z*10);
+	ma_sound_set_velocity(&sounds[HashFetch(&ap->sound_hashmap, bullet_near_sounds[sfx_id])], dir.x*0.1f, dir.y*0.1f, dir.z*0.1f);
 	AP_ReqSoundRandPitch(ap, bullet_near_sounds[sfx_id], 90, 100);
 }
 
