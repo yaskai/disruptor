@@ -14,6 +14,7 @@
 #include "../include/sort.h"
 #include "pm.h"
 #include "rw_save.h"
+#include "player_gun.h"
 
 Vector3 debug_bullet_dest;
 Vector3 debug_bullet_norm;
@@ -23,6 +24,9 @@ EntityHandler *ptr_handler_self = NULL;
 
 rw_GlobalData *_hgd;
 void EntHandlerPassRwState(rw_GlobalData *data) { _hgd = data; }
+
+PlayerGun *handler_ptr_player_gun;
+void HandlerSetPtrGun(PlayerGun *player_gun) { handler_ptr_player_gun = player_gun; }
 
 void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
 	MapSection *sect = ptr_handler_sect;
@@ -1395,6 +1399,7 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 	// Get entity states
 	if(with_states) {
 		rw_LoadMostRecent(handler, _hgd);
+		PlayerGunOnLoad(_hgd, handler_ptr_player_gun);
 		return;
 	}
 

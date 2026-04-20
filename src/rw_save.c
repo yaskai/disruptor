@@ -38,8 +38,6 @@ u8 rw_LoadMostRecent(EntityHandler *ent_handler, rw_GlobalData *global_data) {
 	bool map_match = false;
 
 	for(int i = num_entries-1; i >= 0; i--) {
-		printf("%s\n", meta[i].map);
-
 		if(!streq(meta[i].map, global_data->map))
 			continue;
 

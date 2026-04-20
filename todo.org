@@ -1,0 +1,193 @@
+** (x) crosshair
+___
+* *Collision Detection & Response*
+
+** (x) static level geometry
+** (x) stair stepping 
+** (x) with enemies
+** (-) dynamic level geometry
+** (-) surface/entity collision flags
+** (x) bullet tracing 
+** (x) physical projectile collision
+
+** (x) acceleration structures
+*** (x) bvh
+*** (x) clip bsp
+*** (x) static grid
+
+___
+* *Checkpoints*
+
+** (x) basic 
+** with save data (*_serialization is blocker_*)
+
+___
+* *Bug Mechanics*
+
+** (x) throw
+** (x) bounce
+** (x) recall (just needs a key bind & logic boundaries)
+** (x) death/cooldown
+
+___
+* *Guns*
+
+** (-) pistol
+*** (-) model
+*** (-) textures
+*** (x) recoil animation
+*** (-) reload animation
+
+** (-) shotgun
+*** (-) model
+*** (-) textures
+*** (-) recoil animation
+*** (-) reload animation
+
+** (x) revolver 
+*** (x) model
+*** (-) textures
+*** (x) recoil animation
+*** (-) reload animation
+
+** (-) ammo system
+*** (x) pickups
+*** (-) reload mechanic
+
+** (x) camera effects
+*** (x) sway when moving
+*** (x) pitch with recoil
+
+___
+* *Environment Interactions*
+
+** (-) gates -(and switches)-
+** (x) force fields
+** breakable boxes
+** (-) pickup items (health + ammo), need models
+
+___
+* *Audio*
+
+** basic
+** spatial
+** ambient
+
+___
+* *BSP Rendering*
+
+** (x) Basic: 
+*** (x) mesh generation
+*** (x) texture mapping 
+
+** (x) Lit:
+*** (x) TrenchBroom .fgd setup for lights
+*** (x) import .lit file 
+*** (x) bsp face texture atlas generation
+*** (x) -lighting manager/wrapper- (not needed)
+*** (x) write lighting shader
+
+** (x) Optimized:
+*** (x) import .vis file
+*** (x) use portalizer for mesh render list
+*** (x) make special textures (hint + skip)
+*** (x) make detail brush entities in .fgd (func_detail_illusionary, func_detail_fence, func_detail_wall)
+
+** Extra:
+*** (x) separate draw steps for translucent brushes (eg. forcefield, fence, etc.)
+*** (-) use light grid for entities
+*** dynamic point lights
+
+___
+* *UI*
+
+** (x) hp counter
+** (x) ammo/clip counter
+** (x) crosshair
+** diegetic elements for Bug
+
+___
+* *AI*
+
+** (-) Cleanup
+*** (x) use interrupt mask properly
+*** (x) move ai functions out of ent.c
+
+** (-) Inputs
+*** (x) see player 
+*** (-) hear player
+*** (x) see disrupted entity
+
+** (-) Navigation
+*** (x) A* pathing
+*** (x) simple graphs & nodes setup
+*** (x) -switch to navmesh- fix edge consruction
+
+** (x) turret behaviour: 
+*** (x) idle 
+*** (x) target player
+*** (x) glitch & power down
+
+** (-) maintainer behaviour
+*** (x) idle
+*** (x) attack (go to & pickup projectile and/or meelee)
+*** (x) fix disrupted entities (*_navigation system is blocker_*)
+*** (-) disrupted (*_design is blocker_*)
+
+___
+* *Menus*
+
+** (-) Main Menu
+
+** (-) Pause Menu
+
+** (-) Options Menu
+*** (-) UI layout
+*** (-) integration with config file
+
+___
+* *Visual Effects*
+
+** (-) bullet trails
+*** (x) turret 
+*** (-) player guns (using the same as turret for now but should be changed)
+
+** (-) bullet hole decals
+*** (x) struct 
+*** (x) manager
+*** (-) rendering 
+
+** (-) bullet impact particles 
+*** (-) struct 
+*** (-) manager
+*** (-) rendering
+
+** (x) player damage visual feedback
+
+** enemy damage feedback
+
+** enemy disruption feedback
+
+___
+* *Animation*
+
+  *_Choose Method!_*
+   options are:
+  - -vertex frames (possibly with interpolation)-
+  - -gpu skinning-
+  - -procedural through FABRIK-
+  - (x) cpu skinning ended up being fine 
+
+___
+* *Other*
+
+** (x) git repo readme.md
+
+** improve windows workflow
+
+** text box objects (for use in alpha to explain certain missing planned features)
+
+** game state serialization
+
+** iterative map section loading 
+___

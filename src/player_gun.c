@@ -81,8 +81,7 @@ comp_Weapon weapons[] = {
 
 		.clip_size = 6,
 		.in_clip = 6,
-		//.ammo = 24,
-		.ammo = 999,
+		.ammo = 12,
 
 		.reload_time_amnt = 8,
 		.reload_timer = 0,

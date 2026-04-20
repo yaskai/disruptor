@@ -116,13 +116,14 @@ void GameAudioSetup(Game *game) {
 void GameLoadScene(Game *game, char *path, u8 flags) {
 	game->flags &= ~FLAG_LOAD_COMPLETE;
 
+	HandlerSetPtrGun(&game->player_gun);
+
 	char *path_dup = calloc(strlen(path), 1);
 	memcpy(path_dup, path, strlen(path));
 	char *sep = strrchr(path_dup, '/');
 	*sep = '\0';
 	memcpy(game->_gsave_state.map, sep+1, strlen(path_dup));
 	free(path_dup);
-	printf("%s\n", game->_gsave_state.map);
 
 	SpawnList sl = (SpawnList) {0}; 
 	game->test_section = BuildMapSect(path, &sl);
@@ -261,6 +262,7 @@ void GameUpdate(Game *game, float dt) {
 		Entity player = game->ent_handler.ents[game->ent_handler.player_id];
 
 		rw_LoadMostRecent(&game->ent_handler, &game->_gsave_state);
+		PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
 		game->ent_handler.ents[game->ent_handler.player_id] = player;
 
 		game->ent_handler.flags &= ~AT_LEVEL_BACK;
