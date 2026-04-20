@@ -262,7 +262,7 @@ void GameUpdate(Game *game, float dt) {
 		Entity player = game->ent_handler.ents[game->ent_handler.player_id];
 
 		rw_LoadMostRecent(&game->ent_handler, &game->_gsave_state);
-		PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+		//PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
 		game->ent_handler.ents[game->ent_handler.player_id] = player;
 
 		game->ent_handler.flags &= ~AT_LEVEL_BACK;

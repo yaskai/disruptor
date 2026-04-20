@@ -9,8 +9,6 @@
 #include "config.h"
 
 void rw_WriteSaveNew(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global_data) {
-	SetLogState(1);
-
 	int iter = 0;
 	while(DirectoryExists(TextFormat("data/%s_%d", dir_path, iter))) {
 		iter++;
@@ -157,7 +155,6 @@ u8 rw_WriteEntData(EntityHandler *ent_handler, char *file_path) {
 	// Iterate entities in scene
 	for(u16 i = 0; i < ent_handler->count; i++) {
 		Entity *ent = &ent_handler->ents[i];
-		
 		// * NOTE:
 		// Entity's attached graphics data is ignored and managed elsewhere...
 		// Writing models and animations to save file is wasteful and probably unsafe
@@ -188,6 +185,7 @@ u8 rw_WriteEntData(EntityHandler *ent_handler, char *file_path) {
 
 	// End file write
 	fclose(pF);
+
 	return 1;
 }
 
