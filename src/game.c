@@ -227,6 +227,8 @@ void GameUpdate(Game *game, float dt) {
 		memcpy(path, path_pref, strlen(path_pref));
 		memcpy(path + strlen(path), game->ent_handler.grid.sect_next, strlen(game->ent_handler.grid.sect_next));
 
+		Entity player = game->ent_handler.ents[game->ent_handler.player_id];
+
 		EntHandlerClose(&game->ent_handler);
 		MapSectionClose(&game->test_section);
 		SectFreeBrushData(&game->test_section);
@@ -234,6 +236,8 @@ void GameUpdate(Game *game, float dt) {
 		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 
 		GameLoadScene(game, path, game->ent_handler.flags);
+
+		game->ent_handler.ents[game->ent_handler.player_id].comp_health = player.comp_health;
 
 		game->ent_handler.flags &= ~AT_LEVEL_END;
 	}
