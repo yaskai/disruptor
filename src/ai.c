@@ -98,7 +98,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 	//dir = Vector3Normalize(dir);
 
 	comp_Transform *ct = &ent->comp_transform;
-	if(Vector3DotProduct(ct->forward, dir) >= 0.95f)
+	if(Vector3DotProduct(ct->forward, dir) >= 0.99f)
 		return 1;
 	
 	return 0;

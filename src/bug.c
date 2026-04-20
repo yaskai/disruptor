@@ -475,6 +475,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ent->flags &= ~ENT_COLLIDERS;	
 		ent->flags &= ~BUG_DISRUPTED_ENEMY; 
 		ent->flags &= ~BUG_RECALL;
+		ent->flags &= ~BUG_ON_SWITCH;
 
 		ct->ground_normal = Vector3Zero();
 		bug_bounce = 0;
@@ -624,7 +625,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ct->velocity = Vector3Zero();
 		
 		// Check if there is an enemy to disrupt
-		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL) && !disrupt_used) {
+		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL) && !disrupt_used && !(ent->flags & BUG_ON_SWITCH)) {
 			i16 cell_id = CellCoordsToId(coords, grid);
 			EntGridCell *cell = &grid->cells[cell_id];
 
@@ -646,6 +647,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds)) {
 					DisruptEntity(handler, enemy_ent->id, sect);	
 					ent->flags |= BUG_DISRUPTED_ENEMY;
+					disrupt_used = true;
 					break;
 				}
 
@@ -747,7 +749,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	if(ent->flags & BUG_DISRUPTED_ENEMY)
 		pickup_radius = 0;
 
-	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) && launch_timer <= EPSILON) {
+	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) &&
+		(launch_timer <= EPSILON || (fabsf(ct->velocity.z) <= 0.5f && ct->on_ground))) 
+	{
 		ai->state = BUG_DEFAULT;
 		return;
 	}

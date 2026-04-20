@@ -221,6 +221,7 @@ void GameUpdate(Game *game, float dt) {
 		game->flags |= FLAG_EXIT_REQUEST;
 
 	if(game->ent_handler.flags & AT_LEVEL_END) {
+		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
 
 		char *path_pref = "resources/maps/";
@@ -237,6 +238,7 @@ void GameUpdate(Game *game, float dt) {
 		EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
 
 		GameLoadScene(game, path, game->ent_handler.flags);
+		PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
 
 		game->ent_handler.ents[game->ent_handler.player_id].comp_health = player.comp_health;
 
@@ -244,6 +246,7 @@ void GameUpdate(Game *game, float dt) {
 	}
 
 	if(game->ent_handler.flags & AT_LEVEL_BACK) {
+		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
 
 		char *path_pref = "resources/maps/";
@@ -262,7 +265,7 @@ void GameUpdate(Game *game, float dt) {
 		Entity player = game->ent_handler.ents[game->ent_handler.player_id];
 
 		rw_LoadMostRecent(&game->ent_handler, &game->_gsave_state);
-		//PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+		PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
 		game->ent_handler.ents[game->ent_handler.player_id] = player;
 
 		game->ent_handler.flags &= ~AT_LEVEL_BACK;

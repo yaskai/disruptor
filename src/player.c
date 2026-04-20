@@ -399,7 +399,7 @@ void PlayerUpdate(Entity *player, float dt) {
 		if(step_sound_timer <= 0) {
 			//int sfx_id = GetRandomValue(0, 1);
 
-			Vector3 feet_pos = Vector3Add(player->comp_transform.position, Vector3Scale(DOWN, 48.0f));
+			Vector3 feet_pos = Vector3Add(player->comp_transform.position, Vector3Scale(DOWN, 32.0f));
 			//AP_SetSoundPosition(ptr_ent_handler->ap, plr_step_sounds[sfx_id], feet_pos, 0);
 			//AP_ReqSoundRandPitch(ptr_ent_handler->ap, plr_step_sounds[sfx_id], 90, 110);
 			AP_SetSoundPosition(ptr_ent_handler->ap, "plr_step2", feet_pos, 0);

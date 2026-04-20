@@ -44,8 +44,8 @@ static Ai_SchedDef sched_defs[] = {
 
 	[SCHED_CHASE_PLAYER] = {
 		//.tasks = { TASK_FIND_POS, TASK_GOTO_POS, TASK_STOP_MOVE }, 
-		.tasks = { TASK_MAKE_CHASE_PATH, TASK_GOTO_POS, TASK_FACE_DIR, TASK_STOP_MOVE },
-		.num_tasks = 4,
+		.tasks = { TASK_FACE_DIR, TASK_WAIT_TIME, TASK_MAKE_CHASE_PATH, TASK_GOTO_POS, TASK_FACE_DIR, TASK_STOP_MOVE },
+		.num_tasks = 6,
 		.interrupt_mask = ( AI_INPUT_MEELEE_RANGE ),
 		.fail_mask = ( 0 ),
 		.interrupt_sched = SCHED_MAINTAINER_ATTACK,
@@ -64,8 +64,8 @@ static Ai_SchedDef sched_defs[] = {
 	},
 
 	[SCHED_FIX_FRIEND_A] = {
-		.tasks = { TASK_MAKE_CHASE_PATH, TASK_GOTO_POS },
-		.num_tasks = 2,
+		.tasks = { TASK_STOP_MOVE, TASK_MAKE_CHASE_PATH, TASK_GOTO_POS },
+		.num_tasks = 3,
 		.interrupt_mask = ( AI_INPUT_MEELEE_RANGE ), 
 		.fail_mask = ( 0 ),
 		.interrupt_sched = SCHED_FIX_FRIEND_B,
@@ -74,8 +74,8 @@ static Ai_SchedDef sched_defs[] = {
 	},
 
 	[SCHED_FIX_FRIEND_B] = {
-		.tasks = { TASK_STOP_MOVE, TASK_DO_FIX },
-		.num_tasks = 2,
+		.tasks = { TASK_STOP_MOVE, TASK_FACE_DIR, TASK_DO_FIX },
+		.num_tasks = 3,
 		.interrupt_mask = ( 0 ),
 		.fail_mask = ( AI_INPUT_TARG_DEAD ),
 		.interrupt_sched = SCHED_FIX_FRIEND_A,

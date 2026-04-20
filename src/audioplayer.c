@@ -149,17 +149,17 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "recall3")], 16.0f);
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "throw_bug")], 16.0f);
 
-	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step1")], 16.0f);
-	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")], 16.0f);
-	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")], 16.0f);
-	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step4")], 16.0f);
-	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step5")], 16.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step1")], 32.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")], 32.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")], 32.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step4")], 32.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step5")], 32.0f);
 
-	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step1")], 128.0f);
-	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")], 128.0f);
-	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")], 128.0f);
-	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step4")], 128.0f);
-	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step5")], 128.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step1")], 256.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")], 256.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")], 256.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step4")], 256.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "plr_step5")], 256.0f);
 
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal_steps_01")], 60.0f);
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal_steps_02")], 60.0f);
@@ -191,8 +191,8 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "throw_bug")], 16.0f);
 
 	ma_sound_set_looping(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], MA_TRUE);
-	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 32.0f);
-	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 64.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 96.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 300.0f);
 	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 0.1f);
 	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 3.5f);
 	ma_sound_start(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")]);
@@ -202,7 +202,7 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 
 		ma_sound_set_min_distance(sound, 16.0f);
 		ma_sound_set_max_distance(sound, 64.0f);
-		ma_sound_set_rolloff(sound, 1.85f);
+		ma_sound_set_rolloff(sound, 1.0f);
 		ma_sound_set_directional_attenuation_factor(sound, 1.5f);
 	}
 }
