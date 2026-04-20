@@ -19,7 +19,7 @@ ___
 * *Checkpoints*
 
 ** (x) basic 
-** with save data (*_serialization is blocker_*)
+** (x) with save data (*_serialization is blocker_*)
 
 ___
 * *Bug Mechanics*
@@ -44,15 +44,15 @@ ___
 *** (-) recoil animation
 *** (-) reload animation
 
-** (x) revolver 
+** (-) revolver 
 *** (x) model
 *** (-) textures
 *** (x) recoil animation
-*** (-) reload animation
+*** (x) reload animation
 
-** (-) ammo system
+** (x) ammo system
 *** (x) pickups
-*** (-) reload mechanic
+*** (x) reload mechanic
 
 ** (x) camera effects
 *** (x) sway when moving
@@ -69,9 +69,9 @@ ___
 ___
 * *Audio*
 
-** basic
-** spatial
-** ambient
+** (x) basic
+** (x) spatial
+** (-) ambient
 
 ___
 * *BSP Rendering*
@@ -109,19 +109,20 @@ ___
 ___
 * *AI*
 
-** (-) Cleanup
+** (x) Cleanup
 *** (x) use interrupt mask properly
 *** (x) move ai functions out of ent.c
 
-** (-) Inputs
+** (x) Inputs
 *** (x) see player 
-*** (-) hear player
+*** (x) hear player
 *** (x) see disrupted entity
 
 ** (-) Navigation
 *** (x) A* pathing
 *** (x) simple graphs & nodes setup
 *** (x) -switch to navmesh- fix edge consruction
+*** (-) tune avoidance
 
 ** (x) turret behaviour: 
 *** (x) idle 
@@ -132,7 +133,8 @@ ___
 *** (x) idle
 *** (x) attack (go to & pickup projectile and/or meelee)
 *** (x) fix disrupted entities (*_navigation system is blocker_*)
-*** (-) disrupted (*_design is blocker_*)
+*** (x) disrupted (*_design is blocker_*)
+*** (-) sync attack and fix with animation
 
 ___
 * *Menus*
@@ -183,12 +185,12 @@ ___
 
 ** (x) git repo readme.md
 
-** improve windows workflow
+** (x) improve windows workflow
 
-** text box objects (for use in alpha to explain certain missing planned features)
+** (-) text box objects
 
-** game state serialization
+** (x) game state serialization
 
-** iterative map section loading 
+** (x) iterative map section loading 
 
 ___

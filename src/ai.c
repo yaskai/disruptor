@@ -462,6 +462,15 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 void AiSystemUpdate(EntityHandler *handler, MapSection *sect, float dt) {
 	AiRunTimers(handler, dt);
 
+	if(handler->ents[handler->player_id].comp_ai.state == STATE_DEAD) {
+		alert_sphere_count = 0;
+		for(short i = 0; i < MAX_ALERT_SPHERES; i++) {
+			alert_spheres[i].flags = 0;
+		}
+
+		alert_clear_tick = 2;
+	}
+
 	handler->ai_tick -= dt;
 	if(handler->ai_tick > 0) {
 		return;

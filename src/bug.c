@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <float.h>
 #include "raylib.h"
@@ -82,7 +83,10 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 					continue;
 
 				Vector3 to_enemy = Vector3Subtract(
-					Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_health.bug_point),
+					Vector3Add(
+						Vector3Add(
+							Vector3Scale(enemy_ent->comp_transform.velocity, dt),
+							enemy_ent->comp_transform.position), enemy_ent->comp_health.bug_point),
 					ct->position
 				);	
 
@@ -97,10 +101,29 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 				BvhTraceData tr = TraceDataEmpty();
 				Ray ray = (Ray) { .position = ct->position, .direction = Vector3Normalize(to_enemy) };
+				/*
 				BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, dist);
 				if(tr.hit) {
 					continue;
 				}
+				*/
+				
+				bool vis = true;
+				for(short k = 0; k < sect->bvh_hullgroup_count; k++) {
+					Bvh_HullGroup *hull = &sect->bvh_hullgroups[k];
+
+					if(!(hull->flags & HULLGROUP_ACTIVE))
+						continue;
+
+					BvhTraceData temp_tr = TraceDataEmpty();
+					BvhTracePointEx(ray, sect, hull->bvh, 0, &temp_tr, Vector3Length(to_enemy));
+
+					if(temp_tr.hit)
+						vis = false;
+				}
+
+				if(!vis)
+					continue;
 
 				// Set target to closest candidate
 				if(dist < closest) {
@@ -116,6 +139,10 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	// Increment bounce count
 	(*bounce)++;
+
+	if(ct->velocity.z < 0)
+		ct->velocity.z *= -0.6f;		
+
 
 	// Set forward direction, only really used for model's rotation
 	Vector3 hdir = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
@@ -146,12 +173,15 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		: enemy_ent->comp_transform.position;
 	*/
 
-	Vector3 targ_point = enemy_ent->comp_transform.position;
+	Vector3 targ_point =  enemy_ent->comp_transform.position;
 
 	Vector3 to_enemy = Vector3Subtract( targ_point, ct->position );	
 	float d = Vector3Length(to_enemy);
 	to_enemy.z = 0;
 	to_enemy = Vector3Normalize(to_enemy);
+
+	ct->velocity.x *= 0.5f;
+	ct->velocity.y *= 0.5f;
 
 	if(Vector3DotProduct(to_enemy, enemy_ent->comp_transform.velocity) >= 0.99f) {
 		to_enemy = Vector3Subtract( Vector3Add(enemy_ent->comp_transform.position, enemy_ent->comp_transform.velocity), ct->position );	
@@ -161,11 +191,15 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	}
 
 	if(d > 100 && (fabsf(enemy_ent->comp_transform.position.z - ct->position.z) <= 64) && *bounce > 0) {
-		ct->velocity.x = to_enemy.x * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
-		ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
+		//ct->velocity.x = to_enemy.x * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
+		//ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
+		ct->velocity.x += to_enemy.x * (d*1.01f);	
+		ct->velocity.y += to_enemy.y * (d*1.01f);	
+		ct->velocity.z += fabsf(to_enemy.x + to_enemy.y) * Vector3Distance(ct->position, targ_point) * 0.033f;
 	} else {
-		ct->velocity.x = to_enemy.x * (d*1.01f);	
-		ct->velocity.y = to_enemy.y * (d*1.01f);	
+		ct->velocity.x += to_enemy.x * (d*1.01f);	
+		ct->velocity.y += to_enemy.y * (d*1.01f);	
+		ct->velocity.z += fabsf((to_enemy.x + to_enemy.y)) * Vector3Distance(ct->position, targ_point) * 0.033f;
 	}
 
 	ct->velocity.z += (d*0.05f);
@@ -197,6 +231,24 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		ct->velocity.z += 100.0f;
 		(*bounce)--;
 	}
+
+	ct->velocity.x = Clamp(ct->velocity.x, -500.0f, 500.0f);
+	ct->velocity.y = Clamp(ct->velocity.y, -500.0f, 500.0f);
+
+	if(ct->velocity.z < 120.0f)
+		ct->velocity.z = 120.0f;
+
+	float ceil_z = ct->velocity.z * 1.5f;
+	Ray ceil_ray = (Ray) { .position = ct->position, .direction = UP };
+	BvhTraceData ceil_tr = TraceDataEmpty();
+	BvhTracePointEx(ceil_ray, sect, &sect->bvh[BVH_BOX_SMALL], 0, &ceil_tr, ceil_z);
+	if(ceil_tr.distance < ct->position.z + ct->velocity.z) {
+		float over = (ct->position.z + ct->velocity.z) - ceil_tr.distance;
+		float len = Vector3Length(ct->velocity);
+		ct->velocity.z -= over * 0.1f;
+		ct->velocity.x += copysignf(fmaxf(1.0f, over*0.001f), ct->velocity.x); 
+		ct->velocity.y += copysignf(fmaxf(1.0f, over*0.001f), ct->velocity.y); 
+	} 
 
 	ct->forward = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0 } );
 }
@@ -449,8 +501,10 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
 
 		// Apply gravity
-		if(!ct->on_ground) 
-			ct->velocity.z -= BUG_GRAV * dt;
+		if(!ct->on_ground) { 
+			float grav = (bug_bounce > 0) ? BUG_GRAV * 1.1f : BUG_GRAV;
+			ct->velocity.z -= grav * dt;
+		}
 
 		pmTraceData pm = (pmTraceData) {0};
 	
@@ -558,7 +612,6 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		if(ct->on_ground) {
 			ai->state = BUG_LANDED;
-			ct->velocity = Vector3Zero();
 		}
 
 		launch_timer -= dt;
@@ -596,10 +649,10 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 					break;
 				}
 
-				if(!CheckCollisionSpheres(ct->position, 128, enemy_ent->comp_transform.position, 128))
+				if(!CheckCollisionSpheres(ct->position, 128, enemy_ent->comp_transform.position, 196))
 					continue;
 
-				bug_bounce = 0;
+				bug_bounce = (BUG_MAX_BOUNCES >> 1);
 				ent->comp_ai.state = BUG_LAUNCHED;
 				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 			}

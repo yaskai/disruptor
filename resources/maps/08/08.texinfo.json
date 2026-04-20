@@ -863,11 +863,11 @@
 	},
 	"293" : 
 	{
-		"minlight" : 15.0
+		"phong_angle" : 88.0
 	},
 	"294" : 
 	{
-		"minlight" : 15.0
+		"phong_angle" : 88.0
 	},
 	"295" : 
 	{
@@ -915,14 +915,6 @@
 		"phong_angle" : 88.0
 	},
 	"304" : 
-	{
-		"phong_angle" : 88.0
-	},
-	"305" : 
-	{
-		"phong_angle" : 88.0
-	},
-	"306" : 
 	{
 		"phong_angle" : 88.0
 	},
