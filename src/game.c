@@ -374,15 +374,24 @@ void RenderDebugLayer(Game *game) {
 	// 3D Rendering, debug
 	BeginTextureMode(game->render_target_debug);
 
-	float clear_alpha = (debug_draw_flags & DEBUG_DRAW_BIG) ? 1 : 0.95f;
+	float clear_alpha = (debug_draw_flags & DEBUG_DRAW_BIG) ? 1.0f : 0.95f;
 	ClearBackground(ColorAlpha(BLACK, clear_alpha));
 
 	BeginMode3D(game->camera_debug);
 
-	DrawMap(&game->test_section, game->camera.position);
-	PlayerDisplayDebugInfo(&game->ent_handler.ents[game->ent_handler.player_id]);
+	float dt = GetFrameTime();
 
+	// Render level geometry
+	DrawMap(&game->test_section, game->camera.position);
+	// Render entities
 	RenderEntities(&game->ent_handler, GetFrameTime());
+	// Render transparent level geometry
+	DrawMapTranslucent(&game->test_section, game->camera.position);
+	// Render dynamic brush entities
+	RenderBrushEntities(&game->ent_handler);
+	// Draw player (for debug only)
+	PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
+	//PlayerDisplayDebugInfo(&game->ent_handler.ents[game->ent_handler.player_id]);
 
 	if(IsKeyPressed(KEY_H)) debug_draw_flags ^= DEBUG_DRAW_HULLS;
 	if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
@@ -417,6 +426,7 @@ void RenderDebugLayer(Game *game) {
 	Vector2 dbg_window_size = (Vector2) { .x = game->render_target_debug.texture.width, .y = game->render_target_debug.texture.height };
 	//DebugDrawNavGraphsText(&game->test_section, game->camera_debug, dbg_window_size);
 	//DebugDrawEntText(&game->ent_handler, game->camera_debug);
+	PlayerDebugText(&game->ent_handler.ents[game->ent_handler.player_id]);
 	EndTextureMode();
 }
 

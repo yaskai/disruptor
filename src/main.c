@@ -79,6 +79,7 @@ int main() {
 	//GameLoadScene(&game, "resources/maps/07", 0);
 	GameLoadScene(&game, "resources/maps/08", 0);
 	//GameLoadScene(&game, "resources/maps/09", 0);
+	//GameLoadScene(&game, "resources/maps/10", 0);
 
 	// Run main game loop
 	bool exit = false;

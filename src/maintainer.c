@@ -260,6 +260,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 }
 
 void OnFixMaintainer(Entity *ent) {
+	ent->comp_ai.disrupt_timer = 0;
 	AiSetSchedule(&ent->comp_ai, SCHED_MAINTAINER_IDLE);
 }
 

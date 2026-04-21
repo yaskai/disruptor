@@ -195,18 +195,18 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		//ct->velocity.y = to_enemy.y * d * (1.2f + (GetRandomValue(0, 5) * 0.1f));	
 		ct->velocity.x += to_enemy.x * (d*1.01f);	
 		ct->velocity.y += to_enemy.y * (d*1.01f);	
-		ct->velocity.z += fabsf(to_enemy.x + to_enemy.y) * Vector3Distance(ct->position, targ_point) * 0.033f;
+		//ct->velocity.z += fabsf(to_enemy.x + to_enemy.y) * Vector3Distance(ct->position, targ_point) * 0.033f;
 	} else {
 		ct->velocity.x += to_enemy.x * (d*1.01f);	
 		ct->velocity.y += to_enemy.y * (d*1.01f);	
-		ct->velocity.z += fabsf((to_enemy.x + to_enemy.y)) * Vector3Distance(ct->position, targ_point) * 0.033f;
+		//ct->velocity.z += fabsf((to_enemy.x + to_enemy.y)) * Vector3Distance(ct->position, targ_point) * 0.033f;
 	}
 
-	ct->velocity.z += (d*0.05f);
+	//ct->velocity.z += (d*0.05f);
 
 	if(d <= 265.0f) {
 		if(enemy_ent->id != handler->player_id) {
-			ct->velocity.z += 300 + (1.5f*(*bounce));
+			//ct->velocity.z += 300 + (1.5f*(*bounce));
 			if(*bounce >= BUG_MAX_BOUNCES && !big_bounce_used) {
 				(*bounce)--;
 				big_bounce_used = true;
@@ -214,7 +214,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		} else {
 			ct->velocity.z += 60.0f + (1.15f*(*bounce));
 			if(enemy_ent->comp_transform.position.z > ct->position.z + 128.0f) {
-				ct->velocity.z += 500.0f;
+				//ct->velocity.z += 500.0f;
 
 			} else if(enemy_ent->comp_transform.position.z < ct->position.z) {
 				ct->velocity.x *= 0.95f;
@@ -232,12 +232,13 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 		(*bounce)--;
 	}
 
-	ct->velocity.x = Clamp(ct->velocity.x, -500.0f, 500.0f);
-	ct->velocity.y = Clamp(ct->velocity.y, -500.0f, 500.0f);
+	ct->velocity.x = Clamp(ct->velocity.x, -700.0f, 700.0f);
+	ct->velocity.y = Clamp(ct->velocity.y, -700.0f, 700.0f);
 
-	if(ct->velocity.z < 120.0f)
-		ct->velocity.z = 120.0f;
+	if(ct->velocity.z < 130.0f)
+		ct->velocity.z = 130.0f;
 
+	/*
 	float ceil_z = ct->velocity.z * 1.5f;
 	Ray ceil_ray = (Ray) { .position = ct->position, .direction = UP };
 	BvhTraceData ceil_tr = TraceDataEmpty();
@@ -245,12 +246,14 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	if(ceil_tr.distance < ct->position.z + ct->velocity.z) {
 		float over = (ct->position.z + ct->velocity.z) - ceil_tr.distance;
 		float len = Vector3Length(ct->velocity);
-		ct->velocity.z -= over * 0.1f;
-		ct->velocity.x += copysignf(fmaxf(1.0f, over*0.001f), ct->velocity.x); 
-		ct->velocity.y += copysignf(fmaxf(1.0f, over*0.001f), ct->velocity.y); 
+		ct->velocity.z -= over * 0.5f;
+		ct->velocity.x += copysignf(fmaxf(1.0f, over*0.007f), ct->velocity.x); 
+		ct->velocity.y += copysignf(fmaxf(1.0f, over*0.007f), ct->velocity.y); 
 	} 
+	*/
 
 	ct->forward = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0 } );
+
 }
 
 u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection *sect, u8 *bounce, EntityHandler *handler, float dt) {
@@ -298,6 +301,11 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	}
 
 	BugBounce(ent, ct, sect, handler, bounce, dt);
+	if(ct->velocity.z >= 40.0f) {
+		AP_SetSoundPosition(handler->ap, "click", ct->position, 0);
+		AP_SetSoundPitch(handler->ap, "click", GetRandomValue(90, 110) * 0.01f);
+		AP_RequestSound(handler->ap, "click");
+	}
 
 	return 0;
 }
@@ -613,6 +621,15 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		if(ct->on_ground) {
 			ai->state = BUG_LANDED;
+			ct->velocity = Vector3Zero();
+			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
+				ai->state = BUG_LAUNCHED;
+				ct->on_ground = false;
+				ent->flags &= ~BUG_DISRUPTED_ENEMY;
+				bug_bounce = 0;
+				bug_target_picked = true;
+				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+			}
 		}
 
 		launch_timer -= dt;
@@ -661,7 +678,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		}
 
 		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->targ_data.ent_id > -1 && ai->targ_data.ent_id < handler->count
-		   && !(ent->flags & BUG_RECALL)) {
+		   && !(ent->flags & BUG_RECALL) && disrupt_used) {
 			Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];			
 
 			bool do_recall = (stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED);
@@ -692,6 +709,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 					bug_target_picked = true;
 					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
 				}
+
 			}
 
 			if(!recall_to_player)
@@ -708,8 +726,10 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		// Recall
 		if(can_recall) {
 			if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-				AP_SetSoundPosition(handler->ap, "recall1", ct->position, 0);
-				AP_RequestSound(handler->ap, "recall1");
+				//AP_SetSoundPosition(handler->ap, "recall1", ct->position, 0);
+				//AP_RequestSound(handler->ap, "recall1");
+				AP_SetSoundPosition(handler->ap, "click", ct->position, 0);
+				AP_RequestSound(handler->ap, "click");
 
 				bug_bounce = 0;
 				bug_target_picked = true;
@@ -742,15 +762,26 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	
 	// -------------------------------------------------------------------------------------------------------------
 	// Pickup
-	float pickup_radius = 16.0f;
+	float pickup_radius = 18.0f;
 	if(ent->flags & BUG_RECALL)
 		pickup_radius *= 1.25f;
 
-	if(ent->flags & BUG_DISRUPTED_ENEMY)
-		pickup_radius = 0;
+	if(ent->flags & BUG_DISRUPTED_ENEMY) {
+		pickup_radius = 0.0f;
+		if(ai->targ_data.ent_id > -1) {
+			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
+				ai->targ_data.ent_id = -1;
+				ent->flags &= ~BUG_DISRUPTED_ENEMY;
+			} 
+
+			if(!(handler->ents[ai->targ_data.ent_id].comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
+				ai->targ_data.ent_id = -1;
+			} 
+		}
+	}
 
 	if(CheckCollisionSpheres(ct->position, pickup_radius, player_ent->comp_transform.position, 16) &&
-		(launch_timer <= EPSILON || (fabsf(ct->velocity.z) <= 0.5f && ct->on_ground))) 
+		(launch_timer <= EPSILON || ((fabsf(ct->velocity.z) <= 0.5f && ct->on_ground) && (!(ent->flags & BUG_ON_SWITCH) && launch_timer <= EPSILON)))) 
 	{
 		ai->state = BUG_DEFAULT;
 		return;

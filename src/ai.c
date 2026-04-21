@@ -381,6 +381,11 @@ u8 ExecDoFix(Entity *ent, EntityHandler *handler) {
 	ai->targ_data.ent_id = handler->player_id;
 	ai->input_mask &= ~AI_INPUT_SEE_GLITCHED;
 
+	handler->ents[handler->bug_id].flags &= ~BUG_DISRUPTED_ENEMY;
+	handler->ents[handler->bug_id].comp_ai.state = BUG_LAUNCHED;
+	handler->ents[handler->bug_id].comp_transform.on_ground = false;
+	handler->ents[handler->bug_id].comp_ai.targ_data.ent_id = handler->player_id;
+
 	return 1;
 }
 
@@ -410,12 +415,13 @@ void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
 		return;
 
-	/*
+	if(handler->ents[handler->bug_id].comp_ai.targ_data.ent_id == ent->id)
+		return;
+
 	if(ai->sched_state.sched_id == SCHED_FIX_FRIEND_A || ai->sched_state.sched_id == SCHED_FIX_FRIEND_B) {
 		ai->input_mask |= AI_INPUT_SEE_GLITCHED;
 		return;
 	}
-	*/
 
 	for(u16 i = 0; i < handler->count; i++) {
 		Entity *other = &handler->ents[i];

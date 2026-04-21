@@ -1,0 +1,59 @@
+---- light / ericw-tools 2.0.0-alpha10 ----
+LoadBSPFile: '10.bsp'
+BSP is version Quake BSP bsp29
+INFO: using built-in palette.
+Loading extended texinfo flags from 10.texinfo.json...
+Loading extended content flags from 10.content.json...
+7 entities read, 0 are lights.
+.lit colored light output requested on command line.
+BSPX colored light output requested on command line.
+BSPX light directions output requested on command line.
+
+--- Options Summary ---
+    "dist" was set to "1.000000" (from map)
+    "anglescale" was set to "1.000000" (from map)
+    "light" was set to "15.000000" (from map)
+    "dirt" was set to "1" (from map)
+    "minlight_dirt" was set to "1" (from command line)
+    "bounce" was set to "1" (from map)
+    "bouncescale" was set to "8.500000" (from map)
+    "bouncecolorscale" was set to "1.000000" (from map)
+    "sunlight" was set to "200.000000" (from map)
+    "sunlight_color" was set to "255 196 192" (from map)
+    "sunlight2" was set to "100.000000" (from map)
+    "sunlight2_color" was set to "255 196 192" (from map)
+    "sunlight3" was set to "0.000000" (from map)
+    "sunlight3_color" was set to "255 196 192" (from map)
+    "sunlight_dirt" was set to "1.000000" (from map)
+    "sunlight2_dirt" was set to "1.000000" (from command line)
+    "sunlight_mangle" was set to "0.38302222 -0.66341394 -0.6427876" (from map)
+    "sunlight_penumbra" was set to "4.000000" (from map)
+    "surflight_radiosity" was set to "1" (from command line)
+    "soft" was set to "5" (from command line)
+    "extra" was set to "4" (from command line)
+    "world_units_per_luxel" was set to "16.000000" (from command line)
+
+Embree_TraceInit: Embree version: 4.4.0
+Embree_TraceInit: 
+	161 sky faces
+	2140 solid faces
+	162 filtered faces
+	0 shadow-casting skip faces
+SetupLights: 0 initial lights
+SetupLights: 0 after surface lights
+SetupLights: 0 after jittering
+Final count: 0 lights, 129 suns in use.
+       48 dirtmap vectors
+0 surface light points in use.
+map uses color: true
+lightmap size (total): 1740284
+Lighting Completed.
+
+Writing 10.lit
+DECOUPLED_LM BSPX lump written
+0 switchable light styles (32 max)
+Writing 10.bsp as Quake BSP bsp29
+4.360s seconds elapsed
+0 empty lightmaps
+
+

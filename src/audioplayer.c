@@ -197,6 +197,8 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 3.5f);
 	ma_sound_start(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")]);
 
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "click")], 2.0f);
+
 	for(int i = 0; i < 5; i++) {
 		ma_sound *sound = &sounds[HashFetch(&ap->sound_hashmap, bullet_near_sounds[i])];
 

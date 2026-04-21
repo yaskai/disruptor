@@ -46,7 +46,9 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 		float angle = sinf(GetTime() * 1.5f);
 		angle = Clamp(angle, angle_min, angle_max);
 		
-		ct->targ_look.z = Lerp(ct->targ_look.z, GetRandomValue(-9, 9) * 0.01f, dt*5);
+		//ct->targ_look.z = Lerp(ct->targ_look.z, GetRandomValue(-20, 20) * 0.01f, dt);
+		ct->targ_look.z = Lerp(ct->targ_look.z, sinf(ai->disrupt_timer * 0.25f) + 0.1f, dt);
+		ct->targ_look.z = Clamp(ct->targ_look.z, -0.23f, 0.65f);
 
 		if(ent->comp_weapon.ammo > 0) {
 			ct->forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
