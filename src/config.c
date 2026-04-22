@@ -127,6 +127,9 @@ void ConfigInit(Config *conf) {
 	Option opt_mouse_sensitivity = OptionCreate("mouse_sens", &conf->mouse_sensitivity, VAL_INT);
 	OptionTableInsert(&conf->option_tables[OPT_BLOCK_INPUT], opt_mouse_sensitivity);
 
+	Option opt_audio_volume = OptionCreate("volume", &conf->volume, VAL_INT);
+	OptionTableInsert(&conf->option_tables[OPT_BLOCK_AUDIO], opt_audio_volume);
+
 	Option opt_draw_crosshair = OptionCreate("draw_crosshair", &conf->draw_crosshair, VAL_INT);
 	OptionTableInsert(&conf->option_tables[OPT_BLOCK_OTHER], opt_draw_crosshair);
 }
@@ -173,6 +176,9 @@ void ConfigParseLine(Config *conf, char *line, u8 *block, u8 print) {
 
 		} else if(streq(block_name, "input")) {
 			*block = OPT_BLOCK_INPUT;
+
+		} else if(streq(block_name, "audio")) {
+			*block = OPT_BLOCK_AUDIO;
 
 		} else if(streq(block_name, "other")) {
 			*block = OPT_BLOCK_OTHER;	

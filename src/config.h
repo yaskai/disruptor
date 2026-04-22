@@ -17,11 +17,12 @@ enum VALUE_TYPES : u8 {
 	VAL_HEX		= 4
 };
 
-#define OPTION_BLOCK_COUNT 3
+#define OPTION_BLOCK_COUNT 4
 enum OPTION_BLOCK_NAMES : u8 {
-	OPT_BLOCK_WINDOW,
-	OPT_BLOCK_INPUT,
-	OPT_BLOCK_OTHER
+	OPT_BLOCK_WINDOW		= 0,
+	OPT_BLOCK_INPUT			= 1,
+	OPT_BLOCK_AUDIO			= 2,
+	OPT_BLOCK_OTHER			= 3,
 };
 
 typedef struct {
@@ -60,6 +61,8 @@ typedef struct {
 
 	u32 window_width, window_height;
 	u32 target_fps;
+
+	u32 volume;
 
 	u32 mouse_sensitivity;
 

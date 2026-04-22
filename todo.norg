@@ -28,6 +28,7 @@ ___
 ** (x) bounce
 ** (x) recall (just needs a key bind & logic boundaries)
 ** (x) death/cooldown
+** (x) landmine mode
 
 ___
 * *Guns*
@@ -46,7 +47,7 @@ ___
 
 ** (-) revolver 
 *** (x) model
-*** (-) textures
+*** (-) texture _needs improvement_
 *** (x) recoil animation
 *** (x) reload animation
 
@@ -64,7 +65,7 @@ ___
 ** (-) gates -(and switches)-
 ** (x) force fields
 ** breakable boxes
-** (-) pickup items (health + ammo), need models
+** (-) pickup items (health + ammo), need _/*better/*_ models 
 
 ___
 * *Audio*
@@ -106,6 +107,8 @@ ___
 ** (x) ammo/clip counter
 ** (x) crosshair
 ** diegetic elements for Bug
+** (-) proper HUD separation/handling
+** (-) loading indicator
 
 ___
 * *AI*
@@ -133,9 +136,9 @@ ___
 ** (-) maintainer behaviour
 *** (x) idle
 *** (x) attack (go to & pickup projectile and/or meelee)
-*** (x) fix disrupted entities (*_navigation system is blocker_*)
-*** (x) disrupted (*_design is blocker_*)
-*** (-) sync attack and fix with animation
+*** (x) fix disrupted entities
+*** (-) disrupted
+*** (-) sync attack and fix with animation *_/animation is blocker/_*
 
 ___
 * *Menus*
@@ -148,12 +151,14 @@ ___
 *** (-) UI layout
 *** (-) integration with config file
 
+** Save Select Screen
+
 ___
 * *Visual Effects*
 
 ** (-) bullet trails
 *** (x) turret 
-*** (-) player guns (using the same as turret for now but should be changed)
+*** (-) player guns /using the same as turret for now but should be changed/
 
 ** (-) bullet hole decals
 *** (x) struct 
@@ -165,7 +170,9 @@ ___
 *** (-) manager
 *** (-) rendering
 
-** (x) player damage visual feedback
+** (-) player damage visual feedback
+*** (x) camera tilt
+*** (-) damage sprite overlay
 
 ** enemy damage feedback
 
@@ -179,7 +186,7 @@ ___
   - -vertex frames (possibly with interpolation)-
   - -gpu skinning-
   - -procedural through FABRIK-
-  - (x) cpu skinning ended up being fine 
+  - (x) /cpu skinning ended up being fine/ 
 
 ___
 * *Other*

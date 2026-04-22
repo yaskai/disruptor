@@ -1,5 +1,6 @@
 #include "../include/num_redefs.h"
 #include "raylib.h"
+#include "hud.h"
 
 #ifndef TEXT_OBJECT_H_
 #define TEXT_OBJECT_H_
@@ -10,10 +11,13 @@ typedef struct {
 	char text[64];
 	
 	Vector3 position;
+	float radius;
 		
 	u8 flags;
 
 } TextObject;
+
+void SendTextRequest(TextObject *txt_obj); 
 
 #endif
 

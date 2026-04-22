@@ -277,3 +277,8 @@ void AP_BlendDsp(AudioPlayer *ap, float dt, float speed, u8 preset_id) {
 	verblib_set_dry(verb, Lerp(verblib_get_dry(verb), preset->dry, dt * speed));
 }
 
+void AP_SetGlobalVolume(AudioPlayer *ap, u8 volume) {
+	float val = Clamp(volume * 0.01f, 0.0f, 1.0f);
+	ma_engine_set_volume(&_ma_engine, val);
+}
+

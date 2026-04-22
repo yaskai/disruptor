@@ -256,6 +256,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.anim_state = anim_Init(ent.model);
 			ent.animations = LoadModelAnimations("resources/models/enemies/maintainer.glb", &ent.num_anims);
+			//ent.animations = LoadModelAnimations("resources/models/enemies/maintainer02.glb", &ent.num_anims);
 			ent.anim_state.speed = (1.0f / 100);
 
 		} break;

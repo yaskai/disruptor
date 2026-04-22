@@ -330,13 +330,14 @@ void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
 	handler->base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
 	handler->base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer.glb", prefix));	 
+	//handler->base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer02.glb", prefix));	 
 }
 
 int base_ent_anims_count[16] = {0};
 ModelAnimation *base_ent_anims[16] = {0};
 void LoadEntityBaseAnims() {
 	char *prefix = "resources/models";
-	base_ent_anims[ENT_MAINTAINER] = LoadModelAnimations(TextFormat("%s/enemies/maintainer.glb", prefix), &base_ent_anims_count[ENT_MAINTAINER]);	 
+	base_ent_anims[ENT_MAINTAINER] = LoadModelAnimations(TextFormat("%s/enemies/maintainer02.glb", prefix), &base_ent_anims_count[ENT_MAINTAINER]);	 
 }
 
 Model projectile_models[4];

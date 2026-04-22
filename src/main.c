@@ -28,7 +28,6 @@ void StartupScreen(Config *conf, Game *game) {
 
 	// * TODO:
 	// Add title, logo, etc. here:
-
 	DrawText("...", 32, 0, 80, WHITE);
 
 	EndDrawing();
@@ -75,11 +74,7 @@ int main() {
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
 
-	//GameLoadScene(&game, "resources/maps/06", 0);
-	//GameLoadScene(&game, "resources/maps/07", 0);
 	GameLoadScene(&game, "resources/maps/08", 0);
-	//GameLoadScene(&game, "resources/maps/09", 0);
-	//GameLoadScene(&game, "resources/maps/10", 0);
 
 	// Run main game loop
 	bool exit = false;
