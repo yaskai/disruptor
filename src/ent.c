@@ -320,6 +320,13 @@ OnHitFunc on_hit_funcs[] = {
 int shader_holo_t_loc;
 void LoadEntityShaders(EntityHandler *handler) {
 	char *prefix = "resources/shaders";
+
+	handler->ent_shader = LoadShader(TextFormat("%s/lit_ent_v.glsl", prefix), TextFormat("%s/lit_ent_f.glsl", prefix));
+	handler->ent_shader_locs.locs[LC_LIGHT_POS] = GetShaderLocation(handler->ent_shader, "light_pos");
+	handler->ent_shader_locs.locs[LC_LIGHT_CLR] = GetShaderLocation(handler->ent_shader, "light_clr");
+	handler->ent_shader_locs.locs[LC_MODEL_MAT] = GetShaderLocation(handler->ent_shader, "matModel");
+	handler->ent_shader_locs.locs[LC_MODEL_TEX] = GetShaderLocation(handler->ent_shader, "texture0");
+	handler->ent_shader_locs.locs[LC_VIEW_POS]  = GetShaderLocation(handler->ent_shader, "view_pos");
 }
 
 void UpdateEntityShaders(EntityHandler *handler) {
@@ -1449,21 +1456,92 @@ void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min
 	Bsp_Data *bsp = &ptr_handler_sect->bsp_data;
 	comp_Transform *ct = &ent->comp_transform;
 
-	Color light = lit_SampleLightGrid(bsp, ct->position);
-	if(light.r < min_light) light.r = min_light;
-	if(light.g < min_light) light.g = min_light;
-	if(light.b < min_light) light.b = min_light;
-	DrawModel(ent->model, ct->position, scale, light);
+	float h = BoxExtent(GetModelBoundingBox(ent->model)).z * scale;
+	Vector3 points[3] = {
+		Vector3Add(ct->position, Vector3Scale(UP, h*0.5f)),
+		ct->position,
+		Vector3Add(ct->position, Vector3Scale(DOWN, h*0.5f))
+	};
+
+	Color light_colors[3] = {0};
+	for(short i = 0; i < 3; i++)
+		light_colors[i] = lit_SampleLightGrid(bsp, points[i]);
+
+	float light_pos[9];
+	for(short i = 0; i < 3; i++) {
+		light_pos[i*3+0] = points[i].x;
+		light_pos[i*3+1] = points[i].y;
+		light_pos[i*3+2] = points[i].z;
+	}
+
+	float light_clr[9];
+	for(short i = 0; i < 3; i++) {
+		light_clr[i*3+0] = light_colors[i].r/255.0f;
+		light_clr[i*3+1] = light_colors[i].g/255.0f;
+		light_clr[i*3+2] = light_colors[i].b/255.0f;
+	}
+
+	Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;
+	SetShaderValue(handler->ent_shader, handler->ent_shader_locs.locs[LC_VIEW_POS], &view_pos, SHADER_UNIFORM_VEC3);
+
+	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], light_pos, SHADER_UNIFORM_VEC3, 3);
+	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], light_clr, SHADER_UNIFORM_VEC3, 3);
+
+	Matrix mat = ent->model.transform;
+	//mat = MatrixMultiply(mat, MatrixRotateX(-90.0f*DEG2RAD));
+	SetShaderValueMatrix(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_MAT], mat);
+	//SetShaderValueTexture(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_TEX], ent->model.materials[0].maps[0].texture);
+
+	for(int m = 0; m < ent->model.materialCount; m++) {
+		ent->model.materials[m].shader = handler->ent_shader;
+	}
+	DrawModel(ent->model, ct->position, scale, WHITE);
 }
 
 void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light) {
 	Bsp_Data *bsp = &ptr_handler_sect->bsp_data;
 	comp_Transform *ct = &ent->comp_transform;
 
-	Color light = lit_SampleLightGrid(bsp, ct->position);
-	if(light.r < min_light) light.r = min_light;
-	if(light.g < min_light) light.g = min_light;
-	if(light.b < min_light) light.b = min_light;
-	DrawModelEx(ent->model, pos, axis, angle, Vector3Scale(Vector3One(), scale), light);
+	float h = BoxExtent(GetModelBoundingBox(ent->model)).z * scale;
+	Vector3 points[3] = {
+		Vector3Add(ct->position, Vector3Scale(UP, h)),
+		ct->position,
+		Vector3Add(ct->position, Vector3Scale(DOWN, h*0.5f))
+	};
+
+	Color light_colors[3] = {0};
+	for(short i = 0; i < 3; i++)
+		light_colors[i] = lit_SampleLightGrid(bsp, points[i]);
+
+	float light_pos[9];
+	for(short i = 0; i < 3; i++) {
+		light_pos[i*3+0] = points[i].x;
+		light_pos[i*3+1] = points[i].y;
+		light_pos[i*3+2] = points[i].z;
+	}
+
+	float light_clr[9];
+	for(short i = 0; i < 3; i++) {
+		light_clr[i*3+0] = light_colors[i].r/255.0f;
+		light_clr[i*3+1] = light_colors[i].g/255.0f;
+		light_clr[i*3+2] = light_colors[i].b/255.0f;
+	}
+
+	Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;
+	SetShaderValue(handler->ent_shader, handler->ent_shader_locs.locs[LC_VIEW_POS], &view_pos, SHADER_UNIFORM_VEC3);
+
+	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], light_pos, SHADER_UNIFORM_VEC3, 3);
+	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], light_clr, SHADER_UNIFORM_VEC3, 3);
+
+	Matrix mat = ent->model.transform;
+	//mat = MatrixMultiply(mat, MatrixRotateX(-90.0f*DEG2RAD));
+	SetShaderValueMatrix(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_MAT], mat);
+	//SetShaderValueTexture(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_TEX], ent->model.materials[0].maps[0].texture);
+
+	for(int m = 0; m < ent->model.materialCount; m++) {
+		ent->model.materials[m].shader = handler->ent_shader;
+	}
+
+	DrawModelEx(ent->model, pos, axis, angle, Vector3Scale(Vector3One(), scale), WHITE);
 }
 

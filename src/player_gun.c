@@ -81,7 +81,8 @@ comp_Weapon weapons[] = {
 
 		.clip_size = 6,
 		.in_clip = 6,
-		.ammo = 12,
+		//.ammo = 12,
+		.ammo = 999,
 
 		.reload_time_amnt = 8,
 		.reload_timer = 0,
@@ -181,7 +182,8 @@ void PlayerGunInit(
 	models[WEAP_SHOTGUN] 	= LoadModel("resources/models/weapons/pistol_00.glb");
 	//models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00.glb");
 	models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00_e.glb");
-	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_00.glb");
+	//models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_00.glb");
+	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_01.glb");
 
 	int rev_num_anims = 0;
 	anims[WEAP_REVOLVER] = *LoadModelAnimations("resources/models/weapons/rev_00_e.glb", &rev_num_anims);
@@ -525,6 +527,11 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 
 		Vector3 sample_pos = Vector3Add(gun_refs.player->comp_transform.position, Vector3Scale(gun_refs.player->comp_transform.forward, 5.0f));
 		Color light = lit_SampleLightGrid(&gun_refs.sect->bsp_data, sample_pos);
+		light.r = Clamp(light.r, 100, 255);
+		light.g = light.r;
+		light.b = light.r;
+		//light.g = Clamp(light.g, 60, 255);
+		//light.b = Clamp(light.b, 60, 255);
 		weap_tint = ColorLerp(weap_tint, light, GetFrameTime()*5);
 
 		BeginMode3D(player_gun->cam);

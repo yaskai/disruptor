@@ -221,6 +221,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.flags |= (ENT_COLLIDERS);
 
 			ent.model = handler->base_ent_models[ENT_MAINTAINER];
+			ent.model.materials[0].shader = handler->ent_shader;
 
 			ent.comp_transform.position.z += 20;
 
@@ -234,7 +235,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.05f;
-			ent.comp_ai.hear_distance = 96.0f;
+			ent.comp_ai.hear_distance = 128.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);

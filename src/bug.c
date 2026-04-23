@@ -437,8 +437,11 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 }
 
 void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
-	ent->model = LoadModel("resources/models/weapons/bug_00.glb");
+	ent->model = LoadModel("resources/models/weapons/bug_01.glb");
+	for(int i = 0; i < ent->model.materialCount; i++) 
+		ent->model.materials[i].shader = handler->ent_shader;
 	model_dead = LoadModel("resources/models/weapons/bug_dead_00.glb");
+	model_dead.materials[0].shader = handler->ent_shader;
 
 	ent->comp_transform.bounds = (BoundingBox) {
 		.min = (Vector3) { -4, -4, -4 },

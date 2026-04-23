@@ -1,25 +1,26 @@
 #version 330
 
 in vec2 fragTexCoord;
-in vec2 fragTexCoord2;
-
 in vec3 fragPosition;
 in vec3 fragNormal;
 
 uniform sampler2D texture0;
-uniform sampler2D texture1;
 
 uniform vec3 light_pos[3];
 uniform vec3 light_clr[3];
+uniform vec3 view_pos;
 
 out vec4 finalColor;
 
 void main() {
-	//vec4 diffuse = texture(texture0, fragTexCoord);
-	//vec4 light = texture(texture1, fragTexCoord2);
+    vec4 diffuse = texture(texture0, fragTexCoord);
+    
+    // Simple normal-based vertical gradient using lightgrid samples
+    vec3 normal = normalize(fragNormal);
+    
+    vec3 ambient;
+	ambient = light_clr[1];
+	ambient = clamp(ambient, 0.5, 1.0);
 
-	//finalColor = diffuse * light * 2.25;
-
-	vec4 diffuse = texture(texture0, fragTexCoord);
-	finalColor = diffuse;
+    finalColor = vec4(diffuse.rgb * ambient, 1.0);
 }

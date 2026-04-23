@@ -240,6 +240,19 @@ typedef struct {
 
 } Projectile;
 
+enum ENT_SHADER_LOCS {
+	LC_LIGHT_POS	= 0,
+	LC_LIGHT_CLR	= 1,
+	LC_MODEL_MAT	= 2,
+	LC_MODEL_TEX	= 3,
+	LC_VIEW_POS		= 4,
+};
+
+typedef struct {
+	int locs[8];
+
+} EntShaderLocs;
+
 // Entity handler state flags
 #define AT_LEVEL_END 		0x01
 #define AT_LEVEL_BACK		0x02
@@ -256,6 +269,9 @@ typedef struct {
 
 	vEffect_Manager *effect_manager;
 	AudioPlayer *ap;
+
+	Shader ent_shader;
+	EntShaderLocs ent_shader_locs;
 
 	Vector3 player_start;
 	Vector3 player_start_fwd;
