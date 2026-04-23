@@ -801,7 +801,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	}
 }
 
-void BugDraw(Entity *ent) {
+void BugDraw(Entity *ent, EntityHandler *handler) {
 	//DrawBoundingBox(BoxTranslate(ent->comp_transform.bounds, ent->comp_transform.position), PURPLE);
 	//DrawSphere(ent->comp_transform.position, 8, PURPLE);
 	//DrawLine3D(ent->comp_transform.position, plr_ent_pos, PURPLE);
@@ -823,7 +823,8 @@ void BugDraw(Entity *ent) {
 		//DrawModel(model_dead, ent->comp_transform.position, 3, LIGHTGRAY);	
 		DrawModel(model_dead, ent->comp_transform.position, 3, DARKGRAY);	
  	} else {
-		DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
+		//DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
+		EntDrawLitModel(handler, ent, 3.0f, 100);
 	}
 }
 

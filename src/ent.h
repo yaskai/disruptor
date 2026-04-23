@@ -174,7 +174,7 @@ enum ENT_TYPES : u8 {
 	ENT_DSP_DEFAULT 		=  14,
 	ENT_DSP_SMALL_ROOM		=  15,
 	ENT_DSP_OPEN			=  16,
-	ENT_TEXT_OBJECT			=  17
+	ENT_TEXT_OBJECT			=  17,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {
@@ -345,7 +345,7 @@ void TurretDraw(Entity *ent);
 void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-void MaintainerDraw(Entity *ent, float dt);
+void MaintainerDraw(Entity *ent, EntityHandler *handler, float dt);
 // ----------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------
@@ -416,7 +416,7 @@ enum BUG_STATES : u8 {
 
 void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect);
 void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-void BugDraw(Entity *ent);
+void BugDraw(Entity *ent, EntityHandler *handler);
 
 void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect);
 void AlertMaintainers(EntityHandler *handler, u16 disrupted_id);
@@ -465,5 +465,8 @@ void SwitchSetup(EntityHandler *handler);
 void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt);
 void SwitchDraw(Entity *ent, EntityHandler *handker, float dt);
 void DoTrigger(EntityHandler *handler, Entity *switch_ent);
+
+void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min_light);
+void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light);
 
 #endif

@@ -36,11 +36,13 @@ BSPX light directions output requested on command line.
     "soft" was set to "5" (from command line)
     "extra" was set to "4" (from command line)
     "world_units_per_luxel" was set to "16.000000" (from command line)
+    "lightgrid" was set to "1" (from command line)
+    "lightgrid_format" was set to "octree" (from command line)
 
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
 	331 sky faces
-	11646 solid faces
+	11625 solid faces
 	379 filtered faces
 	0 shadow-casting skip faces
 SetupLights: 82 initial lights
@@ -50,14 +52,23 @@ Final count: 82 lights, 129 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 7068068
+lightmap size (total): 7060284
 Lighting Completed.
 
 Writing 08.lit
 DECOUPLED_LM BSPX lump written
+     32 32 32 lightgrid_dist
+     150 65 46 grid_size
+     -2304 -1528 -1136 grid_mins
+     2480 528 327.2139 grid_maxs
+     1 num_styles
+octree stored 441880 grid nodes + 6620 occluded = 448500 total, full stored 448500 (octree is 98.52397 percent)
+octree nodes size: 13464 bytes (306 * 44)
+octree leafs 2086 overhead 50064 bytes
+      2100221 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing 08.bsp as Quake BSP bsp29
-26.086s seconds elapsed
+43.553s seconds elapsed
 0 empty lightmaps
 
 

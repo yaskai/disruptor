@@ -19,7 +19,6 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Data data = (Bsp_Data) {0};
 
 	FILE *pF = fopen(path, "rb");
-
 	if(!pF) {
 		MessageError("ERROR: Could not load file ", path);
 		return data;
@@ -322,13 +321,59 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 
 		// Read lightgrid octree data (if available)
 		if(lm_grid_id != -1) {
-			int num_entries = sizes[lm_grid_id] / sizeof(lm_OctreeNode);
+			data.lm_oct_raw = malloc(sizes[lm_grid_id]);
+			fseek(pF, offsets[lm_grid_id], SEEK_SET);
+			fread(data.lm_oct_raw, 1, sizes[lm_grid_id], pF);
+			data.lm_oct_raw_size = sizes[lm_grid_id];
 		}
 	}
 	// ---------------------------------------------------------------------------------------
 
 	// Close and return data
 	fclose(pF);
+
+	// Lightgrid octree setup
+	if(data.lm_oct_raw) {
+		u8 *ptr = data.lm_oct_raw;
+
+		// Read header 
+		memcpy(data.lm_oct_header.grid_ext, ptr, 12); 	ptr += 12;
+		memcpy(data.lm_oct_header.grid_size, ptr, 12); 	ptr += 12;
+		memcpy(data.lm_oct_header.grid_mins, ptr, 12);	ptr += 12;
+		data.lm_oct_header.num_styles = *ptr + 1; ptr++;
+		memcpy(&data.lm_oct_header.root, ptr, 4); ptr += 4;
+
+		// Node count
+		memcpy(&data.num_oct_nodes, ptr, 4);
+		ptr += 4;
+
+		data.lm_oct_nodes = (lm_OctreeNode*)ptr;
+		ptr += data.num_oct_nodes * sizeof(lm_OctreeNode);
+
+		// Leaf count
+		memcpy(&data.num_oct_leaves, ptr, 4);
+		ptr += 4;
+
+		printf("num_oct_nodes: %d\n", data.num_oct_nodes);
+		printf("num_oct_leaves: %d\n", data.num_oct_leaves);
+
+		data.oct_leaf_offsets = malloc(data.num_oct_leaves * sizeof(u32));
+		for(u32 i = 0; i < data.num_oct_leaves; i++) {
+			data.oct_leaf_offsets[i] = ptr - data.lm_oct_raw; 
+
+			ptr += 12;
+			int size[3];
+			memcpy(size, ptr, 12);
+			ptr += 12;
+
+			int count = size[0] * size[1] * size[2];
+			for(int j = 0; j < count; j++) {
+				u8 used = *ptr++;
+				if(used == 0xFF) continue;
+				ptr += used * 4;
+			}
+		}
+	}
 
 	BspRenderSetup(&data);
 
@@ -366,14 +411,9 @@ void UnloadBsp(Bsp_Data *data) {
 
 	UnloadShader(data->lm_shader);
 
-	if(data->lm_rgb)
-		free(data->lm_rgb);
-
-	if(data->lm.uvs)
-		free(data->lm.uvs);
-
-	if(data->lm_oct_nodes)
-		free(data->lm_oct_nodes);
+	if(data->lm_rgb)		free(data->lm_rgb);
+	if(data->lm.uvs)		free(data->lm.uvs);
+	if(data->lm_oct_raw)	free(data->lm_oct_raw);
 }
 
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {

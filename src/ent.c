@@ -662,11 +662,11 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				break;
 
 			case ENT_MAINTAINER:
-				MaintainerDraw(ent, dt);
+				MaintainerDraw(ent, handler, dt);
 				break;
 
 			case ENT_DISRUPTOR:
-				BugDraw(ent);
+				BugDraw(ent, handler);
 				break;
 
 			// * NOTE:
@@ -1443,5 +1443,27 @@ void ReloadEntities(EntityHandler *handler, MapSection *sect, short with_states)
 
 	// Reset ai tick
 	// handler->ai_tick = 0.1f; 
+}
+
+void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min_light) {
+	Bsp_Data *bsp = &ptr_handler_sect->bsp_data;
+	comp_Transform *ct = &ent->comp_transform;
+
+	Color light = lit_SampleLightGrid(bsp, ct->position);
+	if(light.r < min_light) light.r = min_light;
+	if(light.g < min_light) light.g = min_light;
+	if(light.b < min_light) light.b = min_light;
+	DrawModel(ent->model, ct->position, scale, light);
+}
+
+void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light) {
+	Bsp_Data *bsp = &ptr_handler_sect->bsp_data;
+	comp_Transform *ct = &ent->comp_transform;
+
+	Color light = lit_SampleLightGrid(bsp, ct->position);
+	if(light.r < min_light) light.r = min_light;
+	if(light.g < min_light) light.g = min_light;
+	if(light.b < min_light) light.b = min_light;
+	DrawModelEx(ent->model, pos, axis, angle, Vector3Scale(Vector3One(), scale), light);
 }
 

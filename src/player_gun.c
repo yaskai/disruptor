@@ -153,6 +153,8 @@ Font hud_font;
 
 void DrawSectionTransition();
 
+Color weap_tint = WHITE;
+
 void PlayerGunInit(
 	PlayerGun *player_gun,
 	Entity *player,
@@ -512,8 +514,21 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		draw_pos = Vector3Add(draw_pos, Vector3Scale(LOCAL_UP, sway.y));
 		draw_pos.z -= sway.y * 0.01f;
 
+		/*
+		Color clr = lit_SampleLightGrid(&gun_refs.sect->bsp_data, gun_refs.player->comp_transform.position);
+		clr.r = Clamp(clr.r, 0, 255);
+		clr.g = Clamp(clr.g, 0, 255);
+		clr.b = Clamp(clr.b, 0, 255);
+		weap_tint = ColorLerp(weap_tint, clr, GetFrameTime());
+		weap_tint.a = 255;
+		*/
+
+		Vector3 sample_pos = Vector3Add(gun_refs.player->comp_transform.position, Vector3Scale(gun_refs.player->comp_transform.forward, 5.0f));
+		Color light = lit_SampleLightGrid(&gun_refs.sect->bsp_data, sample_pos);
+		weap_tint = ColorLerp(weap_tint, light, GetFrameTime()*5);
+
 		BeginMode3D(player_gun->cam);
-		DrawModel(models[player_gun->current_gun], draw_pos, scale, WHITE);
+		DrawModel(models[player_gun->current_gun], draw_pos, scale, weap_tint);
 		EndMode3D();
 	}
 

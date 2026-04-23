@@ -197,7 +197,7 @@ void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, flo
 		anim_Update(&ent->anim_state, ent->animations, dt);
 }
 
-void MaintainerDraw(Entity *ent, float dt) {
+void MaintainerDraw(Entity *ent, EntityHandler *handler, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
@@ -209,6 +209,7 @@ void MaintainerDraw(Entity *ent, float dt) {
 		Vector3 pos = ent->comp_transform.position;		
 		pos.z -= 20;
 
+		/*
 		DrawModelEx(
 			ent->model,
 			pos,
@@ -217,6 +218,9 @@ void MaintainerDraw(Entity *ent, float dt) {
 			Vector3Scale(Vector3One(), 1.0f),
 			LIGHTGRAY 
 		);
+		*/
+
+		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3CrossProduct(ct->forward, UP), 90, 100);
 
 		return;
 	}
@@ -236,7 +240,9 @@ void MaintainerDraw(Entity *ent, float dt) {
 	Vector3 pos = ent->comp_transform.position;
 	float yaw = atan2f(-ct->forward.x, ct->forward.y);
 	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(yaw+(90*DEG2RAD)*-1));
-	DrawModel(ent->model, pos, 1.0f, LIGHTGRAY);
+	EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3CrossProduct(ct->forward, UP), 0, 100);
+	//EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3CrossProduct(ct->forward, UP), 90);
+	//DrawModel(ent->model, pos, 1.0f, LIGHTGRAY);
 
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 10)), GREEN);
 	//DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->targ_look, 10)), RED);

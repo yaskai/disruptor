@@ -28,10 +28,14 @@ typedef struct {
 
 } rBrushList;
 
+#define LG_FLAG_LEAF 	(1u << 31)
+#define LG_FLAG_OCCLUDE (1u << 30)
+#define LG_FLAG_MASK	(LG_FLAG_LEAF | LG_FLAG_OCCLUDE)
+
 typedef struct {
-	Vector3 grid_ext;
+	float grid_ext[3];
 	int grid_size[3];
-	Vector3 grid_min;
+	float grid_mins[3];
 	u8 num_styles;
 	u32 root;
 
@@ -50,11 +54,17 @@ typedef struct {
 } lm_OctreeSample;
 
 typedef struct {
+	lm_OctreeSample samples[4];
 	u8 used;
 	u8 occluded;
-	lm_OctreeSample samples[4];
 
 } lm_SampleList;
+
+typedef struct {
+	int mins[3];
+	int size[3];
+
+} lg_LeafHeader;
 
 typedef struct {
 	Texture2D tex;
@@ -326,11 +336,20 @@ typedef struct {
 
 	u8 *lm_rgb;
 
+
 	Lm_Decoupled *decouple_lm;
 	i32 *lm_offsets;
 
+	u8 *lm_oct_raw;	// Raw octree bspx lump data
+	u32 lm_oct_raw_size;
+
+	lm_OctreeHeader lm_oct_header;
+
 	lm_OctreeNode *lm_oct_nodes;
-	i32 num_oct_nodes;
+	u32 num_oct_nodes;
+
+	u32 *oct_leaf_offsets;
+	u32 num_oct_leaves;
 
 	Bsp_HullGroup *hull_groups;
 
@@ -383,5 +402,7 @@ Lightmap BuildLightmap(Bsp_Data *bsp);
 
 void BspRenderSetup(Bsp_Data *bsp);
 void UpdateBspShaders(Bsp_Data *bsp);
+
+Color lit_SampleLightGrid(Bsp_Data *bsp, Vector3 world_pos);
 
 #endif

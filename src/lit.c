@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 #include <float.h>
 #include <stdio.h>
@@ -87,5 +88,70 @@ Lightmap BuildLightmap(Bsp_Data *bsp) {
 	UnloadImage(img);
 
 	return lm;
+}
+
+Color lit_SampleLightGrid(Bsp_Data *bsp, Vector3 world_pos) {
+	lm_OctreeHeader *header = &bsp->lm_oct_header;
+
+	// Translate world position to grid indices
+	int gx = (int)roundf((world_pos.x - header->grid_mins[0]) / header->grid_ext[0]); 
+	int gy = (int)roundf((world_pos.y - header->grid_mins[1]) / header->grid_ext[1]); 
+	int gz = (int)roundf((world_pos.z - header->grid_mins[2]) / header->grid_ext[2]); 
+
+	// Check bounds
+	if(gx < 0 || gy < 0 || gz < 0)
+		return WHITE;
+
+	if(gx >= header->grid_size[0] || gy >= header->grid_size[1] || gz >= header->grid_size[2])
+		return WHITE;
+
+	// Walk tree
+	u32 node_id = header->root;
+	while(1) {
+		if(node_id & LG_FLAG_OCCLUDE) {
+			return BLACK;
+		}
+
+		if(node_id & LG_FLAG_LEAF) {
+			u32 leaf_id = node_id & ~LG_FLAG_MASK;
+			u8 *ptr = bsp->lm_oct_raw + bsp->oct_leaf_offsets[leaf_id];
+
+			int mins[3], size[3];
+			memcpy(mins, ptr, 12); ptr += 12;
+			memcpy(size, ptr, 12); ptr += 12;
+
+			// Get local position inside leaf
+			int lx = gx - mins[0];
+			int ly = gy - mins[1];
+			int lz = gz - mins[2];
+			int id = (size[0] * size[1] * lz) + (size[0] * ly) + lx;
+			
+			// Skip to sample id
+			for(int i = 0; i < id; i++) {
+				u8 used = *ptr++;
+				if(used == 0xFF) continue;
+				ptr += used * 4;
+			}
+
+			u8 used = *ptr++;
+			if(used == 0xFF || !used)
+				return BLACK;
+
+			// Return first style's color
+			ptr++;		// Skip style byte
+			return (Color) { ptr[0], ptr[1], ptr[2], 255 };
+		}
+
+		// Node found
+		lm_OctreeNode *node = &bsp->lm_oct_nodes[node_id];
+		int sg_x = (gx >= node->x) ? 1 : 0;
+		int sg_y = (gy >= node->y) ? 1 : 0;
+		int sg_z = (gz >= node->z) ? 1 : 0;
+
+		int child_id = (4 * sg_x) + (2 * sg_y) + sg_z;
+		node_id = node->children[child_id];
+	}
+
+	return WHITE;
 }
 
