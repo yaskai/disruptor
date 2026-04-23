@@ -680,6 +680,8 @@ void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTr
 
 	RayCollision coll;
 
+	ray.position = Vector3Subtract(ray.position, bvh->origin);
+
 	if(node_id == 0) {
 		coll = GetRayCollisionBox(ray, node->bounds);
 

@@ -683,7 +683,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	rbrush_list.render_brushes = calloc(rbrush_list.cap, sizeof(RenderBrush));
 	rbrush_list.ids = malloc(sizeof(int) * rbrush_list.cap);
 
-	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
+	for(int i = 0; i < sect.bsp_data.models[0].num_leafs; i++) {
 		int temp_count = 0;
 		RenderBrush *temp_brushes = BspLeafToRenderBrushes(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count); 
 
@@ -791,53 +791,6 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 			sect._hulls[i].arr[j] = hull;
 		}
 	}
-
-	/*
-	Message("Loading bsp", ANSI_BLUE);
-	short bsp_id = -1;
-	for(short i = 0; i < path_list.count; i++)
-		if(strcmp(GetFileExtension(path_list.paths[i]), ".bsp") == 0) bsp_id = i;
-
-	if(bsp_id == -1) { 
-		MessageError("Missing .bsp file", path);
-		return sect;
-	}
-
-	sect.bsp_data = LoadBsp(path_list.paths[bsp_id], false);
-
-	for(short i = 0; i < 4; i++) {
-		sect.bsp[i] = Bsp_BuildHull(&sect.bsp_data, i);
-	}
-
-	short lit_path_id = 0;
-	for(short i = 0; i < path_list.count; i++)
-		if(strcmp(GetFileExtension(path_list.paths[i]), ".lit") == 0) lit_path_id = i;
-
-	// Make BSP lightmap for lighting level geometry
-	sect.bsp_data.lm = BuildLightmap(&sect.bsp_data);
-
-	// Make render brush models
-	rbrush_list.count = 0;
-	rbrush_list.cap = 4096;
-	rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * rbrush_list.cap);
-	rbrush_list.ids = malloc(sizeof(int) * rbrush_list.cap);
-
-	for(int i = 0; i < sect.bsp_data.num_leaves; i++) {
-		int temp_count = 0;
-		RenderBrush *temp_brushes = BspLeafToRenderBrushes(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count); 
-
-		for(int j = 0; j < temp_count; j++) {
-			rbrush_list.render_brushes[rbrush_list.count + j] = temp_brushes[j];
-			rbrush_list.ids[rbrush_list.count + j] = i;
-		}
-
-		rbrush_list.count += temp_count;
-	}
-
-	rbrush_list.cap = rbrush_list.count;
-	rbrush_list.render_brushes = realloc(rbrush_list.render_brushes, sizeof(RenderBrush) * rbrush_list.cap);
-	rbrush_list.ids = realloc(rbrush_list.ids, sizeof(int) * rbrush_list.cap);
-	*/
 
 	// Make render brush models for translucent objects
 	translucent_rbrush_list.count = 0;
@@ -1432,6 +1385,15 @@ void DebugDrawDSP(MapSection *sect, AudioPlayer *ap, Vector3 pos) {
 			continue;
 
 		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, ColorAlpha(RED, 0.25f));
+	}
+}
+
+void MapUpdateBvhOffsets(MapSection *sect) {
+	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
+		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
+
+		for(int j = 0; j < 3; j++) 
+			hg->bvh[j].origin = hg->origin;
 	}
 }
 

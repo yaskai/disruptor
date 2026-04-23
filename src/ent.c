@@ -476,7 +476,6 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		if(!ent->bsp_model)
 			continue;
 
-
 		if(!(ent->flags & ENT_ACTIVE)) {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
 			sect->bvh_hullgroups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
@@ -492,6 +491,9 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 				}
 			}
 		}
+
+		if(ent->type == ENT_DOOR)
+			DoorUpdate(ent, sect, dt);
 	}
 
 	for(u16 i = 0; i < handler->count; i++) {
@@ -698,12 +700,14 @@ void RenderEntities(EntityHandler *handler, float dt) {
 
 			case ENT_HEALTHPACK:
 				//DrawBoundingBox(ent->comp_transform.bounds, PINK);
-				DrawModel(ent->model, ent->comp_transform.position, 1, LIGHTGRAY);
+				//DrawModel(ent->model, ent->comp_transform.position, 1, LIGHTGRAY);
+				EntDrawLitModel(handler, ent, 1, 100);
 				break;
 
 			case ENT_AMMO_REVOLVER:
 				//DrawBoundingBox(ent->comp_transform.bounds, DARKGREEN);
-				DrawModel(ent->model, ent->comp_transform.position, 1, DARKGREEN);
+				//DrawModel(ent->model, ent->comp_transform.position, 1, DARKGREEN);
+				EntDrawLitModel(handler, ent, 1, 100);
 				break;
 		}
 	}

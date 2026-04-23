@@ -192,8 +192,13 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			u8 hull_id = (crouch) ? 2 : 1;
 			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
+			Vector3 offset = bsp->hull_groups[j].origin;
+			Vector3 p1 = Vector3Subtract(dest, offset);
+			Vector3 p2 = Vector3Subtract(Vector3Add(dest, move), offset);
+
 			Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
-			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &temp_tr);
+			//Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &temp_tr);
+			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, p1, p2, &temp_tr);
 
 			// Determine how much of movement was obstructed
 			float hull_frac = temp_tr.fraction;

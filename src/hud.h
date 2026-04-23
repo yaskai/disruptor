@@ -15,4 +15,7 @@ typedef struct {
 	
 } Hud;
 
+void HudInit(Hud *hud);
+void HudUpdate(Hud *hud, float dt);
+
 #endif

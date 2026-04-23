@@ -110,8 +110,8 @@ void GameRenderSetup(Game *game) {
 }
 
 void GameAudioSetup(Game *game) {
-	//AP_SetGlobalVolume(&game->audio_player, game->conf->volume);
 	AP_Init(&game->audio_player, &game->camera);
+	AP_SetGlobalVolume(&game->audio_player, game->conf->volume);
 }
 
 void GameLoadScene(Game *game, char *path, u8 flags) {
@@ -279,6 +279,7 @@ void GameUpdate(Game *game, float dt) {
 	PollInput(&game->input_handler);
 	PlayerGunUpdate(&game->player_gun, dt);
 
+	MapUpdateBvhOffsets(&game->test_section);
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
 	AP_Update(&game->audio_player, dt);
 	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);

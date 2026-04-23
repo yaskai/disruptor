@@ -7,14 +7,14 @@ Input file: /home/kai/projects/disruptor/resources/maps/10/10.map
 Output file: /home/kai/projects/disruptor/resources/maps/10/10.bsp
 
 INFO: using built-in palette.
-     39 entities
+     40 entities
      11 unique textures
-     50 texinfos
-    556 unique planes
+     53 texinfos
+    558 unique planes
 
 INFO: world extents calculated to 5608 units
-      286 brushes
-    1,732 sides
+      287 brushes
+    1,738 sides
        19 side bevels
 
             0 texture frames added
@@ -104,22 +104,22 @@ Writing 10.bsp as Quake BSP bsp29
 Wrote 10.bsp
 
 count   lump name    byte size 
-      2 models              128
-    365 planes             7300
-   3205 vertexes          38460
-   1141 nodes             27384
-     30 texinfos           1200
-   2801 faces             56020
-   1654 clipnodes         13232
-    555 leafs             15540
-   3212 marksurfaces       6424
-   6458 edges             25832
-  12401 surfedges         49604
+      3 models              192
+    367 planes             7340
+   3209 vertexes          38508
+   1147 nodes             27528
+     33 texinfos           1320
+   2807 faces             56140
+   1666 clipnodes         13328
+    562 leafs             15736
+   3218 marksurfaces       6436
+   6470 edges             25880
+  12425 surfedges         49700
      11 textures         558420
         lightdata             0
         visdata               0
-        entdata            2481
+        entdata            2736
 
-0.272s seconds elapsed
+0.281s seconds elapsed
 
 

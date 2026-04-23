@@ -150,6 +150,7 @@ typedef struct {
 	BvhNode *nodes;
 
 	Vector3 shape;
+	Vector3 origin;
 
 	u16 count;
 	u16 capacity;
@@ -181,6 +182,8 @@ typedef struct {
 
 typedef struct {
 	BvhTree bvh[3];
+
+	Vector3 origin;
 
 	int model_id;
 

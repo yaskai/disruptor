@@ -329,6 +329,14 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
 
 		} break;
+
+		case ENT_DOOR: {
+			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
+			ent.model.materials[0].shader = handler->ent_shader;
+
+			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
+
+		} break;
 	}
 
 	ent.comp_health.bug_box = (BoundingBox) {
@@ -467,6 +475,24 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 			if(streq(prop->key, "goto")) {
 				memcpy(spawn.extra, prop->val, strlen(prop->val));
+			}
+
+			if(streq(prop->key, "targ_x")) {
+				int x = 0;
+				sscanf(prop->val, "%d", &x);
+				spawn.targ_offset.x = x;
+			}
+
+			if(streq(prop->key, "targ_y")) {
+				int y = 0;
+				sscanf(prop->val, "%d", &y);
+				spawn.targ_offset.y = y;
+			}
+
+			if(streq(prop->key, "targ_z")) {
+				int z = 0;
+				sscanf(prop->val, "%d", &z);
+				spawn.targ_offset.z = z;
 			}
 		}
 

@@ -23,12 +23,24 @@ void OnTriggerTurnOff(Entity *ent) {
 	ent->flags &= ~ENT_ACTIVE;
 }
 
+void OnTriggerOpen(Entity *ent) {
+	Message("Open()", ANSI_BLUE);
+	ent->flags ^= DOOR_OPENING;
+}
+
+void OnTriggerClose(Entity *ent) {
+	Message("Close()", ANSI_BLUE);
+	ent->flags &= ~DOOR_OPENING;
+}
+
 typedef void (*OnTriggerFunc)(Entity *ent);
 OnTriggerFunc on_trigger_funcs[] = {
 	NULL,
 	&OnTriggerToggle,
 	&OnTriggerTurnOn,
 	&OnTriggerTurnOff,
+	&OnTriggerOpen,
+	&OnTriggerClose,
 };
 // -------------------------------------------------
 
@@ -163,8 +175,13 @@ void DoTrigger(EntityHandler *handler, Entity *switch_ent) {
 		if(obj->trigger_id != switch_ent->trigger_id)	
 			continue;
 
-		if(obj->on_trigger)
-			on_trigger_funcs[obj->on_trigger](obj);
+		if(!obj->on_trigger)
+			continue;
+
+		if(!on_trigger_funcs[obj->on_trigger])
+			continue;
+
+		on_trigger_funcs[obj->on_trigger](obj);
 	}
 
 	switch_ent->trigger_state |= TRIGGERED;

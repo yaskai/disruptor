@@ -175,6 +175,7 @@ enum ENT_TYPES : u8 {
 	ENT_DSP_SMALL_ROOM		=  15,
 	ENT_DSP_OPEN			=  16,
 	ENT_TEXT_OBJECT			=  17,
+	ENT_DOOR				=  18,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {
@@ -182,6 +183,8 @@ enum ON_TRIGGER_EVENT_TYPES : u8 {
 	TRIGGER_TOGGLE 			=  1,
 	TRIGGER_TURN_ON			=  2,
 	TRIGGER_TURN_OFF		=  3,
+	TRIGGER_OPEN			=  4,
+	TRIGGER_CLOSE			=  5,
 };
 
 enum TRIGGER_CONDITION_TYPES : u8 {
@@ -482,7 +485,14 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt);
 void SwitchDraw(Entity *ent, EntityHandler *handker, float dt);
 void DoTrigger(EntityHandler *handler, Entity *switch_ent);
 
+// ----------------------------------------------------------------------------------------------------------------------------
 void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min_light);
 void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light);
+
+// ----------------------------------------------------------------------------------------------------------------------------
+
+#define DOOR_OPENING 0x20
+#define DOOR_CLOSING 0x40
+void DoorUpdate(Entity *ent, MapSection *sect, float dt);
 
 #endif

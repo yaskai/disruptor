@@ -50,6 +50,7 @@ typedef struct {
 	char extra[16];
 
 	Vector3 position;
+	Vector3 targ_offset; 
 	
 	int angle;
 	int radius;
@@ -130,6 +131,8 @@ void DSP_AudioSetup(Bsp_Data *bsp, AudioPlayer *ap, SpawnList *spawn_list);
 void DSP_UpdateBlend(MapSection *sect, AudioPlayer *ap, Vector3 pos, float dt);
 
 void DebugDrawDSP(MapSection *sect, AudioPlayer *ap, Vector3 pos);
+
+void MapUpdateBvhOffsets(MapSection *sect);
 
 #endif
 

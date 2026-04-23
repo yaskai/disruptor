@@ -286,6 +286,8 @@ typedef struct {
 	Bsp_Hull hulls[4];
 	int model_id;
 
+	Vector3 origin;
+
 	u8 flags;
 	u8 collision_flags;
 	

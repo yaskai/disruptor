@@ -2727,117 +2727,142 @@
 }
 // entity 20
 {
+"classname" "info_switch"
+"origin" "2080 80 -560"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "3"
+"trigger_group" "2"
+"trigger_type" "0"
+}
+// entity 21
+{
+"classname" "func_door"
+"on_trigger" "4"
+"trigger_group" "2"
+"start_active" "1"
+"start_open" "0"
+"_phong" "0"
+"_phong_angle" "88"
+"enum_id" "18"
+"targ_z" "132"
+"targ_y" "0"
+"targ_x" "0"
+// brush 0
+{
+( 2088 72 -456 ) ( 2088 68 -456 ) ( 2088 68 -568 ) purpmtl 0 0 0 1 1
+( 2088 68 -456 ) ( 2176 68 -456 ) ( 2176 68 -568 ) purpmtl 0 0 0 1 1
+( 2176 68 -568 ) ( 2176 72 -568 ) ( 2088 72 -568 ) purpmtl 0 0 0 1 1
+( 2088 72 -456 ) ( 2176 72 -456 ) ( 2176 68 -456 ) purpmtl 0 0 0 1 1
+( 2176 72 -568 ) ( 2176 72 -456 ) ( 2088 72 -456 ) purpmtl 0 0 0 1 1
+( 2176 68 -456 ) ( 2176 72 -456 ) ( 2176 72 -568 ) purpmtl 0 0 0 1 1
+}
+}
+// entity 22
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 21
+// entity 23
 {
 "classname" "nav_node"
 "origin" "916 132 -484"
 "_tb_layer" "1"
 }
-// entity 22
+// entity 24
 {
 "classname" "nav_node"
 "origin" "916 388 -460"
 "_tb_layer" "1"
 }
-// entity 23
+// entity 25
 {
 "classname" "nav_node"
 "origin" "1052 460 -452"
 "_tb_layer" "1"
 }
-// entity 24
+// entity 26
 {
 "classname" "nav_node"
 "origin" "1316 460 -452"
 "_tb_layer" "1"
 }
-// entity 25
+// entity 27
 {
 "classname" "nav_node"
 "origin" "1716 420 -452"
 "_tb_layer" "1"
 }
-// entity 26
+// entity 28
 {
 "classname" "nav_node"
 "origin" "1828 420 -452"
 "_tb_layer" "1"
 }
-// entity 27
-{
-"classname" "info_maintainer_spawn"
-"origin" "2136 -560 -544"
-"enum_id" "2"
-"angle" "0"
-"_tb_layer" "1"
-}
-// entity 28
+// entity 29
 {
 "classname" "nav_node"
 "origin" "916 -124 -516"
 "_tb_layer" "1"
 }
-// entity 29
+// entity 30
 {
 "classname" "nav_node"
 "origin" "756 -188 -516"
 "_tb_layer" "1"
 }
-// entity 30
+// entity 31
 {
 "classname" "nav_node"
 "origin" "756 -92 -516"
 "_tb_layer" "1"
 }
-// entity 31
+// entity 32
 {
 "classname" "nav_node"
 "origin" "820 -444 -516"
 "_tb_layer" "1"
 }
-// entity 32
+// entity 33
 {
 "classname" "nav_node"
 "origin" "788 -796 -516"
 "_tb_layer" "1"
 }
-// entity 33
+// entity 34
 {
 "classname" "nav_node"
 "origin" "852 -1180 -516"
 "_tb_layer" "1"
 }
-// entity 34
+// entity 35
 {
 "classname" "nav_node"
 "origin" "724 -1404 -516"
 "_tb_layer" "1"
 }
-// entity 35
+// entity 36
 {
 "classname" "nav_node"
 "origin" "916 228 -460"
 "_tb_layer" "1"
 }
-// entity 36
+// entity 37
 {
 "classname" "nav_node"
 "origin" "964 436 -452"
 "_tb_layer" "1"
 }
-// entity 37
+// entity 38
 {
 "classname" "nav_node"
 "origin" "1148 444 -452"
 "_tb_layer" "1"
 }
-// entity 38
+// entity 39
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
