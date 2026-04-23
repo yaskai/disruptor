@@ -62,6 +62,6 @@ void AP_ReqMaintainerWalkSound(AudioPlayer *ap, Vector3 pos);
 void AP_SetDsp(AudioPlayer *ap, u8 preset_id);
 void AP_BlendDsp(AudioPlayer *ap, float dt, float speed, u8 preset_id);
 
-void AP_SetGlobalVolume(AudioPlayer *ap, u8 volume);
+void AP_SetGlobalVolume(AudioPlayer *ap, int volume);
 
 #endif

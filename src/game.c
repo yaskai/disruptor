@@ -110,6 +110,7 @@ void GameRenderSetup(Game *game) {
 }
 
 void GameAudioSetup(Game *game) {
+	//AP_SetGlobalVolume(&game->audio_player, game->conf->volume);
 	AP_Init(&game->audio_player, &game->camera);
 }
 
@@ -472,7 +473,7 @@ void GameDraw(Game *game, float dt) {
 	}
 
 	int fps = GetFPS();
-	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 	//EntDebugText();
 
 	EndDrawing();

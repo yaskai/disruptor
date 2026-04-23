@@ -261,7 +261,8 @@ void MaintainerDraw(Entity *ent, EntityHandler *handler, float dt) {
 		DrawBoundingBox(ent->comp_health.hit_box, RED);
 	*/
 
-	//DrawBoundingBox(ent->comp_health.hit_box, GREEN);
+	if(ai->input_mask & AI_INPUT_SEE_PLAYER)
+		DrawBoundingBox(ent->comp_health.hit_box, GREEN);
 	//DrawBoundingBox(ent->comp_health.crit_box, RED);
 }
 

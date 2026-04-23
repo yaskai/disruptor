@@ -98,7 +98,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 	//dir = Vector3Normalize(dir);
 
 	comp_Transform *ct = &ent->comp_transform;
-	if(Vector3DotProduct(ct->forward, dir) >= 0.99f)
+	if(Vector3DotProduct(Vector3Normalize((Vector3){ct->forward.x, ct->forward.y, 0}), Vector3Normalize((Vector3){dir.x, dir.y, 0})) >= 0.95f)
 		return 1;
 	
 	return 0;
@@ -213,8 +213,17 @@ u8 ExecGotoPos(Entity *ent, MapSection *sect) {
 	}
 
 	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[1];
+
+	Vector3 tr_start = ct->position;
+	//tr_start.z += 24;
+	tr_start.z += 8;
+
+	Vector3 tr_dest = ai->targ_data.known_position;
+	//tr_dest.z += 24;
+	tr_dest.z += 8;
+
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
-	Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, ct->position, ai->targ_data.position, &tr);
+	Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	
 	if(tr.fraction < 1)
 		return 1;
@@ -597,7 +606,7 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 	Entity *player_ent = &handler->ents[handler->player_id];
 
-	Vector3 eye_pos = Vector3Add(ct->position, Vector3Scale(UP, 10.0f));
+	Vector3 eye_pos = Vector3Add(ct->position, Vector3Scale(UP, 32.0f));
 	Vector3 to_player = Vector3Normalize(Vector3Subtract(player_ent->comp_transform.position, eye_pos));
 	float d_to_player = Vector3LengthSqr(to_player);
 

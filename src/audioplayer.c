@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../include/num_redefs.h"
@@ -7,10 +6,9 @@
 #include "audioplayer.h"
 #include "../include/miniaudio.h" 
 #include "../include/log_message.h"
-//#include "../include/extras/nodes/ma_reverb_node/ma_reverb_node.h"
 #include "../include/ma_reverb_node.h"
 
-#define DEVICE_FORMAT       ma_format_f32
+#define DEVICE_FORMAT ma_format_f32
 
 static dsp_preset_vals presets[] = {
 	[DSP_DEFAULT] = {
@@ -25,8 +23,8 @@ static dsp_preset_vals presets[] = {
 		.room_size = 0.55,
 		.damping = 0.4f,
 		.width = 0.8f,
-		.wet = 0.55f,
-		.dry = 1.0f
+		.wet = 0.4f,
+		.dry = 0.6f
 	},
 
 	[DSP_OPEN] = {
@@ -77,11 +75,8 @@ void AP_Init(AudioPlayer *ap, Camera3D *camera) {
 		MessageError("INIT FAILURE", "ma_engine_init()");
 	}
 
-	ma_engine_set_volume(&_ma_engine, 0.1f);
 	ma_engine_listener_set_enabled(&_ma_engine, 0, MA_TRUE);
 	ma_engine_listener_set_world_up(&_ma_engine, 0, 0, 0, 1);
-
-	//ma_engine_set_volume(&_ma_engine, 0.25f);
 
 	rev_conf = ma_reverb_node_config_init(2, ma_engine_get_sample_rate(&_ma_engine));
 	ma_reverb_node_init(ma_engine_get_node_graph(&_ma_engine), &rev_conf, NULL, &rev_node);
@@ -179,11 +174,22 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal_steps_07")], 250.0f);
 	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal_steps_08")], 250.0f);
 
-	//ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "plr_step1")], 1.85f);
-	//ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")], 1.85f);
-	//ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")], 1.85f);
-	//ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "plr_step4")], 1.85f);
-	//ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "plr_step5")], 1.85f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal3")], 100.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal4")], 100.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal5")], 100.0f);
+	ma_sound_set_min_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal7")], 100.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal3")], 2000.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal4")], 2000.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal5")], 2000.0f);
+	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "metal7")], 2000.0f);
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "metal3")], 1.2f);
+	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "metal3")], 0.5f);
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "metal4")], 1.2f);
+	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "metal4")], 0.5f);
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "metal5")], 1.2f);
+	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "metal5")], 0.5f);
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "metal7")], 1.2f);
+	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "metal7")], 0.5f);
 
 	ma_sound_set_pitch(&sounds[HashFetch(&ap->sound_hashmap, "ground_hit")], 2.0f);
 
@@ -277,7 +283,7 @@ void AP_BlendDsp(AudioPlayer *ap, float dt, float speed, u8 preset_id) {
 	verblib_set_dry(verb, Lerp(verblib_get_dry(verb), preset->dry, dt * speed));
 }
 
-void AP_SetGlobalVolume(AudioPlayer *ap, u8 volume) {
+void AP_SetGlobalVolume(AudioPlayer *ap, int volume) {
 	float val = Clamp(volume * 0.01f, 0.0f, 1.0f);
 	ma_engine_set_volume(&_ma_engine, val);
 }
