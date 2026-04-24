@@ -243,6 +243,9 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 	int curr_brush = 0;
 	int curr_ent = 1;
 
+	int curr_model_id = 0;
+	bool model_incremented = false;
+
 	short parse_mode = -1;
 
 	char line[256];
@@ -268,16 +271,33 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 					parse_mode = PARSE_BRUSH;
 					curr_brush = brush_pool->count++;
 					memcpy(brush_pool->brushes[curr_brush].class_name, curr_entspawn->classname, 64);
+					brush_pool->brushes[curr_brush].model_id = curr_model_id;
 				}
 
+				if(!model_incremented) {
+					if( strncmp(curr_entspawn->classname, "func_forcefield", strlen("func_forcefield")) == 0 ||
+						strncmp(curr_entspawn->classname, "func_door", strlen("func_door")) == 0 ||
+						strncmp(curr_entspawn->classname, "func_lift", strlen("func_lift")) == 0 ) {
+
+						curr_model_id++;
+						model_incremented = true;
+						brush_pool->brushes[curr_brush].model_id = curr_model_id;
+					} else {
+						brush_pool->brushes[curr_brush].model_id = 0;
+					}
+				}
+
+				/*
 				if(strcmp(curr_entspawn->classname, "func_forcefield"))
 					continue;
+					*/
 
 			} else if(line[3] == 'e') {
 				parse_mode = PARSE_ENT;
 				char *tok = strtok(line, " ");
 				curr_ent++;
 				spawn_list->count++;
+				model_incremented = false;
 			}
 		}
 
@@ -320,6 +340,11 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			// Make plane
 			Plane plane = BuildPlane(points[1], points[0], points[2]);
 			brush->planes[brush->plane_count++] = plane;
+
+			brush->model_id = curr_model_id;
+
+			//printf("creating brush %d from entity classname: '%s'\n", curr_brush, curr_entspawn->classname);
+			memcpy(brush_pool->brushes[curr_brush].class_name, curr_entspawn->classname, 64);
 		}
 
 		if(parse_mode == PARSE_ENT) {
@@ -414,16 +439,19 @@ BrushPool ExpandBrushes(BrushPool *brush_pool, Vector3 aabb_extents) {
 	// 1. Extend plane by it's normal
 	Vector3 half_extents = Vector3Scale(aabb_extents, 0.5f);
 	for(u16 i = 0; i < brush_pool->count; i++) {
+		/*
 		if(strcmp(brush_pool->brushes[i].tex_name, "{ff") == 0) {
 			Message("EXP SKIP ff", ANSI_RED);
 			continue;
 		}
+		*/
 
-		exp.brushes[i] = (Brush) { .plane_count = brush_pool->brushes[i].plane_count, .vert_count = brush_pool->brushes[i].vert_count };
-		Brush *brush = &exp.brushes[i];
+		exp.brushes[exp.count] = (Brush) { .plane_count = brush_pool->brushes[i].plane_count, .vert_count = brush_pool->brushes[i].vert_count };
+		Brush *brush = &exp.brushes[exp.count];
 
 		memcpy(brush->planes, brush_pool->brushes[i].planes, sizeof(Plane) * brush->plane_count);
 		memcpy(brush->verts, brush_pool->brushes[i].verts, sizeof(Vector3) * brush->vert_count);
+		brush->model_id = brush_pool->brushes[i].model_id;
 
 		for(u8 j = 0; j < brush->plane_count; j++) {
 			Plane *plane = &brush->planes[j];
@@ -511,6 +539,42 @@ Tri *BrushToTris(Brush *brush, u16 *count, u16 brush_id) {
  	if(tri_count)
 		tris = realloc(tris, sizeof(Tri) * tri_count);
 
+	return tris;
+}
+
+Tri *TrisFromBrushPoolFiltered(BrushPool *brush_pool, u16 *count, int model_id) {
+	u16 tri_count = 0;
+	u16 tri_cap = 1024;
+	Tri *tris = calloc(tri_cap, sizeof(Tri));
+
+	for(u16 i = 0; i < brush_pool->count; i++) {
+		Brush *brush = &brush_pool->brushes[i];
+
+		if(brush->model_id != model_id)
+			continue;
+
+		if(strcmp(brush->tex_name, "{ff") == 0) {
+			Message("SKIPPED {ff", ANSI_RED);
+			continue;
+		}
+
+		u16 temp_count = 0;
+		Tri *brush_tris = BrushToTris(brush, &temp_count, i);
+
+		if(tri_count + temp_count > tri_cap) {
+			tri_cap = (tri_cap << 1);
+			tris = realloc(tris, sizeof(Tri) * tri_cap);
+		}
+
+		memcpy(tris + tri_count, brush_tris, sizeof(Tri) * temp_count);
+		tri_count += temp_count;
+
+		free(brush_tris);
+	}
+
+	*count = tri_count;
+	tri_cap = tri_count;
+	if(tri_count) tris = realloc(tris, sizeof(Tri) * tri_cap);
 	return tris;
 }
 
@@ -723,7 +787,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	// * NOTE:
 	// Change this...
 	// Brushes belonging to separate bsp models should not be included in tri contrstruction
-	sect._tris[0].arr = TrisFromBrushPool(&brush_pools[0], &sect._tris[0].count);
+	//sect._tris[0].arr = TrisFromBrushPool(&brush_pools[0], &sect._tris[0].count);
+	sect._tris[0].arr = TrisFromBrushPoolFiltered(&brush_pools[0], &sect._tris[0].count, 0);
 	//sect._tris[0].arr = TrisFromBspModel(&sect.bsp_data, &sect._tris[0].count, 0);
 	sect._tris[0].ids = calloc(sect._tris[0].count, sizeof(u16));
 	for(u16 j = 0; j < sect._tris[0].count; j++) sect._tris[0].ids[j] = j;
@@ -739,7 +804,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		BrushPool exp = ExpandBrushes(&brush_pools[i], volume);
 
 		// Extract tris
-		sect._tris[i].arr = TrisFromBrushPool(&exp, &sect._tris[i].count);
+		//sect._tris[i].arr = TrisFromBrushPool(&exp, &sect._tris[i].count);
+		sect._tris[i].arr = TrisFromBrushPoolFiltered(&exp, &sect._tris[i].count, 0);
 		//sect._tris[i].arr = TrisFromBspModel(&sect.bsp_data, &sect._tris[i].count, 0);
 		sect._tris[i].ids = calloc(sect._tris[i].count, sizeof(u16));
 		for(u16 j = 0; j < sect._tris[i].count; j++) sect._tris[i].ids[j] = j;
@@ -817,11 +883,6 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	translucent_rbrush_list.render_brushes = realloc(translucent_rbrush_list.render_brushes, sizeof(RenderBrush) * translucent_rbrush_list.cap);
 	translucent_rbrush_list.ids = realloc(translucent_rbrush_list.ids, sizeof(int) * translucent_rbrush_list.cap);
 
-	for(short i = 0; i < 3; i++) {
-		BrushPool *bp = &brush_pools[i];
-		free(bp->brushes);
-	}
-
 	sect.bvh_hullgroup_count = sect.bsp_data.num_models;
 	sect.bvh_hullgroups = malloc(sizeof(Bvh_HullGroup) * sect.bvh_hullgroup_count);
 	for(int i = 0; i < sect.bvh_hullgroup_count; i++) {
@@ -842,11 +903,57 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 			continue;
 		}
 
+		/*
 		for(int j = 1; j < 3; j++) {
-			hg->bvh[j] = sect.bvh[j];
+			hg->bvh[j].tris.arr = TrisFromBrushPoolFiltered(&brush_pools[j], &hg->bvh[j].tris.count, i);
+			hg->bvh[j].tris.ids = calloc(hg->bvh[j].tris.count, sizeof(u16));
+			for(int k = j; k < hg->bvh[j].tris.count; k++) hg->bvh[j].tris.ids[k] = k;
+			
+			Vector3 volume = Vector3Zero();
+			if(j == 1)
+				volume = BODY_VOLUME_MEDIUM;
+			if(j == 2)
+				volume = BODY_VOLUME_SMALL;
+
+			printf("hg[%d] bvh[%d] tri count: %d\n", i, j, hg->bvh[j].tris.count);
+			BvhConstruct(&sect, &hg->bvh[j], volume, &hg->bvh[j].tris);
+		}
+		*/
+
+		for(int j = 1; j < 3; j++) {
+			if(i == 0) break;
+
+			// Build pool of brushes for this model only
+			BrushPool model_pool = {0};
+			model_pool.brushes = calloc(brush_pools[0].count, sizeof(Brush));
+			for(int b = 0; b < brush_pools[0].count; b++) {
+				if(brush_pools[0].brushes[b].model_id == i)
+					model_pool.brushes[model_pool.count++] = brush_pools[0].brushes[b];
+			}
+
+			if(model_pool.count == 0) {
+				free(model_pool.brushes);
+				continue;
+			}
+
+			Vector3 volume = (j == 1) ? BODY_VOLUME_MEDIUM : BODY_VOLUME_SMALL;
+			BrushPool exp = ExpandBrushes(&model_pool, volume);
+
+			hg->bvh[j].tris.arr = TrisFromBrushPool(&exp, &hg->bvh[j].tris.count);
+			hg->bvh[j].tris.ids = calloc(hg->bvh[j].tris.count, sizeof(u16));
+			for(int k = 0; k < hg->bvh[j].tris.count; k++) hg->bvh[j].tris.ids[k] = k;
+			BvhConstruct(&sect, &hg->bvh[j], Vector3Zero(), &hg->bvh[j].tris);
+
+			free(exp.brushes);
+			free(model_pool.brushes);
 		}
 
 		hg->flags |= HULLGROUP_ACTIVE;
+	}
+
+	for(short i = 0; i < 3; i++) {
+		BrushPool *bp = &brush_pools[i];
+		free(bp->brushes);
 	}
 
 	return sect;
@@ -1392,8 +1499,9 @@ void MapUpdateBvhOffsets(MapSection *sect) {
 	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
 		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
 
-		for(int j = 0; j < 3; j++) 
+		for(int j = 0; j < 3; j++) { 
 			hg->bvh[j].origin = hg->origin;
+		}
 	}
 }
 

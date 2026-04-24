@@ -493,7 +493,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		}
 
 		if(ent->type == ENT_DOOR)
-			DoorUpdate(ent, sect, dt);
+			DoorUpdate(ent, handler, sect, dt);
 	}
 
 	for(u16 i = 0; i < handler->count; i++) {
@@ -709,6 +709,9 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				//DrawModel(ent->model, ent->comp_transform.position, 1, DARKGREEN);
 				EntDrawLitModel(handler, ent, 1, 100);
 				break;
+
+			case ENT_DOOR:
+				continue;
 		}
 	}
 
@@ -742,6 +745,21 @@ void RenderBrushEntities(EntityHandler *handler) {
 		if(ent->type == ENT_FORCEFIELD) {
 			ff_ids[ff_count++] = i;
 			continue;
+		}
+
+		//if(ent->type == ENT_DOOR) {
+			//EntDrawLitModel(handler, ent, 1.0f, 10.0f);
+			//continue;
+		//}
+
+		if(ent->type == ENT_DOOR) {
+			Color light_color = lit_SampleLightGrid(&ptr_handler_sect->bsp_data, ent->comp_transform.position);
+
+			Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;
+			SetShaderValue(handler->ent_shader, handler->ent_shader_locs.locs[LC_VIEW_POS], &view_pos, SHADER_UNIFORM_VEC3);
+
+			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], &ent->comp_transform.position, SHADER_UNIFORM_VEC3, 3);
+			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], &light_color, SHADER_UNIFORM_VEC3, 3);
 		}
 
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
@@ -864,9 +882,26 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 
 	// 1. 
 	// Normal BVH trace for level geometry
-	BvhTree *bvh = &sect->bvh[BVH_POINT];
 	BvhTraceData tr = TraceDataEmpty();
-	BvhTracePointEx(ray, sect, bvh, 0, &tr, FLT_MAX);
+	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
+		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
+
+		if(!(hg->flags & HULLGROUP_ACTIVE))	
+			continue;
+
+		if(hg->ent_id > -1) {
+			if(handler->ents[hg->ent_id].type == ENT_FORCEFIELD) {
+				continue;
+			}
+		}
+
+		BvhTraceData temp_tr = TraceDataEmpty();
+		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[i].bvh[0], 0, &temp_tr, 4000.0f);
+
+		if(temp_tr.distance < tr.distance) {
+			tr = temp_tr;
+		}
+	}
 	if(tr.hit) *hit = true;
 
 	// 2. DDA for entities using static grid
@@ -1466,6 +1501,10 @@ void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min
 		ct->position,
 		Vector3Add(ct->position, Vector3Scale(DOWN, h*0.5f))
 	};
+
+	if(ent->bsp_model > 0) {
+		points[1] = Vector3Zero();
+	}
 
 	Color light_colors[3] = {0};
 	for(short i = 0; i < 3; i++)

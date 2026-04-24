@@ -116,7 +116,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 						continue;
 
 					BvhTraceData temp_tr = TraceDataEmpty();
-					BvhTracePointEx(ray, sect, hull->bvh, 0, &temp_tr, Vector3Length(to_enemy));
+					BvhTracePointEx(ray, sect, &hull->bvh[2], 0, &temp_tr, Vector3Length(to_enemy));
 
 					if(temp_tr.hit)
 						vis = false;
@@ -263,12 +263,13 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
 	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 
-	for(int j = 1; j < sect->bvh_hullgroup_count; j++) {
+	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 		if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 			continue;
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
+		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
+		//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, ct->bounds, &temp_tr, 8 + 1 + EPSILON);
 
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
@@ -339,22 +340,30 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh[BVH_BOX_SMALL], 0, &tr, Vector3Length(move));
+		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
 
-		for(int j = 1; j < sect->bvh_hullgroup_count; j++) {
+		for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 				continue;
 			
 			BvhTraceData temp_tr = TraceDataEmpty();
-			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, Vector3Length(move));
+			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, Vector3Length(move));
+			//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, ct->bounds, &temp_tr, Vector3Length(move));
 
+			if(temp_tr.distance < tr.distance) {
+				tr = temp_tr;
+			}
+
+			temp_tr = TraceDataEmpty();
+			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, Vector3Length(move));
 			if(temp_tr.distance < tr.distance) {
 				tr = temp_tr;
 			}
 		}
 
 		// Determine how much of movement was obstructed
-		float fraction = (tr.distance / Vector3Length(move));
+		//float fraction = (tr.distance / Vector3Length(move));
+		float fraction = (tr.contact_dist / Vector3Length(move));
 		fraction = Clamp(fraction, 0.0f, 1.0f);
 
 		EntTraceData ent_tr = { .dist = Vector3Length(move), .hit_ent = -1, .point = dest, .normal = Vector3Zero() };

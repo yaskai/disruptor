@@ -197,7 +197,6 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			Vector3 p2 = Vector3Subtract(Vector3Add(dest, move), offset);
 
 			Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
-			//Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &temp_tr);
 			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, p1, p2, &temp_tr);
 
 			// Determine how much of movement was obstructed
@@ -658,14 +657,17 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 #define GROUND_EPS 0.01f
 // Check if grounded
 u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
-	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
+	Vector3 check = Vector3Add(ct->position, Vector3Scale(UP, 1.5f + GROUND_EPS));
+	Vector3 dest = Vector3Add(ct->position, Vector3Scale(DOWN, 1.5f + GROUND_EPS));
 
-	Vector3 dest = Vector3Add(ct->position, Vector3Scale(DOWN, 1 + GROUND_EPS));
+	Ray ray = (Ray) { .position = check, .direction = DOWN };	
 
 	Bsp_Data *bsp = &ptr_sect->bsp_data;
 
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 	float fraction = 1.0f;
+
+	i16 ent_id = -1;
 
 	for(int j = 0; j < bsp->num_models; j++) {
 		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
@@ -675,7 +677,11 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
 		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
-		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, ct->position, dest, &temp_tr);
+		Vector3 offset = bsp->hull_groups[j].origin;
+		//Vector3 p1 = Vector3Subtract(ct->position, offset);
+		Vector3 p1 = Vector3Subtract(check, offset);
+		Vector3 p2 = Vector3Subtract(dest, offset);
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, p1, p2, &temp_tr);
 
 		// Determine how much of movement was obstructed
 		float hull_frac = temp_tr.fraction;
@@ -684,10 +690,21 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		if(hull_frac < fraction) {
 			tr = temp_tr;
 			fraction = hull_frac;
+
+			if(bsp->hull_groups[j].ent_id > 0) { 
+				ent_id = bsp->hull_groups[j].ent_id;
+
+				if(ent_id > 0) {
+					Entity *lift_ent = &ptr_ent_handler->ents[ent_id]; 
+					lift_ent->flags |= PLAYER_ON_PLATFORM;
+					//ct->velocity.z += ptr_ent_handler->ents[ent_id].comp_transform.velocity.z;
+					//ct->position.z += (lift_ent->comp_transform.velocity.z) * GetFrameTime();
+				}
+			}
 		}
 	}		
 
-	if(tr.fraction >= 1) {
+	if(tr.fraction >= 1.0f) {
 		ct->ground_normal = Vector3Zero();
 		return 0;
 	}
@@ -700,6 +717,13 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 
 	if(fabsf(ct->velocity.z) < STOP_EPS)
 		ct->velocity.z = 0;
+
+	if(ent_id > 0) {
+		Entity *lift_ent = &ptr_ent_handler->ents[ent_id]; 
+		lift_ent->flags |= PLAYER_ON_PLATFORM;
+		//ct->velocity.z += ptr_ent_handler->ents[ent_id].comp_transform.velocity.z;
+		//ct->position.z += (lift_ent->comp_transform.velocity.z) * GetFrameTime();
+	}
 
 	return 1;
 }
@@ -840,6 +864,8 @@ void pm_TraceMove(comp_Transform *ct, Vector3 start, Vector3 wish_vel, pmTraceDa
 
 // Trace move when grounded, stepping logic handled
 void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *pm, float dt, Vector3 wish_vel, EntityHandler *handler) {
+	Bsp_Data *bsp = &ptr_sect->bsp_data;
+
 	// First try moving to destination
 	pmTraceData base_pm = (pmTraceData) { .end_in_solid = -1, .start_in_solid = -1, .origin = start, .clip_count = 0 };
 	pm_TraceMoveEx(ent, start, wish_vel, &base_pm, dt, handler);
@@ -867,6 +893,8 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 	float dist_step = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { step_pm.end_pos.x, step_pm.end_pos.y } );
 
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	float fraction = 1.0f;
+	/*
 	Bsp_RecursiveTraceEx(
 		&ptr_sect->bsp[1],
 		ptr_sect->bsp[1].first_node,
@@ -876,6 +904,32 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 		Vector3Add(base_pm.end_pos, Vector3Scale(DOWN, 1)), 
 		&tr
 	);
+	*/
+	for(int j = 0; j < bsp->num_models; j++) {
+		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			continue;
+
+		u8 hull_id = (crouch) ? 2 : 1;
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
+
+		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+		Vector3 offset = bsp->hull_groups[j].origin;
+		Vector3 p1 = Vector3Subtract(step_pm.end_pos, offset);
+		Vector3 p2 = Vector3Subtract(Vector3Add(base_pm.end_pos, Vector3Scale(DOWN, 1)), offset);
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, p1, p2, &temp_tr);
+
+		// Determine how much of movement was obstructed
+		float hull_frac = temp_tr.fraction;
+		hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+		if(hull_frac < fraction) {
+			tr = temp_tr;
+			fraction = hull_frac;
+
+			//if(bsp->hull_groups[j].ent_id)
+				//ent_id = bsp->hull_groups[j].ent_id;
+		}
+	}		
 
 	bool use_step = (dist_step > dist_base) && tr.plane.normal[2] >= 1.0f;
 
@@ -894,6 +948,7 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 
 	float down_dist = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { down_pm.end_pos.x, down_pm.end_pos.y } );
 
+	/*
 	tr = Bsp_TraceDataEmpty();
 	Bsp_RecursiveTraceEx(
 		&ptr_sect->bsp[1],
@@ -904,6 +959,33 @@ void pm_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData *
 		Vector3Add(down_pm.end_pos, Vector3Scale(DOWN, 1)), 
 		&tr
 	);
+	*/
+
+	for(int j = 0; j < bsp->num_models; j++) {
+		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			continue;
+
+		u8 hull_id = (crouch) ? 2 : 1;
+		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
+
+		Bsp_TraceData temp_tr = Bsp_TraceDataEmpty();
+		Vector3 offset = bsp->hull_groups[j].origin;
+		Vector3 p1 = Vector3Subtract(step_pm.end_pos, offset);
+		Vector3 p2 = Vector3Subtract(Vector3Add(down_pm.end_pos, Vector3Scale(DOWN, 1)), offset);
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, p1, p2, &temp_tr);
+
+		// Determine how much of movement was obstructed
+		float hull_frac = temp_tr.fraction;
+		hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
+
+		if(hull_frac < fraction) {
+			tr = temp_tr;
+			fraction = hull_frac;
+
+			//if(bsp->hull_groups[j].ent_id)
+				//ent_id = bsp->hull_groups[j].ent_id;
+		}
+	}		
 
 	bool use_down = false;
 	if((down_pm.block & BLOCK_GROUND) && (down_dist > dist_base + 0.001f) && (down_pm.end_pos.z > base_pm.end_pos.z + 0.1f))

@@ -58,7 +58,7 @@ Plane TriToPlane(Tri tri) {
 
 // Calculate signed distance from point to a plane
 float PlaneDistance(Plane plane, Vector3 point) {
-	return Vector3DotProduct(plane.normal, point) + plane.d;
+	return Vector3DotProduct(plane.normal, point) - plane.d;
 }
 
 // Calculate length of a box in each axis
@@ -676,11 +676,15 @@ void BvhTracePoint(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, float *
 }
 
 void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist) {
+	if(bvh->count == 0)
+		return;
+
 	BvhNode *node = &bvh->nodes[node_id];
 
 	RayCollision coll;
 
-	ray.position = Vector3Subtract(ray.position, bvh->origin);
+	if(node_id == 0)
+		ray.position = Vector3Subtract(ray.position, bvh->origin);
 
 	if(node_id == 0) {
 		coll = GetRayCollisionBox(ray, node->bounds);
@@ -821,6 +825,9 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 	RayCollision coll;
 	Vector3 h = Vector3Scale(BoxExtent(box), 0.5f);
 
+	if(node_id == 0)
+		ray.position = Vector3Subtract(ray.position, bvh->origin);
+
 	if(node_id == 0) {
 		coll = GetRayCollisionBox(ray, node->bounds);
 
@@ -842,11 +849,6 @@ void BvhBoxSweep(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BoundingB
 
 		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);
 		if(!coll.hit) continue;
-
-		/*
-		if(coll.distance > data->distance)
-			continue;
-		*/
 
 		if(coll.distance > max_dist) 
 			continue;

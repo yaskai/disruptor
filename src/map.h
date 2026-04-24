@@ -31,6 +31,8 @@ typedef struct {
 	Vector2 uv_scale;
 	float uv_rot;
 
+	int model_id;
+
 	u16 vert_count;
 	u16 plane_count;
 

@@ -25,6 +25,22 @@ void OnTriggerTurnOff(Entity *ent) {
 
 void OnTriggerOpen(Entity *ent) {
 	Message("Open()", ANSI_BLUE);
+	
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+
+	u8 do_trigger = 0;
+	if(Vector3Distance(ct->position, ai->targ_data.position) <= EPSILON) {
+		++do_trigger;
+	}
+
+	if(Vector3Distance(ct->position, Vector3Zero()) <= EPSILON) {
+		++do_trigger;
+	}
+
+	if(!do_trigger)
+		return;
+
 	ent->flags ^= DOOR_OPENING;
 }
 

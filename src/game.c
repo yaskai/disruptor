@@ -279,10 +279,10 @@ void GameUpdate(Game *game, float dt) {
 	PollInput(&game->input_handler);
 	PlayerGunUpdate(&game->player_gun, dt);
 
-	MapUpdateBvhOffsets(&game->test_section);
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
 	AP_Update(&game->audio_player, dt);
 	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
+	MapUpdateBvhOffsets(&game->test_section);
 
 	if(IsKeyPressed(KEY_ONE)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
@@ -397,6 +397,7 @@ void RenderDebugLayer(Game *game) {
 
 	if(IsKeyPressed(KEY_H)) debug_draw_flags ^= DEBUG_DRAW_HULLS;
 	if(debug_draw_flags & DEBUG_DRAW_HULLS) { 
+		/*
 		for(u16 j = 0; j < game->test_section.bvh[1].tris.count; j++) {
 			Tri *tri = &game->test_section.bvh[1].tris.arr[j];
 			Color color = colors[tri->hull_id % 7];
@@ -405,6 +406,12 @@ void RenderDebugLayer(Game *game) {
 		for(u16 j = 0; j < game->test_section._hulls[1].count; j++) {
 			Hull *hull = &game->test_section._hulls[1].arr[j];
 			DrawBoundingBox(hull->aabb, colors[j % 7]);
+		}
+		*/
+		for(u16 j = 0; j < game->test_section.bvh_hullgroups->bvh[2].tris.count; j++) {
+			Tri *tri = &game->test_section.bvh_hullgroups->bvh[2].tris.arr[j];
+			Color color = colors[tri->hull_id % 7];
+			DrawTriangle3D(tri->vertices[0], tri->vertices[1], tri->vertices[2], ColorAlpha(color, 0.5f));
 		}
 	}
 

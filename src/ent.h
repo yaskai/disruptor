@@ -491,8 +491,9 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-#define DOOR_OPENING 0x20
-#define DOOR_CLOSING 0x40
-void DoorUpdate(Entity *ent, MapSection *sect, float dt);
+#define DOOR_OPENING 		0x20
+#define DOOR_CLOSING 		0x40
+#define PLAYER_ON_PLATFORM	0x80
+void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 #endif

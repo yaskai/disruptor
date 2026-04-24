@@ -157,6 +157,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 	ent.comp_ai = (comp_Ai) {0};
 	ent.comp_ai.component_valid = false;
+	ent.comp_ai.speed = 50;
 
 	ent.comp_health = (comp_Health) {0};
 	ent.comp_health.amount = 100;
@@ -333,8 +334,13 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		case ENT_DOOR: {
 			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
 			ent.model.materials[0].shader = handler->ent_shader;
+			//ent.model.materials[0].shader = bsp->lm_shader;
+			//ent.model.materials[0].maps[1].texture = bsp->lightmaps->lightmap
 
 			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
+			ent.comp_ai.speed = 700;
+
+			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
 
 		} break;
 	}
@@ -354,7 +360,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	*/
 
 	ent.comp_ai.navgraph_id = -1;
-	ent.comp_ai.speed = 50;
+	//ent.comp_ai.speed = 50;
 	ent.comp_ai.wish_dir = Vector3Zero();
 	ent.comp_ai.targ_data.ent_id = -1;
 

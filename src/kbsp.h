@@ -288,6 +288,8 @@ typedef struct {
 
 	Vector3 origin;
 
+	i16 ent_id;
+
 	u8 flags;
 	u8 collision_flags;
 	
