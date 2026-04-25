@@ -354,9 +354,6 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 		memcpy(&data.num_oct_leaves, ptr, 4);
 		ptr += 4;
 
-		printf("num_oct_nodes: %d\n", data.num_oct_nodes);
-		printf("num_oct_leaves: %d\n", data.num_oct_leaves);
-
 		data.oct_leaf_offsets = malloc(data.num_oct_leaves * sizeof(u32));
 		for(u32 i = 0; i < data.num_oct_leaves; i++) {
 			data.oct_leaf_offsets[i] = ptr - data.lm_oct_raw; 

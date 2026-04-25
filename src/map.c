@@ -19,6 +19,7 @@
 Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 	Bsp_Model *bsp_m = &bsp->models[model_id];
 
+
 	u16 tri_count = 0;
 	for(int i = 0; i < bsp_m->num_faces; i++) {
 		Bsp_Face *face = &bsp->faces[bsp_m->first_face + i];
@@ -41,6 +42,14 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 			continue;
 		*/
 
+		u8 coll_flags = 0;
+
+		if(strcmp(mip->name, "{fence00") == 0) 
+			coll_flags |= COLL_IGNORE_BULLET;
+
+		if(strcmp(mip->name, "{ff") == 0)
+			coll_flags |= COLL_IGNORE_BULLET;
+
 		Vector3 face_verts[face->edge_count];
 		for(int j = 0; j < face->edge_count; j++) {
 			i32 list_edge = bsp->ledges[face->first_edge + j];
@@ -57,7 +66,8 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 				.vertices[1] = face_verts[j+1],
 				.vertices[2] = face_verts[j],
 				.normal = normal,
-				.model_id = model_id
+				.model_id = model_id,
+				.collision_flags = coll_flags
 			};
 
 			tris[tri_id++] = tri;
@@ -477,6 +487,12 @@ Tri *BrushToTris(Brush *brush, u16 *count, u16 brush_id) {
 	Tri *tris = calloc(128, sizeof(Tri));
 	u16 tri_count = 0;
 
+	u8 coll_flags = 0;
+	if(strcmp(brush->tex_name, "{fence00") == 0) 
+		coll_flags |= COLL_IGNORE_BULLET;
+	if(strcmp(brush->tex_name, "{ff") == 0)
+		coll_flags |= COLL_IGNORE_BULLET;
+
 	for(u8 i = 0; i < brush->plane_count; i++) {
 		FaceVert face_verts[64] = {0};
 		u8 fv_count = 0;
@@ -529,7 +545,8 @@ Tri *BrushToTris(Brush *brush, u16 *count, u16 brush_id) {
 				.vertices[1] = face_verts[j].p,
 				.vertices[2] = face_verts[j+1].p,
 				.normal = plane->normal,
-				.hull_id = brush_id
+				.hull_id = brush_id,
+				.collision_flags = coll_flags
 			};
 		}
 	}
@@ -546,6 +563,8 @@ Tri *TrisFromBrushPoolFiltered(BrushPool *brush_pool, u16 *count, int model_id) 
 	u16 tri_count = 0;
 	u16 tri_cap = 1024;
 	Tri *tris = calloc(tri_cap, sizeof(Tri));
+
+	u8 coll_flags = 0;
 
 	for(u16 i = 0; i < brush_pool->count; i++) {
 		Brush *brush = &brush_pool->brushes[i];

@@ -18,6 +18,10 @@
 #define COLL_BLOCK_VIS		0x10
 #define COLL_BLOCK_BUG		0x20
 
+#define COLL_IGNORE_BULLET  0x01
+#define COLL_IGNORE_ENEMIES	0x02
+#define COLL_IGNORE_BUG		0x04
+
 // Triangle primitive struct
 typedef struct {
 	Vector3 vertices[3];
@@ -284,6 +288,7 @@ void BvhTraceNodes(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, float s
 void BvhTracePoint(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, float *smallest_dist, Vector3 *point, bool skip_root);
 
 void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist);
+void BvhTracePointPro(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist, u8 ignore_mask);
 void BvhSweepPointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist);
 
 void BvhHullSweep(Vector3 start, Vector3 delta, Hull *hull, BvhTraceData *tr);

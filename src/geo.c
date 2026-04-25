@@ -745,6 +745,81 @@ void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTr
 	BvhTracePointEx(ray, sect, bvh, node->child_lft, data, max_dist);
 }
 
+void BvhTracePointPro(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist, u8 ignore_flags) {
+	if(bvh->count == 0)
+		return;
+
+	BvhNode *node = &bvh->nodes[node_id];
+
+	RayCollision coll;
+
+	if(node_id == 0)
+		ray.position = Vector3Subtract(ray.position, bvh->origin);
+
+	if(node_id == 0) {
+		coll = GetRayCollisionBox(ray, node->bounds);
+
+		if(!coll.hit)
+			return;
+	};
+
+	for(u16 i = 0; i < node->tri_count; i++) {
+		u16 tri_id = bvh->tris.ids[node->first_tri + i];
+		Tri tri = bvh->tris.arr[tri_id];
+
+		if(tri.collision_flags) {
+			if(tri.collision_flags & ignore_flags)
+				continue;
+		}
+
+		if(Vector3DotProduct(ray.direction, tri.normal) >= 0)
+			continue;
+		
+		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);
+		if(!coll.hit) 
+			continue;
+		
+		if(coll.distance > max_dist) 
+			continue;
+
+		if(coll.distance + EPSILON >= data->distance)
+			continue;
+
+		data->point = coll.point;
+		data->normal = coll.normal;
+		data->distance = coll.distance;
+		data->hit = true;
+
+		data->tri_id = tri_id;
+		data->node_id = node_id;
+
+		data->hull_id = tri.hull_id;
+
+		data->contact_dist = coll.distance;
+		data->contact = coll.point;
+	}
+
+	bool leaf = (node->tri_count > 0);
+	if(leaf) return;
+
+	RayCollision hit_l = GetRayCollisionBox(ray, bvh->nodes[node->child_lft].bounds);	
+	RayCollision hit_r = GetRayCollisionBox(ray, bvh->nodes[node->child_rgt].bounds);
+
+	if(!(hit_l.hit || hit_r.hit)) return;
+
+	float dl = (hit_l.hit) ? hit_l.distance : FLT_MAX;
+	float dr = (hit_r.hit) ? hit_r.distance : FLT_MAX;
+
+	if(dl < dr) {
+		BvhTracePointPro(ray, sect, bvh, node->child_lft, data, max_dist, ignore_flags);
+		BvhTracePointPro(ray, sect, bvh, node->child_rgt, data, max_dist, ignore_flags);
+		return;
+	}
+
+	BvhTracePointPro(ray, sect, bvh, node->child_rgt, data, max_dist, ignore_flags);
+	BvhTracePointPro(ray, sect, bvh, node->child_lft, data, max_dist, ignore_flags);
+}
+
 void BvhSweepPointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist) {
 	BvhNode *node = &bvh->nodes[node_id];
 

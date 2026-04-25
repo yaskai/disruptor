@@ -50,10 +50,7 @@
 	{
 		"minlight" : 15.0
 	},
-	"2" : 
-	{
-		"minlight" : 15.0
-	},
+	"2" : {},
 	"20" : 
 	{
 		"minlight" : 15.0
@@ -81,42 +78,95 @@
 	"26" : {},
 	"27" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
-	"28" : 
-	{
-		"phong_angle" : 88.0
-	},
+	"28" : {},
 	"29" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
-	"3" : {},
+	"3" : 
+	{
+		"minlight" : 15.0
+	},
 	"30" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"31" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"32" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"33" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"34" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
-	"35" : 
+	"35" : {},
+	"36" : 
+	{
+		"minlight" : 15.0
+	},
+	"37" : 
+	{
+		"minlight" : 15.0
+	},
+	"38" : 
+	{
+		"minlight" : 15.0
+	},
+	"39" : 
+	{
+		"minlight" : 15.0
+	},
+	"4" : {},
+	"40" : 
+	{
+		"minlight" : 15.0
+	},
+	"41" : 
 	{
 		"phong_angle" : 88.0
 	},
-	"4" : {},
+	"42" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"43" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"44" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"45" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"46" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"47" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"48" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"49" : 
+	{
+		"phong_angle" : 88.0
+	},
 	"5" : 
 	{
 		"minlight" : 15.0

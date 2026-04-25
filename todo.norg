@@ -5,8 +5,8 @@ ___
 ** (x) static level geometry
 ** (x) stair stepping 
 ** (x) with enemies
-** (-) dynamic level geometry
-** (-) surface/entity collision flags
+** (x) dynamic level geometry
+** (x) surface/entity collision flags
 ** (x) bullet tracing 
 ** (x) physical projectile collision
 
@@ -111,7 +111,7 @@ ___
 ** (-) loading indicator
 
 ___
-* *AI*
+* (x) *AI*
 
 ** (x) Cleanup
 *** (x) use interrupt mask properly
@@ -122,23 +122,23 @@ ___
 *** (x) hear player
 *** (x) see disrupted entity
 
-** (-) Navigation
+** (x) Navigation
 *** (x) A* pathing
 *** (x) simple graphs & nodes setup
 *** (x) -switch to navmesh- fix edge consruction
-*** (-) tune avoidance
+*** (x) tune avoidance
 
 ** (x) turret behaviour: 
 *** (x) idle 
 *** (x) target player
 *** (x) glitch & power down
 
-** (-) maintainer behaviour
+** (x) maintainer behaviour
 *** (x) idle
 *** (x) attack (go to & pickup projectile and/or meelee)
 *** (x) fix disrupted entities
-*** (-) disrupted
-*** (-) sync attack and fix with animation *_/animation is blocker/_*
+*** (x) disrupted
+*** (x) sync attack and fix with animation *_/animation is blocker/_*
 
 ___
 * *Menus*

@@ -342,6 +342,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
 
+			ent.flags &= ~ENT_COLLIDERS;
+
 		} break;
 	}
 

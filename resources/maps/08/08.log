@@ -113,7 +113,7 @@ count   lump name    byte size
    4015 nodes             96360
     304 texinfos          12160
   12408 faces            248160
-  10188 clipnodes         81504
+  10088 clipnodes         80704
    2262 leafs             63336
   15204 marksurfaces      30408
   27400 edges            109600
@@ -123,6 +123,6 @@ count   lump name    byte size
         visdata               0
         entdata           31304
 
-1.364s seconds elapsed
+1.218s seconds elapsed
 
 

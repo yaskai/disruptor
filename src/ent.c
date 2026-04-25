@@ -727,6 +727,8 @@ void RenderEntities(EntityHandler *handler, float dt) {
 		DrawSphere(Vector3Add(pos, Vector3Scale(fwd, 10)), 1, BLUE);
 	} 
 	*/
+
+	DrawSphere(debug_bullet_dest, 4, RED);
 }
 
 void RenderBrushEntities(EntityHandler *handler) {
@@ -753,6 +755,7 @@ void RenderBrushEntities(EntityHandler *handler) {
 		//}
 
 		if(ent->type == ENT_DOOR) {
+			/*
 			Color light_color = lit_SampleLightGrid(&ptr_handler_sect->bsp_data, ent->comp_transform.position);
 
 			Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;
@@ -760,6 +763,10 @@ void RenderBrushEntities(EntityHandler *handler) {
 
 			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], &ent->comp_transform.position, SHADER_UNIFORM_VEC3, 3);
 			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], &light_color, SHADER_UNIFORM_VEC3, 3);
+			*/
+			EntDrawLitModelEx(handler, ent, Vector3Zero(), 1.0f, Vector3Zero(), 0, 0);
+			//EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light)
+			continue;
 		}
 
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
@@ -893,10 +900,12 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 			if(handler->ents[hg->ent_id].type == ENT_FORCEFIELD) {
 				continue;
 			}
+
 		}
 
 		BvhTraceData temp_tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[i].bvh[0], 0, &temp_tr, 4000.0f);
+		//BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[i].bvh[0], 0, &temp_tr, 4000.0f);
+		BvhTracePointPro(ray, sect, &sect->bvh_hullgroups[i].bvh[0], 0, &temp_tr, 4000.0f, COLL_IGNORE_BULLET);
 
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
@@ -1546,9 +1555,21 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 	comp_Transform *ct = &ent->comp_transform;
 
 	float h = BoxExtent(GetModelBoundingBox(ent->model)).z * scale;
+
+	Vector3 center = ct->position;
+	if(ent->bsp_model) {
+		BoundingBox model_bounds = (BoundingBox) {
+			*(Vector3*) bsp->models[ent->bsp_model].mins,
+			*(Vector3*) bsp->models[ent->bsp_model].maxs
+		};
+
+		center = BoxCenter(model_bounds);
+		center = Vector3Add(center, ct->position);
+	};
+
 	Vector3 points[3] = {
 		Vector3Add(ct->position, Vector3Scale(UP, h)),
-		ct->position,
+		center,
 		Vector3Add(ct->position, Vector3Scale(DOWN, h*0.5f))
 	};
 
