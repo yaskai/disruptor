@@ -331,7 +331,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 		} break;
 
-		case ENT_DOOR: {
+		case ENT_DOOR: 
+		case ENT_LADDER: {
 			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
 			ent.model.materials[0].shader = handler->ent_shader;
 			//ent.model.materials[0].shader = bsp->lm_shader;
@@ -345,6 +346,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.flags &= ~ENT_COLLIDERS;
 
 		} break;
+
 	}
 
 	ent.comp_health.bug_box = (BoundingBox) {

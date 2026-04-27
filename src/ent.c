@@ -769,6 +769,11 @@ void RenderBrushEntities(EntityHandler *handler) {
 			continue;
 		}
 
+		if(ent->type == ENT_LADDER) {
+			EntDrawLitModelEx(handler, ent, Vector3Zero(), 1.0f, Vector3Zero(), 0, 0);
+			continue;
+		}
+
 		DrawModel(ent->model, Vector3Zero(), 1, WHITE);
 	}
 

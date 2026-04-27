@@ -168,7 +168,7 @@ enum ENT_TYPES : u8 {
 	ENT_AMMO_REVOLVER		=	8,
 	ENT_DISRUPTOR	 		= 	9,
 	ENT_SWITCH				=  10,
-	ENT_BRUSH				=  11,
+	ENT_BRUSH				=  11,		// * Unused (probably not useful...)
 	ENT_FORCEFIELD			=  12,
 	ENT_BULLSEYE			=  13,
 	ENT_DSP_DEFAULT 		=  14,
@@ -176,6 +176,7 @@ enum ENT_TYPES : u8 {
 	ENT_DSP_OPEN			=  16,
 	ENT_TEXT_OBJECT			=  17,
 	ENT_DOOR				=  18,
+	ENT_LADDER				=  19,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {

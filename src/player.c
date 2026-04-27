@@ -76,6 +76,7 @@ float recoil_input = 0.0f;
 
 bool walk_mod = false;
 bool crouch = false;
+bool on_ladder = false;
 
 float cam_zmod = 16.0f;
 
@@ -185,10 +186,12 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 		float fraction = 1.0f;
 	
 		for(int j = 0; j < bsp->num_models; j++) {
-			if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
+			Bsp_HullGroup *hg = &bsp->hull_groups[j];
+
+			if(!(hg->flags & HULLGROUP_ACTIVE))
 				continue;
 
-			//Bsp_Hull *hull = &bsp->hull_groups[j].hulls[1];
+			// Use half-height hull if crouching 
 			u8 hull_id = (crouch) ? 2 : 1;
 			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
@@ -203,9 +206,16 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			float hull_frac = temp_tr.fraction;
 			hull_frac = Clamp(hull_frac, 0.0f, 1.0f);
 
+			// Check if hit brush entity is earliest hit
 			if(hull_frac < fraction) {
 				tr = temp_tr;
 				fraction = hull_frac;
+				
+				// Ladder check
+				Entity *brush_ent = &handler->ents[hg->ent_id];
+				if(brush_ent->type == ENT_LADDER) {
+					on_ladder = true;
+				}
 			}
 		}		
 
@@ -775,11 +785,34 @@ void pm_Accelerate(comp_Transform *ct, Vector3 wish_dir, float wish_speed, float
 
 #define PLAYER_GRAV 980.0f
 void pm_ApplyGravity(comp_Transform *ct, float dt) {
+	if(on_ladder) {
+		float forward_amnt = Vector3DotProduct(ct->velocity, ct->forward);
+
+		if(forward_amnt >= EPSILON) {
+			ct->velocity.x = 0.0f;
+			ct->velocity.y = 0.0f;
+			ct->velocity.z = 200.0f;
+		}
+
+		if(forward_amnt <= -EPSILON) {
+			ct->velocity.x = 0.0f;
+			ct->velocity.y = 0.0f;
+			ct->velocity.z = -200.0f;
+		}
+		
+		//return;
+	}
+
+
 	if(ct->on_ground) {
 		//ct->velocity.z = 0;
 		return;
 	}
-	ct->velocity.z -= (PLAYER_GRAV * dt); 
+
+	if(!on_ladder)
+		ct->velocity.z -= (PLAYER_GRAV * dt); 
+
+	on_ladder = false;
 }
 
 #define MIN_TRACE_DIST (0.0333f)
