@@ -260,7 +260,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
 
 	BvhTraceData tr = TraceDataEmpty();	
-	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
+	BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, 1 + EPSILON);
 	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 
 	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
@@ -268,9 +268,16 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 			continue;
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
+		//BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
 		//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, ct->bounds, &temp_tr, 8 + 1 + EPSILON);
 
+		/*
+		if(temp_tr.distance < tr.distance) {
+			tr = temp_tr;
+		}
+		*/
+
+		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
 		}
@@ -340,7 +347,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
+		BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, Vector3Length(move));
 
 		for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
@@ -380,6 +387,9 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 			use_ent = false;
 		}
 
+		if(other_ent->type == ENT_DOOR)
+			use_ent = false;
+
 		if(launch_timer >= 0.1f || bug_ent->flags & BUG_RECALL)
 			use_ent = false;
 
@@ -398,6 +408,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 					float into = Vector3DotProduct(vel, clips[j]);
 					float clip_bounce = (use_ent && j == num_clips - 1) ? 1.8f : 1.5005f;
 					clip_bounce *= 0.5f;
+					clip_bounce = 1.0f;
 					if(clips[j].z < 0) {
 						clip_bounce = Clamp(clip_bounce, 1.001f, 1.025f);
 					}

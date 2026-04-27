@@ -20,7 +20,7 @@ void main() {
     
     vec3 ambient;
 	ambient = light_clr[1];
-	ambient = clamp(ambient, 0.5, 1.0);
+	ambient = clamp(ambient, 0.25, 1.0);
 
     finalColor = vec4(diffuse.rgb * ambient, 1.0);
 }

@@ -728,7 +728,7 @@ void RenderEntities(EntityHandler *handler, float dt) {
 	} 
 	*/
 
-	DrawSphere(debug_bullet_dest, 4, RED);
+	//DrawSphere(debug_bullet_dest, 4, RED);
 }
 
 void RenderBrushEntities(EntityHandler *handler) {
@@ -1564,7 +1564,7 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 		};
 
 		center = BoxCenter(model_bounds);
-		center = Vector3Add(center, ct->position);
+		center = Vector3Add(center, Vector3Scale(Vector3Add(ct->position, ct->prev_pos), 0.5f));
 	};
 
 	Vector3 points[3] = {

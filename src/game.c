@@ -339,10 +339,10 @@ void RenderMainLayer(Game *game, float dt) {
 	RenderEntities(&game->ent_handler, GetFrameTime());
 	// Run/draw visual effects
 	vEffectsRun(&game->effect_manager, dt);
-	// Render transparent level geometry
-	DrawMapTranslucent(&game->test_section, game->camera.position);
 	// Render dynamic brush entities
 	RenderBrushEntities(&game->ent_handler);
+	// Render transparent level geometry
+	DrawMapTranslucent(&game->test_section, game->camera.position);
 	// Draw player (for debug only)
 	PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
 
@@ -458,6 +458,8 @@ void GameDraw(Game *game, float dt) {
 
 	// Draw to buffers:
 	// Main
+	ClearBackground(BLACK);
+	BeginBlendMode(BLEND_ALPHA);
 	Rectangle rt_src = (Rectangle) { 0, 0, game->render_target3D.texture.width, -game->render_target3D.texture.height };
 	Rectangle rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
@@ -465,6 +467,7 @@ void GameDraw(Game *game, float dt) {
 	rt_src = (Rectangle) { 0, 0, game->render_target2D.texture.width, -game->render_target2D.texture.height };
 	rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+	EndBlendMode();
 
 	if(IsKeyPressed(KEY_T))
 		debug_draw_flags ^= DEBUG_DRAW_BIG;

@@ -527,12 +527,13 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 
 		Vector3 sample_pos = Vector3Add(gun_refs.player->comp_transform.position, Vector3Scale(gun_refs.player->comp_transform.forward, 5.0f));
 		Color light = lit_SampleLightGrid(&gun_refs.sect->bsp_data, sample_pos);
-		light.r = Clamp(light.r, 100, 255);
+		light.r = Clamp(light.r, 70, 255);
 		light.g = light.r;
 		light.b = light.r;
 		//light.g = Clamp(light.g, 60, 255);
 		//light.b = Clamp(light.b, 60, 255);
 		weap_tint = ColorLerp(weap_tint, light, GetFrameTime()*5);
+		weap_tint.a = 255;
 
 		BeginMode3D(player_gun->cam);
 		DrawModel(models[player_gun->current_gun], draw_pos, scale, weap_tint);

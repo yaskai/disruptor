@@ -92,5 +92,17 @@ static Ai_SchedDef sched_defs[] = {
 		.fail_sched = 0,
 		.next_sched = 0,
 	},
+
+	[SCHED_GOTO_COVER] = {
+		.tasks = { TASK_STOP_MOVE, TASK_FIND_COVER, TASK_GOTO_POS },
+		.num_tasks = 3, 
+		.interrupt_mask = (0),
+		.interrupt_sched = 0,
+		.fail_sched = 0,
+		.next_sched = 0, 
+	},
+
+	[SCHED_REGULATOR_ATTACK] = {
+	},
 };
 

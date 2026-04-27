@@ -621,7 +621,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		// Trace map geometry
 		// Small affordance to account for spatial partition structure (+32)
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, bvh, 0, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds));
+		//BvhTracePointEx(ray, sect, bvh, 0, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds));
+		BvhTracePointPro(ray, sect, bvh, 0, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds), COLL_IGNORE_VIS);
 
 		// Player hitbox collision closer than possible surface collision.
 		// No obstruction, player is visible 

@@ -31,6 +31,7 @@ void PlayerGunInit(
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt);
 void PlayerGunDraw(PlayerGun *player_gun);
+void PlayerGunDraw2d(PlayerGun *player_gun);
 void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);
 
 void PlayerShootPistol(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);

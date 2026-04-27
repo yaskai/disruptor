@@ -19,7 +19,6 @@
 Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 	Bsp_Model *bsp_m = &bsp->models[model_id];
 
-
 	u16 tri_count = 0;
 	for(int i = 0; i < bsp_m->num_faces; i++) {
 		Bsp_Face *face = &bsp->faces[bsp_m->first_face + i];
@@ -37,11 +36,6 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 		Bsp_Surface *surface = &bsp->surfaces[face->texinfo];
 		Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
 
-		/*
-		if(strcmp(mip->name, "{ff") == 0)
-			continue;
-		*/
-
 		u8 coll_flags = 0;
 
 		if(strcmp(mip->name, "{fence00") == 0) 
@@ -49,6 +43,9 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 
 		if(strcmp(mip->name, "{ff") == 0)
 			coll_flags |= COLL_IGNORE_BULLET;
+
+		if(mip->name[0] == '{')
+			coll_flags |= COLL_IGNORE_VIS;
 
 		Vector3 face_verts[face->edge_count];
 		for(int j = 0; j < face->edge_count; j++) {

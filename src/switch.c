@@ -90,6 +90,16 @@ void SwitchSetup(EntityHandler *handler) {
 				Vector3Add(ent->comp_transform.bounds.max, Vector3Scale(BODY_VOLUME_SMALL, 0.5f)),
 			};
 		}
+
+		if(ent->trigger_condition == TRIGGER_COND_COLL_PLR) {
+			ent->comp_transform.bounds = (BoundingBox) {
+				Vector3Subtract(ent->comp_transform.bounds.min, Vector3Scale(BODY_VOLUME_MEDIUM, 0.5f)),
+				Vector3Add(ent->comp_transform.bounds.max, Vector3Scale(BODY_VOLUME_MEDIUM, 0.5f)),
+			};
+
+			ent->flags &= ~ENT_COLLIDERS;
+		}
+
 	}
 }
 

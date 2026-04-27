@@ -3,43 +3,41 @@
 	{
 		"minlight" : 15.0
 	},
-	"1" : 
-	{
-		"minlight" : 15.0
-	},
+	"1" : {},
 	"10" : 
 	{
 		"minlight" : 15.0
 	},
 	"11" : 
 	{
-		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"12" : 
 	{
-		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"13" : 
 	{
+		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"14" : 
 	{
-		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"15" : 
 	{
+		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"16" : 
 	{
+		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"17" : 
 	{
+		"is_special" : true,
 		"minlight" : 15.0
 	},
 	"18" : 
@@ -67,36 +65,27 @@
 	{
 		"minlight" : 15.0
 	},
-	"24" : 
-	{
-		"minlight" : 15.0
-	},
+	"24" : {},
 	"25" : 
 	{
 		"minlight" : 15.0
 	},
 	"26" : {},
-	"27" : 
+	"27" : {},
+	"28" : 
 	{
 		"minlight" : 15.0
 	},
-	"28" : {},
 	"29" : 
 	{
 		"minlight" : 15.0
 	},
-	"3" : 
-	{
-		"minlight" : 15.0
-	},
+	"3" : {},
 	"30" : 
 	{
 		"minlight" : 15.0
 	},
-	"31" : 
-	{
-		"minlight" : 15.0
-	},
+	"31" : {},
 	"32" : 
 	{
 		"minlight" : 15.0
@@ -105,69 +94,82 @@
 	{
 		"minlight" : 15.0
 	},
-	"34" : 
-	{
-		"minlight" : 15.0
-	},
+	"34" : {},
 	"35" : {},
-	"36" : 
-	{
-		"minlight" : 15.0
-	},
-	"37" : 
-	{
-		"minlight" : 15.0
-	},
-	"38" : 
-	{
-		"minlight" : 15.0
-	},
+	"36" : {},
+	"37" : {},
+	"38" : {},
 	"39" : 
 	{
 		"minlight" : 15.0
 	},
-	"4" : {},
+	"4" : 
+	{
+		"minlight" : 15.0
+	},
 	"40" : 
 	{
 		"minlight" : 15.0
 	},
 	"41" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"42" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"43" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"44" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"45" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
-	"46" : 
-	{
-		"phong_angle" : 88.0
-	},
+	"46" : {},
 	"47" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
 	"48" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 15.0
 	},
-	"49" : 
-	{
-		"phong_angle" : 88.0
-	},
+	"49" : {},
 	"5" : 
+	{
+		"minlight" : 15.0
+	},
+	"50" : {},
+	"51" : 
+	{
+		"minlight" : 15.0
+	},
+	"52" : {},
+	"53" : 
+	{
+		"minlight" : 15.0
+	},
+	"54" : 
+	{
+		"minlight" : 15.0
+	},
+	"55" : {},
+	"56" : {},
+	"57" : 
+	{
+		"minlight" : 15.0
+	},
+	"58" : 
+	{
+		"minlight" : 15.0
+	},
+	"59" : 
 	{
 		"minlight" : 15.0
 	},
@@ -175,9 +177,48 @@
 	{
 		"minlight" : 15.0
 	},
-	"7" : 
+	"60" : 
 	{
 		"minlight" : 15.0
+	},
+	"61" : {},
+	"62" : {},
+	"63" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"64" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"65" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"66" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"67" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"68" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"69" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"7" : {},
+	"70" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"71" : 
+	{
+		"phong_angle" : 88.0
 	},
 	"8" : 
 	{
@@ -185,7 +226,6 @@
 	},
 	"9" : 
 	{
-		"is_special" : true,
 		"minlight" : 15.0
 	}
 }

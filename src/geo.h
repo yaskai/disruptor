@@ -21,6 +21,7 @@
 #define COLL_IGNORE_BULLET  0x01
 #define COLL_IGNORE_ENEMIES	0x02
 #define COLL_IGNORE_BUG		0x04
+#define COLL_IGNORE_VIS		0x08
 
 // Triangle primitive struct
 typedef struct {

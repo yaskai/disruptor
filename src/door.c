@@ -38,7 +38,7 @@ void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt)
 		Entity *player_ent = &handler->ents[handler->player_id];
 		comp_Transform *player_ct = &player_ent->comp_transform;
 
-		player_ct->position.z += (vel.z * dt) + 0.001f;	
+		player_ct->position.z += (vel.z * dt);	
 		if(player_ct->velocity.z < EPSILON) player_ct->velocity.z = EPSILON;
 		player_ct->position.x += (vel.x * dt);
 		player_ct->position.y += (vel.y * dt);
