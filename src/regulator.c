@@ -14,6 +14,8 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	comp_Ai *ai = &ent->comp_ai;
 	comp_Weapon *weap = &ent->comp_weapon;
 
+	anim_Switch(&ent->anim_state, 3);
+
 	if(ai->task_state.timer > 0)
 		return;
 
@@ -115,7 +117,7 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 	if(ai->state == STATE_MOVE) {
 		Vector3 move_dir = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0.0f } );
 		ct->yaw = Lerp(ct->yaw, atan2f(-move_dir.x, move_dir.y), 5*dt);
-		anim_Switch(&ent->anim_state, 1);
+		anim_Switch(&ent->anim_state, 2);
 		anim_Update(&ent->anim_state, ent->animations, dt);
 	}
 
@@ -148,13 +150,21 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 	comp_Ai *ai = &ent->comp_ai;
 
 	if(ai->state == STATE_DEAD) {
-		ent->anim_state.curr_frame = 0;
-		ent->anim_state.anim_id = 0;
+		//ent->anim_state.curr_frame = 0;
+		//ent->anim_state.anim_id = 0;
+		anim_Switch(&ent->anim_state, 0);
+		if(!ent->anim_state.loop_count && ent->anim_state.curr_frame < ent->animations[ent->anim_state.anim_id].frameCount-1) {
+			anim_Update(&ent->anim_state, ent->animations, dt);
+		} else {
+			ent->anim_state.curr_frame = ent->animations[ent->anim_state.anim_id].frameCount-1;
+		}
+
 		anim_Apply(&ent->anim_state, &ent->model, ent->animations);
 
 		Vector3 pos = ent->comp_transform.position;		
-		pos.z -= 20;
-		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3CrossProduct(ct->forward, UP), 90, 100);
+		pos.z -= 10;
+		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3Zero(), 0, 100);
+		//EntDrawLitModel(handler, ent, 1.0f, 0);
 
 		return;
 	}
@@ -166,6 +176,6 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), QuaternionToMatrix(ct->qrot));
 	EntDrawLitModel(handler, ent, 1.0f, 0);
 
-	DrawBoundingBox(ent->comp_health.hit_box, GREEN);
+	//DrawBoundingBox(ent->comp_health.hit_box, GREEN);
 }
 

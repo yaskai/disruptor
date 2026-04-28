@@ -4,7 +4,7 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from test07.texinfo.json...
 Loading extended content flags from test07.content.json...
-32 entities read, 5 are lights.
+33 entities read, 5 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -64,7 +64,7 @@ octree leafs 2126 overhead 51024 bytes
       3970179 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test07.bsp as Quake BSP bsp29
-14.546s seconds elapsed
+14.167s seconds elapsed
 0 empty lightmaps
 
 
