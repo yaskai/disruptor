@@ -105,7 +105,69 @@ static Ai_SchedDef sched_defs[] = {
 	[SCHED_GOTO_COVER] = {
 		.timers = { 0.0f },
 		.tasks = { TASK_STOP_MOVE, TASK_FIND_COVER, TASK_GOTO_POS, TASK_STOP_MOVE },
-		.num_tasks = 4, 
+		.num_tasks = 5, 
+		.interrupt_mask = (0),
+		.interrupt_sched = 0,
+		.fail_sched = 0,
+		.next_sched = SCHED_REGULATOR_IDLE, 
+	},
+
+	/*
+	[SCHED_REGULATOR_ATTACK] = {
+		.timers = { 0.0f },
+		.tasks = { TASK_FACE_DIR, TASK_FIND_FIRING_POS, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_FACE_DIR, TASK_FIRE_WEAPON },
+		.num_tasks = 6,
+		.interrupt_mask = (0),
+		.interrupt_sched = SCHED_REGULATOR_RELOAD,
+		.fail_sched = 0,
+		.next_sched = SCHED_REGULATOR_RELOAD,
+	},
+
+	[SCHED_REGULATOR_IDLE] = {
+		.timers = { 0.0f },
+		.tasks = { TASK_WAIT_TIME },
+		.num_tasks = 1,
+		.interrupt_mask = (AI_INPUT_SEE_PLAYER | AI_INPUT_HEAR_PLAYER),
+		.interrupt_sched = SCHED_REGULATOR_ATTACK,
+		.fail_sched = 0,
+		.next_sched = SCHED_REGULATOR_IDLE,
+	},
+
+	[SCHED_REGULATOR_RELOAD] = {
+		.timers = { 0.0f },
+		.tasks = { TASK_FIND_COVER, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_RELOAD_WEAPON },
+		.num_tasks = 5, 
+		.interrupt_mask = (0),
+		.interrupt_sched = 0,
+		.fail_sched = 0,
+		.next_sched = SCHED_REGULATOR_IDLE, 
+	},
+	*/
+
+	[SCHED_REGULATOR_FIND_FIRE_POS] = {
+		.timers = { 0.0f },
+		.tasks = { TASK_FACE_DIR, TASK_FIND_FIRING_POS, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_FACE_DIR, },
+		.num_tasks = 5,
+		.interrupt_mask = (AI_INPUT_SEE_PLAYER),
+		.interrupt_sched = SCHED_REGULATOR_ATTACK,
+		.fail_sched = 0,
+		.next_sched = SCHED_REGULATOR_ATTACK,
+	},
+
+	[SCHED_REGULATOR_IDLE] = {
+		.timers = { 0.0f },
+		.tasks = { TASK_WAIT_TIME },
+		.num_tasks = 1,
+		.interrupt_mask = (AI_INPUT_SEE_PLAYER | AI_INPUT_HEAR_PLAYER),
+		.interrupt_sched = SCHED_REGULATOR_FIND_FIRE_POS,
+		.fail_sched = 0,
+		.next_sched = SCHED_REGULATOR_IDLE,
+	},
+
+	[SCHED_REGULATOR_RELOAD] = {
+		.timers = { 0.0f },
+		.tasks = { TASK_FIND_COVER, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_RELOAD_WEAPON },
+		.num_tasks = 5, 
 		.interrupt_mask = (0),
 		.interrupt_sched = 0,
 		.fail_sched = 0,
@@ -114,22 +176,12 @@ static Ai_SchedDef sched_defs[] = {
 
 	[SCHED_REGULATOR_ATTACK] = {
 		.timers = { 0.0f },
-		.tasks = { TASK_FIND_FIRING_POS, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_FACE_DIR, TASK_FIRE_WEAPON },
-		.num_tasks = 5,
-		.interrupt_mask = (AI_INPUT_CLIP_EMPTY),
-		.interrupt_sched = SCHED_GOTO_COVER,
-		.fail_sched = 0,
-		.next_sched = SCHED_MAINTAINER_IDLE,
-	},
-
-	[SCHED_REGULATOR_IDLE] = {
-		.timers = { 0.0f },
-		.tasks = { TASK_WAIT_TIME },
+		.tasks = { TASK_FIRE_WEAPON },
 		.num_tasks = 1,
-		.interrupt_mask = (AI_INPUT_SEE_PLAYER),
-		.interrupt_sched = SCHED_GOTO_COVER,
+		.interrupt_mask = (0),
+		.interrupt_sched = 0,
 		.fail_sched = 0,
-		.next_sched = SCHED_REGULATOR_IDLE,
-	},
+		.next_sched = SCHED_REGULATOR_RELOAD,
+	}
 };
 

@@ -280,13 +280,14 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.animations = LoadModelAnimations("resources/models/enemies/reg_00.glb", &ent.num_anims);
 			ent.anim_state.speed = (1.0f / 100);
 
-			ent.comp_ai.speed = 150;
+			ent.comp_ai.speed = 170;
 			ent.comp_health.bug_point = BUG_POINT_MAINTAINER;
 
 			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
 			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 
+			ent.comp_ai.hear_distance = 100.0f;
 			ent.comp_ai.component_valid = true;
 
 			ent.comp_health.hit_box = ent.comp_transform.bounds;
@@ -294,6 +295,16 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.comp_health.hit_box.max = Vector3Add(ent.comp_transform.bounds.max, Vector3Scale(Vector3One(), -3));
 
 			ent.flags |= ENT_COLLIDERS;
+
+			ent.comp_weapon = (comp_Weapon) {
+				.ammo_type = WEAPON_TRAVEL_HITSCAN,
+				.clip_size = 35,
+				.in_clip = 45,
+				.cooldown = 0.0f,
+				.reload_timer = 0.0f,
+				.reload_time_amnt = 2.0f,
+				.damage = 5
+			};
 
 			AiSetSchedule(&ent.comp_ai, SCHED_REGULATOR_IDLE);
 

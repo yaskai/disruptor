@@ -501,4 +501,6 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 #define PLAYER_ON_PLATFORM	0x80
 void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
+bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect, u8 flags);
+
 #endif

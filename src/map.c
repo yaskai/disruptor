@@ -1525,3 +1525,24 @@ void MapUpdateBvhOffsets(MapSection *sect) {
 	}
 }
 
+void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max_dist, u8 ignore_flags, u8 hull_id) {
+	Vector3 ray_pos = ray.position;
+	BvhTraceData tr = TraceDataEmpty();
+
+	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
+		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
+		BvhTree *bvh = &hg->bvh[hull_id];
+
+		ray.position = ray_pos;
+		ray.position = Vector3Subtract(ray.position, hg->origin);
+		
+		BvhTraceData temp_tr = TraceDataEmpty();
+		BvhTracePointPro(ray, sect, bvh, 0, &temp_tr, max_dist, ignore_flags);
+
+		if(temp_tr.distance < tr.distance)
+			tr = temp_tr;	
+	}
+
+	*data = tr;
+}
+

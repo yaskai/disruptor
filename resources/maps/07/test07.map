@@ -1909,11 +1909,13 @@
 {
 "classname" "nav_node"
 "origin" "652 100 -52"
+"flags" "0"
 }
 // entity 18
 {
 "classname" "nav_node"
 "origin" "540 84 -52"
+"flags" "0"
 }
 // entity 19
 {
@@ -1924,6 +1926,7 @@
 {
 "classname" "nav_node"
 "origin" "540 -100 -52"
+"flags" "0"
 }
 // entity 21
 {

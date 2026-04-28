@@ -966,8 +966,11 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
 	recoil = weap_data->recoil;
 	sway = weap_data->sway;
 
-	for(short i = 0; i < 4; i++)
+	for(short i = 0; i < 4; i++) {
 		weapons[i] = weap_data->weapons[i];
-
+		weapons[i].reload_timer = 0.0f;		
+		anim_states[i].curr_frame = anims[i].frameCount;
+		anim_Apply(&anim_states[i], &models[i], &anims[i]);
+	}
 }
 

@@ -20,6 +20,30 @@ short alert_sphere_count = 0;
 AlertSphere alert_spheres[MAX_ALERT_SPHERES] = {0};
 float alert_clear_tick = 0;
 
+bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect, u8 flags) {
+	if(targ_id == -1 || targ_id >= handler->count) {
+		MessageDiagInt("invalid LOS check", targ_id, ANSI_YELLOW);
+		return false;
+	}
+	
+	Vector3 pos = ent->comp_transform.position;
+	Entity *targ_ent = &handler->ents[targ_id];
+
+	Vector3 dir = Vector3Normalize(Vector3Subtract(targ_ent->comp_transform.position, pos));
+	Ray ray = (Ray) { .position = pos, .direction = dir };
+
+	BvhTraceData bvh_tr = TraceDataEmpty();
+	BvhTraceHullGroups(ray, sect, &bvh_tr, 2000.0f, COLL_IGNORE_VIS | flags, 0);
+	
+	EntTraceData ent_tr = EntTraceDataEmpty();
+	TraceEntities(ray, handler, 2000.0f, ent->id, &ent_tr);
+
+	if(ent_tr.hit_ent == targ_id && ent_tr.dist < bvh_tr.distance)
+		return true;
+
+	return false;
+}
+
 void AddAlertSphere(Entity *ent, float radius) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -74,6 +98,7 @@ u8 ExecReloadWeapon(Entity *ent, comp_Ai *ai, float dt) {
 	if(ai->task_state.timer <= 0) {
 		ai->task_state.timer = 0;
 		ent->comp_weapon.ammo = ent->comp_weapon.clip_size;
+		ent->comp_weapon.in_clip = ent->comp_weapon.clip_size;
 		return 1;
 	}
 	
@@ -100,7 +125,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 	//dir = Vector3Normalize(dir);
 
 	comp_Transform *ct = &ent->comp_transform;
-	if(Vector3DotProduct(Vector3Normalize((Vector3){ct->forward.x, ct->forward.y, 0}), Vector3Normalize((Vector3){dir.x, dir.y, 0})) >= 0.95f)
+	if(Vector3DotProduct(Vector3Normalize((Vector3){ct->forward.x, ct->forward.y, 0}), Vector3Normalize((Vector3){dir.x, dir.y, 0})) >= 0.9f)
 		return 1;
 	
 	return 0;
@@ -227,13 +252,14 @@ u8 ExecGotoPos(Entity *ent, MapSection *sect) {
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 	Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, tr_start, tr_dest, &tr);
 	
-	if(tr.fraction < 1)
+	if(tr.fraction < 1) 
 		return 1;
 
 	ai->wish_dir = to_dest;
 	ai->wish_dir.z = 0;
 	ai->wish_dir = Vector3Normalize(ai->wish_dir);
 	ct->targ_look = ai->wish_dir; 
+	ai->task_state.use_path = false;
 
 	return 0;
 }
@@ -458,6 +484,8 @@ u8 ExecFindCover(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 		result = 1;
 		MakeNavPath(ent, graph, curr_node);
+		ai->task_state.move_dest = graph->nodes[curr_node].position;
+		ai->targ_data.known_position = graph->nodes[curr_node].position;
 		break;
 	}
 
@@ -467,6 +495,8 @@ u8 ExecFindCover(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	return 1;
 }
 
+// * NOTE: 
+// Switch to bvh trace later
 u8 ExecFindFiringPos(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	comp_Transform 	*ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -482,6 +512,32 @@ u8 ExecFindFiringPos(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 	i16 curr_node = ai->curr_navnode_id;
 
+	Vector3 player_pos = handler->ents[handler->player_id].comp_transform.position;
+
+	/*
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	//Vector3 tr_start = graph->nodes[curr_node].position; 
+	Vector3 tr_start = graph->nodes[curr_node].position; 
+	tr_start.z += 16.0f;
+	Vector3 tr_dest = handler->ents[handler->player_id].comp_transform.position;
+	tr_dest.z += 16.0f;
+	Bsp_RecursiveTraceEx(hull, hull->first_node, 0.0f, 1.0f, tr_start, tr_dest, &tr);
+	if(tr.fraction >= 1.0f) {
+		ai->task_state.move_dest = ct->position;
+		ai->targ_data.known_position = ct->position;
+		return 1;
+	}
+	*/
+
+	Bsp_TraceData tr = Bsp_TraceDataEmpty();
+	Vector3 tr_start = graph->nodes[curr_node].position; 
+	Vector3 tr_dest = handler->ents[handler->player_id].comp_transform.position;
+	if(CheckLOS(ent, handler->player_id, handler, sect, COLL_IGNORE_BULLET)) {
+		ai->task_state.move_dest = ct->position;
+		ai->targ_data.known_position = ct->position;
+		return 1;
+	}
+
 	while(!result && iter < (graph->node_count-1)) {
 		if(visited[curr_node])
 			continue;
@@ -496,20 +552,37 @@ u8 ExecFindFiringPos(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		if(node->flags & IS_COVER)
 			continue;
 
-		Bsp_TraceData tr = Bsp_TraceDataEmpty();
-		Vector3 tr_start = node->position; 
-		Vector3 tr_dest = handler->ents[handler->player_id].comp_transform.position;
+		BvhTraceData tr = TraceDataEmpty();
+		Ray ray = (Ray) { 
+			.position = node->position, 
+			.direction = Vector3Normalize(Vector3Subtract(player_pos, node->position))
+		};
+
+		BvhTraceHullGroups(ray, sect, &tr, Vector3Distance(player_pos, node->position), (COLL_IGNORE_VIS | COLL_IGNORE_BULLET), 0);
+		if(tr.hit)
+			continue;
+
+		/*
+		tr = Bsp_TraceDataEmpty();
+		tr_start = node->position; 
+		tr_start.z += 16.0f;
+		tr_dest = handler->ents[handler->player_id].comp_transform.position;
+		tr_dest.z += 16.0f;
 		Bsp_RecursiveTraceEx(hull, hull->first_node, 0.0f, 1.0f, tr_start, tr_dest, &tr);
 
-		if(tr.fraction <= 1.0f)
+
+		if(tr.fraction < 1.0f)
 			continue;
+		*/
 
 		result = 1;
 		MakeNavPath(ent, graph, curr_node);
+		ai->task_state.move_dest = graph->nodes[curr_node].position;
+		ai->targ_data.known_position = graph->nodes[curr_node].position;
 		break;
 	}
 
-	return 1;
+	return result;
 }
 
 void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
@@ -907,6 +980,10 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 
 		case TASK_FIND_COVER:
 			done = ExecFindCover(ent, handler, sect);
+			break;
+
+		case TASK_FIND_FIRING_POS:
+			done = ExecFindFiringPos(ent, handler, sect);
 			break;
 	}
 
