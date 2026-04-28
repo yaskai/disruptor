@@ -366,6 +366,10 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 
 void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 void MaintainerDraw(Entity *ent, EntityHandler *handler, float dt);
+
+void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
+void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt);
+
 // ----------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 #include <float.h>
 #include <stdio.h>
+#include <string.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "ai.h"
@@ -412,6 +413,25 @@ u8 ExecGotoEnt(Entity *ent, EntityHandler *handler) {
 u8 ExecRestoreSched(Entity *ent) {
 	AiSetSchedule(&ent->comp_ai, ent->comp_ai.sched_state.prev_sched);
 	return 1;
+}
+
+u8 ExecFindCover(Entity *ent, EntityHandler *handler, MapSection *sect) {
+	comp_Transform 	*ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+
+	u8 result = 0;	
+	int iter = 0;
+
+	bool visited[graph->node_count];
+	memset(visited, graph->node_count, false);
+
+	while(!result && iter < graph->node_count) {
+		
+	}
+
+	return result;
 }
 
 void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {

@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -337,7 +336,7 @@ void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
 	handler->base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
 	handler->base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer.glb", prefix));	 
-	//handler->base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer02.glb", prefix));	 
+	handler->base_ent_models[ENT_REGULATOR] = LoadModel(TextFormat("%s/enemies/reg_00.glb", prefix));	 
 }
 
 int base_ent_anims_count[16] = {0};
@@ -527,6 +526,10 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 			case ENT_SWITCH:
 				SwitchUpdate(handler, ent, dt);
 				break;
+
+			case ENT_REGULATOR:
+				RegulatorUpdate(ent, handler, sect, dt);
+				break;
 		}
 
 		ent->comp_health.bug_box = BoxTranslate(
@@ -712,6 +715,10 @@ void RenderEntities(EntityHandler *handler, float dt) {
 
 			case ENT_DOOR:
 				continue;
+
+			case ENT_REGULATOR:
+				RegulatorDraw(ent, handler, dt);
+				break;
 		}
 	}
 
@@ -1154,6 +1161,64 @@ void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos) {
 // * NOTE:
 // Nothing right now as that enemy isn't implemented yet...
 void OnHitRegulator(Entity *ent, short damage, Vector3 bullet_pos) {
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+	
+	int sfx_id = GetRandomValue(0, 3);
+
+	Vector3 to_player = Vector3Subtract(ptr_handler_self->ents[ptr_handler_self->player_id].comp_transform.position, ct->position);
+	to_player = Vector3Normalize(to_player);
+
+	AP_SetSoundPosition(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], ct->position, 0);
+	AP_SetSoundDir(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id], to_player, 0);
+
+	AP_RequestSound(ptr_handler_self->ap, maintainer_hit_sounds[sfx_id]);
+
+	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
+		ent->comp_health.amount = 0;
+
+	if(CheckCollisionBoxSphere(ent->comp_health.crit_box, bullet_pos, 3.5f)) {
+		ent->comp_health.amount -= damage;
+		ent->comp_ai.state = STATE_STUNNED;
+		//AiSetSchedule(ai, SCHED_STUN);
+		ent->comp_health.damage_cooldown = 0.25f;
+	}
+
+	if(ent->comp_health.amount <= 0)
+		ai->state = STATE_DEAD;
+
+	Vector3 prev_wish = ai->wish_dir;
+	float prev_speed = ai->speed;
+
+	ai->speed = 1000;
+
+	Vector3 knockback = Vector3Negate(to_player);
+	if(ai->state != STATE_DEAD)
+		knockback = Vector3Zero();
+	else {
+		short dice = GetRandomValue(0, 6);
+		/*
+		if(dice == 6) {
+			//knockback.z = 0.99f;
+			knockback.z = 0.1f;
+			ai->speed = 3000;
+		}
+		*/
+	}
+	knockback = Vector3Normalize(knockback);
+
+	ai->wish_dir = knockback;
+	EntMove(ent, ptr_handler_sect, ptr_handler_self, GetFrameTime());
+
+	ai->wish_dir = prev_wish;
+	ai->speed = prev_speed;
+
+	if(ai->state == STATE_DEAD) {
+		//ct->velocity.x = 0;
+		//ct->velocity.y = 0;	
+		ai->wish_dir = Vector3Zero();
+		ent->flags &= ~ENT_COLLIDERS;
+	}
 }
 
 void OnFixRegulator(Entity *ent) {

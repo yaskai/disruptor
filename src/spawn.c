@@ -264,6 +264,37 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		} break;
 
 		case ENT_REGULATOR: {
+			ent.comp_health.amount = 20;
+			ent.comp_health.on_hit = 3;
+			ent.comp_health.component_valid = true;
+
+			ent.model = handler->base_ent_models[ENT_REGULATOR];
+			ent.model.materials[0].shader = handler->ent_shader;
+
+			float angle = (spawn_point->angle-270) * DEG2RAD;
+			ent.model.transform = MatrixRotateX(90*DEG2RAD);
+			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
+
+			ent.anim_state = anim_Init(ent.model);
+			ent.animations = LoadModelAnimations("resources/models/enemies/reg_00.glb", &ent.num_anims);
+			ent.anim_state.speed = (1.0f / 100);
+
+			ent.comp_ai.speed = 150;
+			ent.comp_health.bug_point = BUG_POINT_MAINTAINER;
+
+			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
+			ent.comp_transform.bounds.min = Vector3Scale(BODY_VOLUME_MEDIUM, -0.5f);
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+
+			ent.comp_ai.component_valid = true;
+
+			ent.comp_health.hit_box = ent.comp_transform.bounds;
+			ent.comp_health.hit_box.min = Vector3Add(ent.comp_transform.bounds.min,  Vector3Scale(Vector3One(), 3));
+			ent.comp_health.hit_box.max = Vector3Add(ent.comp_transform.bounds.max, Vector3Scale(Vector3One(), -3));
+
+			ent.flags |= ENT_COLLIDERS;
+
+			AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 
 		} break;
 
@@ -331,10 +362,10 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 		} break;
 
-		case ENT_DOOR: 
-		case ENT_LADDER: {
+		case ENT_DOOR: { 
 			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
 			ent.model.materials[0].shader = handler->ent_shader;
+
 			//ent.model.materials[0].shader = bsp->lm_shader;
 			//ent.model.materials[0].maps[1].texture = bsp->lightmaps->lightmap
 
@@ -347,6 +378,19 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 		} break;
 
+		case ENT_LADDER: {
+			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
+			ent.model.materials[0].shader = handler->ent_shader;
+			ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
+
+			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
+			ent.comp_ai.speed = 700;
+
+			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
+
+			ent.flags &= ~ENT_COLLIDERS;
+
+		} break;
 	}
 
 	ent.comp_health.bug_box = (BoundingBox) {
@@ -358,20 +402,16 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
 	if(spawn_point->start_active) ent.flags |= (ENT_ACTIVE);
 
-	/*
-	if(ent.type == ENT_TURRET)
-		ent.flags &= ~ENT_ACTIVE;
-	*/
-
 	ent.comp_ai.navgraph_id = -1;
-	//ent.comp_ai.speed = 50;
 	ent.comp_ai.wish_dir = Vector3Zero();
 	ent.comp_ai.targ_data.ent_id = -1;
 
 	ent.cell_id = -1;
 
+	if(spawn_point->speed)
+		ent.comp_ai.speed = spawn_point->speed;
+
 	handler->count++;
-	//handler->brush_ents_offset = handler->count;
 
 	return ent;
 }
@@ -381,7 +421,6 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 	char *cursor = bsp->ent_str;	
 
-	//Bsp_Ent ent_data[1024] = {0};
 	Bsp_Ent *ent_data = calloc(1024, sizeof(Bsp_Ent));
 	int count = 0;
 		
@@ -503,6 +542,12 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 				int z = 0;
 				sscanf(prop->val, "%d", &z);
 				spawn.targ_offset.z = z;
+			}
+
+			if(streq(prop->key, "speed")) {
+				int s = 0;
+				sscanf(prop->val, "%d", &s);
+				spawn.speed = s;
 			}
 		}
 

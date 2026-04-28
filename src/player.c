@@ -195,6 +195,7 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 			u8 hull_id = (crouch) ? 2 : 1;
 			Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
+			// Change trace start and end points to account for origin offsets
 			Vector3 offset = bsp->hull_groups[j].origin;
 			Vector3 p1 = Vector3Subtract(dest, offset);
 			Vector3 p2 = Vector3Subtract(Vector3Add(dest, move), offset);

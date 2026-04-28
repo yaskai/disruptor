@@ -66,6 +66,8 @@ typedef struct {
 	int trigger_condition;
 	int start_active;
 
+	int speed;
+
 	u16 id;
 	
 } EntSpawn; 

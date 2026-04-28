@@ -1694,6 +1694,33 @@
 ( -544 -856 144 ) ( -576 -856 136 ) ( -544 -856 136 ) met01 0 0 0 1 1
 ( -544 -856 144 ) ( -544 -912 136 ) ( -544 -912 144 ) met01 0 0 0 1 1
 }
+// brush 186
+{
+( 464 48 -16 ) ( 464 -48 -16 ) ( 464 -48 -88 ) purpmtl 0 0 0 1 1
+( 464 -48 -16 ) ( 576 -48 -16 ) ( 576 -48 -88 ) purpmtl 0 0 0 1 1
+( 576 -48 -88 ) ( 576 48 -88 ) ( 464 48 -88 ) purpmtl 0 0 0 1 1
+( 464 48 -16 ) ( 576 48 -16 ) ( 576 -48 -16 ) purpmtl 0 0 0 1 1
+( 576 48 -88 ) ( 576 48 -16 ) ( 464 48 -16 ) purpmtl 0 0 0 1 1
+( 576 -48 -16 ) ( 576 48 -16 ) ( 576 48 -88 ) purpmtl 0 0 0 1 1
+}
+// brush 187
+{
+( 544 -296 -16 ) ( 544 -392 -16 ) ( 544 -392 -88 ) purpmtl 0 0 0 1 1
+( 544 -392 -16 ) ( 656 -392 -16 ) ( 656 -392 -88 ) purpmtl 0 0 0 1 1
+( 656 -392 -88 ) ( 656 -296 -88 ) ( 544 -296 -88 ) purpmtl 0 0 0 1 1
+( 544 -296 -16 ) ( 656 -296 -16 ) ( 656 -392 -16 ) purpmtl 0 0 0 1 1
+( 656 -296 -88 ) ( 656 -296 -16 ) ( 544 -296 -16 ) purpmtl 0 0 0 1 1
+( 656 -392 -16 ) ( 656 -296 -16 ) ( 656 -296 -88 ) purpmtl 0 0 0 1 1
+}
+// brush 188
+{
+( 312 -128 -16 ) ( 312 -224 -16 ) ( 312 -224 -88 ) purpmtl 0 0 0 1 1
+( 312 -224 -16 ) ( 424 -224 -16 ) ( 424 -224 -88 ) purpmtl 0 0 0 1 1
+( 424 -224 -88 ) ( 424 -128 -88 ) ( 312 -128 -88 ) purpmtl 0 0 0 1 1
+( 312 -128 -16 ) ( 424 -128 -16 ) ( 424 -224 -16 ) purpmtl 0 0 0 1 1
+( 424 -128 -88 ) ( 424 -128 -16 ) ( 312 -128 -16 ) purpmtl 0 0 0 1 1
+( 424 -224 -16 ) ( 424 -128 -16 ) ( 424 -128 -88 ) purpmtl 0 0 0 1 1
+}
 }
 // entity 1
 {
@@ -1880,13 +1907,117 @@
 }
 // entity 17
 {
+"classname" "nav_node"
+"origin" "652 100 -52"
+}
+// entity 18
+{
+"classname" "nav_node"
+"origin" "540 84 -52"
+}
+// entity 19
+{
+"classname" "nav_node"
+"origin" "364 -76 -52"
+}
+// entity 20
+{
+"classname" "nav_node"
+"origin" "540 -100 -52"
+}
+// entity 21
+{
+"classname" "nav_node"
+"origin" "604 -244 -52"
+"flags" "1"
+}
+// entity 22
+{
+"classname" "nav_node"
+"origin" "484 -180 -52"
+"flags" "1"
+}
+// entity 23
+{
+"classname" "nav_node"
+"origin" "484 -444 -52"
+}
+// entity 24
+{
+"classname" "nav_node"
+"origin" "620 -444 -52"
+"flags" "1"
+}
+// entity 25
+{
+"classname" "nav_node"
+"origin" "788 -444 -52"
+}
+// entity 26
+{
+"classname" "nav_node"
+"origin" "700 -348 -52"
+"flags" "1"
+}
+// entity 27
+{
+"classname" "info_regulator_spawn"
+"origin" "688 96 -64"
+"enum_id" "3"
+"angle" "90"
+}
+// entity 28
+{
+"classname" "nav_node"
+"origin" "484 -340 -52"
+}
+// entity 29
+{
+"classname" "nav_node"
+"origin" "364 -268 -52"
+"flags" "1"
+}
+// entity 30
+{
+"classname" "nav_node"
+"origin" "276 -276 -52"
+}
+// entity 31
+{
+"classname" "nav_node"
+"origin" "276 -28 -52"
+}
+// entity 32
+{
+"classname" "nav_node"
+"origin" "364 108 -52"
+}
+// entity 33
+{
+"classname" "nav_node"
+"origin" "428 -12 -52"
+"flags" "1"
+}
+// entity 34
+{
+"classname" "nav_node"
+"origin" "604 -4 -52"
+"flags" "1"
+}
+// entity 35
+{
+"classname" "nav_node"
+"origin" "716 -188 -52"
+}
+// entity 36
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 18
+// entity 37
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
