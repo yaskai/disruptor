@@ -146,8 +146,8 @@ static Ai_SchedDef sched_defs[] = {
 
 	[SCHED_REGULATOR_FIND_FIRE_POS] = {
 		.timers = { 0.0f },
-		.tasks = { TASK_FACE_DIR, TASK_FIND_FIRING_POS, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_FACE_DIR, },
-		.num_tasks = 5,
+		.tasks = { TASK_FACE_DIR, TASK_FIND_FIRING_POS, TASK_GOTO_POS, TASK_STOP_MOVE },
+		.num_tasks = 4,
 		.interrupt_mask = (AI_INPUT_SEE_PLAYER),
 		.interrupt_sched = SCHED_REGULATOR_ATTACK,
 		.fail_sched = 0,
@@ -167,7 +167,7 @@ static Ai_SchedDef sched_defs[] = {
 	[SCHED_REGULATOR_RELOAD] = {
 		.timers = { 0.0f },
 		.tasks = { TASK_FIND_COVER, TASK_GOTO_POS, TASK_STOP_MOVE, TASK_RELOAD_WEAPON },
-		.num_tasks = 5, 
+		.num_tasks = 4, 
 		.interrupt_mask = (0),
 		.interrupt_sched = 0,
 		.fail_sched = 0,
@@ -175,9 +175,9 @@ static Ai_SchedDef sched_defs[] = {
 	},
 
 	[SCHED_REGULATOR_ATTACK] = {
-		.timers = { 0.0f },
-		.tasks = { TASK_FIRE_WEAPON },
-		.num_tasks = 1,
+		.timers = { 0.0f, 0.5f },
+		.tasks = { TASK_FACE_DIR, TASK_FIRE_WEAPON },
+		.num_tasks = 2,
 		.interrupt_mask = (0),
 		.interrupt_sched = 0,
 		.fail_sched = 0,

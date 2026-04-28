@@ -1101,9 +1101,9 @@ void cam_Adjust(comp_Transform *ct, float dt) {
 		if(cam_zmod <= 0.1f)
 			cam_zmod = 0;
 		*/
-		cam_zmod = Lerp(cam_zmod, 4.0f, dt*10.0f);
-		if(cam_zmod <= 4.1f)
-			cam_zmod = 4.0f;
+		cam_zmod = Lerp(cam_zmod, 0.0f, dt*10.0f);
+		if(cam_zmod <= 0.1f)
+			cam_zmod = 0.0f;
 	} else {
 		cam_zmod = Lerp(cam_zmod, 16, dt*8.5f);
 		if(cam_zmod >= 15.9f)

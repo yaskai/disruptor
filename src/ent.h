@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include "../include/num_redefs.h"
 #include "input_handler.h"
 #include "geo.h"
@@ -57,6 +58,8 @@ bool CoordsInBounds(Coords coords, EntGrid *grid);
 
 typedef struct {
 	BoundingBox bounds;
+
+	Quaternion qrot;
 
 	Vector3 position;
 	Vector3 velocity;

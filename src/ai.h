@@ -5,7 +5,7 @@
 #ifndef AI_H_
 #define AI_H_
 
-#define AI_TICK_RATE 11.0f
+#define AI_TICK_RATE 4.0f
 
 // ** Input mask definitions ** //
 //

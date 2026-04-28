@@ -277,7 +277,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.model.transform = MatrixMultiply(ent.model.transform, MatrixRotateZ(angle));
 
 			ent.anim_state = anim_Init(ent.model);
-			ent.animations = LoadModelAnimations("resources/models/enemies/reg_00.glb", &ent.num_anims);
+			//ent.animations = LoadModelAnimations("resources/models/enemies/reg_00.glb", &ent.num_anims);
+			ent.animations = LoadModelAnimations("resources/models/enemies/reg_01.glb", &ent.num_anims);
 			ent.anim_state.speed = (1.0f / 100);
 
 			ent.comp_ai.speed = 170;
@@ -288,6 +289,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
 
 			ent.comp_ai.hear_distance = 100.0f;
+			ent.comp_ai.sight_cone = 0.25f;
 			ent.comp_ai.component_valid = true;
 
 			ent.comp_health.hit_box = ent.comp_transform.bounds;
@@ -298,9 +300,9 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_weapon = (comp_Weapon) {
 				.ammo_type = WEAPON_TRAVEL_HITSCAN,
-				.clip_size = 35,
-				.in_clip = 45,
-				.cooldown = 0.0f,
+				.clip_size = 12,
+				.in_clip = 12,
+				.cooldown = 0.5f,
 				.reload_timer = 0.0f,
 				.reload_time_amnt = 2.0f,
 				.damage = 5

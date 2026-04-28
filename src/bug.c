@@ -260,7 +260,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
 
 	BvhTraceData tr = TraceDataEmpty();	
-	BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, 1 + EPSILON);
+	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
 	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 
 	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
@@ -268,14 +268,12 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 			continue;
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
-		//BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
+		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
 		//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, ct->bounds, &temp_tr, 8 + 1 + EPSILON);
 
-		/*
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
 		}
-		*/
 
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
 		if(temp_tr.distance < tr.distance) {
@@ -347,7 +345,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, Vector3Length(move));
+		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
 
 		for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
@@ -355,8 +353,6 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 			
 			BvhTraceData temp_tr = TraceDataEmpty();
 			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, Vector3Length(move));
-			//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, ct->bounds, &temp_tr, Vector3Length(move));
-
 			if(temp_tr.distance < tr.distance) {
 				tr = temp_tr;
 			}

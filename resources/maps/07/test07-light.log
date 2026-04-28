@@ -4,7 +4,7 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from test07.texinfo.json...
 Loading extended content flags from test07.content.json...
-30 entities read, 5 are lights.
+32 entities read, 5 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -38,8 +38,8 @@ BSPX light directions output requested on command line.
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
 	123 sky faces
-	1768 solid faces
-	180 filtered faces
+	1770 solid faces
+	210 filtered faces
 	0 shadow-casting skip faces
 SetupLights: 5 initial lights
 SetupLights: 5 after surface lights
@@ -48,7 +48,7 @@ Final count: 5 lights, 194 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 1524572
+lightmap size (total): 1561952
 Lighting Completed.
 
 Writing test07.lit
@@ -64,7 +64,7 @@ octree leafs 2126 overhead 51024 bytes
       3970179 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing test07.bsp as Quake BSP bsp29
-13.760s seconds elapsed
+14.546s seconds elapsed
 0 empty lightmaps
 
 

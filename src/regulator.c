@@ -1,5 +1,7 @@
 #include "raylib.h"
 #include "ent.h"
+#include <math.h>
+#include <raymath.h>
 
 void RegulatorThink(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
@@ -11,6 +13,9 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 	comp_Weapon *weap = &ent->comp_weapon;
+
+	if(ai->task_state.timer > 0)
+		return;
 
 	if(!(ai->input_mask & AI_INPUT_SEE_PLAYER)) {
 		if(!CheckLOS(ent, handler->player_id, handler, sect, COLL_IGNORE_BULLET)) {
@@ -105,13 +110,18 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 5*dt);
 	}
 
+	ct->pitch = asinf(Clamp(ct->targ_look.z, -1.0f, 1.0f));
+	
 	if(ai->state == STATE_MOVE) {
 		Vector3 move_dir = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0.0f } );
 		ct->yaw = Lerp(ct->yaw, atan2f(-move_dir.x, move_dir.y), 5*dt);
+		anim_Switch(&ent->anim_state, 1);
+		anim_Update(&ent->anim_state, ent->animations, dt);
 	}
 
 	if(ai->task_state.task_id == TASK_FIRE_WEAPON) {
 		ai->state = STATE_ATTACK;
+
 		RegulatorFireWeapon(ent, handler, sect, dt);
 
 		Vector3 to_player = Vector3Subtract(handler->ents[handler->player_id].comp_transform.position, ct->position);
@@ -120,10 +130,15 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 
 		ct->targ_look = to_player; 
 		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 5*dt);
-	}
+		ct->yaw = atan2f(-ct->forward.x, ct->forward.y);
+		
+		return;
+	} 
 
-	if(ai->task_state.task_id == TASK_RELOAD_WEAPON)
+	if(ai->task_state.task_id == TASK_RELOAD_WEAPON) {
 		ai->state = STATE_RELOAD;
+		anim_Switch(&ent->anim_state, 2);
+	}
 
 	EntMove(ent, sect, handler, dt);
 }
@@ -144,18 +159,12 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 		return;
 	}
 
-	anim_Switch(&ent->anim_state, 0);
-	//anim_Update(&ent->anim_state, ent->animations, dt);
 	anim_Apply(&ent->anim_state, &ent->model, ent->animations);
 
-	float yaw = atan2f(-ct->forward.x, ct->forward.y);
-
-	if(ai->state == STATE_MOVE) {
-		yaw = ct->yaw;
-	}
-
-	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(yaw+(90*DEG2RAD)));
-	EntDrawLitModelEx(handler, ent, ct->position, 1.0f, Vector3CrossProduct(ct->forward, UP), 0, 100);
+	Quaternion targ = QuaternionFromEuler(ct->pitch, 0.0f, ct->yaw+90*DEG2RAD);
+	ct->qrot = QuaternionSlerp(ct->qrot, targ, 5*dt);
+	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), QuaternionToMatrix(ct->qrot));
+	EntDrawLitModel(handler, ent, 1.0f, 0);
 
 	DrawBoundingBox(ent->comp_health.hit_box, GREEN);
 }

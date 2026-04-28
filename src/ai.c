@@ -125,7 +125,7 @@ u8 ExecFaceDir(Entity *ent, Vector3 dir) {
 	//dir = Vector3Normalize(dir);
 
 	comp_Transform *ct = &ent->comp_transform;
-	if(Vector3DotProduct(Vector3Normalize((Vector3){ct->forward.x, ct->forward.y, 0}), Vector3Normalize((Vector3){dir.x, dir.y, 0})) >= 0.9f)
+	if(Vector3DotProduct(Vector3Normalize((Vector3){ct->forward.x, ct->forward.y, 0}), Vector3Normalize((Vector3){dir.x, dir.y, 0})) >= 0.96f)
 		return 1;
 	
 	return 0;
@@ -197,7 +197,7 @@ u8 ExecMakePatrolPath(Entity *ent, MapSection *sect) {
 	if(MakeNavPath(ent, graph, GetRandomValue(0, graph->node_count-1))) {
 		Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
 		ai->task_state.move_dest = point;
-		ai->targ_data.known_position = point;
+		//ai->targ_data.known_position = point;
 		ai->targ_data.ent_id = -1;
 		//Message("success", ANSI_GREEN);
 		return 1;
@@ -245,7 +245,8 @@ u8 ExecGotoPos(Entity *ent, MapSection *sect) {
 	//tr_start.z += 24;
 	tr_start.z += 8;
 
-	Vector3 tr_dest = ai->targ_data.known_position;
+	//Vector3 tr_dest = ai->targ_data.known_position;
+	Vector3 tr_dest = ai->task_state.move_dest;
 	//tr_dest.z += 24;
 	tr_dest.z += 8;
 
@@ -301,7 +302,7 @@ u8 ExecFindPos(Entity *ent, MapSection *sect) {
 	MakeNavPath(ent, graph, node);
 	Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
 	ai->task_state.move_dest = point;
-	ai->targ_data.known_position = point;
+	//ai->targ_data.known_position = point;
 	ai->targ_data.ent_id = -1;
 
 	return 1;
@@ -895,6 +896,7 @@ void AiDoSchedule(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai
 	u8 complete = AiDoTask(ent, handler, sect, ai, task_id, dt);
 	if(complete) {
 		ai->sched_state.curr_task++;
+		ai->task_state.timer = sched_defs[ai->sched_state.sched_id].timers[ai->sched_state.curr_task];
 	}
 
 	if(sched_state->curr_task >= sched_def->num_tasks) {
