@@ -43,7 +43,8 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 			NavNode node = (NavNode) {
 				.position = spawn_point->position,
 				.id = nav_graph->node_count,
-				.edge_count = 0
+				.edge_count = 0,
+				.flags = spawn_point->flags
 			};
 			memset(node.edges, 0, sizeof(u16) * MAX_EDGES_PER_NODE);
 			nav_graph->nodes[nav_graph->node_count] = node;
@@ -294,7 +295,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.flags |= ENT_COLLIDERS;
 
-			AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
+			AiSetSchedule(&ent.comp_ai, SCHED_REGULATOR_IDLE);
 
 		} break;
 
@@ -548,6 +549,12 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 				int s = 0;
 				sscanf(prop->val, "%d", &s);
 				spawn.speed = s;
+			}
+
+			if(streq(prop->key, "flags")) {
+				int f = 0;
+				sscanf(prop->val, "%d", &f);
+				spawn.flags = (u8)f;
 			}
 		}
 

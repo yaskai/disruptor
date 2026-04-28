@@ -5,6 +5,8 @@
 #define NAV_H_
 
 #define MAX_EDGES_PER_NODE	64
+
+#define IS_COVER	0x01
 typedef struct {
 	Vector3 position;
 

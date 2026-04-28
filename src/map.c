@@ -1291,8 +1291,12 @@ void DebugDrawNavGraphs(MapSection *sect, Model model) {
 			NavNode *node_A = &navgraph->nodes[edge->id_A];
 			NavNode *node_B = &navgraph->nodes[edge->id_B];
 
-			//DrawModel(model, node_A->position, 1, BLUE);
-			//DrawModel(model, node_B->position, 1, BLUE);
+			Color node_color[2] = { BLUE };
+			if(node_A->flags & IS_COVER) node_color[0] = YELLOW;
+			if(node_B->flags & IS_COVER) node_color[1] = YELLOW;
+
+			DrawModel(model, node_A->position, 1, node_color[0]);
+			DrawModel(model, node_B->position, 1, node_color[1]);
 
 			Color line_color = (i % 2 == 0) ? MAGENTA : GREEN; 
 			DrawLine3D(node_A->position, node_B->position, line_color);

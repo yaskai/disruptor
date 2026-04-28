@@ -69,6 +69,8 @@ void GameClose(Game *game) {
 }
 
 void GameRenderSetup(Game *game) {
+	sphere_model = LoadModelFromMesh(GenMeshSphere(1, 12, 12));
+
 	// Initalize 3D camera
 	game->camera = (Camera3D) {
 		.position = (Vector3) { 30, 30, 30 },

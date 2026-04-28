@@ -7,6 +7,7 @@
 #include "ent.h"
 #include "sched_defs.c"
 #include "../include/log_message.h"
+#include "nav.h"
 
 #define AI_TICKRATE 6.0f
 float ai_tick = 0.0f;
@@ -272,7 +273,10 @@ u8 ExecFindPos(Entity *ent, MapSection *sect) {
 		return 1;
 
 	MakeNavPath(ent, graph, node);
-	ai->task_state.move_dest = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.curr]].position;
+	Vector3 point = graph->nodes[ai->task_state.path.nodes[ai->task_state.path.count-1]].position;
+	ai->task_state.move_dest = point;
+	ai->targ_data.known_position = point;
+	ai->targ_data.ent_id = -1;
 
 	return 1;
 }
@@ -420,18 +424,92 @@ u8 ExecFindCover(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	comp_Ai *ai = &ent->comp_ai;
 
 	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[0];
 
 	u8 result = 0;	
 	int iter = 0;
 
 	bool visited[graph->node_count];
-	memset(visited, graph->node_count, false);
+	memset(visited, false, graph->node_count);
 
-	while(!result && iter < graph->node_count) {
+	i16 curr_node = ai->curr_navnode_id;
+
+	while(!result && iter < (graph->node_count-1)) {
+		if(visited[curr_node])
+			continue;
 		
+		visited[curr_node] = true;
+
+		curr_node = (curr_node + 1) % (graph->node_count); 
+		iter++;
+
+		NavNode *node = &graph->nodes[curr_node];
+
+		if(!(node->flags & IS_COVER))
+			continue;
+
+		Bsp_TraceData tr = Bsp_TraceDataEmpty();
+		Vector3 tr_start = node->position; 
+		Vector3 tr_dest = handler->ents[handler->player_id].comp_transform.position;
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0.0f, 1.0f, tr_start, tr_dest, &tr);
+
+		if(tr.fraction >= 1.0f)
+			continue;
+
+		result = 1;
+		MakeNavPath(ent, graph, curr_node);
+		break;
 	}
 
-	return result;
+	if(!result)
+		ExecMakePatrolPath(ent, sect);
+
+	return 1;
+}
+
+u8 ExecFindFiringPos(Entity *ent, EntityHandler *handler, MapSection *sect) {
+	comp_Transform 	*ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+
+	NavGraph *graph = &sect->navgraphs[ai->navgraph_id];
+	Bsp_Hull *hull = &sect->bsp_data.hull_groups[0].hulls[0];
+
+	u8 result = 0;	
+	int iter = 0;
+
+	bool visited[graph->node_count];
+	memset(visited, false, graph->node_count);
+
+	i16 curr_node = ai->curr_navnode_id;
+
+	while(!result && iter < (graph->node_count-1)) {
+		if(visited[curr_node])
+			continue;
+		
+		visited[curr_node] = true;
+
+		curr_node = (curr_node + 1) % (graph->node_count-1); 
+		iter++;
+
+		NavNode *node = &graph->nodes[curr_node];
+
+		if(node->flags & IS_COVER)
+			continue;
+
+		Bsp_TraceData tr = Bsp_TraceDataEmpty();
+		Vector3 tr_start = node->position; 
+		Vector3 tr_dest = handler->ents[handler->player_id].comp_transform.position;
+		Bsp_RecursiveTraceEx(hull, hull->first_node, 0.0f, 1.0f, tr_start, tr_dest, &tr);
+
+		if(tr.fraction <= 1.0f)
+			continue;
+
+		result = 1;
+		MakeNavPath(ent, graph, curr_node);
+		break;
+	}
+
+	return 1;
 }
 
 void CheckForBrokenAlly(Entity *ent, EntityHandler *handler) {
@@ -617,6 +695,9 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 
 	if(ent->type == ENT_MAINTAINER && ai->navgraph_id >= 0)
 		CheckForBrokenAlly(ent, handler);
+
+	if(ent->comp_weapon.in_clip <= 0)
+		ai->input_mask |= AI_INPUT_CLIP_EMPTY;
 
 	// ** Check if player is visible **	
 	//
@@ -822,6 +903,10 @@ u8 AiDoTask(Entity *ent, EntityHandler *handler, MapSection *sect, comp_Ai *ai, 
 
 		case TASK_RESTORE_SCHED:
 			done = ExecRestoreSched(ent);
+			break;
+
+		case TASK_FIND_COVER:
+			done = ExecFindCover(ent, handler, sect);
 			break;
 	}
 

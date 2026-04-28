@@ -69,6 +69,8 @@ typedef struct {
 	int speed;
 
 	u16 id;
+
+	u8 flags;
 	
 } EntSpawn; 
 

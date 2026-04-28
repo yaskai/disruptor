@@ -19,6 +19,7 @@
 #define AI_INPUT_MEELEE_RANGE	0x0080
 #define AI_INPUT_DEST_REACHED	0x0100
 #define AI_INPUT_TARG_DEAD		0x0200
+#define AI_INPUT_CLIP_EMPTY		0x0400
 // *** 
 
 enum ANIM_STATES : u8 {
@@ -80,6 +81,7 @@ typedef struct {
 } Ai_SchedState;
 
 typedef struct {
+	float timers[8];		// Task timer array
 	u8 tasks[8];			// Task ID array
 	u8 num_tasks;			// Number of tasks
 
