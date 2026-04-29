@@ -22,5 +22,8 @@ void main() {
 	ambient = light_clr[1];
 	ambient = clamp(ambient, 0.25, 1.0);
 
+	if(diffuse.x >= 1.0)
+		ambient = vec3(1.0);
+
     finalColor = vec4(diffuse.rgb * ambient, 1.0);
 }

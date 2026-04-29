@@ -59,3 +59,20 @@ void anim_Switch(AnimState *anim_state, int anim_id) {
 	anim_state->loop_count = 0;
 }
 
+void anim_SocketSetup(AnimState *anim_state, Model *model, char *socket_name) {
+	printf("anim_SocketSetup()\n");
+	printf("socket_name: %s\n", socket_name);
+	
+	int id = -1;	
+
+	for(int i = 0; i < model->boneCount; i++) {
+		if(TextIsEqual(socket_name, model->bones[i].name)) {
+			id = i;
+			break;
+		}
+	}
+
+	anim_state->weap_socket = id;
+	printf("id: %d\n", id);
+}
+

@@ -7,6 +7,15 @@
 #include "raymath.h"
 #include "kbsp.h"
 #include "../include/log_message.h"
+#include "lit.h"
+#include "map.h"
+#include "ent.h"
+
+MapSection *lh_ptr_sect;
+void lh_SetSectPointer(MapSection *sect) { lh_ptr_sect = sect; }
+
+EntityHandler *lh_ptr_ent_handler;
+void lh_SetEntHandlerPtr(EntityHandler *handler) { lh_ptr_ent_handler = handler; }
 
 Lightmap BuildLightmap(Bsp_Data *bsp) {
 	Message("BuildLightmap()", ANSI_BLUE);
@@ -153,5 +162,15 @@ Color lit_SampleLightGrid(Bsp_Data *bsp, Vector3 world_pos) {
 	}
 
 	return WHITE;
+}
+
+void InitPointLights(LightHandler *lh) {
+		
+}
+
+void ManagePointLights(LightHandler *lh, float dt) {
+	for(u8 i = 0; i < lh->num_point_lights; i++) {
+		
+	}
 }
 

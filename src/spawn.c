@@ -281,7 +281,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.animations = LoadModelAnimations("resources/models/enemies/reg_01.glb", &ent.num_anims);
 			ent.anim_state.speed = (1.0f / 100);
 
-			ent.comp_ai.speed = 170;
+			ent.comp_ai.speed = 210;
 			ent.comp_health.bug_point = BUG_POINT_MAINTAINER;
 
 			ent.comp_transform.bounds.max = Vector3Scale(BODY_VOLUME_MEDIUM,  0.5f);
@@ -403,6 +403,22 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
 
 			ent.flags &= ~ENT_COLLIDERS;
+
+		} break;
+
+		case ENT_GLASS: {
+			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
+			//ent.model.materials[0].shader = handler->ent_shader;
+			ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
+
+			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
+
+			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
+
+			ent.flags &= ~ENT_COLLIDERS;
+
+			ent.comp_health.component_valid = true;
+			ent.comp_health.hit_box = ent.comp_transform.bounds;
 
 		} break;
 	}

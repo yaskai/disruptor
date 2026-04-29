@@ -1,7 +1,8 @@
-#include "raylib.h"
-#include "ent.h"
+#include <stdio.h>
 #include <math.h>
-#include <raymath.h>
+#include "raylib.h"
+#include "raymath.h"
+#include "ent.h"
 
 void RegulatorThink(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
@@ -49,16 +50,16 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	}
 
 	Vector3 trace_start = ct->position;
-	trace_start.z += 12;
+	//trace_start.z += 12;
 	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
 
 	Vector3 dir = ct->targ_look;
-	float offset = GetRandomValue(-10, 10) * 0.01f;	
+	float offset = GetRandomValue(-15, 15) * 0.01f;	
 
 	Vector3 right = Vector3CrossProduct(dir, UP);
 	dir = Vector3Add(dir, Vector3Scale(right, offset));
 
-	offset = GetRandomValue(-10, 10) * 0.01f;
+	offset = GetRandomValue(-15, 15) * 0.01f;
 	dir = Vector3Add(dir, Vector3Scale(UP, offset));
 
 	dir = Vector3Normalize(dir);
@@ -109,10 +110,12 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 			ct->targ_look = to_player; 
 		}
 
-		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 5*dt);
+		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
+		ct->yaw = atan2f(-ct->forward.x, ct->forward.y);
 	}
 
 	ct->pitch = asinf(Clamp(ct->targ_look.z, -1.0f, 1.0f));
+	ct->pitch = 0.0f;
 	
 	if(ai->state == STATE_MOVE) {
 		Vector3 move_dir = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0.0f } );
@@ -164,7 +167,6 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 		Vector3 pos = ent->comp_transform.position;		
 		pos.z -= 10;
 		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3Zero(), 0, 100);
-		//EntDrawLitModel(handler, ent, 1.0f, 0);
 
 		return;
 	}
@@ -175,6 +177,21 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 	ct->qrot = QuaternionSlerp(ct->qrot, targ, 5*dt);
 	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), QuaternionToMatrix(ct->qrot));
 	EntDrawLitModel(handler, ent, 1.0f, 0);
+
+	/*
+	if(ent->anim_state.weap_socket > -1) {
+		Vector3 t = ent->animations[ent->anim_state.anim_id].framePoses[ent->anim_state.curr_frame][ent->anim_state.weap_socket].translation;
+		Quaternion r = ent->animations[ent->anim_state.anim_id].framePoses[ent->anim_state.curr_frame][ent->anim_state.weap_socket].rotation;
+		Vector3 s = ent->animations[ent->anim_state.anim_id].framePoses[ent->anim_state.curr_frame][ent->anim_state.weap_socket].translation;
+
+		Matrix bone_mat = MatrixIdentity();
+		//bone_mat = MatrixMultiply(bone_mat, MatrixScale(s.x, s.y, s.z));
+		bone_mat = MatrixMultiply(bone_mat, QuaternionToMatrix(r));
+		//bone_mat = MatrixMultiply(bone_mat, MatrixTranslate(t.x, t.y, t.z));
+
+		DrawModel(handler->weap_models[0], Vector3Add(ct->position, t), 1.0f, WHITE);
+	}
+	*/
 
 	//DrawBoundingBox(ent->comp_health.hit_box, GREEN);
 }

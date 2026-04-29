@@ -33,7 +33,7 @@ bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect
 	Ray ray = (Ray) { .position = pos, .direction = dir };
 
 	BvhTraceData bvh_tr = TraceDataEmpty();
-	BvhTraceHullGroups(ray, sect, &bvh_tr, 2000.0f, COLL_IGNORE_VIS | flags, 0);
+	BvhTraceHullGroups(ray, sect, &bvh_tr, 2000.0f, (COLL_IGNORE_VIS | flags), 0);
 	
 	EntTraceData ent_tr = EntTraceDataEmpty();
 	TraceEntities(ray, handler, 2000.0f, ent->id, &ent_tr);

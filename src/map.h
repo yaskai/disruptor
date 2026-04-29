@@ -141,5 +141,7 @@ void DebugDrawDSP(MapSection *sect, AudioPlayer *ap, Vector3 pos);
 void MapUpdateBvhOffsets(MapSection *sect);
 void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max_dist, u8 ignore_flags, u8 hull_id);
 
+void lh_SetSectPointer(MapSection *sect);
+
 #endif
 

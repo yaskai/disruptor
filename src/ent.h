@@ -180,6 +180,7 @@ enum ENT_TYPES : u8 {
 	ENT_TEXT_OBJECT			=  17,
 	ENT_DOOR				=  18,
 	ENT_LADDER				=  19,
+	ENT_GLASS				=  20,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {
@@ -266,6 +267,7 @@ typedef struct {
 #define AUTOSAVE_REQUEST	0x04
 typedef struct {
 	Model base_ent_models[16];
+	Model weap_models[16];
 
 	Entity *ents;
 	Projectile *projectiles;
@@ -505,5 +507,7 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect, u8 flags);
+
+void lh_SetEntHandlerPtr(EntityHandler *handler);
 
 #endif

@@ -38,14 +38,23 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 
 		u8 coll_flags = 0;
 
-		if(strcmp(mip->name, "{fence00") == 0) 
+		if(strcmp(mip->name, "{fence00") == 0) { 
 			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
 
-		if(strcmp(mip->name, "{ff") == 0)
+		if(strcmp(mip->name, "{ff") == 0) {
 			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
 
+		/*
 		if(mip->name[0] == '{')
 			coll_flags |= COLL_IGNORE_VIS;
+		*/
+
+		if(strcmp(mip->name, "{glass00") == 0)
+			coll_flags &= ~COLL_IGNORE_BULLET;
 
 		Vector3 face_verts[face->edge_count];
 		for(int j = 0; j < face->edge_count; j++) {
@@ -1539,7 +1548,7 @@ void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max
 		BvhTraceData temp_tr = TraceDataEmpty();
 		BvhTracePointPro(ray, sect, bvh, 0, &temp_tr, max_dist, ignore_flags);
 
-		if(temp_tr.distance < tr.distance)
+		if(temp_tr.hit && temp_tr.distance < tr.distance)
 			tr = temp_tr;	
 	}
 

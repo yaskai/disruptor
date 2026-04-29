@@ -2011,7 +2011,7 @@
 "origin" "688 96 -64"
 "enum_id" "3"
 "angle" "90"
-"start_active" "0"
+"start_active" "1"
 "on_trigger" "2"
 "trigger_group" "3"
 }
@@ -2052,13 +2052,23 @@
 }
 // entity 40
 {
+"classname" "info_regulator_spawn"
+"origin" "704 -352 -64"
+"enum_id" "3"
+"angle" "0"
+"start_active" "1"
+"on_trigger" "2"
+"trigger_group" "3"
+}
+// entity 41
+{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 41
+// entity 42
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

@@ -6,17 +6,17 @@ LoadBSPFile: '10.bsp'
 BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from 10.texinfo.json...
-  1356 leafs
-  1259 clusters
-  3494 portals
+  1376 leafs
+  1279 clusters
+  3533 portals
 Calculating Base Vis:
 Calculating Full Vis:
 Expanding clusters...
-average leafs visible: 316
+average leafs visible: 314
 c_noclip: 0
-c_chains: 14939674
-visdatasize:145397  compressed from 230520
+c_chains: 15084751
+visdatasize:148171  compressed from 236672
 Writing 10.bsp as Quake BSP bsp29
-2.99s elapsed
+4.01s elapsed
 
 

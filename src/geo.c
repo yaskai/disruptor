@@ -767,10 +767,10 @@ void BvhTracePointPro(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhT
 		u16 tri_id = bvh->tris.ids[node->first_tri + i];
 		Tri tri = bvh->tris.arr[tri_id];
 
-		if(tri.collision_flags) {
+		//if(tri.collision_flags) {
 			if(tri.collision_flags & ignore_flags)
 				continue;
-		}
+		//}
 
 		if(Vector3DotProduct(ray.direction, tri.normal) >= 0)
 			continue;

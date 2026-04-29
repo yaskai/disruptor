@@ -347,6 +347,12 @@ void LoadEntityBaseAnims() {
 	base_ent_anims[ENT_REGULATOR] = LoadModelAnimations(TextFormat("%s/enemies/reg_01.glb", prefix), &base_ent_anims_count[ENT_REGULATOR]);	 
 }
 
+void LoadEntWeapons(EntityHandler *handler) {
+	char *prefix = "resources/models";
+	handler->weap_models[0] = LoadModel(TextFormat("%s/weapons/shotgun_02.glb", prefix));
+	handler->weap_models[0].transform = MatrixRotateX(90*DEG2RAD);
+}
+
 Model projectile_models[4];
 
 void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, AudioPlayer *ap) {
@@ -360,6 +366,7 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, Aud
 	LoadEntityShaders(handler);
 	LoadEntityBaseModels(handler);
 	LoadEntityBaseAnims();
+	LoadEntWeapons(handler);
 
 	handler->ai_tick = 0;
 	handler->autosave_tick = 0;

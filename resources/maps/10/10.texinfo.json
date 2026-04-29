@@ -1,98 +1,98 @@
 {
 	"0" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"1" : {},
 	"10" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"11" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"12" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"13" : 
 	{
 		"is_special" : true,
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"14" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"15" : 
 	{
 		"is_special" : true,
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"16" : 
 	{
 		"is_special" : true,
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"17" : 
 	{
 		"is_special" : true,
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"18" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"19" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"2" : {},
 	"20" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"21" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"22" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"23" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"24" : {},
 	"25" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"26" : {},
 	"27" : {},
 	"28" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"29" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"3" : {},
 	"30" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"31" : {},
 	"32" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"33" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"34" : {},
 	"35" : {},
@@ -101,104 +101,104 @@
 	"38" : {},
 	"39" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"4" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"40" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"41" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"42" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"43" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"44" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"45" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"46" : {},
 	"47" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"48" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
-	"49" : {},
+	"49" : 
+	{
+		"phong_angle" : 88.0
+	},
 	"5" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"50" : {},
-	"51" : 
+	"51" : {},
+	"52" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
-	"52" : {},
-	"53" : 
-	{
-		"minlight" : 15.0
-	},
+	"53" : {},
 	"54" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
-	"55" : {},
-	"56" : {},
-	"57" : 
+	"55" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
+	"56" : {},
+	"57" : {},
 	"58" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"59" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"6" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"60" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
-	"61" : {},
+	"61" : 
+	{
+		"minlight" : 30.0
+	},
 	"62" : {},
 	"63" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"64" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
 	"65" : 
 	{
-		"phong_angle" : 88.0
+		"minlight" : 30.0
 	},
-	"66" : 
-	{
-		"phong_angle" : 88.0
-	},
+	"66" : {},
 	"67" : 
 	{
 		"phong_angle" : 88.0
@@ -220,12 +220,28 @@
 	{
 		"phong_angle" : 88.0
 	},
+	"72" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"73" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"74" : 
+	{
+		"phong_angle" : 88.0
+	},
+	"75" : 
+	{
+		"phong_angle" : 88.0
+	},
 	"8" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	},
 	"9" : 
 	{
-		"minlight" : 15.0
+		"minlight" : 30.0
 	}
 }
