@@ -40,7 +40,7 @@ ___
 *** (-) reload animation
 
 ** (-) shotgun
-*** (-) model
+*** (x) model
 *** (-) textures
 *** (-) recoil animation
 *** (-) reload animation
@@ -51,6 +51,12 @@ ___
 *** (x) recoil animation
 *** (x) reload animation
 
+** (-) smg
+*** (x) model
+*** (x) textures
+*** (-) recoil animation
+*** (-) reload animation
+
 ** (x) ammo system
 *** (x) pickups
 *** (x) reload mechanic
@@ -58,6 +64,13 @@ ___
 ** (x) camera effects
 *** (x) sway when moving
 *** (x) pitch with recoil
+
+** (-) unlock pickups
+*** (-) bug
+*** (-) revolver
+*** (-) pistol
+*** (-) shotgun
+*** (-) smg
 
 ___
 * *Environment Interactions*
@@ -111,7 +124,7 @@ ___
 ** (-) loading indicator
 
 ___
-* (x) *AI*
+* (-) *AI*
 
 ** (x) Cleanup
 *** (x) use interrupt mask properly
@@ -139,6 +152,11 @@ ___
 *** (x) fix disrupted entities
 *** (x) disrupted
 *** (x) sync attack and fix with animation *_/animation is blocker/_*
+
+** (-) scripting support
+*** (x) spawn
+*** (-) go to position
+*** (-) set state
 
 ___
 * *Menus*
