@@ -1039,6 +1039,9 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 			float angle = Vector3Angle(node_A->position, node_B->position);
 			if(angle > MAX_EDGE_ANGLE || angle < -MAX_EDGE_ANGLE)
 				continue;
+
+			if(fabsf(node_A->position.z - node_B->position.z) >= 64.0f)
+				continue;
 			
 			Bsp_TraceData tr = Bsp_TraceDataEmpty();
 			Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, node_A->position, node_B->position, &tr);

@@ -17,6 +17,8 @@ void lh_SetSectPointer(MapSection *sect) { lh_ptr_sect = sect; }
 EntityHandler *lh_ptr_ent_handler;
 void lh_SetEntHandlerPtr(EntityHandler *handler) { lh_ptr_ent_handler = handler; }
 
+LightHandler *lh_ptr_self = NULL;
+
 Lightmap BuildLightmap(Bsp_Data *bsp) {
 	Message("BuildLightmap()", ANSI_BLUE);
 
@@ -165,12 +167,25 @@ Color lit_SampleLightGrid(Bsp_Data *bsp, Vector3 world_pos) {
 }
 
 void InitPointLights(LightHandler *lh) {
-		
+	lh_ptr_self = lh;	
 }
 
 void ManagePointLights(LightHandler *lh, float dt) {
-	for(u8 i = 0; i < lh->num_point_lights; i++) {
+	for(u8 i = 0; i < MAX_POINT_LIGHTS; i++) {
+		PointLight *pl = &lh->point_lights[i];				
+
+		if(!(pl->flags & PL_ACTIVE))
+			continue;
 		
+		pl->timer -= dt;
 	}
+}
+
+void AddPointlight(PointLight point_light) {
+	for(u8 i = 0; i < MAX_POINT_LIGHTS; i++) {
+	}
+}
+
+void RemovePointLight(LightHandler *lh, u8 id) {
 }
 

@@ -336,7 +336,8 @@ void LoadEntityBaseModels(EntityHandler *handler) {
 	char *prefix = "resources/models";
 	handler->base_ent_models[ENT_TURRET] = LoadModel(TextFormat("%s/enemies/turret.glb", prefix));	 
 	handler->base_ent_models[ENT_MAINTAINER] = LoadModel(TextFormat("%s/enemies/maintainer.glb", prefix));	 
-	handler->base_ent_models[ENT_REGULATOR] = LoadModel(TextFormat("%s/enemies/reg_01.glb", prefix));	 
+	//handler->base_ent_models[ENT_REGULATOR] = LoadModel(TextFormat("%s/enemies/reg_01.glb", prefix));	 
+	handler->base_ent_models[ENT_REGULATOR] = LoadModel(TextFormat("%s/enemies/reg_02.glb", prefix));	 
 }
 
 int base_ent_anims_count[16] = {0};
@@ -344,7 +345,8 @@ ModelAnimation *base_ent_anims[16] = {0};
 void LoadEntityBaseAnims() {
 	char *prefix = "resources/models";
 	base_ent_anims[ENT_MAINTAINER] = LoadModelAnimations(TextFormat("%s/enemies/maintainer02.glb", prefix), &base_ent_anims_count[ENT_MAINTAINER]);	 
-	base_ent_anims[ENT_REGULATOR] = LoadModelAnimations(TextFormat("%s/enemies/reg_01.glb", prefix), &base_ent_anims_count[ENT_REGULATOR]);	 
+	//base_ent_anims[ENT_REGULATOR] = LoadModelAnimations(TextFormat("%s/enemies/reg_01.glb", prefix), &base_ent_anims_count[ENT_REGULATOR]);	 
+	base_ent_anims[ENT_REGULATOR] = LoadModelAnimations(TextFormat("%s/enemies/reg_02.glb", prefix), &base_ent_anims_count[ENT_REGULATOR]);	 
 }
 
 void LoadEntWeapons(EntityHandler *handler) {
@@ -1185,8 +1187,9 @@ void OnHitRegulator(Entity *ent, short damage, Vector3 bullet_pos) {
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
 		ent->comp_health.amount = 0;
 
-	if(CheckCollisionBoxSphere(ent->comp_health.crit_box, bullet_pos, 3.5f)) {
-		ent->comp_health.amount -= damage;
+	if(CheckCollisionBoxSphere(ent->comp_health.crit_box, bullet_pos, 4.5f)) {
+		ent->comp_health.amount -= (int)(damage*2.5f);
+		//ent->comp_health.amount = 0;
 		ent->comp_ai.state = STATE_STUNNED;
 		//AiSetSchedule(ai, SCHED_STUN);
 		ent->comp_health.damage_cooldown = 0.25f;
@@ -1664,9 +1667,9 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 
 	float light_clr[9];
 	for(short i = 0; i < 3; i++) {
-		light_clr[i*3+0] = light_colors[i].r/255.0f;
-		light_clr[i*3+1] = light_colors[i].g/255.0f;
-		light_clr[i*3+2] = light_colors[i].b/255.0f;
+		light_clr[i*3+0] = Clamp(light_colors[i].r, min_light, 255.0f) /255.0f;
+		light_clr[i*3+1] = Clamp(light_colors[i].g, min_light, 255.0f) /255.0f;
+		light_clr[i*3+2] = Clamp(light_colors[i].b, min_light, 255.0f) /255.0f;
 	}
 
 	Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;

@@ -4,6 +4,17 @@
 #include "raymath.h"
 #include "ent.h"
 
+char *regulator_step_sounds[8] = {
+	"metal_steps_01",
+	"metal_steps_02",
+	"metal_steps_03",
+	"metal_steps_04",
+	"metal_steps_05",
+	"metal_steps_06",
+	"metal_steps_07",
+	"metal_steps_08",
+};
+
 void RegulatorThink(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
@@ -54,12 +65,12 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	trace_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 38));
 
 	Vector3 dir = ct->targ_look;
-	float offset = GetRandomValue(-15, 15) * 0.01f;	
+	float offset = GetRandomValue(-11, 11) * 0.01f;	
 
 	Vector3 right = Vector3CrossProduct(dir, UP);
 	dir = Vector3Add(dir, Vector3Scale(right, offset));
 
-	offset = GetRandomValue(-15, 15) * 0.01f;
+	offset = GetRandomValue(-11, 11) * 0.01f;
 	dir = Vector3Add(dir, Vector3Scale(UP, offset));
 
 	dir = Vector3Normalize(dir);
@@ -116,12 +127,30 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 
 	ct->pitch = asinf(Clamp(ct->targ_look.z, -1.0f, 1.0f));
 	ct->pitch = 0.0f;
+
+	if(fabsf(ct->velocity.x + ct->velocity.y) >= 0.1f)
+		ai->state = STATE_MOVE;
 	
 	if(ai->state == STATE_MOVE) {
 		Vector3 move_dir = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0.0f } );
 		ct->yaw = Lerp(ct->yaw, atan2f(-move_dir.x, move_dir.y), 5*dt);
 		anim_Switch(&ent->anim_state, 2);
 		anim_Update(&ent->anim_state, ent->animations, dt);
+
+		if(ent->anim_state.curr_frame % (32 + ent->id) == 0) {
+			int sfx_id = GetRandomValue(0, 7); 
+			AP_SetSoundPosition(handler->ap, regulator_step_sounds[sfx_id], ct->position, 0);
+
+			//Vector3 sound_dir = Vector3Scale(Vector3Add(ct->forward, DOWN), 0.5f);
+			//sound_dir = Vector3Normalize(sound_dir);
+
+			Vector3 hpos = (Vector3) { ct->position.x, ct->position.y, 0 };
+			Vector3 player_hpos = handler->ents[handler->player_id].comp_transform.position;
+			player_hpos.z = 0;
+
+			if(Vector3Distance(hpos, player_hpos) <= 500.0f)
+				AP_RequestSound(handler->ap, regulator_step_sounds[sfx_id]);
+		}
 	}
 
 	if(ai->task_state.task_id == TASK_FIRE_WEAPON) {
@@ -134,7 +163,7 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 		to_player = Vector3Normalize(to_player);
 
 		ct->targ_look = to_player; 
-		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 5*dt);
+		ct->forward = Vector3Lerp(ct->forward, ct->targ_look, 10*dt);
 		ct->yaw = atan2f(-ct->forward.x, ct->forward.y);
 		
 		return;
@@ -166,7 +195,7 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 
 		Vector3 pos = ent->comp_transform.position;		
 		pos.z -= 10;
-		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3Zero(), 0, 100);
+		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3Zero(), 0, 90);
 
 		return;
 	}
@@ -176,22 +205,7 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 	Quaternion targ = QuaternionFromEuler(ct->pitch, 0.0f, ct->yaw+90*DEG2RAD);
 	ct->qrot = QuaternionSlerp(ct->qrot, targ, 5*dt);
 	ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), QuaternionToMatrix(ct->qrot));
-	EntDrawLitModel(handler, ent, 1.0f, 0);
-
-	/*
-	if(ent->anim_state.weap_socket > -1) {
-		Vector3 t = ent->animations[ent->anim_state.anim_id].framePoses[ent->anim_state.curr_frame][ent->anim_state.weap_socket].translation;
-		Quaternion r = ent->animations[ent->anim_state.anim_id].framePoses[ent->anim_state.curr_frame][ent->anim_state.weap_socket].rotation;
-		Vector3 s = ent->animations[ent->anim_state.anim_id].framePoses[ent->anim_state.curr_frame][ent->anim_state.weap_socket].translation;
-
-		Matrix bone_mat = MatrixIdentity();
-		//bone_mat = MatrixMultiply(bone_mat, MatrixScale(s.x, s.y, s.z));
-		bone_mat = MatrixMultiply(bone_mat, QuaternionToMatrix(r));
-		//bone_mat = MatrixMultiply(bone_mat, MatrixTranslate(t.x, t.y, t.z));
-
-		DrawModel(handler->weap_models[0], Vector3Add(ct->position, t), 1.0f, WHITE);
-	}
-	*/
+	EntDrawLitModelEx(handler, ent, ct->position, 1.0f, Vector3Zero(), 0, 90);
 
 	//DrawBoundingBox(ent->comp_health.hit_box, GREEN);
 }

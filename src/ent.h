@@ -134,16 +134,16 @@ enum weapon_types : u8 {
 
 typedef struct {
 	float cooldown;
-
 	float reload_time_amnt;
 	float reload_timer;
-
-	short travel_type;
-	short damage;
 
 	int clip_size;
 	int in_clip;
 	int ammo;
+
+	short travel_type;
+	short damage;
+	short spread;
 
 	u8 ammo_type;
 	u8 id;

@@ -62,7 +62,7 @@ ___
 ___
 * *Environment Interactions*
 
-** (-) gates -(and switches)-
+** (x) gates -(and switches)-
 ** (x) force fields
 ** breakable boxes
 ** (-) pickup items (health + ammo), need _/*better/*_ models 
@@ -98,7 +98,7 @@ ___
 ** Extra:
 *** (x) separate draw steps for translucent brushes (eg. forcefield, fence, etc.)
 *** (x) use light grid for entities
-*** dynamic point lights
+*** (-) dynamic point lights
 
 ___
 * *UI*

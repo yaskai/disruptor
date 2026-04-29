@@ -14,7 +14,6 @@ typedef struct {
 	float timer;
 
 	u8 flags;
-	u8 id;
 
 } PointLight;
 
@@ -27,5 +26,7 @@ typedef struct {
 
 void InitPointLights(LightHandler *lh);
 void ManagePointLights(LightHandler *lh, float dt);
+
+void AddPointlight(PointLight point_light);
 
 #endif

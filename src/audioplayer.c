@@ -23,8 +23,8 @@ static dsp_preset_vals presets[] = {
 		.room_size = 0.55,
 		.damping = 0.4f,
 		.width = 0.8f,
-		.wet = 0.4f,
-		.dry = 0.6f
+		.wet = 0.65f,
+		.dry = 1.0f
 	},
 
 	[DSP_OPEN] = {

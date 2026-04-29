@@ -883,6 +883,10 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 			ai->disrupt_timer = 500;
 
 		} break;
+
+		case ENT_REGULATOR: {
+
+		} break;
 	}
 
 	//handler->ents[handler->bug_id].flags |= BUG_DISRUPTED_ENEMY;

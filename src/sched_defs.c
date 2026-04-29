@@ -175,9 +175,9 @@ static Ai_SchedDef sched_defs[] = {
 	},
 
 	[SCHED_REGULATOR_ATTACK] = {
-		.timers = { 0.0f, 0.5f },
-		.tasks = { TASK_FACE_DIR, TASK_FIRE_WEAPON },
-		.num_tasks = 2,
+		.timers = { 0.0f, 1.0f, 0.0f },
+		.tasks = { TASK_FACE_DIR, TASK_FIRE_WEAPON, TASK_WAIT_TIME },
+		.num_tasks = 3,
 		.interrupt_mask = (0),
 		.interrupt_sched = 0,
 		.fail_sched = 0,
