@@ -1,10 +1,10 @@
 #include "../include/num_redefs.h"
 #include "raylib.h"
+#include "kbsp.h"
 
 #ifndef LIT_H_
 #define LIT_H_
 
-#define PL_ACTIVE	0x01
 typedef struct {
 	Color color;
 
@@ -13,7 +13,7 @@ typedef struct {
 	float radius;
 	float timer;
 
-	u8 flags;
+	int active;
 
 } PointLight;
 
@@ -25,8 +25,10 @@ typedef struct {
 } LightHandler;
 
 void InitPointLights(LightHandler *lh);
-void ManagePointLights(LightHandler *lh, float dt);
+void ManagePointLights(Bsp_Data *bsp, float dt);
 
 void AddPointlight(PointLight point_light);
+
+Vector3 ColorQuantized(Color color);
 
 #endif

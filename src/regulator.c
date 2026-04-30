@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "ent.h"
+#include "lit.h"
 
 char *regulator_step_sounds[8] = {
 	"metal_steps_01",
@@ -96,6 +97,15 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 		RayCollision near_coll = GetRayCollisionSphere(ray, handler->ents[handler->player_id].comp_transform.position, 96);
 		if(near_coll.hit)
 			AP_ReqNearBulletSound(handler->ap, near_coll.point, dir);
+
+		PointLight pl = (PointLight) {
+			.position = Vector3Add(trace_start, Vector3Scale(dir, 5)),
+			.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.25f),
+			.timer = 0.1f,
+			.active = 1,
+			.radius = 100,
+		};
+		AddPointlight(pl);
 	}
 }
 

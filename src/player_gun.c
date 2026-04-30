@@ -8,6 +8,7 @@
 #include "v_effect.h"
 #include "config.h"
 #include "audioplayer.h"
+#include "lit.h"
 
 #define USE_MWHEEL (true)
 
@@ -729,6 +730,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	AP_SetSoundPitch(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id], GetRandomValue(80, 90) * 0.01f);
 	AP_RequestSound(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id]);
 
+
 	recoil_add = false;
 	recoil = 90 + (GetRandomValue(1, 5) * 0.1f);
 
@@ -791,6 +793,16 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 		anim_Apply(&anim_states[curr_gun->id], &models[curr_gun->id], &anims[curr_gun->id]);
 	}
 	*/
+
+	Vector3 d = Vector3Normalize(Vector3Subtract(gun_refs.world_cam->position, gun_refs.world_cam->target));
+	PointLight pl = (PointLight) {
+		.position = Vector3Add(gun_refs.world_cam->position, Vector3Scale(d, 5)),
+		.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.25f),
+		.timer = 0.1f,
+		.active = 1,
+		.radius = 300,
+	};
+	AddPointlight(pl);
 }
 
 void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {

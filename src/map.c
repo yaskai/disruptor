@@ -1373,6 +1373,7 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 	translucent_count = 0;
 	
+	BeginShaderMode(sect->bsp_data.lm_shader);
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
 	for(int i = 0; i < rbrush_list.count; i++) {
 		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, rbrush_list.ids[i])) 
@@ -1384,6 +1385,7 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
 	}
+	EndShaderMode();
 }
 
 void DrawMapTranslucent(MapSection *sect, Vector3 pos) {

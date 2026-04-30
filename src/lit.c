@@ -11,11 +11,30 @@
 #include "map.h"
 #include "ent.h"
 
+int g_loc_count;
+int g_loc_position;
+int g_loc_color;
+int g_loc_radius;
+int g_loc_enable;
+
 MapSection *lh_ptr_sect;
 void lh_SetSectPointer(MapSection *sect) { lh_ptr_sect = sect; }
 
 EntityHandler *lh_ptr_ent_handler;
 void lh_SetEntHandlerPtr(EntityHandler *handler) { lh_ptr_ent_handler = handler; }
+
+Bsp_Data *lh_bsp_ptr;
+void lh_SetBspPtr(Bsp_Data *bsp) { 
+	lh_bsp_ptr = bsp;  
+}
+
+void lh_SetShaderLocs(Bsp_Data *bsp) {
+	g_loc_count 	= GetShaderLocation(bsp->lm_shader, "pl_count");	
+	g_loc_enable 	= GetShaderLocation(bsp->lm_shader, "pl_enabled");
+	g_loc_position 	= GetShaderLocation(bsp->lm_shader, "pl_position");
+	g_loc_color 	= GetShaderLocation(bsp->lm_shader, "pl_color");
+	g_loc_radius   	= GetShaderLocation(bsp->lm_shader, "pl_radius");
+}
 
 LightHandler *lh_ptr_self = NULL;
 
@@ -170,22 +189,53 @@ void InitPointLights(LightHandler *lh) {
 	lh_ptr_self = lh;	
 }
 
-void ManagePointLights(LightHandler *lh, float dt) {
-	for(u8 i = 0; i < MAX_POINT_LIGHTS; i++) {
-		PointLight *pl = &lh->point_lights[i];				
+void ManagePointLights(Bsp_Data *bsp, float dt) {
+	int enabled[MAX_POINT_LIGHTS] = {0};
+	Vector3 position[MAX_POINT_LIGHTS];
+	Vector3 color[MAX_POINT_LIGHTS];
+	float radius[MAX_POINT_LIGHTS];
 
-		if(!(pl->flags & PL_ACTIVE))
-			continue;
-		
-		pl->timer -= dt;
+	for(int i = 0; i < MAX_POINT_LIGHTS; i++) {
+		PointLight *pl = &lh_ptr_self->point_lights[i];
+
+		if(pl->active) {
+			pl->timer -= dt;
+
+			if(pl->timer <= 0.0f)
+				pl->active = 0;
+		}
+
+		enabled[i] = pl->active ? 1 : 0;
+		position[i] = pl->position;
+		color[i] = ColorQuantized(pl->color);
+		radius[i] = pl->radius;
 	}
+
+	SetShaderValueV(bsp->lm_shader, g_loc_enable, enabled, SHADER_UNIFORM_INT, MAX_POINT_LIGHTS);
+	SetShaderValueV(bsp->lm_shader, g_loc_position, position, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
+	SetShaderValueV(bsp->lm_shader, g_loc_color, color, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
+	SetShaderValueV(bsp->lm_shader, g_loc_radius, radius, SHADER_UNIFORM_FLOAT, MAX_POINT_LIGHTS);
 }
 
 void AddPointlight(PointLight point_light) {
+	u8 id = 0;
 	for(u8 i = 0; i < MAX_POINT_LIGHTS; i++) {
+		PointLight *pl = &lh_ptr_self->point_lights[i];
+
+		if(pl->active)
+			continue;
+
+		id = i;
+		break;
 	}
+
+	point_light.active = 1;
+	lh_ptr_self->point_lights[id] = point_light;
+
+	PointLight *pl = &lh_ptr_self->point_lights[id];
 }
 
-void RemovePointLight(LightHandler *lh, u8 id) {
+Vector3 ColorQuantized(Color color) {
+	return (Vector3) { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f };
 }
 

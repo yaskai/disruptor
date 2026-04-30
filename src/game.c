@@ -109,6 +109,12 @@ void GameRenderSetup(Game *game) {
 
 	mat_default = LoadMaterialDefault();
 	mat_default.maps[MATERIAL_MAP_DIFFUSE].color = ColorAlpha(BLUE, 0.25f);
+
+	game->lh = (LightHandler) {0};
+	InitPointLights(&game->lh);
+	//lh_SetShaderLocs(&game->test_section.bsp_data);
+	lh_SetBspPtr(&game->test_section.bsp_data);
+	lh_SetShaderLocs(&game->test_section.bsp_data);
 }
 
 void GameAudioSetup(Game *game) {
@@ -206,8 +212,6 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	game->ent_handler.spawn_list.arr = calloc(spawn_list.count, sizeof(EntSpawn));
 	memcpy(game->ent_handler.spawn_list.arr, spawn_list.arr, sizeof(EntSpawn) * spawn_list.count);
 
-	//ReloadEntities(&game->ent_handler, &game->test_section, 0);
-
 	// Setup checkpoints	
 	for(u16 i = 0; i < game->ent_handler.checkpoint_list.count; i++) {
 		game->ent_handler.checkpoint_list.cells[i] = CellCoordsToId(
@@ -215,6 +219,11 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	}
 
 	DSP_AudioSetup(&game->test_section.bsp_data, &game->audio_player, &spawn_list);
+
+	lh_SetSectPointer(&game->test_section);
+	lh_SetEntHandlerPtr(&game->ent_handler);
+	lh_SetBspPtr(&game->test_section.bsp_data);
+	lh_SetShaderLocs(&game->test_section.bsp_data);
 
 	game->flags |= FLAG_LOAD_COMPLETE;
 }
@@ -284,7 +293,6 @@ void GameUpdate(Game *game, float dt) {
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
 	AP_Update(&game->audio_player, dt);
 	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
-	MapUpdateBvhOffsets(&game->test_section);
 
 	if(IsKeyPressed(KEY_ONE)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
@@ -335,6 +343,7 @@ void RenderMainLayer(Game *game, float dt) {
 	ClearBackground(BLACK);
 	BeginMode3D(game->camera);
 
+	ManagePointLights(&game->test_section.bsp_data, dt);
 	// Render level geometry
 	DrawMap(&game->test_section, game->camera.position);
 	// Render entities

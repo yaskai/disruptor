@@ -409,4 +409,8 @@ void UpdateBspShaders(Bsp_Data *bsp);
 
 Color lit_SampleLightGrid(Bsp_Data *bsp, Vector3 world_pos);
 
+void lh_SetShaderLocs(Bsp_Data *bsp);
+void lh_SetShaderVals(Bsp_Data *bsp);
+void lh_SetBspPtr(Bsp_Data *bsp);
+
 #endif

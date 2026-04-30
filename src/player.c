@@ -9,6 +9,7 @@
 #include "geo.h"
 #include "player_gun.h"
 #include "pm.h"
+#include "lit.h"
 
 #define PLAYER_MAX_PITCH (88.0f * DEG2RAD)
 #define PLAYER_SPEED 190.0f

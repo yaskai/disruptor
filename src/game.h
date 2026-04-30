@@ -8,6 +8,7 @@
 #include "../include/num_redefs.h"
 #include "audioplayer.h"
 #include "rw_save.h"
+#include "lit.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -38,6 +39,8 @@ typedef struct {
 	Config *conf;
 
 	rw_GlobalData _gsave_state;
+
+	LightHandler lh;
 
 	u8 flags;
 

@@ -84,7 +84,7 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	// ---------------------------------------------------------------------------------------
 	// Vertices
 	Bsp_Lump vert_lump = header.lumps[LUMP_VERTICES];
-
+ 
 	fseek(pF, vert_lump.file_offset, SEEK_SET);
 	i32 vert_count = vert_lump.file_size / sizeof(Vector3);  
 	Vector3 *verts = malloc(sizeof(Vector3) * vert_count);
@@ -1173,6 +1173,9 @@ void BspRenderSetup(Bsp_Data *bsp) {
 	}
 
 	//DisplayNodes(&material_hashmap);
+
+	//lh_SetBspPtr(bsp);
+	//lh_SetShaderLocs(bsp);
 }
 
 void UpdateBspShaders(Bsp_Data *bsp) {
