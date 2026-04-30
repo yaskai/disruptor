@@ -225,6 +225,10 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	lh_SetBspPtr(&game->test_section.bsp_data);
 	lh_SetShaderLocs(&game->test_section.bsp_data);
 
+	for(int i = 0; i < game->test_section.bvh_hullgroup_count; i++) {
+		game->test_section.bvh_hullgroups[i].ent_id = game->test_section.bsp_data.hull_groups[i].ent_id;
+	}
+
 	game->flags |= FLAG_LOAD_COMPLETE;
 }
 

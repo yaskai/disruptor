@@ -510,9 +510,10 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-#define DOOR_OPENING 		0x20
-#define DOOR_CLOSING 		0x40
-#define PLAYER_ON_PLATFORM	0x80
+#define DOOR_OPENING 		0x10
+#define DOOR_CLOSING 		0x20
+#define PLAYER_ON_PLATFORM	0x40
+#define BUG_ON_PLATFORM		0x80
 void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect, u8 flags);

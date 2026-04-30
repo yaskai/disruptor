@@ -29,6 +29,8 @@ float bug_z_vel_prev = 0;
 
 Vector3 plr_ent_pos;
 
+bool bug_on_plat = false;
+
 // This function handles setting Bug's target as well as moving towards it. 
 void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHandler *handler, u8 *bounce, float dt) {
 	EntGrid *grid = &handler->grid;
@@ -263,6 +265,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
 	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 
+	i16 ent_id = -1;
 	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 		if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 			continue;
@@ -273,11 +276,32 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
+
+			ent_id = sect->bvh_hullgroups[j].ent_id;
+			if(ent_id > 0) {
+				if(handler->ents[ent_id].type == ENT_DOOR) {
+					Entity *lift_ent = &handler->ents[ent_id];
+					lift_ent->flags |= BUG_ON_PLATFORM;		
+					bug_on_plat = true;
+				}
+			}
 		}
+
+		if(temp_tr.hit)
+			continue;
 
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
+
+			ent_id = sect->bvh_hullgroups[j].ent_id;
+			if(ent_id > 0) {
+				if(handler->ents[ent_id].type == ENT_DOOR) {
+					Entity *lift_ent = &handler->ents[ent_id];
+					lift_ent->flags |= BUG_ON_PLATFORM;		
+					bug_on_plat = true;
+				}
+			}
 		}
 	}
 	
@@ -300,9 +324,10 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 
 	ct->ground_normal = tr.normal;
 
+
 	short max_bounces = (ent->flags & BUG_RECALL) ? BUG_MAX_RECALL_BOUNCES : BUG_MAX_BOUNCES;
 	if(*bounce >= max_bounces) {
-		ct->velocity.z = 0;
+		//ct->velocity.z = 0;
 		return 1;
 	}
 
@@ -386,10 +411,8 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 			use_ent = false;
 		}
 
-		/*
 		if(other_ent->type == ENT_DOOR)
 			use_ent = false;
-		*/
 
 		if(launch_timer >= 0.1f || bug_ent->flags & BUG_RECALL)
 			use_ent = false;
@@ -475,6 +498,8 @@ void BugInit(Entity *ent, EntityHandler *handler, MapSection *sect) {
 }
 
 void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
+	bug_on_plat = false;
+
 	Entity *player_ent = &handler->ents[handler->player_id];
 
 	if(player_ent->comp_health.amount <= 0 || player_ent->comp_ai.state == STATE_DEAD) {
@@ -526,10 +551,29 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 	ct->bounds = BoxTranslate(ct->bounds, ct->position);
 
+	if(ai->state) {
+		// Check if grounded
+		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
+
+		// Apply gravity
+		if(!ct->on_ground) { 
+			float grav = (bug_bounce > 0) ? BUG_GRAV * 1.1f : BUG_GRAV;
+			ct->velocity.z -= grav * dt;
+		}
+
+		pmTraceData pm = (pmTraceData) {0};
+
+		Vector3 prev_pos = ct->position;
+		bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
+		ct->velocity = pm.end_vel;
+		ct->position = pm.end_pos;
+	}
+
 	// -------------------------------------------------------------------------------------------------------------
 	if(ai->state == BUG_LAUNCHED) {
 		launch_timer -= dt;
 
+		/*
 		// Check if grounded
 		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
 
@@ -545,6 +589,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
 		ct->velocity = pm.end_vel;
 		ct->position = pm.end_pos;
+		*/
 		
 		if(launch_timer <= 0)
 			ct->velocity = Vector3ClampValue(ct->velocity, -BUG_MAX_VEL, BUG_MAX_VEL);
@@ -645,7 +690,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		if(ct->on_ground) {
 			ai->state = BUG_LANDED;
-			ct->velocity = Vector3Zero();
+			//ct->velocity = Vector3Zero();
 			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
 				ai->state = BUG_LAUNCHED;
 				ct->on_ground = false;
@@ -851,7 +896,9 @@ void BugDraw(Entity *ent, EntityHandler *handler) {
  	} else {
 		//DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
 		//EntDrawLitModel(handler, ent, 3.0f, 100);
-		EntDrawLitModelEx(handler, ent, Vector3Add(ct->position, Vector3Scale(DOWN, 1.0f)), 3.0f, Vector3Zero(), 0.0f, 60);
+		Vector3 pos = Vector3Add(ct->position, Vector3Scale(DOWN, 1.0f));
+		if(bug_on_plat) pos = Vector3Add(pos, Vector3Scale(DOWN, 6.0f));
+		EntDrawLitModelEx(handler, ent, pos, 3.0f, Vector3Zero(), 0.0f, 60);
 	}
 }
 

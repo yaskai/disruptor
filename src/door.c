@@ -46,6 +46,19 @@ void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt)
 		//player_ct->position.z += (vel.z * dt);	
 	}
 
+	if(ent->flags & BUG_ON_PLATFORM) {
+		Entity *bug_ent = &handler->ents[handler->bug_id];
+		comp_Transform *bug_ct = &bug_ent->comp_transform;
+
+		bug_ct->position.z += (vel.z * dt);	
+		if(bug_ct->velocity.z < EPSILON) bug_ct->velocity.z = EPSILON;
+		bug_ct->position.x += (vel.x * dt);
+		bug_ct->position.y += (vel.y * dt);
+
+		//player_ct->position.z += (vel.z * dt);	
+	}
+
 	ent->flags &= ~PLAYER_ON_PLATFORM;
+	ent->flags &= ~BUG_ON_PLATFORM;
 }
 
