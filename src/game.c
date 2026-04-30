@@ -291,6 +291,7 @@ void GameUpdate(Game *game, float dt) {
 	PlayerGunUpdate(&game->player_gun, dt);
 
 	UpdateEntities(&game->ent_handler, &game->test_section, dt);
+	MapUpdateBvhOffsets(&game->test_section);
 	AP_Update(&game->audio_player, dt);
 	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
 

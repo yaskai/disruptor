@@ -155,7 +155,7 @@ Vector3 *CollectTriplets(Brush *brush, u8 *t_count) {
 					i8 in = true;
 					for(u8 p = 0; p < brush->plane_count; p++) {
 						Plane plane = brush->planes[p];
-						if(Vector3DotProduct(plane.normal, v) + plane.d > 0.01f) {
+						if(Vector3DotProduct(plane.normal, v) + plane.d > 0.1f) {
 							in = 0;
 							break;
 						}
@@ -210,7 +210,7 @@ void BrushGetVertices(Brush *brush) {
 					if(in) {
 						bool unique = true;
 						for(u8 t = 0; t < count; t++) {
-							if(Vector3Distance(vertices[t], v) < 0.0001f) {
+							if(Vector3Distance(vertices[t], v) < 0.001f) {
 								unique = false;
 								break;
 							}
@@ -1373,7 +1373,6 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 	translucent_count = 0;
 	
-	BeginShaderMode(sect->bsp_data.lm_shader);
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
 	for(int i = 0; i < rbrush_list.count; i++) {
 		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, rbrush_list.ids[i])) 
@@ -1385,7 +1384,6 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
 	}
-	EndShaderMode();
 }
 
 void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
