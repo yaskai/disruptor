@@ -155,7 +155,7 @@ Vector3 *CollectTriplets(Brush *brush, u8 *t_count) {
 					i8 in = true;
 					for(u8 p = 0; p < brush->plane_count; p++) {
 						Plane plane = brush->planes[p];
-						if(Vector3DotProduct(plane.normal, v) + plane.d > 0.1f) {
+						if(Vector3DotProduct(plane.normal, v) + plane.d > 0.01f) {
 							in = 0;
 							break;
 						}
@@ -210,7 +210,7 @@ void BrushGetVertices(Brush *brush) {
 					if(in) {
 						bool unique = true;
 						for(u8 t = 0; t < count; t++) {
-							if(Vector3Distance(vertices[t], v) < 0.001f) {
+							if(Vector3Distance(vertices[t], v) < 0.0001f) {
 								unique = false;
 								break;
 							}

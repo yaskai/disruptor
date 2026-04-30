@@ -1,80 +1,80 @@
 ---- qbsp / ericw-tools 2.0.0-alpha10-72-g67e9fd3b-dirty ----
 
 --- Options Summary ---
-    "nomerge" was set to "1" (from command line)
     "forcegoodtree" was set to "1" (from command line)
 
 Input file: /home/kai/projects/disruptor/resources/maps/10/10.map
 Output file: /home/kai/projects/disruptor/resources/maps/10/10.bsp
 
 INFO: using built-in palette.
-      274 entities
+      270 entities
        14 unique textures
       102 texinfos
-    1,090 unique planes
+    1,080 unique planes
 
 INFO: world extents calculated to 5608 units
-      687 brushes
-    4,184 sides
-      126 side bevels
+      688 brushes
+    4,190 sides
+      125 side bevels
 
             0 texture frames added
 Processing hull 0...
       6 DETAIL_WALL | DETAIL brushes
      25 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
       6 SKY brushes
-    633 SOLID brushes
-    670 brushes total
-    4,082 visible sides
-INFO: calculating BSP for 670 brushes with 4082 sides
-      670 brushes
-    4,076 visible faces
+    634 SOLID brushes
+    671 brushes total
+    4,088 visible sides
+INFO: calculating BSP for 671 brushes with 4088 sides
+      671 brushes
+    4,082 visible faces
         6 non-visible faces
-    2,298 nodes
+    2,265 nodes
         1 non-visible nodes
-    2,298 expensive split nodes
-    2,299 leaves
+    2,265 expensive split nodes
+    2,266 leaves
         6 DETAIL_WALL | DETAIL leafs
-       12 SOLID | SKY leafs
+       10 SOLID | SKY leafs
        67 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      872 SOLID leafs
+      874 SOLID leafs
        35 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
-      208 SKY leafs
-    1,099 EMPTY leafs
-    2,299 leafs total
+      186 SKY leafs
+    1,088 EMPTY leafs
+    2,266 leafs total
     20 max tree height
     14 avg tree height
-    11,174 tree portals
-    164 outside leaves
+    11,096 tree portals
+    156 outside leaves
     0 detail filled leafs
-      670 brushes
-    2,487 visible faces
-    1,595 non-visible faces
-    2,576 nodes
-      454 non-visible nodes
-    2,576 expensive split nodes
-    2,577 leaves
+      671 brushes
+    2,485 visible faces
+    1,603 non-visible faces
+    2,507 nodes
+      428 non-visible nodes
+    2,507 expensive split nodes
+    2,508 leaves
         6 DETAIL_WALL | DETAIL leafs
-       15 SOLID | SKY leafs
+       14 SOLID | SKY leafs
        64 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      980 SOLID leafs
+      983 SOLID leafs
        33 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
-      249 SKY leafs
-    1,230 EMPTY leafs
-    2,577 leafs total
-    23 max tree height
+      219 SKY leafs
+    1,189 EMPTY leafs
+    2,508 leafs total
+    22 max tree height
     14 avg tree height
-    12,369 tree portals
-    307 outside leaves
+    12,124 tree portals
+    271 outside leaves
     0 detail filled leafs
-    12,369 tree portals
-    10,541 sides visible
-    5,275 makefaces
-    1,783 subdivided
-    207 nodes pruned
-    1,236 player-occupiable leaves
-    1,142 clusters of leaves
-    3,197 vis portals
+    12,124 tree portals
+    10,518 sides visible
+    5,232 makefaces
+    1,147 merged
+    1,776 subdivided
+    228 nodes pruned
+    1,201 player-occupiable leaves
+    1,107 clusters of leaves
+    3,123 vis portals
 fixing up cluster at 1824 -72 -520
 fixing up cluster at 1732 -72 -520
 fixing up cluster at 2152 -804 44
@@ -139,21 +139,21 @@ fixing up cluster at 816 -1204 192
 fixing up cluster at 816 -1204 156
 fixing up cluster at 1300 -1348 12.000000000000028
 fixing up cluster at 1300 -1348 -148
-       15 SOLID | SKY leafs
+       14 SOLID | SKY leafs
        64 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-      923 EMPTY leafs
+      918 EMPTY leafs
        32 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
-      249 SKY leafs
-    1,087 SOLID leafs
-    2,370 leafs total
-    23 max tree height
-    13 avg tree height
-     5,109 edges added by tjunctions
-     6,738 faces optimized through MWT
-    18,687 triangles computed from MWT
-     1,089 faces created via optimization of MWT triangles
-    18,134 edges
-     7,944 faces
+      219 SKY leafs
+    1,033 SOLID leafs
+    2,280 leafs total
+    22 max tree height
+    14 avg tree height
+     4,974 edges added by tjunctions
+     5,674 faces optimized through MWT
+    16,426 triangles computed from MWT
+     1,168 faces created via optimization of MWT triangles
+    15,906 edges
+     6,871 faces
 Processing hull 1...
 Processing hull 2...
 Writing 10.bsp as Quake BSP bsp29
@@ -161,21 +161,21 @@ Wrote 10.bsp
 
 count   lump name    byte size 
      18 models             1152
-    695 planes            13900
-   8847 vertexes         106164
-   2471 nodes             59304
+    692 planes            13840
+   8032 vertexes          96384
+   2381 nodes             57144
      74 texinfos           2960
-   8046 faces            160920
-   4352 clipnodes         34816
-   1356 leafs             37968
-   8359 marksurfaces      16718
-  18339 edges             73356
-  35100 surfedges        140400
+   6973 faces            139460
+   4382 clipnodes         35056
+   1321 leafs             36988
+   8327 marksurfaces      16654
+  16111 edges             64444
+  30605 surfedges        122420
      14 textures         707748
         lightdata             0
         visdata               0
-        entdata           28210
+        entdata           27858
 
-0.625s seconds elapsed
+0.549s seconds elapsed
 
 

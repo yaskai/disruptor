@@ -124,23 +124,26 @@ comp_Weapon weapons[] = {
 	},
 };
 
-Model models[4];
+Model models[5];
 Matrix gun_matrix;
 
-ModelAnimation anims[4];
-AnimState anim_states[4];
+ModelAnimation anims[5];
+AnimState anim_states[5];
+bool weap_unlocked[5];
 
 bool reload_active = false;
 bool reload_sound_set = false;
 
-char *gun_shoot_sounds[4][3] = {
+char *gun_shoot_sounds[5][3] = {
 	// Disruptor
 	{ "" },					
 	// Revolver
 	{ "pistol", "pistol2", "pistol3" },
 	// Pistol
 	{ "" },
-	// Pistol
+	// Shotgun
+	{ "" },
+	// SMG
 	{ "" },
 };
 
@@ -195,6 +198,7 @@ void PlayerGunInit(
 	models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00_e.glb");
 	//models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_00.glb");
 	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_01.glb");
+	models[WEAP_SMG] = LoadModel("resources/models/weapons/smg_00.glb");
 
 	int rev_num_anims = 0;
 	anims[WEAP_REVOLVER] = *LoadModelAnimations("resources/models/weapons/rev_00_e.glb", &rev_num_anims);
@@ -976,9 +980,14 @@ void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun) {
 	weap_data->recoil = recoil;
 	weap_data->sway = sway;
 
-	for(short i = 0; i < 4; i++)
+	for(short i = 0; i < 5; i++) {
 		weap_data->weapons[i] = weapons[i];
 
+		weap_data->anim_curr_frame[i] = anim_states[i].curr_frame;
+		weap_data->anim_anim_id[i] = anim_states[i].anim_id;
+		weap_data->anim_acc[i] = anim_states[i].acc;
+		weap_data->anim_loop_count[i] = anim_states[i].loop_count;
+	}
 }
 
 void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
@@ -989,11 +998,26 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
 	recoil = weap_data->recoil;
 	sway = weap_data->sway;
 
+	for(short i = 0; i < 5; i++) {
+		weapons[i] = weap_data->weapons[i];
+		
+		anim_states[i].curr_frame = weap_data->anim_curr_frame[i];
+		anim_states[i].anim_id = weap_data->anim_anim_id[i];
+		anim_states[i].acc = weap_data->anim_acc[i];
+		anim_states[i].loop_count = weap_data->anim_loop_count[i];
+
+		anim_Apply(&anim_states[i], &models[i], &anims[i]);
+	}
+	
+	reload_active = true;
+
+	/*
 	for(short i = 0; i < 4; i++) {
 		weapons[i] = weap_data->weapons[i];
 		weapons[i].reload_timer = 0.0f;		
 		anim_states[i].curr_frame = anims[i].frameCount;
 		anim_Apply(&anim_states[i], &models[i], &anims[i]);
 	}
+	*/
 }
 

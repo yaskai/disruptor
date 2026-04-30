@@ -19,7 +19,12 @@ typedef struct {
 } rw_Meta;
 
 typedef struct {
-	comp_Weapon weapons[4];
+	comp_Weapon weapons[5];
+	
+	int anim_curr_frame[5];
+	int anim_anim_id[5];
+	float anim_acc[5];
+	u8 anim_loop_count[5];
 
 	Vector2 sway;
 
