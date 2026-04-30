@@ -129,6 +129,7 @@ enum weapon_types : u8 {
 	WEAP_REVOLVER,
 	WEAP_PISTOL,
 	WEAP_SHOTGUN,
+	WEAP_SMG,
 	WEAP_TURRET,
 };
 
@@ -256,8 +257,16 @@ enum ENT_SHADER_LOCS {
 	LC_VIEW_POS		= 4,
 };
 
+enum ENT_SHADER_PL_LOCS {
+	LC_PL_ENABLED	= 0,
+	LC_PL_POSITION	= 1,
+	LC_PL_COLOR		= 2,
+	LC_PL_RADIUS	= 3
+};
+
 typedef struct {
-	int locs[8];
+	int locs[8];		// locs
+	int pl_locs[8];		// point light locs
 
 } EntShaderLocs;
 

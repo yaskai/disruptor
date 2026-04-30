@@ -321,11 +321,17 @@ void LoadEntityShaders(EntityHandler *handler) {
 	char *prefix = "resources/shaders";
 
 	handler->ent_shader = LoadShader(TextFormat("%s/lit_ent_v.glsl", prefix), TextFormat("%s/lit_ent_f.glsl", prefix));
-	handler->ent_shader_locs.locs[LC_LIGHT_POS] = GetShaderLocation(handler->ent_shader, "light_pos");
-	handler->ent_shader_locs.locs[LC_LIGHT_CLR] = GetShaderLocation(handler->ent_shader, "light_clr");
-	handler->ent_shader_locs.locs[LC_MODEL_MAT] = GetShaderLocation(handler->ent_shader, "matModel");
-	handler->ent_shader_locs.locs[LC_MODEL_TEX] = GetShaderLocation(handler->ent_shader, "texture0");
-	handler->ent_shader_locs.locs[LC_VIEW_POS]  = GetShaderLocation(handler->ent_shader, "view_pos");
+
+	handler->ent_shader_locs.locs[LC_LIGHT_POS] 		= GetShaderLocation(handler->ent_shader, "light_pos");
+	handler->ent_shader_locs.locs[LC_LIGHT_CLR] 		= GetShaderLocation(handler->ent_shader, "light_clr");
+	handler->ent_shader_locs.locs[LC_MODEL_MAT] 		= GetShaderLocation(handler->ent_shader, "matModel");
+	handler->ent_shader_locs.locs[LC_MODEL_TEX] 		= GetShaderLocation(handler->ent_shader, "texture0");
+	handler->ent_shader_locs.locs[LC_VIEW_POS]  		= GetShaderLocation(handler->ent_shader, "view_pos");
+
+	handler->ent_shader_locs.pl_locs[LC_PL_ENABLED] 	= GetShaderLocation(handler->ent_shader, "pl_enable");
+	handler->ent_shader_locs.pl_locs[LC_PL_POSITION] 	= GetShaderLocation(handler->ent_shader, "pl_position");
+	handler->ent_shader_locs.pl_locs[LC_PL_COLOR] 		= GetShaderLocation(handler->ent_shader, "pl_color");
+	handler->ent_shader_locs.pl_locs[LC_PL_RADIUS] 		= GetShaderLocation(handler->ent_shader, "pl_radius");
 }
 
 void UpdateEntityShaders(EntityHandler *handler) {

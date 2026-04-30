@@ -112,6 +112,16 @@ comp_Weapon weapons[] = {
 		.reload_time_amnt = 4,
 		.reload_timer = 0,
 	},
+	// SMG
+	(comp_Weapon) {
+		.id = WEAP_SMG,
+		.damage = 3,
+		.clip_size = 35,
+		.in_clip = 35,
+		.ammo = 70, 	
+		.reload_time_amnt = 5,
+		.reload_timer = 0
+	},
 };
 
 Model models[4];

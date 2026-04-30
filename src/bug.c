@@ -345,7 +345,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
+		//BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
 
 		for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
@@ -831,6 +831,8 @@ void BugDraw(Entity *ent, EntityHandler *handler) {
 	if(launch_timer >= 0.4725f)
 		return;
 
+	comp_Transform *ct = &ent->comp_transform;
+
 	if(!(ent->flags & BUG_ON_SWITCH)) {
 		float angle = atan2f(-ent->comp_transform.forward.x, ent->comp_transform.forward.y);
 		ent->model.transform = MatrixRotateY(angle);
@@ -843,7 +845,8 @@ void BugDraw(Entity *ent, EntityHandler *handler) {
 		DrawModel(model_dead, ent->comp_transform.position, 3, DARKGRAY);	
  	} else {
 		//DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);	
-		EntDrawLitModel(handler, ent, 3.0f, 100);
+		//EntDrawLitModel(handler, ent, 3.0f, 100);
+		EntDrawLitModelEx(handler, ent, Vector3Add(ct->position, Vector3Scale(DOWN, 1.0f)), 3.0f, Vector3Zero(), 0.0f, 60);
 	}
 }
 

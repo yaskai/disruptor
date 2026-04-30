@@ -138,7 +138,7 @@ void RegulatorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 	ct->pitch = asinf(Clamp(ct->targ_look.z, -1.0f, 1.0f));
 	ct->pitch = 0.0f;
 
-	if(fabsf(ct->velocity.x + ct->velocity.y) >= 0.1f)
+	if(fabsf(ct->velocity.x + ct->velocity.y) >= 1.0f)
 		ai->state = STATE_MOVE;
 	
 	if(ai->state == STATE_MOVE) {
@@ -205,7 +205,7 @@ void RegulatorDraw(Entity *ent, EntityHandler *handler, float dt) {
 
 		Vector3 pos = ent->comp_transform.position;		
 		pos.z -= 10;
-		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3Zero(), 0, 90);
+		EntDrawLitModelEx(handler, ent, pos, 1.0f, Vector3Zero(), 0, 0);
 
 		return;
 	}

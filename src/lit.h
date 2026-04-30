@@ -1,6 +1,7 @@
 #include "../include/num_redefs.h"
 #include "raylib.h"
 #include "kbsp.h"
+#include "ent.h"
 
 #ifndef LIT_H_
 #define LIT_H_
@@ -25,7 +26,7 @@ typedef struct {
 } LightHandler;
 
 void InitPointLights(LightHandler *lh);
-void ManagePointLights(Bsp_Data *bsp, float dt);
+void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt);
 
 void AddPointlight(PointLight point_light);
 

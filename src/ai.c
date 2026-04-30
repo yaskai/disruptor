@@ -467,7 +467,7 @@ u8 ExecFindCover(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		
 		visited[curr_node] = true;
 
-		curr_node = (curr_node + 1) % (graph->node_count); 
+		curr_node = (curr_node + 1) % (graph->node_count-1); 
 		iter++;
 
 		NavNode *node = &graph->nodes[curr_node];

@@ -189,7 +189,7 @@ void InitPointLights(LightHandler *lh) {
 	lh_ptr_self = lh;	
 }
 
-void ManagePointLights(Bsp_Data *bsp, float dt) {
+void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt) {
 	int enabled[MAX_POINT_LIGHTS] = {0};
 	Vector3 position[MAX_POINT_LIGHTS];
 	Vector3 color[MAX_POINT_LIGHTS];
@@ -215,6 +215,11 @@ void ManagePointLights(Bsp_Data *bsp, float dt) {
 	SetShaderValueV(bsp->lm_shader, g_loc_position, position, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
 	SetShaderValueV(bsp->lm_shader, g_loc_color, color, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
 	SetShaderValueV(bsp->lm_shader, g_loc_radius, radius, SHADER_UNIFORM_FLOAT, MAX_POINT_LIGHTS);
+
+	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_ENABLED], enabled, SHADER_UNIFORM_INT, MAX_POINT_LIGHTS);
+	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_POSITION], position, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
+	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_COLOR], color, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
+	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_RADIUS], radius, SHADER_UNIFORM_FLOAT, MAX_POINT_LIGHTS);
 }
 
 void AddPointlight(PointLight point_light) {

@@ -343,7 +343,7 @@ void RenderMainLayer(Game *game, float dt) {
 	ClearBackground(BLACK);
 	BeginMode3D(game->camera);
 
-	ManagePointLights(&game->test_section.bsp_data, dt);
+	ManagePointLights(&game->test_section.bsp_data, &game->ent_handler, dt);
 	// Render level geometry
 	DrawMap(&game->test_section, game->camera.position);
 	// Render entities

@@ -181,6 +181,11 @@ u8 rw_WriteEntData(EntityHandler *ent_handler, char *file_path) {
 		// Flags & type:
 		fwrite(&ent->type, sizeof(i8), 1, pF);
 		fwrite(&ent->flags, sizeof(u8), 1, pF);
+		// Anim state:
+		fwrite(&ent->anim_state.curr_frame, sizeof(int), 1, pF);
+		fwrite(&ent->anim_state.anim_id, sizeof(int), 1, pF);
+		fwrite(&ent->anim_state.acc, sizeof(float), 1, pF);
+		fwrite(&ent->anim_state.loop_count, sizeof(u8), 1, pF);
 	}
 
 	// End file write
@@ -227,6 +232,12 @@ u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path) {
 		// ID and flags
 		fread(&ent->type, sizeof(i8), 1, pF);
 		fread(&ent->flags, sizeof(u8), 1, pF);
+
+		// Anim state:
+		fread(&ent->anim_state.curr_frame, sizeof(int), 1, pF);
+		fread(&ent->anim_state.anim_id, sizeof(int), 1, pF);
+		fread(&ent->anim_state.acc, sizeof(float), 1, pF);
+		fread(&ent->anim_state.loop_count, sizeof(u8), 1, pF);
 	}
 
 	// End file read
