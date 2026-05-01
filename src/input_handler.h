@@ -26,17 +26,18 @@ typedef struct {
 #define INPUT_ACTION_COUNT	16
 
 // Action indices, keyboard 
-#define ACTION_MOVE_U		0
-#define ACTION_MOVE_L		1
-#define ACTION_MOVE_D		2
-#define ACTION_MOVE_R		3
-#define ACTION_JUMP			4
-#define ACTION_WALK			5
-#define ACTION_CROUCH		6
+#define ACTION_MOVE_U		 0
+#define ACTION_MOVE_L		 1
+#define ACTION_MOVE_D		 2
+#define ACTION_MOVE_R		 3
+#define ACTION_JUMP			 4
+#define ACTION_WALK			 5
+#define ACTION_CROUCH		 6
 
-#define ACTION_SHOOT		7
-#define ACTION_SHOOT_ALT 	8
-#define ACTION_RELOAD		9
+#define ACTION_SHOOT		 7
+#define ACTION_SHOOT_ALT 	 8
+#define ACTION_RELOAD	 	 9
+#define ACTION_INTERACT		10
 
 typedef struct {
 	InputAction actions[INPUT_ACTION_COUNT];

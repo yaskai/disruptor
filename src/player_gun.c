@@ -448,6 +448,9 @@ void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt) {
 	cam_recoil = 0;
 }
 
+void PlayerGunUpdateSMG(PlayerGun *player_gun, float dt) {
+}
+
 void PlayerGunDraw(PlayerGun *player_gun) {
 	/*
 	if(gun_refs.handler->flags & AT_LEVEL_END) {
@@ -726,9 +729,11 @@ void PlayerShootShotgun(PlayerGun *player_gun, EntityHandler *handler, MapSectio
 }
 
 void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
+	// Can't shoot, reload in progress
 	if(reload_active)
 		return;
 
+	// Can't shoot, no ammo
 	if(curr_gun->in_clip <= 0) {
 		AP_RequestSound(gun_refs.ap, "outofammo");
 		return;
@@ -867,6 +872,10 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 	AP_RequestSound(gun_refs.ap, "throw_bug");
 }
 
+void PlayerShootSMG(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
+}
+
+
 void PlayerGunReload(PlayerGun *player_gun, float dt) {
 	if(recoil > 1.0f)
 		return;
@@ -886,6 +895,7 @@ void PlayerGunReload(PlayerGun *player_gun, float dt) {
 
 		reload_active = true;
 
+		// Play sound
 		if(!reload_sound_set) {
 			AP_SetSoundPosition(gun_refs.ap, "rev_reload", gun_refs.world_cam->position, 0);
 			AP_RequestSound(gun_refs.ap, "rev_reload");
@@ -943,6 +953,8 @@ void SendAmmoPickupEvent(int pickup_type) {
 	}	
 }
 
+// * NOTE: 
+// To be replaced and moved to ui.c
 void DrawSectionTransition() {
 	DrawTextEx(
 		hud_font,
@@ -980,6 +992,7 @@ void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun) {
 	weap_data->recoil = recoil;
 	weap_data->sway = sway;
 
+	// Write animation state for each weapon
 	for(short i = 0; i < 5; i++) {
 		weap_data->weapons[i] = weapons[i];
 
@@ -998,6 +1011,7 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
 	recoil = weap_data->recoil;
 	sway = weap_data->sway;
 
+	// Read animation state for each weapon
 	for(short i = 0; i < 5; i++) {
 		weapons[i] = weap_data->weapons[i];
 		
@@ -1007,17 +1021,9 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
 		anim_states[i].loop_count = weap_data->anim_loop_count[i];
 
 		anim_Apply(&anim_states[i], &models[i], &anims[i]);
-	}
-	
-	reload_active = true;
 
-	/*
-	for(short i = 0; i < 4; i++) {
-		weapons[i] = weap_data->weapons[i];
-		weapons[i].reload_timer = 0.0f;		
-		anim_states[i].curr_frame = anims[i].frameCount;
-		anim_Apply(&anim_states[i], &models[i], &anims[i]);
+		if(anim_states[i].curr_frame ^ anim_states[i].anim_id)
+			reload_active = true;
 	}
-	*/
 }
 

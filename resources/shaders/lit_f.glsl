@@ -17,6 +17,8 @@ uniform vec3 pl_position[MAX_PL];
 uniform vec3 pl_color[MAX_PL];
 uniform float pl_radius[MAX_PL];
 
+uniform int full_bright;
+
 void main() {
 	vec4 diffuse = texture(texture0, fragTexCoord);
 	vec4 light = texture(texture1, fragTexCoord2);
@@ -29,7 +31,7 @@ void main() {
 		vec3 light_dir = normalize(pl_position[i] - fragWorldPos);
 		float dist = distance(pl_position[i], fragWorldPos); 
 		float attenuation = 1.0 - smoothstep(0.0, pl_radius[i], dist);
-		float dot = max(dot(fragNormal, light_dir), 0.0);
+		float ndot = max(dot(fragNormal, light_dir), 0.0);
 		pl_add += pl_color[i] * attenuation;
 	}
 		

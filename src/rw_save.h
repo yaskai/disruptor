@@ -8,7 +8,7 @@
 #ifndef RW_SAVE_H_
 #define RW_SAVE_H_
 
-#define AUTOSAVE_TICKRATE (300.0f*dt)
+#define AUTOSAVE_TICKRATE (30.0f*dt)
 #define IS_AUTOSAVE	0x01
 typedef struct {
 	time_t time_stamp;

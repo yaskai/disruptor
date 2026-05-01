@@ -39,9 +39,9 @@ void main() {
 		vec3 light_dir = normalize(pl_position[i] - fragWorldPos);
 		float dist = distance(pl_position[i], fragWorldPos); 
 		float attenuation = 1.0 - smoothstep(0.0, pl_radius[i], dist*1.75);
-		float dot = max(dot(fragNormal, light_dir), 0.0);
+		float ndot = max(dot(fragNormal, light_dir), 0.0);
 
-		pl_add += pl_color[i] * attenuation * dot;
+		pl_add += pl_color[i] * attenuation * ndot;
 
 	}
 

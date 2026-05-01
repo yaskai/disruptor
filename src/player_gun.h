@@ -38,11 +38,13 @@ void PlayerShootPistol(PlayerGun *player_gun, EntityHandler *handler, MapSection
 void PlayerShootShotgun(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);
 void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);
 void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);
+void PlayerShootSMG(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect);
 
 void PlayerGunUpdatePistol(PlayerGun *player_gun, float dt);
 void PlayerGunUpdateShotgun(PlayerGun *player_gun, float dt);
 void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt);
 void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt);
+void PlayerGunUpdateSMG(PlayerGun *player_gun, float dt);
 
 void PlayerGunReload(PlayerGun *player_gun, float dt);
 

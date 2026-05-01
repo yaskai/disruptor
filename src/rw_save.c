@@ -21,6 +21,7 @@ void rw_WriteSaveNew(EntityHandler *ent_handler, char *dir_path, rw_GlobalData g
 }
 
 u8 rw_LoadMostRecent(EntityHandler *ent_handler, rw_GlobalData *global_data) {
+	// Open metadata file
 	char *meta_path = "data/svd_meta";
 	FILE *pF = fopen(meta_path, "rb"); 
 	if(!pF) {
@@ -28,13 +29,16 @@ u8 rw_LoadMostRecent(EntityHandler *ent_handler, rw_GlobalData *global_data) {
 		return 0;
 	}
 
+	// Calculate number of save entries
 	int num_entries = GetFileLength(meta_path) / sizeof(rw_Meta);
+
+	// Read contents
 	rw_Meta meta[num_entries];
 	fread(&meta, sizeof(rw_Meta) * num_entries, 1, pF);
 
+	// Find latest save with matching map file
 	int latest_id = 0;
 	bool map_match = false;
-
 	for(int i = num_entries-1; i >= 0; i--) {
 		if(!streq(meta[i].map, global_data->map))
 			continue;
@@ -49,6 +53,7 @@ u8 rw_LoadMostRecent(EntityHandler *ent_handler, rw_GlobalData *global_data) {
 	if(!map_match)
 		return 0;
 
+	// Read save data
 	rw_ReadSave(ent_handler, meta[latest_id].name, global_data);
 
 	return 1;

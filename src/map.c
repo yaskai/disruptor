@@ -508,7 +508,7 @@ Tri *BrushToTris(Brush *brush, u16 *count, u16 brush_id) {
 		for(u8 j = 0; j < brush->vert_count; j++) {
 			Vector3 v = brush->verts[j];
 
-			bool in = (fabsf(Vector3DotProduct(plane->normal, v) + plane->d) <= 0.01f);
+			bool in = (fabsf(Vector3DotProduct(plane->normal, v) + plane->d) <= 0.1f);
 			if(!in) continue;
 
 			face_verts[fv_count++].p = v;

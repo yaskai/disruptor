@@ -85,7 +85,7 @@ void pm_AirFriction(comp_Transform *ct, float dt);
 #define BLOCK_STEP	 	0x02
 u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 blocked);
 
-#define BASE_JUMP_FORCE 210.0f
+#define BASE_JUMP_FORCE 230.0f
 void pm_Jump(comp_Transform *ct, InputHandler *input);
 
 #endif

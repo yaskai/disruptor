@@ -119,7 +119,7 @@ ___
 ** (x) hp counter
 ** (x) ammo/clip counter
 ** (x) crosshair
-** diegetic elements for Bug
+** (_) -diegetic elements for Bug-
 ** (-) proper HUD separation/handling
 ** (-) loading indicator
 

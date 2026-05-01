@@ -20,6 +20,8 @@ void InputInit(InputHandler *handler) {
 	handler->actions[ACTION_WALK].key		= KEY_LEFT_SHIFT;
 
 	handler->actions[ACTION_JUMP].key 		= KEY_SPACE;
+
+	handler->actions[ACTION_INTERACT].key 	= KEY_E;
 }
 
 void PollInput(InputHandler *handler) {
