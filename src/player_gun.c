@@ -811,7 +811,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	Vector3 d = Vector3Normalize(Vector3Subtract(gun_refs.world_cam->position, gun_refs.world_cam->target));
 	PointLight pl = (PointLight) {
 		.position = Vector3Add(gun_refs.world_cam->position, Vector3Scale(d, 5)),
-		.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.25f),
+		.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.75f),
 		.timer = 0.1f,
 		.active = 1,
 		.radius = 300,

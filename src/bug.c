@@ -370,7 +370,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
-		//BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
+		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
 
 		for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
