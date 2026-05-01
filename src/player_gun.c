@@ -814,7 +814,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 		.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.75f),
 		.timer = 0.1f,
 		.active = 1,
-		.radius = 300,
+		.radius = 600,
 	};
 	AddPointlight(pl);
 }

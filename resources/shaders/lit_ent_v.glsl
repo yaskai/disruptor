@@ -15,7 +15,7 @@ out vec3 fragNormal;
 void main() {
 	fragTexCoord = vertexTexCoord;	
 
-	fragPosition = vec3(matModel * vec4(vertexPosition, 1.0));
+	fragPosition = vec3(mvp * vec4(vertexPosition, 1.0));
 	fragWorldPos = vec3(matModel * vec4(vertexPosition, 1.0));
 	fragNormal = mat3(transpose(inverse(matModel))) * vertexNormal;
 

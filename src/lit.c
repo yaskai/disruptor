@@ -11,11 +11,19 @@
 #include "map.h"
 #include "ent.h"
 
+bool ent_shader_locs_set = false;
+
 int g_loc_count;
 int g_loc_position;
 int g_loc_color;
 int g_loc_radius;
 int g_loc_enable;
+
+int e_loc_count;
+int e_loc_position;
+int e_loc_color;
+int e_loc_radius;
+int e_loc_enable;
 
 MapSection *lh_ptr_sect;
 void lh_SetSectPointer(MapSection *sect) { lh_ptr_sect = sect; }
@@ -187,9 +195,19 @@ Color lit_SampleLightGrid(Bsp_Data *bsp, Vector3 world_pos) {
 
 void InitPointLights(LightHandler *lh) {
 	lh_ptr_self = lh;	
+	ent_shader_locs_set = false;
 }
 
 void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt) {
+	if(!ent_shader_locs_set) {
+		ent_handler->ent_shader_locs.pl_locs[LC_PL_ENABLED] 	= GetShaderLocation(ent_handler->ent_shader, "pl_enabled");
+		ent_handler->ent_shader_locs.pl_locs[LC_PL_POSITION] 	= GetShaderLocation(ent_handler->ent_shader, "pl_position");
+		ent_handler->ent_shader_locs.pl_locs[LC_PL_COLOR] 		= GetShaderLocation(ent_handler->ent_shader, "pl_color");
+		ent_handler->ent_shader_locs.pl_locs[LC_PL_RADIUS] 		= GetShaderLocation(ent_handler->ent_shader, "pl_radius");
+
+		ent_shader_locs_set = true;
+	}
+
 	int enabled[MAX_POINT_LIGHTS] = {0};
 	Vector3 position[MAX_POINT_LIGHTS];
 	Vector3 color[MAX_POINT_LIGHTS];
@@ -215,7 +233,7 @@ void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt) {
 	SetShaderValueV(bsp->lm_shader, g_loc_position, position, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
 	SetShaderValueV(bsp->lm_shader, g_loc_color, color, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
 	SetShaderValueV(bsp->lm_shader, g_loc_radius, radius, SHADER_UNIFORM_FLOAT, MAX_POINT_LIGHTS);
-
+	
 	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_ENABLED], enabled, SHADER_UNIFORM_INT, MAX_POINT_LIGHTS);
 	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_POSITION], position, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);
 	SetShaderValueV(ent_handler->ent_shader, ent_handler->ent_shader_locs.pl_locs[LC_PL_COLOR], color, SHADER_UNIFORM_VEC3, MAX_POINT_LIGHTS);

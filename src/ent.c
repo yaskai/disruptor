@@ -1626,9 +1626,9 @@ void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min
 	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], light_pos, SHADER_UNIFORM_VEC3, 3);
 	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], light_clr, SHADER_UNIFORM_VEC3, 3);
 
-	Matrix mat = ent->model.transform;
+	//Matrix mat = ent->model.transform;
 	//mat = MatrixMultiply(mat, MatrixRotateX(-90.0f*DEG2RAD));
-	SetShaderValueMatrix(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_MAT], mat);
+	//SetShaderValueMatrix(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_MAT], mat);
 	//SetShaderValueTexture(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_TEX], ent->model.materials[0].maps[0].texture);
 
 	for(int m = 0; m < ent->model.materialCount; m++) {
