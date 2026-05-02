@@ -28,7 +28,6 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 			handler->text_objs = realloc(handler->text_objs, sizeof(TextObject) * handler->text_obj_cap);
 		}
 
-		printf("%s\n", text_obj.text);
 		handler->text_objs[handler->text_obj_count++] = text_obj;
 	}
 

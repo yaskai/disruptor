@@ -24,7 +24,19 @@ void HudUpdate(Hud *hud, float dt) {
 	DisplayAmmoCounter(hud);
 	DisplayHealthCounter(hud);
 
-	DisplayTextObject(hud, 0);
+	Vector3 player_pos = hud->handler->ents[hud->handler->player_id].comp_transform.position;
+
+	i16 text_obj_id = -1;
+	for(i16 i = 0; i < hud->handler->text_obj_count; i++) {
+		TextObject *text_obj = &hud->handler->text_objs[i];
+
+		if(CheckCollisionSpheres(player_pos, 64, text_obj->position, 64)) {
+			text_obj_id = i;
+		}
+	}
+
+	if(text_obj_id > -1)
+		DisplayTextObject(hud, text_obj_id);
 }
 
 void DisplayAmmoCounter(Hud *hud) {
