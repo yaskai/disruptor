@@ -13,6 +13,19 @@
 #define ENT_H_
 
 // ----------------------------------------------------------------------------------------------------------------------------
+#define TXT_OBJ_ACTIVE	0x01
+#define TXT_OBJ_SHOW	0x02
+typedef struct {
+	char text[64];
+	
+	Vector3 position;
+	float radius;
+		
+	u8 flags;
+
+} TextObject;
+
+// ----------------------------------------------------------------------------------------------------------------------------
 void EntDebugText();
 
 typedef struct {
@@ -289,6 +302,8 @@ typedef struct {
 	vEffect_Manager *effect_manager;
 	AudioPlayer *ap;
 
+	TextObject *text_objs;
+
 	Shader ent_shader;
 	EntShaderLocs ent_shader_locs;
 
@@ -312,6 +327,9 @@ typedef struct {
 
 	u16 player_id;
 	u16 bug_id;
+
+	u16 text_obj_count;
+	u16 text_obj_cap;
 
 	u8 flags;
 

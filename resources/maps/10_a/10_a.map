@@ -1710,20 +1710,13 @@
 }
 // entity 11
 {
-"classname" "info_player_start"
-"origin" "1936 -1184 -544"
-"enum_id" "0"
-"angle" "0"
-}
-// entity 12
-{
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "NavLayer"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 13
+// entity 12
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
@@ -4556,7 +4549,7 @@
 ( 2136 -1776 -456 ) ( 2136 -1784 -568 ) ( 2136 -1784 -456 ) purpmtl 0 0 0 1 1
 }
 }
-// entity 14
+// entity 13
 {
 "classname" "light"
 "origin" "1024 144 -928"
@@ -4568,7 +4561,7 @@
 "impulse" "0"
 "_tb_layer" "3"
 }
-// entity 15
+// entity 14
 {
 "classname" "light"
 "origin" "1024 304 -928"
@@ -4580,7 +4573,7 @@
 "impulse" "0"
 "_tb_layer" "3"
 }
-// entity 16
+// entity 15
 {
 "classname" "light"
 "origin" "1024 464 -928"
@@ -4592,7 +4585,7 @@
 "impulse" "0"
 "_tb_layer" "3"
 }
-// entity 17
+// entity 16
 {
 "classname" "light"
 "origin" "1192 464 -928"
@@ -4604,7 +4597,7 @@
 "impulse" "0"
 "_tb_layer" "3"
 }
-// entity 18
+// entity 17
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -4629,7 +4622,7 @@
 ( 1408 -696 -872 ) ( 1408 -328 -872 ) ( 1408 -328 -1040 ) purpmtl 0 0 0 1 1
 }
 }
-// entity 19
+// entity 18
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -4654,7 +4647,7 @@
 ( 1408 -696 -752 ) ( 1408 -328 -752 ) ( 1408 -328 -872 ) purpmtl 0 0 0 1 1
 }
 }
-// entity 20
+// entity 19
 {
 "classname" "info_switch"
 "origin" "1480 -352 -992"
@@ -4665,7 +4658,7 @@
 "trigger_type" "0"
 "_tb_layer" "3"
 }
-// entity 21
+// entity 20
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -4679,7 +4672,7 @@
 ( 792 24 -752 ) ( 792 -272 -1008 ) ( 792 -272 -752 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 22
+// entity 21
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -4693,7 +4686,7 @@
 ( 992 -64 -752 ) ( 992 -272 -1000 ) ( 992 -272 -752 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 23
+// entity 22
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -4707,7 +4700,7 @@
 ( 368 -696 -792 ) ( 368 -688 -792 ) ( 368 -688 -864 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 24
+// entity 23
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4731,7 +4724,7 @@
 ( 456 -656 -1104 ) ( 464 -664 -1104 ) ( 464 -664 -976 ) met01 0 0 0 1 1
 }
 }
-// entity 25
+// entity 24
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4755,7 +4748,7 @@
 ( 456 -656 -1088 ) ( 464 -664 -1088 ) ( 464 -664 -960 ) met01 0 0 0 1 1
 }
 }
-// entity 26
+// entity 25
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4779,7 +4772,7 @@
 ( 456 -656 -1072 ) ( 464 -664 -1072 ) ( 464 -664 -944 ) met01 0 0 0 1 1
 }
 }
-// entity 27
+// entity 26
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4803,7 +4796,7 @@
 ( 456 -656 -1056 ) ( 464 -664 -1056 ) ( 464 -664 -928 ) met01 0 0 0 1 1
 }
 }
-// entity 28
+// entity 27
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4827,7 +4820,7 @@
 ( 456 -656 -992 ) ( 464 -664 -992 ) ( 464 -664 -864 ) met01 0 0 0 1 1
 }
 }
-// entity 29
+// entity 28
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4851,7 +4844,7 @@
 ( 456 -656 -1008 ) ( 464 -664 -1008 ) ( 464 -664 -880 ) met01 0 0 0 1 1
 }
 }
-// entity 30
+// entity 29
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4875,7 +4868,7 @@
 ( 456 -656 -1024 ) ( 464 -664 -1024 ) ( 464 -664 -896 ) met01 0 0 0 1 1
 }
 }
-// entity 31
+// entity 30
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4899,7 +4892,7 @@
 ( 456 -656 -1040 ) ( 464 -664 -1040 ) ( 464 -664 -912 ) met01 0 0 0 1 1
 }
 }
-// entity 32
+// entity 31
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4923,7 +4916,7 @@
 ( 456 -656 -928 ) ( 464 -664 -928 ) ( 464 -664 -800 ) met01 0 0 0 1 1
 }
 }
-// entity 33
+// entity 32
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4947,7 +4940,7 @@
 ( 456 -656 -944 ) ( 464 -664 -944 ) ( 464 -664 -816 ) met01 0 0 0 1 1
 }
 }
-// entity 34
+// entity 33
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4971,7 +4964,7 @@
 ( 456 -656 -960 ) ( 464 -664 -960 ) ( 464 -664 -832 ) met01 0 0 0 1 1
 }
 }
-// entity 35
+// entity 34
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -4995,7 +4988,7 @@
 ( 456 -656 -976 ) ( 464 -664 -976 ) ( 464 -664 -848 ) met01 0 0 0 1 1
 }
 }
-// entity 36
+// entity 35
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5019,7 +5012,7 @@
 ( 456 -656 -880 ) ( 464 -664 -880 ) ( 464 -664 -752 ) met01 0 0 0 1 1
 }
 }
-// entity 37
+// entity 36
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5043,7 +5036,7 @@
 ( 456 -656 -896 ) ( 464 -664 -896 ) ( 464 -664 -768 ) met01 0 0 0 1 1
 }
 }
-// entity 38
+// entity 37
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5067,7 +5060,7 @@
 ( 456 -656 -912 ) ( 464 -664 -912 ) ( 464 -664 -784 ) met01 0 0 0 1 1
 }
 }
-// entity 39
+// entity 38
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5091,7 +5084,7 @@
 ( 464 -664 -1104 ) ( 464 -664 -1103 ) ( 464 -663 -1104 ) met01 0 0 0 1 1
 }
 }
-// entity 40
+// entity 39
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5115,7 +5108,7 @@
 ( 464 -664 -1088 ) ( 464 -664 -1087 ) ( 464 -663 -1088 ) met01 0 0 0 1 1
 }
 }
-// entity 41
+// entity 40
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5139,7 +5132,7 @@
 ( 464 -664 -1072 ) ( 464 -664 -1071 ) ( 464 -663 -1072 ) met01 0 0 0 1 1
 }
 }
-// entity 42
+// entity 41
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5163,7 +5156,7 @@
 ( 464 -664 -1056 ) ( 464 -664 -1055 ) ( 464 -663 -1056 ) met01 0 0 0 1 1
 }
 }
-// entity 43
+// entity 42
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5187,7 +5180,7 @@
 ( 464 -664 -1040 ) ( 464 -664 -1039 ) ( 464 -663 -1040 ) met01 0 0 0 1 1
 }
 }
-// entity 44
+// entity 43
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5211,7 +5204,7 @@
 ( 464 -664 -1024 ) ( 464 -664 -1023 ) ( 464 -663 -1024 ) met01 0 0 0 1 1
 }
 }
-// entity 45
+// entity 44
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5235,7 +5228,7 @@
 ( 464 -664 -1008 ) ( 464 -664 -1007 ) ( 464 -663 -1008 ) met01 0 0 0 1 1
 }
 }
-// entity 46
+// entity 45
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5257,6 +5250,30 @@
 ( 464 -664 -992 ) ( 464 -663 -992 ) ( 465 -664 -992 ) met01 0 0 0 1 1
 ( 464 -664 -992 ) ( 465 -664 -992 ) ( 464 -664 -991 ) met01 0 0 0 1 1
 ( 464 -664 -992 ) ( 464 -664 -991 ) ( 464 -663 -992 ) met01 0 0 0 1 1
+}
+}
+// entity 46
+{
+"classname" "func_ladder"
+"on_trigger" "0"
+"trigger_group" "0"
+"start_active" "1"
+"start_open" "0"
+"enum_id" "19"
+"targ_x" "0"
+"targ_y" "0"
+"targ_z" "0"
+"_phong" "0"
+"_phong_angle" "88"
+"_tb_layer" "3"
+// brush 0
+{
+( 456 -672 -984 ) ( 456 -671 -984 ) ( 456 -672 -983 ) met01 0 0 0 1 1
+( 456 -672 -984 ) ( 456 -672 -983 ) ( 457 -672 -984 ) met01 0 0 0 1 1
+( 456 -672 -984 ) ( 457 -672 -984 ) ( 456 -671 -984 ) met01 0 0 0 1 1
+( 464 -664 -976 ) ( 464 -663 -976 ) ( 465 -664 -976 ) met01 0 0 0 1 1
+( 464 -664 -976 ) ( 465 -664 -976 ) ( 464 -664 -975 ) met01 0 0 0 1 1
+( 464 -664 -976 ) ( 464 -664 -975 ) ( 464 -663 -976 ) met01 0 0 0 1 1
 }
 }
 // entity 47
@@ -5299,30 +5316,6 @@
 "_tb_layer" "3"
 // brush 0
 {
-( 456 -672 -984 ) ( 456 -671 -984 ) ( 456 -672 -983 ) met01 0 0 0 1 1
-( 456 -672 -984 ) ( 456 -672 -983 ) ( 457 -672 -984 ) met01 0 0 0 1 1
-( 456 -672 -984 ) ( 457 -672 -984 ) ( 456 -671 -984 ) met01 0 0 0 1 1
-( 464 -664 -976 ) ( 464 -663 -976 ) ( 465 -664 -976 ) met01 0 0 0 1 1
-( 464 -664 -976 ) ( 465 -664 -976 ) ( 464 -664 -975 ) met01 0 0 0 1 1
-( 464 -664 -976 ) ( 464 -664 -975 ) ( 464 -663 -976 ) met01 0 0 0 1 1
-}
-}
-// entity 49
-{
-"classname" "func_ladder"
-"on_trigger" "0"
-"trigger_group" "0"
-"start_active" "1"
-"start_open" "0"
-"enum_id" "19"
-"targ_x" "0"
-"targ_y" "0"
-"targ_z" "0"
-"_phong" "0"
-"_phong_angle" "88"
-"_tb_layer" "3"
-// brush 0
-{
 ( 456 -672 -968 ) ( 456 -671 -968 ) ( 456 -672 -967 ) met01 0 0 0 1 1
 ( 456 -672 -968 ) ( 456 -672 -967 ) ( 457 -672 -968 ) met01 0 0 0 1 1
 ( 456 -672 -968 ) ( 457 -672 -968 ) ( 456 -671 -968 ) met01 0 0 0 1 1
@@ -5331,7 +5324,7 @@
 ( 464 -664 -960 ) ( 464 -664 -959 ) ( 464 -663 -960 ) met01 0 0 0 1 1
 }
 }
-// entity 50
+// entity 49
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5355,7 +5348,7 @@
 ( 464 -664 -944 ) ( 464 -664 -943 ) ( 464 -663 -944 ) met01 0 0 0 1 1
 }
 }
-// entity 51
+// entity 50
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5379,7 +5372,7 @@
 ( 464 -664 -928 ) ( 464 -664 -927 ) ( 464 -663 -928 ) met01 0 0 0 1 1
 }
 }
-// entity 52
+// entity 51
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5403,7 +5396,7 @@
 ( 464 -664 -912 ) ( 464 -664 -911 ) ( 464 -663 -912 ) met01 0 0 0 1 1
 }
 }
-// entity 53
+// entity 52
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5427,7 +5420,7 @@
 ( 464 -664 -896 ) ( 464 -664 -895 ) ( 464 -663 -896 ) met01 0 0 0 1 1
 }
 }
-// entity 54
+// entity 53
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5451,7 +5444,7 @@
 ( 464 -664 -880 ) ( 464 -664 -879 ) ( 464 -663 -880 ) met01 0 0 0 1 1
 }
 }
-// entity 55
+// entity 54
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5475,7 +5468,7 @@
 ( 408 -664 -880 ) ( 408 -664 -879 ) ( 408 -663 -880 ) met01 0 0 0 1 1
 }
 }
-// entity 56
+// entity 55
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5499,7 +5492,7 @@
 ( 408 -664 -896 ) ( 408 -664 -895 ) ( 408 -663 -896 ) met01 0 0 0 1 1
 }
 }
-// entity 57
+// entity 56
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5523,7 +5516,7 @@
 ( 408 -664 -912 ) ( 408 -664 -911 ) ( 408 -663 -912 ) met01 0 0 0 1 1
 }
 }
-// entity 58
+// entity 57
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5547,7 +5540,7 @@
 ( 408 -664 -928 ) ( 408 -664 -927 ) ( 408 -663 -928 ) met01 0 0 0 1 1
 }
 }
-// entity 59
+// entity 58
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5571,7 +5564,7 @@
 ( 408 -664 -944 ) ( 408 -664 -943 ) ( 408 -663 -944 ) met01 0 0 0 1 1
 }
 }
-// entity 60
+// entity 59
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5595,7 +5588,7 @@
 ( 408 -664 -960 ) ( 408 -664 -959 ) ( 408 -663 -960 ) met01 0 0 0 1 1
 }
 }
-// entity 61
+// entity 60
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5619,7 +5612,7 @@
 ( 408 -664 -976 ) ( 408 -664 -975 ) ( 408 -663 -976 ) met01 0 0 0 1 1
 }
 }
-// entity 62
+// entity 61
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5643,7 +5636,7 @@
 ( 408 -664 -992 ) ( 408 -664 -991 ) ( 408 -663 -992 ) met01 0 0 0 1 1
 }
 }
-// entity 63
+// entity 62
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5667,7 +5660,7 @@
 ( 408 -664 -1008 ) ( 408 -664 -1007 ) ( 408 -663 -1008 ) met01 0 0 0 1 1
 }
 }
-// entity 64
+// entity 63
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5691,7 +5684,7 @@
 ( 408 -664 -1024 ) ( 408 -664 -1023 ) ( 408 -663 -1024 ) met01 0 0 0 1 1
 }
 }
-// entity 65
+// entity 64
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5715,7 +5708,7 @@
 ( 408 -664 -1040 ) ( 408 -664 -1039 ) ( 408 -663 -1040 ) met01 0 0 0 1 1
 }
 }
-// entity 66
+// entity 65
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5739,7 +5732,7 @@
 ( 408 -664 -1056 ) ( 408 -664 -1055 ) ( 408 -663 -1056 ) met01 0 0 0 1 1
 }
 }
-// entity 67
+// entity 66
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5763,7 +5756,7 @@
 ( 408 -664 -1072 ) ( 408 -664 -1071 ) ( 408 -663 -1072 ) met01 0 0 0 1 1
 }
 }
-// entity 68
+// entity 67
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5787,7 +5780,7 @@
 ( 408 -664 -1088 ) ( 408 -664 -1087 ) ( 408 -663 -1088 ) met01 0 0 0 1 1
 }
 }
-// entity 69
+// entity 68
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -5811,7 +5804,7 @@
 ( 408 -664 -1104 ) ( 408 -664 -1103 ) ( 408 -663 -1104 ) met01 0 0 0 1 1
 }
 }
-// entity 70
+// entity 69
 {
 "classname" "checkpoint"
 "origin" "224 352 -1064"
@@ -5819,7 +5812,7 @@
 "angle" "0"
 "_tb_layer" "3"
 }
-// entity 71
+// entity 70
 {
 "classname" "checkpoint"
 "origin" "1200 464 -976"
@@ -5827,7 +5820,7 @@
 "angle" "0"
 "_tb_layer" "3"
 }
-// entity 72
+// entity 71
 {
 "classname" "checkpoint"
 "origin" "1568 -528 -976"
@@ -5835,7 +5828,7 @@
 "angle" "0"
 "_tb_layer" "3"
 }
-// entity 73
+// entity 72
 {
 "classname" "checkpoint"
 "origin" "880 -104 -976"
@@ -5843,7 +5836,7 @@
 "angle" "0"
 "_tb_layer" "3"
 }
-// entity 74
+// entity 73
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -5857,7 +5850,7 @@
 ( 720 -744 -752 ) ( 720 -736 -752 ) ( 720 -736 -968 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 75
+// entity 74
 {
 "classname" "func_forcefield"
 "on_trigger" "3"
@@ -5876,7 +5869,7 @@
 ( 504 -1168 -744 ) ( 504 -1264 -888 ) ( 504 -1264 -744 ) {ff 0 0 0 1 1
 }
 }
-// entity 76
+// entity 75
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -5890,7 +5883,7 @@
 ( 584 -1160 -752 ) ( 584 -1168 -880 ) ( 584 -1168 -752 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 77
+// entity 76
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -5904,7 +5897,7 @@
 ( 296 -1088 -776 ) ( 296 -1152 -888 ) ( 296 -1152 -776 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 78
+// entity 77
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -5918,7 +5911,7 @@
 ( 288 -1088 -768 ) ( 288 -1152 -776 ) ( 288 -1152 -768 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 79
+// entity 78
 {
 "classname" "info_switch"
 "origin" "312 -888 -1000"
@@ -5929,49 +5922,49 @@
 "trigger_type" "0"
 "_tb_layer" "3"
 }
-// entity 80
+// entity 79
 {
 "classname" "nav_node"
 "origin" "916 -1148 -980"
 "_tb_layer" "3"
 }
-// entity 81
+// entity 80
 {
 "classname" "nav_node"
 "origin" "884 -1020 -980"
 "_tb_layer" "3"
 }
-// entity 82
+// entity 81
 {
 "classname" "nav_node"
 "origin" "916 -876 -980"
 "_tb_layer" "3"
 }
-// entity 83
+// entity 82
 {
 "classname" "nav_node"
 "origin" "1124 -1164 -980"
 "_tb_layer" "3"
 }
-// entity 84
+// entity 83
 {
 "classname" "nav_node"
 "origin" "1044 -1068 -980"
 "_tb_layer" "3"
 }
-// entity 85
+// entity 84
 {
 "classname" "nav_node"
 "origin" "1092 -996 -980"
 "_tb_layer" "3"
 }
-// entity 86
+// entity 85
 {
 "classname" "nav_node"
 "origin" "1220 -1164 -980"
 "_tb_layer" "3"
 }
-// entity 87
+// entity 86
 {
 "classname" "info_maintainer_spawn"
 "origin" "1096 -1168 -976"
@@ -5979,43 +5972,43 @@
 "angle" "270"
 "_tb_layer" "3"
 }
-// entity 88
+// entity 87
 {
 "classname" "nav_node"
 "origin" "1252 -1012 -964"
 "_tb_layer" "3"
 }
-// entity 89
+// entity 88
 {
 "classname" "nav_node"
 "origin" "1252 -948 -940"
 "_tb_layer" "3"
 }
-// entity 90
+// entity 89
 {
 "classname" "nav_node"
 "origin" "1244 -884 -908"
 "_tb_layer" "3"
 }
-// entity 91
+// entity 90
 {
 "classname" "nav_node"
 "origin" "1244 -812 -900"
 "_tb_layer" "3"
 }
-// entity 92
+// entity 91
 {
 "classname" "nav_node"
 "origin" "1004 -796 -900"
 "_tb_layer" "3"
 }
-// entity 93
+// entity 92
 {
 "classname" "nav_node"
 "origin" "812 -788 -860"
 "_tb_layer" "3"
 }
-// entity 94
+// entity 93
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -6029,7 +6022,7 @@
 ( 1800 -896 -648 ) ( 1800 -888 -648 ) ( 1800 -888 -1000 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 95
+// entity 94
 {
 "classname" "func_detail_fence"
 "_tb_layer" "3"
@@ -6043,7 +6036,7 @@
 ( 1800 -776 -648 ) ( 1800 -768 -648 ) ( 1800 -768 -1000 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 96
+// entity 95
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -6068,7 +6061,7 @@
 ( 1800 -776 -992 ) ( 1800 -888 -1000 ) ( 1800 -888 -992 ) purpmtl 0 0 0 1 1
 }
 }
-// entity 97
+// entity 96
 {
 "classname" "info_switch"
 "origin" "1760 -832 -984"
@@ -6079,13 +6072,13 @@
 "trigger_type" "0"
 "_tb_layer" "3"
 }
-// entity 98
+// entity 97
 {
 "classname" "nav_node"
 "origin" "892 -796 -868"
 "_tb_layer" "3"
 }
-// entity 99
+// entity 98
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6109,7 +6102,7 @@
 ( 2136 -776 -680 ) ( 2128 -784 -680 ) ( 2128 -784 -552 ) met01 0 0 0 1 1
 }
 }
-// entity 100
+// entity 99
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6133,7 +6126,7 @@
 ( 2136 -776 -696 ) ( 2128 -784 -696 ) ( 2128 -784 -568 ) met01 0 0 0 1 1
 }
 }
-// entity 101
+// entity 100
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6157,7 +6150,7 @@
 ( 2080 -768 -688 ) ( 2080 -769 -688 ) ( 2080 -768 -687 ) met01 0 0 0 1 1
 }
 }
-// entity 102
+// entity 101
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6181,7 +6174,7 @@
 ( 2136 -768 -688 ) ( 2136 -769 -688 ) ( 2136 -768 -687 ) met01 0 0 0 1 1
 }
 }
-// entity 103
+// entity 102
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6205,7 +6198,7 @@
 ( 2080 -768 -704 ) ( 2080 -769 -704 ) ( 2080 -768 -703 ) met01 0 0 0 1 1
 }
 }
-// entity 104
+// entity 103
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6229,7 +6222,7 @@
 ( 2136 -768 -704 ) ( 2136 -769 -704 ) ( 2136 -768 -703 ) met01 0 0 0 1 1
 }
 }
-// entity 105
+// entity 104
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6253,7 +6246,7 @@
 ( 2080 -768 -656 ) ( 2080 -769 -656 ) ( 2080 -768 -655 ) met01 0 0 0 1 1
 }
 }
-// entity 106
+// entity 105
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6277,7 +6270,7 @@
 ( 2136 -776 -648 ) ( 2128 -784 -648 ) ( 2128 -784 -520 ) met01 0 0 0 1 1
 }
 }
-// entity 107
+// entity 106
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6301,7 +6294,7 @@
 ( 2136 -776 -664 ) ( 2128 -784 -664 ) ( 2128 -784 -536 ) met01 0 0 0 1 1
 }
 }
-// entity 108
+// entity 107
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6325,7 +6318,7 @@
 ( 2080 -768 -672 ) ( 2080 -769 -672 ) ( 2080 -768 -671 ) met01 0 0 0 1 1
 }
 }
-// entity 109
+// entity 108
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6349,7 +6342,7 @@
 ( 2136 -768 -656 ) ( 2136 -769 -656 ) ( 2136 -768 -655 ) met01 0 0 0 1 1
 }
 }
-// entity 110
+// entity 109
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6373,7 +6366,7 @@
 ( 2136 -768 -672 ) ( 2136 -769 -672 ) ( 2136 -768 -671 ) met01 0 0 0 1 1
 }
 }
-// entity 111
+// entity 110
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6397,7 +6390,7 @@
 ( 2080 -768 -624 ) ( 2080 -769 -624 ) ( 2080 -768 -623 ) met01 0 0 0 1 1
 }
 }
-// entity 112
+// entity 111
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6421,7 +6414,7 @@
 ( 2136 -776 -616 ) ( 2128 -784 -616 ) ( 2128 -784 -488 ) met01 0 0 0 1 1
 }
 }
-// entity 113
+// entity 112
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6445,7 +6438,7 @@
 ( 2136 -776 -632 ) ( 2128 -784 -632 ) ( 2128 -784 -504 ) met01 0 0 0 1 1
 }
 }
-// entity 114
+// entity 113
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6469,7 +6462,7 @@
 ( 2080 -768 -640 ) ( 2080 -769 -640 ) ( 2080 -768 -639 ) met01 0 0 0 1 1
 }
 }
-// entity 115
+// entity 114
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6493,7 +6486,7 @@
 ( 2136 -768 -624 ) ( 2136 -769 -624 ) ( 2136 -768 -623 ) met01 0 0 0 1 1
 }
 }
-// entity 116
+// entity 115
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6517,7 +6510,7 @@
 ( 2136 -768 -640 ) ( 2136 -769 -640 ) ( 2136 -768 -639 ) met01 0 0 0 1 1
 }
 }
-// entity 117
+// entity 116
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6541,7 +6534,7 @@
 ( 2080 -768 -592 ) ( 2080 -769 -592 ) ( 2080 -768 -591 ) met01 0 0 0 1 1
 }
 }
-// entity 118
+// entity 117
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6565,7 +6558,7 @@
 ( 2136 -776 -584 ) ( 2128 -784 -584 ) ( 2128 -784 -456 ) met01 0 0 0 1 1
 }
 }
-// entity 119
+// entity 118
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6589,7 +6582,7 @@
 ( 2136 -776 -600 ) ( 2128 -784 -600 ) ( 2128 -784 -472 ) met01 0 0 0 1 1
 }
 }
-// entity 120
+// entity 119
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6613,7 +6606,7 @@
 ( 2080 -768 -608 ) ( 2080 -769 -608 ) ( 2080 -768 -607 ) met01 0 0 0 1 1
 }
 }
-// entity 121
+// entity 120
 {
 "classname" "func_ladder"
 "on_trigger" "0"
@@ -6637,7 +6630,7 @@
 ( 2136 -768 -592 ) ( 2136 -769 -592 ) ( 2136 -768 -591 ) met01 0 0 0 1 1
 }
 }
-// entity 122
+// entity 121
 {
 "classname" "func_ladder"
 "on_trigger" "0"

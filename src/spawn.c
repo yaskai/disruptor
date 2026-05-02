@@ -1,7 +1,7 @@
-#include <raylib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "raylib.h"
 #include "map.h"
 #include "ent.h"
 #include "kbsp.h"
@@ -11,6 +11,25 @@
 void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph, Bsp_Data *bsp) {
 	if(streq(spawn_point->classname, "worldspawn")) {
 		return;
+	}
+
+	if(streq(spawn_point->classname, "text_object")) {
+		TextObject text_obj = (TextObject) {0};
+		text_obj.position = spawn_point->position;
+		// Copy the 64 'extra' bytes from spawn point to text object string
+		memcpy(text_obj.text, spawn_point->extra, 64);
+		
+		if(!handler->text_obj_cap) {
+			handler->text_obj_cap = 8;
+			handler->text_objs = malloc(sizeof(TextObject) * handler->text_obj_cap);
+
+		} else if (handler->text_obj_count + 1 >= handler->text_obj_cap) {
+			handler->text_obj_cap = (handler->text_obj_cap << 1);
+			handler->text_objs = realloc(handler->text_objs, sizeof(TextObject) * handler->text_obj_cap);
+		}
+
+		printf("%s\n", text_obj.text);
+		handler->text_objs[handler->text_obj_count++] = text_obj;
 	}
 
 	if(streq(spawn_point->classname, "level_end")) {
@@ -585,6 +604,10 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 				int f = 0;
 				sscanf(prop->val, "%d", &f);
 				spawn.flags = (u8)f;
+			}
+
+			if(streq(prop->key, "text")) {
+				memcpy(spawn.extra, prop->val, strlen(prop->val));
 			}
 		}
 

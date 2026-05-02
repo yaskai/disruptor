@@ -35,4 +35,6 @@ void DisplayBackgroundRec(Hud *hud, Rectangle rec);
 Vector2 HudTextCenter(Hud *hud, Rectangle rec, const char *text);
 Vector2 HudTextCenterEx(Hud *hud, Rectangle rec, const char *text, float font_size, float font_spacing);
 
+void DisplayTextObject(Hud *hud, i16 id);
+
 #endif

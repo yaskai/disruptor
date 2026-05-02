@@ -7,7 +7,7 @@ Input file: /home/kai/projects/disruptor/resources/maps/10_a/10_a.map
 Output file: /home/kai/projects/disruptor/resources/maps/10_a/10_a.bsp
 
 INFO: using built-in palette.
-      123 entities
+      122 entities
        14 unique textures
        80 texinfos
     1,032 unique planes
@@ -116,8 +116,8 @@ count   lump name    byte size
      14 textures         707748
         lightdata             0
         visdata               0
-        entdata           18185
+        entdata           18096
 
-0.569s seconds elapsed
+0.760s seconds elapsed
 
 

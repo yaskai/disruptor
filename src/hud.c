@@ -23,6 +23,8 @@ void HudUpdate(Hud *hud, float dt) {
 
 	DisplayAmmoCounter(hud);
 	DisplayHealthCounter(hud);
+
+	DisplayTextObject(hud, 0);
 }
 
 void DisplayAmmoCounter(Hud *hud) {
@@ -91,7 +93,6 @@ void DisplayLoadIndicator(Hud *hud) {
 	};
 	DisplayBackgroundRec(hud, rec);
 
-	//Vector2 text_pos = HudTextCenter(hud, rec, text);
 	Vector2 text_pos = HudTextCenterEx(hud, rec, text, hud->font_size * 0.5f, hud->font_spacing); 
 
 	DrawTextEx(
@@ -121,5 +122,30 @@ Vector2 HudTextCenterEx(Hud *hud, Rectangle rec, const char *text, float font_si
 	Vector2 text_bounds = MeasureTextEx(hud->font, text, font_size, font_spacing);
 
 	return (Vector2) { rec_mid.x - text_bounds.x * 0.5f, rec_mid.y - text_bounds.y * 0.5f };
+}
+
+void DisplayTextObject(Hud *hud, i16 id) {
+	TextObject *text_obj = &hud->handler->text_objs[id];
+	const char *text = TextFormat("%s", text_obj->text);
+
+	Rectangle rec = (Rectangle) {
+		.x = 32,
+		.y = hud->conf->window_height - 220,
+		.width = 300,
+		.height = 90
+
+	};
+	DisplayBackgroundRec(hud, rec);
+
+	Vector2 text_pos = HudTextCenterEx(hud, rec, text, hud->font_size * 0.5f, hud->font_spacing); 
+
+	DrawTextEx(
+		hud->font,
+		text,
+		text_pos,
+		hud->font_size * 0.5f,
+		hud->font_spacing, 
+		ColorAlpha(TEXT_GREEN, 0.75f)
+	);
 }
 
