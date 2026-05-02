@@ -11,7 +11,7 @@ void HudInit(Hud *hud, Config *conf, EntityHandler *handler, PlayerGun *player_g
 	hud->font = LoadFontEx("resources/fonts/shuretech.ttf", 64, NULL, 0);
 	SetTextureFilter(hud->font.texture, TEXTURE_FILTER_TRILINEAR);
 
-	hud->font_size = 80.0f;
+	hud->font_size = 60.0f;
 	hud->font_spacing = 1.0f;
 }
 
@@ -83,15 +83,16 @@ void DisplayLoadIndicator(Hud *hud) {
 	const char *text = TextFormat("loading...");
 
 	Rectangle rec = (Rectangle) {
-		.x = hud->conf->window_width * 0.5f - (100 * 0.25f),
-		.y = hud->conf->window_height * 0.5f - (70 * 0.25f),
-		.width = 100,
+		.x = hud->conf->window_width * 0.5f - 125,
+		.y = hud->conf->window_height * 0.5f,
+		.width = 250,
 		.height = 70
 
 	};
 	DisplayBackgroundRec(hud, rec);
 
-	Vector2 text_pos = HudTextCenter(hud, rec, text);
+	//Vector2 text_pos = HudTextCenter(hud, rec, text);
+	Vector2 text_pos = HudTextCenterEx(hud, rec, text, hud->font_size * 0.5f, hud->font_spacing); 
 
 	DrawTextEx(
 		hud->font,
