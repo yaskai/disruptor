@@ -9,6 +9,7 @@
 #include "audioplayer.h"
 #include "rw_save.h"
 #include "lit.h"
+#include "hud.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -32,6 +33,8 @@ typedef struct {
 	RenderTexture2D render_target_debug;
 
 	InputHandler input_handler;
+
+	Hud hud;
 
 	Camera3D camera;
 	Camera3D camera_debug;

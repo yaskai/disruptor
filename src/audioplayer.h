@@ -64,4 +64,7 @@ void AP_BlendDsp(AudioPlayer *ap, float dt, float speed, u8 preset_id);
 
 void AP_SetGlobalVolume(AudioPlayer *ap, int volume);
 
+void AP_Pause(AudioPlayer *ap);
+void AP_Resume(AudioPlayer *ap);
+
 #endif

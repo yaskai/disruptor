@@ -48,6 +48,8 @@ float sway_t = 0;
 
 float init_t = 1.0f;
 
+#define TEXT_COLOR (Color) { 98, 234, 201, 255 }
+
 typedef struct {
 	EntityHandler *handler;	
 	MapSection *sect;
@@ -558,75 +560,6 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		DrawModel(models[player_gun->current_gun], draw_pos, scale, weap_tint);
 		EndMode3D();
 	}
-
-	/*
-	DrawText(TextFormat("_H_%d", gun_refs.player->comp_health.amount), 64, 980, 80, ColorAlpha(SKYBLUE, 0.95f));	
-	DrawText(
-		TextFormat("%d | %d", curr_gun->in_clip, curr_gun->ammo),
-		1640,
-		980,
-		80,
-		ColorAlpha(SKYBLUE, 0.95f)
-	);
-	*/
-
-	DrawTextEx(
-		hud_font,
-		TextFormat("_H_%d", gun_refs.player->comp_health.amount),
-		(Vector2) { 64, gun_refs.conf->window_height - 120 },
-		80, 
-		1, 
-		ColorAlpha(SKYBLUE, 0.75f)
-	);
-
-	DrawTextEx(
-		hud_font,
-		TextFormat("%d | %d", curr_gun->in_clip, curr_gun->ammo),
-		(Vector2) { 1640, gun_refs.conf->window_height - 120 },
-		80,
-		1, 
-		ColorAlpha(SKYBLUE, 0.75f)
-	);
-
-	/*
-	DrawTextEx(
-		hud_font,
-		TextFormat("%d", bug_ent->comp_ai.state),
-		(Vector2) { 0, 64 },
-		32,
-		1, 
-		ColorAlpha(GREEN, 0.95f)
-	);
-
-	DrawTextEx(
-		hud_font,
-		TextFormat("%f %f %f", bug_ent->comp_transform.position.x, bug_ent->comp_transform.position.y, bug_ent->comp_transform.position.z),
-		(Vector2) { 0, 96 },
-		32,
-		1, 
-		ColorAlpha(GREEN, 0.95f)
-	);
-
-	int bug_active = gun_refs.handler->ents[gun_refs.handler->bug_id].flags & ENT_ACTIVE;
-	DrawTextEx(
-		hud_font,
-		TextFormat("%d", bug_active),
-		(Vector2) { 0, 128 },
-		32,
-		1, 
-		ColorAlpha(GREEN, 0.95f)
-	);
-
-
-	DrawTextEx(
-		hud_font,
-		TextFormat("%d", bug_ent->comp_ai.state),
-		(Vector2) { 0, 64 },
-		32,
-		1, 
-		ColorAlpha(GREEN, 0.95f)
-	);
-	*/
 
 	short crosshair_type = CROSSHAIR_DEFAULT;
 	switch(player_gun->current_gun) {

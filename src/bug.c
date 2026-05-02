@@ -556,7 +556,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
 
 		// Apply gravity
-		if(!ct->on_ground) { 
+		if(!ct->on_ground && !(ent->flags & BUG_ON_SWITCH)) { 
 			float grav = (bug_bounce > 0) ? BUG_GRAV * 1.1f : BUG_GRAV;
 			ct->velocity.z -= grav * dt;
 		}
@@ -690,7 +690,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 		if(ct->on_ground) {
 			ai->state = BUG_LANDED;
-			//ct->velocity = Vector3Zero();
+			ct->velocity = Vector3Zero();
 			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
 				ai->state = BUG_LAUNCHED;
 				ct->on_ground = false;

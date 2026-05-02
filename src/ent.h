@@ -274,6 +274,7 @@ typedef struct {
 #define AT_LEVEL_END 		0x01
 #define AT_LEVEL_BACK		0x02
 #define AUTOSAVE_REQUEST	0x04
+#define MAP_LOADING			0x08
 typedef struct {
 	Model base_ent_models[16];
 	Model weap_models[16];
@@ -499,12 +500,14 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp);
 void SetEntityTriggers(EntityHandler *handler);
 
 // ----------------------------------------------------------------------------------------------------------------------------
+
 void SwitchSetup(EntityHandler *handler);
 void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt);
 void SwitchDraw(Entity *ent, EntityHandler *handker, float dt);
 void DoTrigger(EntityHandler *handler, Entity *switch_ent);
 
 // ----------------------------------------------------------------------------------------------------------------------------
+
 void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min_light);
 void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light);
 
@@ -515,6 +518,8 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 #define PLAYER_ON_PLATFORM	0x40
 #define BUG_ON_PLATFORM		0x80
 void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
+
+// ----------------------------------------------------------------------------------------------------------------------------
 
 bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect, u8 flags);
 

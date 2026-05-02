@@ -35,9 +35,6 @@
 	[
 		"SKY"
 	],
-	[
-		"SKY"
-	],
 	[],
 	[
 		"SKY"
@@ -46,12 +43,7 @@
 	[
 		"SKY"
 	],
-	[],
 	[],
-	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
@@ -60,12 +52,7 @@
 	],
 	[],
 	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
+	[],
 	[
 		"SKY"
 	],
@@ -75,7 +62,6 @@
 	[
 		"SKY"
 	],
-	[],
 	[
 		"SKY"
 	],
@@ -83,14 +69,10 @@
 	[],
 	[],
 	[],
-	[],
 	[
 		"SKY"
 	],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
@@ -102,9 +84,7 @@
 	[
 		"SKY"
 	],
-	[
-		"SKY"
-	],
+	[],
 	[],
 	[
 		"SKY"
@@ -112,6 +92,14 @@
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[],
 	[],
@@ -121,12 +109,30 @@
 	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
+	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
+	[],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -151,8 +157,15 @@
 	[],
 	[],
 	[],
+	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[
 		"SKY"
 	],
@@ -165,6 +178,7 @@
 	[
 		"SKY"
 	],
+	[],
 	[
 		"SKY"
 	],
@@ -173,14 +187,34 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[
 		"SKY"
 	],
+	[],
 	[],
 	[],
+	[],
+	[
+		"SKY"
+	],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -201,9 +235,7 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
+	[],
 	[],
 	[],
 	[],
@@ -215,10 +247,15 @@
 	[],
 	[],
 	[],
+	[],
 	[
 		"SKY"
 	],
+	[],
 	[],
+	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
@@ -235,11 +272,11 @@
 		"SKY"
 	],
 	[],
-	[
-		"SKY"
-	],
+	[],
+	[],
 	[],
 	[],
+	[],
 	[
 		"SKY"
 	],
@@ -247,9 +284,6 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
@@ -259,10 +293,20 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
+	[],
 	[],
 	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -278,7 +322,9 @@
 		"SKY"
 	],
 	[],
-	[],
+	[
+		"SKY"
+	],
 	[
 		"SKY"
 	],
@@ -288,14 +334,8 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
@@ -315,6 +355,10 @@
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[],
 	[],
@@ -332,8 +376,21 @@
 	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -344,18 +401,45 @@
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
+	],
+	[],
+	[
+		"SKY"
+	],
+	[],
+	[],
+	[],
+	[
+		"SKY"
 	],
+	[],
 	[],
 	[],
+	[],
+	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
+	[],
+	[
+		"SKY"
+	],
 	[
 		"SKY"
 	],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
+	[],
+	[],
 	[],
 	[],
 	[],
@@ -455,6 +539,10 @@
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
@@ -469,47 +557,31 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
 	[],
-	[
-		"SKY"
-	],
 	[],
-	[
-		"SKY"
-	],
 	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
-	[
-		"SKY"
-	],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -517,6 +589,7 @@
 		"DETAIL"
 	],
 	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -527,37 +600,21 @@
 	[],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
+	[],
 	[
 		"SKY"
 	],
-	[],
-	[],
-	[],
-	[],
 	[
 		"SKY"
 	],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
 	[
 		"SKY"
 	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
 	[
 		"SKY"
 	],
@@ -565,18 +622,17 @@
 	[
 		"SKY"
 	],
+	[],
 	[
-		"SKY"
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
 	[],
 	[
 		"SKY"
 	],
-	[],
-	[],
-	[],
-	[],
-	[],
 	[],
 	[],
 	[],
@@ -591,6 +647,12 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -600,6 +662,9 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -607,30 +672,6 @@
 	[],
 	[],
 	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
 	[
 		"SKY"
 	],
@@ -640,7 +681,6 @@
 	[
 		"SKY"
 	],
-	[],
 	[
 		"SKY"
 	],
@@ -648,21 +688,18 @@
 		"SKY"
 	],
 	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[
 		"SKY"
 	],
+	[],
 	[],
+	[],
 	[
 		"SKY"
 	],
+	[],
 	[],
 	[],
 	[],
@@ -682,14 +719,24 @@
 	],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -697,14 +744,12 @@
 		"DETAIL"
 	],
 	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
-	[],
 	[],
 	[
 		"WINDOW",
@@ -713,21 +758,25 @@
 		"DETAIL"
 	],
 	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
 	[],
 	[],
+	[],
+	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
 	[],
 	[],
 	[
@@ -736,8 +785,6 @@
 		"TRANSLUCENT",
 		"DETAIL"
 	],
-	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -752,9 +799,29 @@
 	[],
 	[],
 	[],
-	[],
+	[
+		"SKY"
+	],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -772,6 +839,9 @@
 	[
 		"SKY"
 	],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -781,26 +851,14 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
 	[],
 	[
@@ -811,59 +869,49 @@
 	],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
-	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
 	[],
 	[],
@@ -873,16 +921,17 @@
 		"TRANSLUCENT",
 		"DETAIL"
 	],
-	[],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
+	[],
+	[],
+	[],
 	[],
 	[],
+	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -890,6 +939,9 @@
 		"DETAIL"
 	],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[
 		"WINDOW",
@@ -897,14 +949,15 @@
 		"TRANSLUCENT",
 		"DETAIL"
 	],
-	[],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[],
 	[
@@ -914,6 +967,9 @@
 		"DETAIL"
 	],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[
 		"WINDOW",
@@ -925,7 +981,6 @@
 	[
 		"SKY"
 	],
-	[],
 	[],
 	[],
 	[
@@ -937,13 +992,7 @@
 	[
 		"SKY"
 	],
-	[
-		"SKY"
-	],
 	[],
-	[
-		"SKY"
-	],
 	[
 		"SKY"
 	],
@@ -951,9 +1000,7 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
+	[],
 	[],
 	[],
 	[],
@@ -962,27 +1009,16 @@
 		"SKY"
 	],
 	[],
+	[],
 	[
 		"SKY"
 	],
-	[],
 	[],
-	[],
-	[],
-	[],
 	[
 		"SKY"
 	],
-	[],
-	[],
-	[],
-	[],
-	[],
 	[],
 	[],
-	[],
-	[],
-	[],
 	[
 		"SKY"
 	],
@@ -995,14 +1031,21 @@
 	[
 		"SKY"
 	],
-	[],
 	[
 		"SKY"
 	],
+	[
+		"SKY"
+	],
+	[],
 	[
 		"SKY"
 	],
 	[],
+	[],
+	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
@@ -1016,6 +1059,9 @@
 		"SKY"
 	],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[
 		"SKY"
@@ -1026,18 +1072,31 @@
 	[
 		"SKY"
 	],
+	[],
 	[],
 	[],
+	[],
 	[
-		"SKY"
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
+	[],
 	[
-		"SKY"
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
 	[],
 	[],
+	[],
 	[
-		"SKY"
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
 	[],
 	[
@@ -1046,7 +1105,12 @@
 	[
 		"SKY"
 	],
-	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[
 		"SKY"
 	],
@@ -1074,6 +1138,9 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -1085,9 +1152,6 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
@@ -1097,74 +1161,28 @@
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
 	[],
 	[],
 	[],
 	[
 		"SKY"
-	],
-	[],
-	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
-	],
-	[],
-	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
 	],
-	[],
-	[],
-	[],
-	[],
 	[],
 	[],
 	[
@@ -1173,73 +1191,22 @@
 		"TRANSLUCENT",
 		"DETAIL"
 	],
-	[],
-	[
-		"SKY"
-	],
-	[],
 	[],
 	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
 	],
-	[],
 	[],
 	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
-	[],
 	[],
 	[],
 	[
@@ -1247,93 +1214,9 @@
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
-	],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
 	],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
 	[],
 	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -1347,157 +1230,58 @@
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
 	],
 	[],
-	[
-		"SKY"
-	],
 	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
-	],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
 	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[
-		"SKY"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
 	[],
 	[],
-	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
-	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
+	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
 	[],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
 	[
@@ -1506,6 +1290,7 @@
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
 	[],
 	[
 		"WINDOW",
@@ -1514,12 +1299,14 @@
 		"DETAIL"
 	],
 	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
 	[],
 	[
 		"WINDOW",
@@ -1529,8 +1316,20 @@
 	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
 	[
@@ -1541,13 +1340,14 @@
 	],
 	[],
 	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -1556,16 +1356,38 @@
 	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[],
 	[
-		"SKY"
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
 	[],
+	[],
 	[
 		"SKY"
 	],
@@ -1578,23 +1400,20 @@
 	[
 		"SKY"
 	],
+	[],
 	[
 		"SKY"
 	],
-	[],
 	[
 		"SKY"
 	],
-	[],
-	[],
-	[],
 	[],
 	[],
 	[],
 	[],
-	[],
-	[],
-	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -1602,18 +1421,18 @@
 	[
 		"SKY"
 	],
+	[],
 	[
 		"SKY"
 	],
-	[],
 	[],
 	[],
 	[],
 	[],
 	[],
-	[],
-	[],
-	[],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[],
@@ -1625,19 +1444,37 @@
 	[],
 	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
-	[],
-	[],
-	[],
-	[],
-	[],
-	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
+	[
+		"SKY"
+	],
 	[],
 	[],
 	[
@@ -1649,12 +1486,16 @@
 	[
 		"SKY"
 	],
+	[],
+	[],
 	[
 		"SKY"
 	],
 	[
 		"SKY"
 	],
+	[],
+	[],
 	[
 		"SKY"
 	],
@@ -1662,28 +1503,74 @@
 	[
 		"SKY"
 	],
-	[],
 	[
 		"SKY"
 	],
+	[],
 	[
 		"SKY"
 	],
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
+	[],
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[],
 	[
-		"WINDOW",
-		"MIRROR_INSIDE_SET",
-		"TRANSLUCENT",
-		"DETAIL"
+		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
 	[
 		"SKY"
@@ -1692,8 +1579,18 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
+	[],
 	[],
 	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
+	],
 	[],
 	[
 		"WINDOW",
@@ -1701,11 +1598,14 @@
 		"TRANSLUCENT",
 		"DETAIL"
 	],
+	[],
+	[],
 	[],
 	[
 		"SKY"
 	],
 	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -1714,7 +1614,10 @@
 	],
 	[],
 	[
-		"SKY"
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
 	[],
 	[],
@@ -1722,7 +1625,6 @@
 	[],
 	[],
 	[],
-	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -1733,7 +1635,24 @@
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[
 		"WINDOW",
 		"MIRROR_INSIDE_SET",
@@ -1741,21 +1660,33 @@
 		"DETAIL"
 	],
 	[],
-	[
-		"SKY"
-	],
+	[],
 	[],
 	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
 	[
 		"SKY"
 	],
+	[],
+	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
+	[],
+	[],
 	[],
+	[],
+	[],
 	[
 		"SKY"
 	],
@@ -1768,6 +1699,9 @@
 	[],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[
 		"SKY"
 	],
@@ -1776,12 +1710,14 @@
 	[
 		"SKY"
 	],
-	[],
 	[
 		"SKY"
 	],
 	[],
 	[],
+	[
+		"SKY"
+	],
 	[
 		"SKY"
 	],
@@ -2112,7 +2048,19 @@
 	],
 	[
 		"SKY"
+	],
+	[],
+	[],
+	[],
+	[
+		"WINDOW",
+		"MIRROR_INSIDE_SET",
+		"TRANSLUCENT",
+		"DETAIL"
 	],
+	[],
+	[],
+	[],
 	[],
 	[],
 	[],

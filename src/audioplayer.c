@@ -288,3 +288,10 @@ void AP_SetGlobalVolume(AudioPlayer *ap, int volume) {
 	ma_engine_set_volume(&_ma_engine, val);
 }
 
+void AP_Pause(AudioPlayer *ap) {
+}
+
+void AP_Resume(AudioPlayer *ap) {
+}
+
+

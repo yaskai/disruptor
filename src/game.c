@@ -115,6 +115,9 @@ void GameRenderSetup(Game *game) {
 	//lh_SetShaderLocs(&game->test_section.bsp_data);
 	lh_SetBspPtr(&game->test_section.bsp_data);
 	lh_SetShaderLocs(&game->test_section.bsp_data);
+
+	game->hud = (Hud) {0};
+	HudInit(&game->hud, game->conf, &game->ent_handler, &game->player_gun);
 }
 
 void GameAudioSetup(Game *game) {
@@ -380,6 +383,7 @@ void RenderGunLayer(Game *game) {
 	ClearBackground(BLANK);
 
 	PlayerGunDraw(&game->player_gun);
+	HudUpdate(&game->hud, GetFrameTime());
 
 	EndTextureMode();
 }
@@ -458,7 +462,7 @@ void RenderDebugLayer(Game *game) {
 void GameDraw(Game *game, float dt) {
 	if((game->ent_handler.flags & AT_LEVEL_END) ^ (game->ent_handler.flags & AT_LEVEL_BACK)) {
 		BeginTextureMode(game->render_target2D);
-		DrawText("...", 32, 0, 80, BLACK);
+		HudUpdate(&game->hud, dt);
 		EndTextureMode();
 
 	} else {

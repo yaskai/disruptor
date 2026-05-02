@@ -12,7 +12,7 @@
 #define AI_TICKRATE 6.0f
 float ai_tick = 0.0f;
 
-#define MEELEE_RANGE (48.0f*48.0f)
+#define MEELEE_RANGE (38.0f*38.0f)
 
 const bool AI_LOG = false;
 
