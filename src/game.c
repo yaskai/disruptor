@@ -677,6 +677,9 @@ void GameTitleScreen(Game *game) {
 	game->input_handler.mouse_delta = (Vector2) { 0, 0 };
 	ui_TitleUpdate(&game->ui);
 
+	if(game->ui.flags & UI_EXIT_GAME_REQ)
+		game->flags |= FLAG_EXIT_REQUEST;
+
 	if(game->ui.flags & UI_START_GAME_REQ) {
 		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
 		StartNewGame(game);

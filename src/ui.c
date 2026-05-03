@@ -133,13 +133,40 @@ void ui_TitleUpdate(UiHandler *ui) {
 	if(!(ui->flags & UI_ACTIVE))
 		ui_Toggle();
 
+	float width = 250;
+	float height = 90;
+	float left = 128;
+	float top = 1080 * 0.25f;
+
 	ui->cursor_pos = GetMousePosition();
 
 	if(IsKeyPressed(KEY_SPACE))	
 		ui->flags |= UI_START_GAME_REQ;
 
-	if(ui_Button(ui, (Rectangle) { 128, 1080 * 0.25f, 300, 100 }, "New Game", false))
+	if(ui_Button(ui, (Rectangle) { left, top + ((height+20) * 0), width, height }, "New Game", false))
 		ui->flags |= UI_START_GAME_REQ;
+
+	if(ui_Button(ui, (Rectangle) { left, top + ((height+20) * 1), width, height }, "Load Game", false)) {
+		ui->active_tab = (ui->active_tab == TAB_LOAD) ? TAB_NONE : TAB_LOAD;
+		save_scroll = 0.0f;
+		save_focus = -1;
+		rw_data_init = false;
+		save_img_init = false;
+	}
+
+	if(ui_Button(ui, (Rectangle) { left, top + ((height+20) * 2), width, height }, "Exit", false)) {
+		ui->flags |= UI_EXIT_GAME_REQ;
+	}
+
+	switch(ui->active_tab) {
+		case TAB_LOAD:
+			ui_LoadTab(ui);
+			break;
+
+		case TAB_OPTIONS:
+			ui_OptionsTab(ui);
+			break;
+	}
 }
 
 void ui_PauseUpdate(UiHandler *ui) {
@@ -219,6 +246,7 @@ void ui_LoadTab(UiHandler *ui) {
 	if(save_focus > -1) {
 		if(!save_img_init) {
 			save_img = LoadTexture(TextFormat("data/%s/cap.png", meta[save_focus].name));
+			SetTextureFilter(save_img, TEXTURE_FILTER_TRILINEAR);
 			save_img_init = true;
 		}
 
