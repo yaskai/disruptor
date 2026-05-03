@@ -277,6 +277,11 @@ void GameUpdate(Game *game, float dt) {
 
 	if(game->ui.flags & UI_LOAD_SAVE_REQ) {
 		if(strcmp(game->ui.map_name, game->_gsave_state.map)) {
+			BeginDrawing();
+			ClearBackground(BLACK);
+			DisplayLoadIndicator(&game->hud);
+			EndDrawing();
+
 			char *path_pref = "resources/maps/";
 			char path[255] = {'\0'};
 			memcpy(path, path_pref, strlen(path_pref));

@@ -37,6 +37,11 @@ void HudUpdate(Hud *hud, float dt) {
 		return;
 	}
 
+	if(hud->handler->flags & MAP_LOADING) {
+		DisplayLoadIndicator(hud);
+		return;
+	}
+
 	DisplayAmmoCounter(hud);
 	DisplayHealthCounter(hud);
 
