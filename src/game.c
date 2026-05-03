@@ -321,6 +321,8 @@ void GameUpdate(Game *game, float dt) {
 	}
 
 	if(game->ent_handler.flags & AT_LEVEL_END) {
+		screen_cap = true;
+
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
 
@@ -346,6 +348,8 @@ void GameUpdate(Game *game, float dt) {
 	}
 
 	if(game->ent_handler.flags & AT_LEVEL_BACK) {
+		screen_cap = true;
+
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
 
@@ -396,6 +400,7 @@ void GameUpdate(Game *game, float dt) {
 	if(IsKeyPressed(KEY_ONE)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
+		screen_cap = true;
 	}
 
 	if(IsKeyPressed(KEY_TWO)) {
@@ -405,10 +410,12 @@ void GameUpdate(Game *game, float dt) {
 			PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
 	}
 
-	if(game->ent_handler.flags & AUTOSAVE_REQUEST) {
+	if((game->ent_handler.flags & AUTOSAVE_REQUEST) ^ (game->ui.flags & UI_SAVE_GAME_REQ)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
+
 		game->ent_handler.flags &= ~AUTOSAVE_REQUEST;
+		game->ui.flags &= ~UI_SAVE_GAME_REQ;
 
 		screen_cap = true;
 	}

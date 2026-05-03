@@ -13,6 +13,9 @@ int num_save_entries = 0;
 rw_Meta *meta = NULL;
 
 float save_scroll = 0.0f;
+Texture2D save_img;
+bool save_img_init = false;
+int save_focus = -1;
 
 void ui_Init(UiHandler *ui, Config *conf) {
 	// Bind ui self pointer
@@ -154,10 +157,13 @@ void ui_PauseUpdate(UiHandler *ui) {
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 1), width, height }, "Load Game", false)) {
 		ui->active_tab = (ui->active_tab == 0) ? TAB_LOAD : TAB_NONE;
 		save_scroll = 0.0f;
+		save_focus = -1;
 		rw_data_init = false;
+		save_img_init = false;
 	}
 
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 2), width, height }, "Save Game", false)) {
+		ui->flags |= UI_SAVE_GAME_REQ; 
 	}
 
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 3), width, height }, "Options", false)) {
@@ -182,27 +188,48 @@ void ui_PauseUpdate(UiHandler *ui) {
 void ui_LoadTab(UiHandler *ui) {
 	ui_InitRwData(ui);
 	
-	float width = 300;
-	float height = 100;
+	float width = 320;
+	float height = 64;
 	float left = ui->conf->window_width * 0.5f - width;
 	float top = ui->conf->window_height * 0.15f; 
 
 	float bot = ui->conf->window_height - (ui->conf->window_height * 0.15f);
 
 	save_scroll += GetMouseWheelMove() * 2.0f;
+	save_scroll = Clamp(save_scroll, -num_save_entries * (height*0.5f), 0.0f);
 
 	for(int i = num_save_entries-1; i > 0; i--) {
-		int y = (top + ((height * (num_save_entries - i) ) + 20)) + save_scroll;
+		int y = (top + ((height * (num_save_entries - i) ) + 4)) + save_scroll;
 
-		if(y < top || y > bot)
+		if(y - height < top || y + height > bot)
 			continue;
 
 		const char *text = TextFormat("%s", ctime(&meta[i].time_stamp));
-		//const char *text = TextFormat("%s", meta[i].map);
+
+		DrawLineV((Vector2) { left, y }, (Vector2) { left + width, y }, RAYWHITE);
 		
 		if(ui_ButtonEx(ui, (Rectangle) { left, y, width, height }, text, false, ui->font_size * 0.5f)) {
-			memcpy(ui->save_name, meta[i].name, 64);
-			memcpy(ui->map_name, meta[i].map, 64);
+			if(i != save_focus)
+				save_img_init = false;
+
+			save_focus = i;
+		}
+	}
+
+	if(save_focus > -1) {
+		if(!save_img_init) {
+			save_img = LoadTexture(TextFormat("data/%s/cap.png", meta[save_focus].name));
+			save_img_init = true;
+		}
+
+		Vector2 img_pos = (Vector2) { left + width + (width*0.25f), top + height };
+		DrawTextureEx(save_img, img_pos, 0, 1.25f, WHITE);
+
+		Rectangle btn_rec = (Rectangle) { img_pos.x, img_pos.y + (save_img.height * 1.25f), save_img.width * 1.25f, 64 };
+
+		if(ui_ButtonEx(ui, btn_rec, "load", true, ui->font_size)) {
+			memcpy(ui->save_name, meta[save_focus].name, 64);
+			memcpy(ui->map_name, meta[save_focus].map, 64);
 			ui->flags |= UI_LOAD_SAVE_REQ;
 		}
 	}

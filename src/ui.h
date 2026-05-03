@@ -25,6 +25,7 @@ typedef struct {
 #define UI_EXIT_GAME_REQ	0x02
 #define UI_TOGGLE_REQ		0x04
 #define UI_LOAD_SAVE_REQ	0x08
+#define UI_SAVE_GAME_REQ	0x10
 
 enum UI_TABS : u8 {
 	TAB_NONE	= 0,
