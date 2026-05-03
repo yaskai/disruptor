@@ -1,21 +1,37 @@
+#include <stdlib.h>
 #include "raylib.h"
 #include "hud.h"
 
 #define TEXT_GREEN (Color) { 98, 234, 201, 255 }
+#define TEXT_ORANGE (Color) { 255, 165, 80, 255 }
+
+int *hud_cp = NULL;
 
 void HudInit(Hud *hud, Config *conf, EntityHandler *handler, PlayerGun *player_gun) {
 	hud->conf = conf;
 	hud->handler = handler;
 	hud->player_gun = player_gun;
 
-	hud->font = LoadFontEx("resources/fonts/shuretech.ttf", 64, NULL, 0);
+	hud_cp = malloc((96 + 32) * sizeof(int));
+	for(int i = 0; i < 96; i++)
+		hud_cp[i] = 32 + i;
+
+	hud_cp[96] = 0xf21e;
+	hud_cp[97] = 0xf05f6;
+	hud_cp[98] = 0xf0b7a;
+	hud->font = LoadFontEx("resources/fonts/shuretech.ttf", 64, hud_cp, 99);
 	SetTextureFilter(hud->font.texture, TEXTURE_FILTER_TRILINEAR);
 
-	hud->font_size = 60.0f;
+	hud->font_size = 80.0f;
 	hud->font_spacing = 1.0f;
+
+	hud->text_shader = LoadShader("resources/shaders/ui_text_v.glsl", "resources/shaders/ui_text_f.glsl");
 }
 
 void HudUpdate(Hud *hud, float dt) {
+	float t = GetTime();
+	SetShaderValue(hud->text_shader, GetShaderLocation(hud->text_shader, "time"), &t, SHADER_UNIFORM_FLOAT);
+
 	if((hud->handler->flags & AT_LEVEL_END) || (hud->handler->flags & AT_LEVEL_BACK)) {
 		DisplayLoadIndicator(hud);
 		return;
@@ -43,7 +59,7 @@ void DisplayAmmoCounter(Hud *hud) {
 	Entity *player = &hud->handler->ents[hud->handler->player_id];
 	comp_Weapon *weap = &player->comp_weapon;
 
-	const char *text = TextFormat("%d | %d", weap->in_clip, weap->ammo);
+	const char *text = TextFormat("%.02d / %.03d", weap->in_clip, weap->ammo);
 
 	Rectangle rec = (Rectangle) {
 		.x = 1600,
@@ -56,21 +72,23 @@ void DisplayAmmoCounter(Hud *hud) {
 
 	Vector2 text_pos = HudTextCenter(hud, rec, text);
 
+	BeginShaderMode(hud->text_shader);
 	DrawTextEx(
 		hud->font,
 		text,
 		text_pos,
 		hud->font_size,
 		hud->font_spacing, 
-		ColorAlpha(TEXT_GREEN, 0.75f)
+		ColorAlpha(TEXT_GREEN, 0.85f)
 	);
+	EndShaderMode();
 }
 
 void DisplayHealthCounter(Hud *hud) {
 	Entity *player = &hud->handler->ents[hud->handler->player_id];
 	comp_Health *health = &player->comp_health;
 
-	const char *text = TextFormat("+%d", health->amount);
+	const char *text = TextFormat("󰗶%.03d", health->amount);
 
 	Rectangle rec = (Rectangle) {
 		.x = 32,
@@ -83,6 +101,7 @@ void DisplayHealthCounter(Hud *hud) {
 
 	Vector2 text_pos = HudTextCenter(hud, rec, text);
 
+	BeginShaderMode(hud->text_shader);
 	DrawTextEx(
 		hud->font,
 		text,
@@ -91,6 +110,7 @@ void DisplayHealthCounter(Hud *hud) {
 		hud->font_spacing, 
 		ColorAlpha(TEXT_GREEN, 0.75f)
 	);
+	EndShaderMode();
 };
 
 void DisplayLoadIndicator(Hud *hud) {
@@ -107,14 +127,16 @@ void DisplayLoadIndicator(Hud *hud) {
 
 	Vector2 text_pos = HudTextCenterEx(hud, rec, text, hud->font_size * 0.5f, hud->font_spacing); 
 
+	BeginShaderMode(hud->text_shader);
 	DrawTextEx(
 		hud->font,
 		text,
 		text_pos,
 		hud->font_size * 0.5f,
 		hud->font_spacing, 
-		ColorAlpha(TEXT_GREEN, 0.75f)
+		ColorAlpha(TEXT_GREEN, 0.85f)
 	);
+	EndShaderMode();
 }
 
 void DisplayBackgroundRec(Hud *hud, Rectangle rec) {
@@ -138,7 +160,7 @@ Vector2 HudTextCenterEx(Hud *hud, Rectangle rec, const char *text, float font_si
 
 void DisplayTextObject(Hud *hud, i16 id) {
 	TextObject *text_obj = &hud->handler->text_objs[id];
-	const char *text = TextFormat("%s", text_obj->text);
+	const char *text = TextFormat("󰭺%s", text_obj->text);
 
 	Rectangle rec = (Rectangle) {
 		.x = 32,
@@ -151,13 +173,15 @@ void DisplayTextObject(Hud *hud, i16 id) {
 
 	Vector2 text_pos = HudTextCenterEx(hud, rec, text, hud->font_size * 0.5f, hud->font_spacing); 
 
+	BeginShaderMode(hud->text_shader);
 	DrawTextEx(
 		hud->font,
 		text,
 		text_pos,
 		hud->font_size * 0.5f,
 		hud->font_spacing, 
-		ColorAlpha(TEXT_GREEN, 0.75f)
+		ColorAlpha(TEXT_ORANGE, 0.85f)
 	);
+	EndShaderMode();
 }
 

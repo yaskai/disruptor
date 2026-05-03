@@ -118,6 +118,21 @@ void GameRenderSetup(Game *game) {
 
 	game->hud = (Hud) {0};
 	HudInit(&game->hud, game->conf, &game->ent_handler, &game->player_gun);
+
+	SetShaderValue(
+			game->hud.text_shader,
+			GetShaderLocation(game->hud.text_shader, "texture0"),
+			&game->render_target2D.texture, 
+			SHADER_UNIFORM_SAMPLER2D
+			);
+
+	Vector2 res = (Vector2) { VIRT_W, VIRT_H };
+	SetShaderValue(
+			game->hud.text_shader,
+			GetShaderLocation(game->hud.text_shader, "resolution"),
+			&res,
+			SHADER_UNIFORM_VEC2
+			);
 }
 
 void GameAudioSetup(Game *game) {
@@ -233,11 +248,16 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	}
 
 	game->flags |= FLAG_LOAD_COMPLETE;
+	game->flags |= FLAG_GAME_STARTED;
 }
 
 void GameUpdate(Game *game, float dt) {
 	if(IsKeyPressed(KEY_ESCAPE))
 		game->flags |= FLAG_EXIT_REQUEST;
+
+	if(!(game->flags & FLAG_GAME_STARTED)) {
+		return;
+	}
 
 	if(game->ent_handler.flags & AT_LEVEL_END) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
@@ -460,6 +480,9 @@ void RenderDebugLayer(Game *game) {
 }
 
 void GameDraw(Game *game, float dt) {
+	if(!(game->flags & FLAG_GAME_STARTED))
+		return;
+
 	if((game->ent_handler.flags & AT_LEVEL_END) ^ (game->ent_handler.flags & AT_LEVEL_BACK)) {
 		BeginTextureMode(game->render_target2D);
 		HudUpdate(&game->hud, dt);

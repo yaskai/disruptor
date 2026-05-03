@@ -16,6 +16,7 @@
 
 #define FLAG_EXIT_REQUEST	0x01
 #define FLAG_LOAD_COMPLETE 	0x02
+#define FLAG_GAME_STARTED 	0x04
 
 typedef struct {
 	AudioPlayer audio_player;
