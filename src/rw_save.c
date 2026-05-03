@@ -8,6 +8,8 @@
 #include "rw_save.h"
 #include "config.h"
 
+char recent_write[64];
+
 void rw_WriteSaveNew(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global_data) {
 	int iter = 0;
 	while(DirectoryExists(TextFormat("data/%s_%d", dir_path, iter))) {
@@ -95,6 +97,7 @@ u8 rw_WriteSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global
 
 	memcpy(meta.map, global_data.map, sizeof(meta.map));
 	memcpy(meta.name, dir_path, sizeof(meta.name));
+	memcpy(recent_write, meta.name, sizeof(meta.name));
 
 	char *met_path = "data/svd_meta";	
 	FILE *pF = fopen(met_path, "ab"); 
@@ -248,5 +251,9 @@ u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path) {
 	// End file read
 	fclose(pF);
 	return 1;
+}
+
+char *rw_GetRecentWritePath() {
+	return recent_write;
 }
 

@@ -19,6 +19,9 @@ Vector2 mouse_pause_position;
 void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point);
 void EndScreen(Game *game, float dt);
 
+RenderTexture2D save_rt;
+bool screen_cap = false;
+
 #define VIRT_W (1920)
 #define VIRT_H (1080)
 
@@ -55,7 +58,7 @@ void GameInit(Game *game, Config *conf) {
 
 	game->_gsave_state = (rw_GlobalData) {0};
 
-	SetLogState(false);
+	SetLogState(0);
 
 	game->flags = 0;
 }
@@ -139,9 +142,11 @@ void GameRenderSetup(Game *game) {
 			);
 
 	game->ui = (UiHandler) {0};
-	ui_Init(&game->ui);
+	ui_Init(&game->ui, game->conf);
 
 	blur_shader = LoadShader("resources/shaders/base_v.glsl", "resources/shaders/blur_f.glsl");
+
+	save_rt = LoadRenderTexture(640/2, 360/2);
 }
 
 void GameAudioSetup(Game *game) {
@@ -270,6 +275,32 @@ void GameUpdate(Game *game, float dt) {
 	if(game->ui.flags & UI_EXIT_GAME_REQ)
 		game->flags |= FLAG_EXIT_REQUEST;
 
+	if(game->ui.flags & UI_LOAD_SAVE_REQ) {
+		if(strcmp(game->ui.map_name, game->_gsave_state.map)) {
+			char *path_pref = "resources/maps/";
+			char path[255] = {'\0'};
+			memcpy(path, path_pref, strlen(path_pref));
+			memcpy(path + strlen(path), game->ui.map_name, strlen(game->ui.map_name));
+
+			EntHandlerClose(&game->ent_handler);
+
+			MapSectionClose(&game->test_section);
+			SectFreeBrushData(&game->test_section);
+
+			EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
+
+			GameLoadScene(game, path, game->ent_handler.flags);
+			PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+		}
+		
+		if(rw_ReadSave(&game->ent_handler, game->ui.save_name, &game->_gsave_state)) {
+			memcpy(game->_gsave_state.map, game->ui.map_name, 64);
+			PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
+			game->ui.flags &= ~UI_LOAD_SAVE_REQ;
+			game->ui.flags |= UI_TOGGLE_REQ;
+		}
+	}
+
 	if(IsKeyPressed(KEY_ESCAPE))
 		game->ui.flags |= UI_TOGGLE_REQ;
 
@@ -378,6 +409,8 @@ void GameUpdate(Game *game, float dt) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
 		game->ent_handler.flags &= ~AUTOSAVE_REQUEST;
+
+		screen_cap = true;
 	}
 }
 
@@ -560,6 +593,23 @@ void GameDraw(Game *game, float dt) {
 	rt_src = (Rectangle) { 0, 0, game->render_target2D.texture.width, -game->render_target2D.texture.height };
 	rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
 	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, tint);
+
+	if(screen_cap) {
+		BeginTextureMode(save_rt);
+		Rectangle rt_src = (Rectangle) { 0, 0, game->render_target3D.texture.width, game->render_target3D.texture.height };
+		Rectangle rt_dst = (Rectangle) { 0, 0, save_rt.texture.width, save_rt.texture.height };
+		DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+
+		rt_src = (Rectangle) { 0, 0, game->render_target2D.texture.width, game->render_target2D.texture.height };
+		rt_dst = (Rectangle) { 0, 0, save_rt.texture.width, save_rt.texture.height };
+		DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+		EndTextureMode();
+
+		const char *export_path = TextFormat("data/%s/cap.png", rw_GetRecentWritePath());
+		ExportImage(LoadImageFromTexture(save_rt.texture), export_path);
+
+		screen_cap = false;
+	}
 
 	EndBlendMode();
 

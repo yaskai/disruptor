@@ -8,7 +8,7 @@
 #ifndef RW_SAVE_H_
 #define RW_SAVE_H_
 
-#define AUTOSAVE_TICKRATE (30.0f*dt)
+#define AUTOSAVE_TICKRATE (5.0f)
 #define IS_AUTOSAVE	0x01
 typedef struct {
 	time_t time_stamp;
@@ -37,6 +37,7 @@ typedef struct {
 
 typedef struct {
 	char map[64];
+	char name[64];
 	time_t curr_time;
 
 	rw_PlayerWeaponData player_weap_data;
@@ -58,5 +59,7 @@ u8 rw_WriteEntData(EntityHandler *ent_handler, char *file_path);
 u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path);
 
 void EntHandlerPassRwState(rw_GlobalData *data);
+
+char *rw_GetRecentWritePath();
 
 #endif
