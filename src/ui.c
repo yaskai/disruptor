@@ -155,7 +155,7 @@ void ui_PauseUpdate(UiHandler *ui) {
 		ui->flags |= UI_TOGGLE_REQ;
 
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 1), width, height }, "Load Game", false)) {
-		ui->active_tab = (ui->active_tab == 0) ? TAB_LOAD : TAB_NONE;
+		ui->active_tab = (ui->active_tab == TAB_LOAD) ? TAB_NONE : TAB_LOAD;
 		save_scroll = 0.0f;
 		save_focus = -1;
 		rw_data_init = false;
@@ -167,7 +167,7 @@ void ui_PauseUpdate(UiHandler *ui) {
 	}
 
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 3), width, height }, "Options", false)) {
-		ui->active_tab = (ui->active_tab == 0) ? TAB_OPTIONS : TAB_NONE;
+		ui->active_tab = (ui->active_tab == TAB_OPTIONS) ? TAB_NONE : TAB_OPTIONS;
 	}
 
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 4), width, height }, "Exit", false)) {
@@ -236,7 +236,19 @@ void ui_LoadTab(UiHandler *ui) {
 }
 
 void ui_OptionsTab(UiHandler *ui) {
+	float width = 400;
+	float height = 64;
+	float left = ui->conf->window_width * 0.475f - width;
+	float top = ui->conf->window_height * 0.15f; 
+	float bot = ui->conf->window_height - (ui->conf->window_height * 0.25f);
 
+	Rectangle panel_rec = (Rectangle) { left, top, left + width, bot };
+
+	DrawRectangleLinesEx(panel_rec, 2, RAYWHITE);
+	
+	const char *text = "under construction...";
+	Vector2 text_pos = ui_TextCenter(ui, panel_rec, text);
+	DrawTextEx(ui->font, text, text_pos, ui->font_size, ui->font_spacing, WHITE);
 }
 
 u8 ui_InitRwData(UiHandler *ui) {

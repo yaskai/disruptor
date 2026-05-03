@@ -397,19 +397,6 @@ void GameUpdate(Game *game, float dt) {
 		PlayerGunUpdate(&game->player_gun, dt);
 	}
 
-	if(IsKeyPressed(KEY_ONE)) {
-		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
-		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
-		screen_cap = true;
-	}
-
-	if(IsKeyPressed(KEY_TWO)) {
-		//rw_ReadSave(&game->ent_handler, "test", &game->_gsave_state);
-		//PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
-		if(rw_LoadMostRecent(&game->ent_handler, &game->_gsave_state))
-			PlayerGunOnLoad(&game->_gsave_state, &game->player_gun);
-	}
-
 	if((game->ent_handler.flags & AUTOSAVE_REQUEST) ^ (game->ui.flags & UI_SAVE_GAME_REQ)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
