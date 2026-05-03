@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include <float.h>
 #include "raylib.h"
 #include "raymath.h"
@@ -12,6 +13,8 @@
 #include "map.h"
 #include "rw_save.h"
 
+Game *game_self_ptr;
+
 Shader blur_shader;
 
 Vector2 mouse_pause_position;
@@ -21,6 +24,25 @@ void EndScreen(Game *game, float dt);
 
 RenderTexture2D save_rt;
 bool screen_cap = false;
+
+pthread_t cap_thread;
+bool cap_thread_started = false;
+typedef struct {
+	const char *export_path;
+	Image img;
+
+} CapData;
+
+void *ExportCap(void *arg) {
+	CapData *cap_data = (CapData*)arg;
+	//cap_thread_started = true;
+	//cap_thread_done = (bool*)false;
+	ExportImage(cap_data->img, cap_data->export_path);
+	UnloadImage(cap_data->img);
+	free((void*)cap_data->export_path);
+	free(cap_data);
+	return NULL;
+} 
 
 #define VIRT_W (1920)
 #define VIRT_H (1080)
@@ -61,9 +83,14 @@ void GameInit(Game *game, Config *conf) {
 	SetLogState(0);
 
 	game->flags = 0;
+
+	game_self_ptr = game;
 }
 
 void GameClose(Game *game) {
+	if(cap_thread_started)
+		pthread_join(cap_thread, NULL);
+
 	// Unload render textures
 	if(IsTextureValid(game->render_target3D.texture))
 		UnloadRenderTexture(game->render_target3D);
@@ -146,7 +173,8 @@ void GameRenderSetup(Game *game) {
 
 	blur_shader = LoadShader("resources/shaders/base_v.glsl", "resources/shaders/blur_f.glsl");
 
-	save_rt = LoadRenderTexture(640/2, 360/2);
+	//save_rt = LoadRenderTexture(540/2, 360/2);
+	save_rt = LoadRenderTexture(640, 360);
 }
 
 void GameAudioSetup(Game *game) {
@@ -605,7 +633,22 @@ void GameDraw(Game *game, float dt) {
 		EndTextureMode();
 
 		const char *export_path = TextFormat("data/%s/cap.png", rw_GetRecentWritePath());
-		ExportImage(LoadImageFromTexture(save_rt.texture), export_path);
+		Image img = LoadImageFromTexture(save_rt.texture);
+		
+		CapData *cap_data = malloc(sizeof(CapData)); 
+		char *path_copy = malloc(strlen(export_path)+1);
+		strcpy(path_copy, export_path);
+
+		cap_data->export_path = path_copy;
+		cap_data->img = img;
+
+		if(pthread_create(&cap_thread, NULL, ExportCap, cap_data) == 0) {
+			cap_thread_started = true; 
+		} else {
+			UnloadImage(img);
+			free(path_copy);
+			free(cap_data);
+		}
 
 		screen_cap = false;
 	}

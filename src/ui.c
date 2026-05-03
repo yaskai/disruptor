@@ -21,7 +21,7 @@ void ui_Init(UiHandler *ui, Config *conf) {
 	// Bind ui self pointer
 	ui_self_ptr = ui;
 
-	ui->conf =  conf;
+	ui->conf = conf;
 
 	ui->font_size = 60.0f;
 	ui->font_spacing = 1.0f;
@@ -249,9 +249,15 @@ void ui_LoadTab(UiHandler *ui) {
 		}
 
 		Vector2 img_pos = (Vector2) { left + width + (width*0.25f), top + height };
-		DrawTextureEx(save_img, img_pos, 0, 1.25f, WHITE);
+		DrawTextureEx(save_img, img_pos, 0, 1.0f, WHITE);
 
-		Rectangle btn_rec = (Rectangle) { img_pos.x, img_pos.y + (save_img.height * 1.25f), save_img.width * 1.25f, 64 };
+		Rectangle btn_rec = (Rectangle) { img_pos.x, img_pos.y + (save_img.height * 1.0f), save_img.width * 1.0f, 64 };
+
+		DrawRectangleLinesEx(
+				(Rectangle) { img_pos.x, img_pos.y, save_img.width, save_img.height + height },
+				2,
+				GRAY
+				);
 
 		if(ui_ButtonEx(ui, btn_rec, "load", true, ui->font_size)) {
 			memcpy(ui->save_name, meta[save_focus].name, 64);

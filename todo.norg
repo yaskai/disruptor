@@ -121,8 +121,8 @@ ___
 ** (x) ammo/clip counter
 ** (x) crosshair
 ** (_) -diegetic elements for Bug-
-** (-) proper HUD separation/handling
-** (-) loading indicator
+** (x) proper HUD separation/handling
+** (x) loading indicator
 
 ___
 * (-) *AI*
@@ -163,6 +163,8 @@ ___
 * *Menus*
 
 ** (-) Main Menu
+*** (x) buttons
+*** (-) background image
 
 ** (x) Pause Menu
 

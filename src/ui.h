@@ -74,4 +74,3 @@ void ui_OptionsTab(UiHandler *ui);
 u8 ui_InitRwData(UiHandler *ui);
 
 #endif
-
