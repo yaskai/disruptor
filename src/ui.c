@@ -140,11 +140,9 @@ void ui_TitleUpdate(UiHandler *ui) {
 
 	ui->cursor_pos = GetMousePosition();
 
-	if(IsKeyPressed(KEY_SPACE))	
+	if(ui_Button(ui, (Rectangle) { left, top, width, height }, "New Game", false)) {
 		ui->flags |= UI_START_GAME_REQ;
-
-	if(ui_Button(ui, (Rectangle) { left, top + ((height+20) * 0), width, height }, "New Game", false))
-		ui->flags |= UI_START_GAME_REQ;
+	}
 
 	if(ui_Button(ui, (Rectangle) { left, top + ((height+20) * 1), width, height }, "Load Game", false)) {
 		ui->active_tab = (ui->active_tab == TAB_LOAD) ? TAB_NONE : TAB_LOAD;
