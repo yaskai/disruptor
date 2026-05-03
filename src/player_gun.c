@@ -58,6 +58,7 @@ typedef struct {
 	Config *conf;
 	Camera3D *world_cam;
 	AudioPlayer *ap;
+	InputHandler *input;
 
 } PlayerGunRefs;
 PlayerGunRefs gun_refs = {0};
@@ -84,8 +85,8 @@ comp_Weapon weapons[] = {
 
 		.clip_size = 6,
 		.in_clip = 6,
-		.ammo = 12,
-		//.ammo = 999,
+		//.ammo = 12,
+		.ammo = 999,
 
 		.reload_time_amnt = 8,
 		.reload_timer = 0,
@@ -180,7 +181,8 @@ void PlayerGunInit(
 	vEffect_Manager *effect_manager,
 	Config *conf,
 	Camera3D *world_cam,
-	AudioPlayer *ap
+	AudioPlayer *ap,
+	InputHandler *input
 	) 
 {
 	gun_refs.world_cam = world_cam;
@@ -232,6 +234,8 @@ void PlayerGunInit(
 	SetTextureFilter(hud_font.texture, TEXTURE_FILTER_POINT);
 
 	//sway_t = GetTime();
+	
+	gun_refs.input = input;
 
 	init_t = 0.0f;
 }
@@ -281,7 +285,8 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 		}
 	}
 
-	Vector2 md = GetMouseDelta();
+	//Vector2 md = GetMouseDelta();
+	Vector2 md = gun_refs.input->mouse_delta;
 	if(fabsf(md.x) >= 1.5f)
 		sway.x += (md.x * dt * 0.025f);
 

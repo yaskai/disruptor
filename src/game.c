@@ -12,6 +12,8 @@
 #include "map.h"
 #include "rw_save.h"
 
+Vector2 mouse_pause_position;
+
 void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point);
 void EndScreen(Game *game, float dt);
 
@@ -133,6 +135,9 @@ void GameRenderSetup(Game *game) {
 			&res,
 			SHADER_UNIFORM_VEC2
 			);
+
+	game->ui = (UiHandler) {0};
+	ui_Init(&game->ui);
 }
 
 void GameAudioSetup(Game *game) {
@@ -199,7 +204,8 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 		&game->effect_manager,
 		game->conf,
 		&game->camera,
-		&game->audio_player
+		&game->audio_player,
+		&game->input_handler
 	);
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -249,11 +255,23 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 
 	game->flags |= FLAG_LOAD_COMPLETE;
 	game->flags |= FLAG_GAME_STARTED;
+
+	GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
 }
 
 void GameUpdate(Game *game, float dt) {
-	if(IsKeyPressed(KEY_ESCAPE))
-		game->flags |= FLAG_EXIT_REQUEST;
+	//if(IsKeyPressed(KEY_ESCAPE))
+		//game->flags |= FLAG_EXIT_REQUEST;
+
+	if(IsKeyPressed(KEY_ESCAPE)) {
+		GetMouseDelta();
+		ui_Toggle();
+
+		if(game->ui.flags & UI_ACTIVE)
+			mouse_pause_position = GetMousePosition();
+		else 
+			SetMousePosition(mouse_pause_position.x, mouse_pause_position.y);
+	}
 
 	if(!(game->flags & FLAG_GAME_STARTED)) {
 		return;
@@ -314,13 +332,20 @@ void GameUpdate(Game *game, float dt) {
 
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
 
-	PollInput(&game->input_handler);
-	PlayerGunUpdate(&game->player_gun, dt);
+	if(game->ui.flags & UI_ACTIVE) {
+		ui_PauseUpdate(&game->ui);
 
-	UpdateEntities(&game->ent_handler, &game->test_section, dt);
-	MapUpdateBvhOffsets(&game->test_section);
-	AP_Update(&game->audio_player, dt);
-	DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
+		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
+
+	} else {
+		PollInput(&game->input_handler);
+
+		UpdateEntities(&game->ent_handler, &game->test_section, dt);
+		MapUpdateBvhOffsets(&game->test_section);
+		AP_Update(&game->audio_player, dt);
+		DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
+		PlayerGunUpdate(&game->player_gun, dt);
+	}
 
 	if(IsKeyPressed(KEY_ONE)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
@@ -480,18 +505,19 @@ void RenderDebugLayer(Game *game) {
 }
 
 void GameDraw(Game *game, float dt) {
-	if(!(game->flags & FLAG_GAME_STARTED))
-		return;
+	if(game->flags & FLAG_GAME_STARTED) {
+		if((game->ent_handler.flags & AT_LEVEL_END) ^ (game->ent_handler.flags & AT_LEVEL_BACK)) {
+			BeginTextureMode(game->render_target2D);
+			HudUpdate(&game->hud, dt);
+			EndTextureMode();
 
-	if((game->ent_handler.flags & AT_LEVEL_END) ^ (game->ent_handler.flags & AT_LEVEL_BACK)) {
-		BeginTextureMode(game->render_target2D);
-		HudUpdate(&game->hud, dt);
-		EndTextureMode();
-
+		} else {
+			RenderMainLayer(game, dt);
+			RenderGunLayer(game);
+			RenderDebugLayer(game);
+		}
 	} else {
-		RenderMainLayer(game, dt);
-		RenderGunLayer(game);
-		RenderDebugLayer(game);
+		GameTitleScreen(game);
 	}
 
 	// 2D Rendering
@@ -527,7 +553,7 @@ void GameDraw(Game *game, float dt) {
 	}
 
 	int fps = GetFPS();
-	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 	//EntDebugText();
 
 	EndDrawing();
@@ -565,5 +591,24 @@ void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point) {
 	
 	if(IsKeyDown(KEY_M))
 		cam->target = target_point;
+}
+
+void StartNewGame(Game *game) {
+	ui_Toggle();
+	GameLoadScene(game, "resources/maps/10_a", 0);
+}
+
+void GameTitleScreen(Game *game) {
+	game->input_handler.skip_frames = 5;
+	ui_TitleUpdate(&game->ui);
+
+	if(game->ui.flags & UI_START_GAME_REQ) {
+		mouse_pause_position = GetMousePosition();
+		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+		StartNewGame(game);
+		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+		game->ui.flags &= ~UI_START_GAME_REQ;		
+		SetMousePosition(mouse_pause_position.x, mouse_pause_position.y);
+	}
 }
 

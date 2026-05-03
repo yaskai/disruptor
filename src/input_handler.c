@@ -30,8 +30,13 @@ void PollInput(InputHandler *handler) {
 	float dt = GetFrameTime();
 
 	// Get mouse delta, scale by sensitivity setting
-	Vector2 d = GetMouseDelta();
-	handler->mouse_delta = Vector2Scale(d, handler->mouse_sensitivity);
+	if(handler->skip_frames <= 0) {
+		Vector2 d = GetMouseDelta();
+		handler->mouse_delta = Vector2Scale(d, handler->mouse_sensitivity);
+	} else {
+		//handler->mouse_delta = Vector2Zero();
+		handler->skip_frames--;
+	}
 
 	for(u8 i = 0; i < INPUT_ACTION_COUNT; i++) {
 		InputAction *action = &handler->actions[i];

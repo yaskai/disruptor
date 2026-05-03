@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include "../include/num_redefs.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -201,6 +202,7 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_max_distance(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 300.0f);
 	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 0.1f);
 	ma_sound_set_rolloff(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], 3.5f);
+	ma_sound_set_position(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")], FLT_MAX, FLT_MAX, FLT_MAX);	
 	ma_sound_start(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")]);
 
 	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "click")], 2.0f);

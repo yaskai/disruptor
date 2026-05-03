@@ -47,6 +47,8 @@ typedef struct {
 
 	float mouse_sensitivity;
 
+	int skip_frames;
+
 	u8 input_method;
 
 } InputHandler;

@@ -26,7 +26,8 @@ void PlayerGunInit(
 	vEffect_Manager *effect_manager,
 	Config *conf,
 	Camera3D *world_cam,
-	AudioPlayer *ap
+	AudioPlayer *ap,
+	InputHandler *input
 );
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt);
@@ -54,5 +55,6 @@ void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun);
 void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun);
 
 void HandlerSetPtrGun(PlayerGun *player_gun);
+void PlayerGunSetMouseDelta(Vector2 md);
 
 #endif

@@ -10,6 +10,7 @@
 #include "rw_save.h"
 #include "lit.h"
 #include "hud.h"
+#include "ui.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -36,6 +37,7 @@ typedef struct {
 	InputHandler input_handler;
 
 	Hud hud;
+	UiHandler ui;
 
 	Camera3D camera;
 	Camera3D camera_debug;
@@ -60,5 +62,8 @@ void GameLoadScene(Game *game, char *path, u8 flags);
 
 void GameUpdate(Game *game, float dt);
 void GameDraw(Game *game, float dt);
+
+void StartNewGame(Game *game);
+void GameTitleScreen(Game *game);
 
 #endif
