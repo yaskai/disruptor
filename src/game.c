@@ -12,6 +12,8 @@
 #include "map.h"
 #include "rw_save.h"
 
+Shader blur_shader;
+
 Vector2 mouse_pause_position;
 
 void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point);
@@ -138,6 +140,8 @@ void GameRenderSetup(Game *game) {
 
 	game->ui = (UiHandler) {0};
 	ui_Init(&game->ui);
+
+	blur_shader = LoadShader("resources/shaders/base_v.glsl", "resources/shaders/blur_f.glsl");
 }
 
 void GameAudioSetup(Game *game) {
@@ -263,7 +267,13 @@ void GameUpdate(Game *game, float dt) {
 	//if(IsKeyPressed(KEY_ESCAPE))
 		//game->flags |= FLAG_EXIT_REQUEST;
 
-	if(IsKeyPressed(KEY_ESCAPE)) {
+	if(game->ui.flags & UI_EXIT_GAME_REQ)
+		game->flags |= FLAG_EXIT_REQUEST;
+
+	if(IsKeyPressed(KEY_ESCAPE))
+		game->ui.flags |= UI_TOGGLE_REQ;
+
+	if(game->ui.flags & UI_TOGGLE_REQ) {
 		GetMouseDelta();
 		ui_Toggle();
 
@@ -271,6 +281,8 @@ void GameUpdate(Game *game, float dt) {
 			mouse_pause_position = GetMousePosition();
 		else 
 			SetMousePosition(mouse_pause_position.x, mouse_pause_position.y);
+
+		game->ui.flags &= ~UI_TOGGLE_REQ;
 	}
 
 	if(!(game->flags & FLAG_GAME_STARTED)) {
@@ -333,8 +345,11 @@ void GameUpdate(Game *game, float dt) {
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
 
 	if(game->ui.flags & UI_ACTIVE) {
+		/*
+		BeginTextureMode(game->render_target2D);
 		ui_PauseUpdate(&game->ui);
-
+		EndTextureMode();
+		*/
 		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
 
 	} else {
@@ -505,6 +520,8 @@ void RenderDebugLayer(Game *game) {
 }
 
 void GameDraw(Game *game, float dt) {
+	bool pause = false;
+
 	if(game->flags & FLAG_GAME_STARTED) {
 		if((game->ent_handler.flags & AT_LEVEL_END) ^ (game->ent_handler.flags & AT_LEVEL_BACK)) {
 			BeginTextureMode(game->render_target2D);
@@ -516,6 +533,10 @@ void GameDraw(Game *game, float dt) {
 			RenderGunLayer(game);
 			RenderDebugLayer(game);
 		}
+
+		if(game->ui.flags & UI_ACTIVE)
+			pause = true;
+
 	} else {
 		GameTitleScreen(game);
 	}
@@ -529,14 +550,22 @@ void GameDraw(Game *game, float dt) {
 	// Main
 	ClearBackground(BLACK);
 	BeginBlendMode(BLEND_ALPHA);
+
+	Color tint = (pause) ? DARKGRAY : WHITE;
+
 	Rectangle rt_src = (Rectangle) { 0, 0, game->render_target3D.texture.width, -game->render_target3D.texture.height };
 	Rectangle rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
-	DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+	DrawTexturePro(game->render_target3D.texture, rt_src, rt_dst, Vector2Zero(), 0, tint);
 
 	rt_src = (Rectangle) { 0, 0, game->render_target2D.texture.width, -game->render_target2D.texture.height };
 	rt_dst = (Rectangle) { 0, 0, game->conf->window_width, game->conf->window_height };
-	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, WHITE);
+	DrawTexturePro(game->render_target2D.texture, rt_src, rt_dst, Vector2Zero(), 0, tint);
+
 	EndBlendMode();
+
+	if(pause) {
+		ui_PauseUpdate(&game->ui);
+	}
 
 	if(IsKeyPressed(KEY_T))
 		debug_draw_flags ^= DEBUG_DRAW_BIG;
@@ -555,6 +584,7 @@ void GameDraw(Game *game, float dt) {
 	int fps = GetFPS();
 	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 	//EntDebugText();
+
 
 	EndDrawing();
 }
@@ -599,16 +629,20 @@ void StartNewGame(Game *game) {
 }
 
 void GameTitleScreen(Game *game) {
-	game->input_handler.skip_frames = 5;
+	//game->input_handler.skip_frames = 5;
+	game->input_handler.mouse_delta = (Vector2) { 0, 0 };
 	ui_TitleUpdate(&game->ui);
 
 	if(game->ui.flags & UI_START_GAME_REQ) {
-		mouse_pause_position = GetMousePosition();
 		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
 		StartNewGame(game);
 		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
 		game->ui.flags &= ~UI_START_GAME_REQ;		
-		SetMousePosition(mouse_pause_position.x, mouse_pause_position.y);
+		SetMousePosition(0, 0);
+		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
+	} else {
+		mouse_pause_position = GetMousePosition();
 	}
 }
 

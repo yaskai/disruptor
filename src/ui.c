@@ -8,7 +8,7 @@ void ui_Init(UiHandler *ui) {
 	// Bind ui self pointer
 	ui_self_ptr = ui;
 
-	ui->font_size = 30.0f;
+	ui->font_size = 60.0f;
 	ui->font_spacing = 1.0f;
 	ui->font = LoadFontEx("resources/fonts/shuretech.ttf", 64, NULL, 0);
 	
@@ -48,7 +48,7 @@ void ui_DisplayCursor(UiHandler *ui) {
 	
 }
 
-u8 ui_Button(UiHandler *ui, Rectangle rec, const char *text) {
+u8 ui_Button(UiHandler *ui, Rectangle rec, const char *text, bool bg_rec) {
 	u8 state = 0;
 	bool hover = CheckCollisionPointRec(ui->cursor_pos, rec);
 
@@ -59,10 +59,14 @@ u8 ui_Button(UiHandler *ui, Rectangle rec, const char *text) {
 			state = WG_PRESSED;
 	}
 
-	DrawRectangleRec(rec, ui->style.background[state]);
-	DrawRectangleLinesEx(rec, 2, ui->style.outline[state]);
+	Vector2 text_pos = (Vector2) { rec.x, rec.y };
+
+	if(bg_rec) {
+		DrawRectangleRec(rec, ui->style.background[state]);
+		DrawRectangleLinesEx(rec, 2, ui->style.outline[state]);
+		text_pos = ui_TextCenter(ui, rec, text);
+	}
 	
-	Vector2 text_pos = ui_TextCenter(ui, rec, text);
 	DrawTextEx(ui->font, text, text_pos, ui->font_size, ui->font_spacing, ui->style.text[state]);
 
 	return (state == WG_PRESSED) ? 1 : 0;
@@ -83,6 +87,8 @@ Vector2 ui_TextCenterEx(UiHandler *ui, Rectangle rec, const char *text, float fo
 }
 
 void ui_TitleUpdate(UiHandler *ui) {
+	ClearBackground(BLACK);
+
 	if(!(ui->flags & UI_ACTIVE))
 		ui_Toggle();
 
@@ -91,11 +97,33 @@ void ui_TitleUpdate(UiHandler *ui) {
 	if(IsKeyPressed(KEY_SPACE))	
 		ui->flags |= UI_START_GAME_REQ;
 
-	if(ui_Button(ui, (Rectangle) { 128, 1080 * 0.25f, 300, 100 }, "New Game"))
+	if(ui_Button(ui, (Rectangle) { 128, 1080 * 0.25f, 300, 100 }, "New Game", false))
 		ui->flags |= UI_START_GAME_REQ;
 }
 
 void ui_PauseUpdate(UiHandler *ui) {
-}
+	ClearBackground(BLANK);
 
+	ui->cursor_pos = GetMousePosition();
+
+	float width = 250;
+	float height = 90;
+	float top = 1080 * 0.33f;
+
+	if(ui_Button(ui, (Rectangle) { 128, top, width, height }, "Resume", false))
+		ui->flags |= UI_TOGGLE_REQ;
+
+	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 1), width, height }, "Load Game", false)) {
+	}
+
+	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 2), width, height }, "Save Game", false)) {
+	}
+
+	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 3), width, height }, "Options", false)) {
+	}
+
+	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 4), width, height }, "Exit", false)) {
+		ui->flags |= UI_EXIT_GAME_REQ;
+	}
+}
 

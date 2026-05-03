@@ -5,7 +5,7 @@
 #define UI_H_
 
 #define UI_WIDGET_STATE_COUNT 3
-enum ui_widget_states : u8 {
+enum UI_WIDGET_STATES : u8 {
 	WG_DEFAULT,
 	WG_HOVERED,
 	WG_PRESSED
@@ -21,6 +21,14 @@ typedef struct {
 #define UI_ACTIVE			0x01
 #define UI_START_GAME_REQ	0x02
 #define UI_EXIT_GAME_REQ	0x02
+#define UI_TOGGLE_REQ		0x04
+
+enum UI_TABS : u8 {
+	TAB_NONE	= 0,
+	TAB_LOAD	= 1,
+	TAB_OPTIONS	= 2,
+};
+
 typedef struct {
 	Font font;
 
@@ -32,10 +40,10 @@ typedef struct {
 	float font_size;
 	float font_spacing;
 
+	u8 active_tab;
 	u8 flags;
 
 } UiHandler;
-
 
 void ui_Init(UiHandler *ui);
 void ui_Update(UiHandler *ui, float dt);
@@ -44,7 +52,7 @@ void ui_Toggle();
 
 void ui_DisplayCursor(UiHandler *ui);
 
-u8 ui_Button(UiHandler *ui, Rectangle rec, const char *text);
+u8 ui_Button(UiHandler *ui, Rectangle rec, const char *text, bool bg_rec);
 
 Vector2 ui_TextCenter(UiHandler *ui, Rectangle rec, const char *text);
 Vector2 ui_TextCenterEx(UiHandler *ui, Rectangle rec, const char *text, float font_size, float font_spacing);
@@ -52,4 +60,8 @@ Vector2 ui_TextCenterEx(UiHandler *ui, Rectangle rec, const char *text, float fo
 void ui_TitleUpdate(UiHandler *ui);
 void ui_PauseUpdate(UiHandler *ui);
 
+void ui_LoadTab(UiHandler *ui);
+void ui_OptionsTab(UiHandler *ui);
+
 #endif
+
