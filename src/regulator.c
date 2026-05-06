@@ -86,7 +86,8 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 	
 	// Add bullet trail effect
 	float dist = Vector3Distance(trace_start, trail_end);
-	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
+	//vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
+	vEffectsAddTracer(handler->effect_manager, trace_start, trail_end);
 
 	weap->cooldown = 0.085f;
 	weap->ammo--;

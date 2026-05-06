@@ -64,6 +64,9 @@ void DisplayAmmoCounter(Hud *hud) {
 	Entity *player = &hud->handler->ents[hud->handler->player_id];
 	comp_Weapon *weap = &player->comp_weapon;
 
+	if(!weap->id)
+		return;
+
 	const char *text = TextFormat("%.02d / %.03d", weap->in_clip, weap->ammo);
 
 	Rectangle rec = (Rectangle) {

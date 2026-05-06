@@ -318,6 +318,11 @@ void CheckForPickups(Entity *player, EntityHandler *handler, i16 cell_id) {
 			case ENT_AMMO_REVOLVER:
 				SendAmmoPickupEvent(ent->type);
 				break;
+
+			case ENT_UNLOCK_BUG:
+			case ENT_UNLOCK_REVOLVER:
+				SendUnlockPickupEvent(ent->type);
+				break;
 		}
 
 		ent->flags &= ~ENT_ACTIVE;
@@ -1248,7 +1253,7 @@ void SpawnPlayer(Entity *ent, Vector3 position, Vector3 fwd) {
 	cam_bob = 0;
 	cam_tilt = 0;
 
-	ent->comp_transform.position.z += 20;
+	//ent->comp_transform.position.z += 20;
 
 	//ptr_cam->position = position;
 	//ptr_cam->target = Vector3Add(position, fwd);

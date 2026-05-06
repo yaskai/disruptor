@@ -13,6 +13,7 @@ typedef struct {
 
 	float radius;
 	float timer;
+	float duration;
 
 	int active;
 

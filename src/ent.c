@@ -414,6 +414,10 @@ void EntHandlerClose(EntityHandler *handler) {
 
 	if(handler->checkpoint_list.cells)
 		free(handler->checkpoint_list.cells);
+
+	handler->checkpoint_list.count = 0;
+	handler->count = 0;
+	handler->text_obj_count = 0;
 }
 
 // **
@@ -494,6 +498,7 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		if(!(ent->flags & ENT_ACTIVE)) {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
 			sect->bvh_hullgroups[ent->bsp_model].flags &= ~HULLGROUP_ACTIVE;
+
 		} else {
 			sect->bsp_data.hull_groups[ent->bsp_model].flags |=  HULLGROUP_ACTIVE;
 			sect->bvh_hullgroups[ent->bsp_model].flags |= HULLGROUP_ACTIVE;
@@ -505,10 +510,11 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 					ff_closest_dist = dist;
 				}
 			}
-		}
 
-		if(ent->type == ENT_DOOR)
-			DoorUpdate(ent, handler, sect, dt);
+			if(ent->type == ENT_DOOR) {
+				DoorUpdate(ent, handler, sect, dt);
+			}
+		}
 	}
 
 	for(u16 i = 0; i < handler->count; i++) {
@@ -735,10 +741,28 @@ void RenderEntities(EntityHandler *handler, float dt) {
 			case ENT_REGULATOR:
 				RegulatorDraw(ent, handler, dt);
 				break;
+
+			case ENT_UNLOCK_BUG:
+				EntDrawLitModel(handler, ent, 3.0f, 100);
+				//DrawModel(handler->ents[handler->bug_id].model, ent->comp_transform.position, 3.0f, WHITE);
+				break;
+
+			case ENT_UNLOCK_REVOLVER:
+				EntDrawLitModel(handler, ent, 3.0f, 100);
+				break;
 		}
 	}
 
 	RenderProjectiles(handler);
+
+	/*
+	Entity *bug = &handler->ents[handler->bug_id];
+	if(bug->comp_ai.state > 0 && bug->comp_ai.state < 4) {
+		rlDisableDepthMask();
+		DrawModelWires(bug->model, bug->comp_transform.position, 3.0f, PINK);
+		rlEnableDepthMask();
+	}
+	*/
 
 	/*
 	for(int i = 0; i < handler->checkpoint_list.count; i++) {
@@ -788,6 +812,18 @@ void RenderBrushEntities(EntityHandler *handler) {
 			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], &light_color, SHADER_UNIFORM_VEC3, 3);
 			*/
 			EntDrawLitModelEx(handler, ent, Vector3Zero(), 1.0f, Vector3Zero(), 0, 0);
+
+			if(ent->bsp_model != 4)
+				continue;
+
+			if(ent->id == 11) {
+				DrawBoundingBox(ent->comp_transform.bounds, RED);
+
+				BoundingBox test_box = ptr_handler_sect->bvh_hullgroups[ent->bsp_model].bvh->nodes[2].bounds;
+				//test_box = BoxTranslate(test_box, Vector3Subtract(BoxCenter(test_box), ptr_handler_sect->bvh_hullgroups[ent->bsp_model].origin));
+				test_box = BoxTranslate(test_box, Vector3Subtract(BoxCenter(test_box), ptr_handler_sect->bvh_hullgroups[ent->bsp_model].bvh[2].origin));
+				DrawBoundingBox(test_box, GREEN);
+			}
 			//EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light)
 			continue;
 		}
@@ -928,7 +964,6 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 			if(handler->ents[hg->ent_id].type == ENT_FORCEFIELD) {
 				continue;
 			}
-
 		}
 
 		BvhTraceData temp_tr = TraceDataEmpty();
@@ -1033,6 +1068,10 @@ Vector3 TraceBullet(EntityHandler *handler, MapSection *sect, Vector3 origin, Ve
 	if(*hit && ent_hit_id > -1 && !dummy) {
 		Entity *hit_ent = &handler->ents[ent_hit_id];
 		OnHitEnt(hit_ent, handler->ents[sender].comp_weapon.damage, dest);
+	}
+
+	if(!ent_first) {
+		vEffectsAddImpactDecal(handler->effect_manager, Vector3Add(tr.point, tr.normal), tr.normal);
 	}
 
 	debug_bullet_dest = dest;

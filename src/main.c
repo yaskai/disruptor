@@ -74,8 +74,6 @@ int main() {
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
 
-	//StartNewGame(&game);
-
 	// Run main game loop
 	bool exit = false;
 	GameTick(&exit, &game);

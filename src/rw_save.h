@@ -19,12 +19,13 @@ typedef struct {
 } rw_Meta;
 
 typedef struct {
-	comp_Weapon weapons[5];
+	comp_Weapon weapons[6];
 	
-	int anim_curr_frame[5];
-	int anim_anim_id[5];
-	float anim_acc[5];
-	u8 anim_loop_count[5];
+	int anim_curr_frame[6];
+	int anim_anim_id[6];
+	float anim_acc[6];
+	u8 anim_loop_count[6];
+	u8 unlocked[6];
 
 	Vector2 sway;
 
@@ -57,6 +58,9 @@ u8 rw_ReadGlobalData(rw_GlobalData *global_data, char *file_path);
 
 u8 rw_WriteEntData(EntityHandler *ent_handler, char *file_path);
 u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path);
+
+u8 rw_WriteEffectData(vEffect_Manager *eff_manager, char *file_path);
+u8 rw_ReadEffectData(vEffect_Manager *eff_manager, char *file_path);
 
 void EntHandlerPassRwState(rw_GlobalData *data);
 

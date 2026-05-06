@@ -22,7 +22,7 @@ void HashResize(HashMap *map) {
 	u32 new_cap = (map->capacity << 1);
 
 	if(new_cap == 0)
-		new_cap = 128;
+		new_cap = 2048;
 
 	HashNode *nodes = calloc(new_cap, sizeof(HashNode));
 

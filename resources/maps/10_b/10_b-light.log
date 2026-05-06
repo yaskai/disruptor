@@ -1,0 +1,72 @@
+---- light / ericw-tools 2.0.0-alpha10 ----
+LoadBSPFile: '10_b.bsp'
+BSP is version Quake BSP bsp29
+INFO: using built-in palette.
+ConvertTextures: WARNING: invalid size data for 
+Loading extended texinfo flags from 10_b.texinfo.json...
+Loading extended content flags from 10_b.content.json...
+WARNING: brush entity with mins [1145 -1287 -375] maxs [1311 -1285 -281] (func_door) has empty key/value "" ""
+31 entities read, 1 are lights.
+.lit colored light output requested on command line.
+BSPX colored light output requested on command line.
+BSPX light directions output requested on command line.
+
+--- Options Summary ---
+    "dist" was set to "1.000000" (from map)
+    "anglescale" was set to "1.000000" (from map)
+    "light" was set to "30.000000" (from map)
+    "dirt" was set to "1" (from map)
+    "minlight_dirt" was set to "1" (from command line)
+    "bounce" was set to "1" (from map)
+    "bouncescale" was set to "8.500000" (from map)
+    "bouncecolorscale" was set to "1.000000" (from map)
+    "sunlight" was set to "200.000000" (from map)
+    "sunlight_color" was set to "255 196 192" (from map)
+    "sunlight2" was set to "100.000000" (from map)
+    "sunlight2_color" was set to "255 196 192" (from map)
+    "sunlight3" was set to "0.000000" (from map)
+    "sunlight3_color" was set to "255 196 192" (from map)
+    "sunlight_dirt" was set to "1.000000" (from map)
+    "sunlight2_dirt" was set to "1.000000" (from command line)
+    "sunlight_mangle" was set to "0.13302225 -0.7544065 -0.6427876" (from map)
+    "sunlight_penumbra" was set to "4.000000" (from map)
+    "surflight_radiosity" was set to "1" (from command line)
+    "soft" was set to "5" (from command line)
+    "extra" was set to "4" (from command line)
+    "world_units_per_luxel" was set to "16.000000" (from command line)
+    "lightgrid" was set to "1" (from command line)
+    "lightgrid_format" was set to "octree" (from command line)
+
+Embree_TraceInit: Embree version: 4.4.0
+Embree_TraceInit: 
+	161 sky faces
+	3543 solid faces
+	226 filtered faces
+	0 shadow-casting skip faces
+SetupLights: 1 initial lights
+SetupLights: 1 after surface lights
+SetupLights: 1 after jittering
+Final count: 1 lights, 129 suns in use.
+       48 dirtmap vectors
+0 surface light points in use.
+map uses color: true
+lightmap size (total): 2715104
+Lighting Completed.
+
+Writing 10_b.lit
+DECOUPLED_LM BSPX lump written
+     32 32 32 lightgrid_dist
+     77 73 46 grid_size
+     24 -1784 -1136 grid_mins
+     2480 528 327.2139 grid_maxs
+     1 num_styles
+octree stored 252376 grid nodes + 6190 occluded = 258566 total, full stored 258566 (octree is 97.606026 percent)
+octree nodes size: 9152 bytes (208 * 44)
+octree leafs 1391 overhead 33384 bytes
+      1247657 bytes LIGHTGRID_OCTREE
+0 switchable light styles (32 max)
+Writing 10_b.bsp as Quake BSP bsp29
+8.653s seconds elapsed
+0 empty lightmaps
+
+

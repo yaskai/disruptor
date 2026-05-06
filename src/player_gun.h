@@ -50,6 +50,7 @@ void PlayerGunUpdateSMG(PlayerGun *player_gun, float dt);
 void PlayerGunReload(PlayerGun *player_gun, float dt);
 
 void SendAmmoPickupEvent(int pickup_type);
+void SendUnlockPickupEvent(int pickup_type);
 
 void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun);
 void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun);

@@ -45,8 +45,17 @@ bool CheckLOS(Entity *ent, i16 targ_id, EntityHandler *handler, MapSection *sect
 }
 
 void AddAlertSphere(Entity *ent, float radius) {
+	/*
+	printf("added alert sphere\n");
+	printf("ent_id: %d\n", ent->id);
+	printf("ent_type: %d\n", ent->type);
+	*/
+
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
+
+	if(!ai->component_valid)
+		return;
 
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED)
 		return;

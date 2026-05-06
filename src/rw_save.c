@@ -9,6 +9,7 @@
 #include "config.h"
 
 char recent_write[64];
+char *rw_GetRecentWritePath() { return recent_write; }
 
 void rw_WriteSaveNew(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global_data) {
 	int iter = 0;
@@ -83,6 +84,12 @@ u8 rw_WriteSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData global
 	ent_path[strlen(ent_path)] = 'e';
 	result += rw_WriteEntData(ent_handler, ent_path);
 
+	++needed;
+	char eff_path[64] = {'\0'};
+	memcpy(eff_path, file_prefix, strlen(file_prefix));
+	eff_path[strlen(eff_path)] = 'v';
+	result += rw_WriteEffectData(ent_handler->effect_manager, eff_path);
+
 	rw_Meta meta = (rw_Meta) {
 		.name = {'\0'},
 		.map = {'\0'},
@@ -126,6 +133,12 @@ u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData *global
 	memcpy(ent_path, file_prefix, strlen(file_prefix));
 	ent_path[strlen(ent_path)] = 'e';
 	result += rw_ReadEntData(ent_handler, ent_path);
+
+	++needed;
+	char eff_path[64] = {'\0'};
+	memcpy(eff_path, file_prefix, strlen(file_prefix));
+	eff_path[strlen(eff_path)] = 'v';
+	result += rw_ReadEffectData(ent_handler->effect_manager, eff_path);
 
 	ent_handler->ai_tick = global_data->ai_tick;
 	
@@ -253,7 +266,34 @@ u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path) {
 	return 1;
 }
 
-char *rw_GetRecentWritePath() {
-	return recent_write;
+u8 rw_WriteEffectData(vEffect_Manager *eff_manager, char *file_path) {
+	Message("rw_WriteEffectData()", ANSI_BLUE);
+	FILE *pF = fopen(file_path, "wb");
+
+	for(u8 i = 0; i < V_EFFECT_MAX_TRAILS; i++)			fwrite(&eff_manager->trails[i], sizeof(vEffect_Trail), 1, pF);
+	for(u8 i = 0; i < V_EFFECT_MAX_IMPACT_DECALS; i++)	fwrite(&eff_manager->impact_decals[i], sizeof(vEffect_ImpactDecal), 1, pF);
+	for(u8 i = 0; i < V_EFFECT_MAX_TRACERS; i++)		fwrite(&eff_manager->tracers[i], sizeof(vEffectTracer), 1, pF);
+	for(u8 i = 0; i < V_EFFECT_MAX_PARTICLES; i++)		fwrite(&eff_manager->particles[i], sizeof(vEffectParticle), 1, pF);
+
+	fclose(pF);
+	return 1;
+}
+
+u8 rw_ReadEffectData(vEffect_Manager *eff_manager, char *file_path) {
+	Message("rw_ReadEffectData()", ANSI_BLUE);
+
+	FILE *pF = fopen(file_path, "rb");
+	if(!pF) {
+		MessageError("ERROR: File does not exist ", file_path);
+		return 0;
+	}
+
+	for(u8 i = 0; i < V_EFFECT_MAX_TRAILS; i++)			fread(&eff_manager->trails[i], sizeof(vEffect_Trail), 1, pF);
+	for(u8 i = 0; i < V_EFFECT_MAX_IMPACT_DECALS; i++)	fread(&eff_manager->impact_decals[i], sizeof(vEffect_ImpactDecal), 1, pF);
+	for(u8 i = 0; i < V_EFFECT_MAX_TRACERS; i++)		fread(&eff_manager->tracers[i], sizeof(vEffectTracer), 1, pF);
+	for(u8 i = 0; i < V_EFFECT_MAX_PARTICLES; i++)		fread(&eff_manager->particles[i], sizeof(vEffectParticle), 1, pF);
+
+	fclose(pF);
+	return 1;
 }
 

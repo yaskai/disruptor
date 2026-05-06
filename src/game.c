@@ -88,8 +88,8 @@ void GameInit(Game *game, Config *conf) {
 }
 
 void GameClose(Game *game) {
-	if(cap_thread_started)
-		pthread_join(cap_thread, NULL);
+	//if(cap_thread_started)
+		//pthread_join(cap_thread, NULL);
 
 	// Unload render textures
 	if(IsTextureValid(game->render_target3D.texture))
@@ -183,6 +183,8 @@ void GameAudioSetup(Game *game) {
 }
 
 void GameLoadScene(Game *game, char *path, u8 flags) {
+	DisableCursor();
+
 	game->flags &= ~FLAG_LOAD_COMPLETE;
 
 	HandlerSetPtrGun(&game->player_gun);
@@ -294,6 +296,20 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	game->flags |= FLAG_GAME_STARTED;
 
 	GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+
+	/*
+	printf("bvh hg count: %d\n", game->test_section.bvh_hullgroup_count);
+	printf("bsp hg count: %d\n", game->test_section.bsp_data.num_models);
+
+	for(int i = 0; i < game->test_section.bsp_data.num_models; i++) {
+		printf("bvh hg[%d] ent_id: %d\n", i, game->test_section.bvh_hullgroups[i].ent_id);
+		printf("bsp hg[%d] ent_id: %d\n", i, game->test_section.bsp_data.hull_groups[i].ent_id);
+	}
+
+	printf("player_id: %d\n", game->ent_handler.player_id);
+	printf("bug_id: %d\n", game->ent_handler.bug_id);
+	printf("sect ptr (src) %p\n", &game->test_section);
+	*/
 }
 
 void GameUpdate(Game *game, float dt) {
@@ -423,8 +439,8 @@ void GameUpdate(Game *game, float dt) {
 	} else {
 		PollInput(&game->input_handler);
 
-		UpdateEntities(&game->ent_handler, &game->test_section, dt);
 		MapUpdateBvhOffsets(&game->test_section);
+		UpdateEntities(&game->ent_handler, &game->test_section, dt);
 		AP_Update(&game->audio_player, dt);
 		DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
 		PlayerGunUpdate(&game->player_gun, dt);
@@ -674,9 +690,8 @@ void GameDraw(Game *game, float dt) {
 	}
 
 	int fps = GetFPS();
-	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 	//EntDebugText();
-
 
 	EndDrawing();
 }
@@ -717,7 +732,11 @@ void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point) {
 
 void StartNewGame(Game *game) {
 	ui_Toggle();
-	GameLoadScene(game, "resources/maps/10_a", 0);
+	//GameLoadScene(game, "resources/maps/10_a", 0);
+	GameLoadScene(game, "resources/maps/10_a_1", 0);
+	//GameLoadScene(game, "resources/maps/10_a_3", 0);
+	//GameLoadScene(game, "resources/maps/10_b", 0);
+	//GameLoadScene(game, "resources/maps/10", 0);
 }
 
 void GameTitleScreen(Game *game) {

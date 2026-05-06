@@ -256,7 +256,7 @@ void ui_LoadTab(UiHandler *ui) {
 		DrawRectangleLinesEx(
 				(Rectangle) { img_pos.x, img_pos.y, save_img.width, save_img.height + height },
 				2,
-				GRAY
+				RAYWHITE
 				);
 
 		if(ui_ButtonEx(ui, btn_rec, "load", true, ui->font_size)) {

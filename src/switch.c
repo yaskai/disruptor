@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "ent.h"
 #include "../include/log_message.h"
+#include <stdio.h>
 
 #define TRIGGERED 0x01
 
@@ -82,7 +83,6 @@ void SwitchSetup(EntityHandler *handler) {
 		}
 
 		if(ent->trigger_condition == TRIGGER_COND_COLL_BUG) {
-			//ent->model = LoadModel("resources/models/weapons/bug_00.glb");
 			ent->model = LoadModel("resources/models/bug_plat_00.glb");
 
 			ent->comp_transform.bounds = (BoundingBox) {
@@ -179,9 +179,7 @@ void SwitchDraw(Entity *ent, EntityHandler *handler, float dt) {
 			ent->model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateZ(ent->comp_transform.yaw));
 			ent->model.transform = MatrixMultiply(ent->model.transform, MatrixTranslate(0, 0, sinf(GetTime() * 2) * 0.25f));
 
-			//if(!(handler->ents[handler->bug_id].flags & BUG_ON_SWITCH)) {
-				DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);
-			//}
+			DrawModel(ent->model, ent->comp_transform.position, 3, WHITE);
 
 			break;
 	}

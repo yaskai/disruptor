@@ -1,0 +1,116 @@
+---- qbsp / ericw-tools 2.0.0-alpha10-72-g67e9fd3b-dirty ----
+
+--- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
+
+Input file: /home/kai/projects/disruptor/resources/maps/10_b/10_b.map
+Output file: /home/kai/projects/disruptor/resources/maps/10_b/10_b.bsp
+
+INFO: using built-in palette.
+     39 entities
+     22 unique textures
+     85 texinfos
+    648 unique planes
+
+INFO: world extents calculated to 5608 units
+      311 brushes
+    1,877 sides
+       69 side bevels
+
+            0 texture frames added
+WARNING: unable to find texture tile321
+Processing hull 0...
+      6 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+      7 SKY brushes
+    295 SOLID brushes
+    308 brushes total
+    1,859 visible sides
+INFO: calculating BSP for 308 brushes with 1859 sides
+      308 brushes
+    1,859 visible faces
+    1,100 nodes
+    1,100 expensive split nodes
+    1,101 leaves
+        6 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      385 SOLID leafs
+       11 SOLID | SKY leafs
+      156 SKY leafs
+      543 EMPTY leafs
+    1,101 leafs total
+    20 max tree height
+    13 avg tree height
+    5,544 tree portals
+    101 outside leaves
+    0 detail filled leafs
+      308 brushes
+    1,183 visible faces
+      676 non-visible faces
+    1,264 nodes
+      292 non-visible nodes
+    1,264 expensive split nodes
+    1,265 leaves
+        6 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      408 SOLID leafs
+       15 SOLID | SKY leafs
+      183 SKY leafs
+      653 EMPTY leafs
+    1,265 leafs total
+    19 max tree height
+    12 avg tree height
+    6,055 tree portals
+    216 outside leaves
+    0 detail filled leafs
+    6,055 tree portals
+    4,655 sides visible
+    2,459 makefaces
+      453 merged
+    1,350 subdivided
+    46 nodes pruned
+      626 player-occupiable leaves
+      622 clusters of leaves
+    1,664 vis portals
+fixing up cluster at 2060 -124 -672
+fixing up cluster at 2028 -208 -248
+fixing up cluster at 1840 -1188 -468
+fixing up cluster at 1500 -612 -336
+fixing up cluster at 1228 -776 -180
+fixing up cluster at 1404 -956 -284
+        6 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+       15 SOLID | SKY leafs
+      437 EMPTY leafs
+      183 SKY leafs
+      578 SOLID leafs
+    1,219 leafs total
+    19 max tree height
+    12 avg tree height
+    2,999 edges added by tjunctions
+    3,180 faces optimized through MWT
+    9,355 triangles computed from MWT
+      703 faces created via optimization of MWT triangles
+    9,131 edges
+    3,930 faces
+Processing hull 1...
+Processing hull 2...
+Writing 10_b.bsp as Quake BSP bsp29
+Wrote 10_b.bsp
+
+count   lump name    byte size 
+      4 models              256
+    422 planes             8440
+   4409 vertexes          52908
+   1236 nodes             29664
+     63 texinfos           2520
+   3956 faces             79120
+   1701 clipnodes         13608
+    648 leafs             18144
+   9046 marksurfaces      18092
+   9184 edges             36736
+  17366 surfedges         69464
+     22 textures        1154104
+        lightdata             0
+        visdata               0
+        entdata            3885
+
+0.338s seconds elapsed
+
+

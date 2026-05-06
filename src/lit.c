@@ -219,6 +219,10 @@ void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt) {
 		if(pl->active) {
 			pl->timer -= dt;
 
+			float frac = (pl->timer / pl->duration);
+			pl->radius *= frac;
+			//pl->radius *= ((pl->duration / pl->timer) * 0.01f);
+
 			if(pl->timer <= 0.0f)
 				pl->active = 0;
 		}
@@ -254,6 +258,7 @@ void AddPointlight(PointLight point_light) {
 
 	point_light.active = 1;
 	lh_ptr_self->point_lights[id] = point_light;
+	lh_ptr_self->point_lights[id].duration = point_light.timer;
 
 	PointLight *pl = &lh_ptr_self->point_lights[id];
 }

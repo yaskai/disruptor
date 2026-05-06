@@ -293,7 +293,8 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 				if(!model_incremented) {
 					if( strncmp(curr_entspawn->classname, "func_forcefield", strlen("func_forcefield")) == 0 ||
 						strncmp(curr_entspawn->classname, "func_door", strlen("func_door")) == 0 ||
-						strncmp(curr_entspawn->classname, "func_lift", strlen("func_lift")) == 0 ) {
+						strncmp(curr_entspawn->classname, "func_lift", strlen("func_lift")) == 0 || 
+						strncmp(curr_entspawn->classname, "func_glass", strlen("func_glass")) == 0) {
 
 						curr_model_id++;
 						model_incremented = true;
@@ -706,6 +707,10 @@ Model BrushToModel(Brush *brush, Bsp_Data *bsp, u8 *out_flags) {
 
 	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = tex;
 	if(use_shader) model.materials[0].shader = shader;
+	else {
+		//model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
+		//model.materials[0].shader = bsp->lm_shader;
+	}
 
 	return model;
 }
@@ -849,8 +854,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 		}
 
 		Vector3 volume = Vector3Zero();
-		if(i == 1)
-			volume = BODY_VOLUME_MEDIUM;
+		//if(i == 1)
+			//volume = BODY_VOLUME_MEDIUM;
 
 		BvhConstruct(&sect, &sect.bvh[i], volume, &sect._tris[i]);
 		if(GetLogState()) printf("bvh[%d] node count: %d\n", i, sect.bvh->count);
@@ -958,6 +963,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 
 			if(model_pool.count == 0) {
 				free(model_pool.brushes);
+				printf("model empty\n");
 				continue;
 			}
 
@@ -1398,7 +1404,8 @@ void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
 			continue;
 		}
 
-		DrawModel(rbrush->model, Vector3Zero(), 1, WHITE);
+		Color light = lit_SampleLightGrid(&sect->bsp_data, BoxCenter(GetModelBoundingBox(rbrush->model)));
+		DrawModel(rbrush->model, Vector3Zero(), 1, light);
 	}
 	rlEnableDepthMask();
 }
@@ -1528,9 +1535,8 @@ void DebugDrawDSP(MapSection *sect, AudioPlayer *ap, Vector3 pos) {
 }
 
 void MapUpdateBvhOffsets(MapSection *sect) {
-	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
+	for(int i = 0; i < sect->bsp_data.num_models; i++) {
 		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
-
 		for(int j = 0; j < 3; j++) { 
 			hg->bvh[j].origin = hg->origin;
 		}
@@ -1543,6 +1549,9 @@ void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max
 
 	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
 		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
+		if(!(hg->flags & HULLGROUP_ACTIVE))
+			continue;
+
 		BvhTree *bvh = &hg->bvh[hull_id];
 
 		ray.position = ray_pos;

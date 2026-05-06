@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "raylib.h"
+#include "raymath.h"
 #include "map.h"
 #include "ent.h"
 #include "kbsp.h"
@@ -18,16 +19,6 @@ void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_
 		text_obj.position = spawn_point->position;
 		// Copy the 64 'extra' bytes from spawn point to text object string
 		memcpy(text_obj.text, spawn_point->extra, 64);
-		
-		if(!handler->text_obj_cap) {
-			handler->text_obj_cap = 8;
-			handler->text_objs = malloc(sizeof(TextObject) * handler->text_obj_cap);
-
-		} else if (handler->text_obj_count + 1 >= handler->text_obj_cap) {
-			handler->text_obj_cap = (handler->text_obj_cap << 1);
-			handler->text_objs = realloc(handler->text_objs, sizeof(TextObject) * handler->text_obj_cap);
-		}
-
 		handler->text_objs[handler->text_obj_count++] = text_obj;
 	}
 
@@ -255,7 +246,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_ai.component_valid = true;
 			ent.comp_ai.sight_cone = 0.05f;
-			ent.comp_ai.hear_distance = 128.0f;
+			ent.comp_ai.hear_distance = 64.0f;
 
 			//AiSetSchedule(&ent.comp_ai, SCHED_PATROL);
 			AiSetSchedule(&ent.comp_ai, SCHED_MAINTAINER_IDLE);
@@ -319,8 +310,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 			ent.comp_weapon = (comp_Weapon) {
 				.ammo_type = WEAPON_TRAVEL_HITSCAN,
-				.clip_size = 12,
-				.in_clip = 12,
+				.clip_size = 24,
+				.in_clip = 24,
 				.cooldown = 0.5f,
 				.reload_timer = 0.0f,
 				.reload_time_amnt = 2.0f,
@@ -402,6 +393,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			//ent.model.materials[0].shader = bsp->lm_shader;
 			//ent.model.materials[0].maps[1].texture = bsp->lightmaps->lightmap
 
+			ent.comp_ai.component_valid = false;
 			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
 			ent.comp_ai.speed = 700;
 
@@ -440,6 +432,45 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.comp_health.hit_box = ent.comp_transform.bounds;
 
 		} break;
+
+		case ENT_UNLOCK_BUG: {
+			ent.flags |= ENT_IS_PICKUP;
+
+			ent.model = LoadModel("resources/models/weapons/bug_01.glb");
+			for(int i = 0; i < ent.model.materialCount; i++) 
+				ent.model.materials[i].shader = handler->ent_shader;
+
+			ent.model.transform = MatrixRotateX(90*DEG2RAD);
+
+			ent.comp_transform.bounds = (BoundingBox) {
+				.min = (Vector3) { -4, -4, -4 },
+				.max = (Vector3) {  4,  4,  4 }
+			};
+
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+			ent.comp_ai.component_valid = false;
+
+		} break;
+
+		case ENT_UNLOCK_REVOLVER: {
+			ent.flags |= ENT_IS_PICKUP;
+
+			//ent.model = LoadModel("resources/models/weapons/bug_01.glb");
+			ent.model = LoadModel("resources/models/weapons/rev_00_e.glb");
+			for(int i = 0; i < ent.model.materialCount; i++) 
+				ent.model.materials[i].shader = handler->ent_shader;
+
+			ent.model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateY(90*DEG2RAD));
+
+			ent.comp_transform.bounds = (BoundingBox) {
+				.min = (Vector3) { -4, -4, -4 },
+				.max = (Vector3) {  4,  4,  4 }
+			};
+
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+			ent.comp_ai.component_valid = false;
+
+		} break;
 	}
 
 	ent.comp_health.bug_box = (BoundingBox) {
@@ -470,7 +501,7 @@ SpawnList ParseBspEnts(EntityHandler *handler, Bsp_Data *bsp) {
 
 	char *cursor = bsp->ent_str;	
 
-	Bsp_Ent *ent_data = calloc(1024, sizeof(Bsp_Ent));
+	Bsp_Ent *ent_data = calloc(2048, sizeof(Bsp_Ent));
 	int count = 0;
 		
 	while(*cursor) {

@@ -66,6 +66,9 @@ PlayerGunRefs gun_refs = {0};
 comp_Weapon *curr_gun = NULL;
 
 comp_Weapon weapons[] = {
+	// None
+	(comp_Weapon) {0},
+
 	// Disruptor
 	(comp_Weapon) {
 		.id = WEAP_DISRUPTOR,
@@ -84,9 +87,9 @@ comp_Weapon weapons[] = {
 		.damage = 4,
 
 		.clip_size = 6,
-		.in_clip = 6,
-		//.ammo = 12,
-		.ammo = 999,
+		.in_clip = 0,
+		.ammo = 12,
+		//.ammo = 999,
 
 		.reload_time_amnt = 8,
 		.reload_timer = 0,
@@ -127,17 +130,19 @@ comp_Weapon weapons[] = {
 	},
 };
 
-Model models[5];
+Model models[6];
 Matrix gun_matrix;
 
-ModelAnimation anims[5];
-AnimState anim_states[5];
-bool weap_unlocked[5];
+ModelAnimation anims[6];
+AnimState anim_states[6];
+bool weap_unlocked[6];
 
 bool reload_active = false;
 bool reload_sound_set = false;
 
-char *gun_shoot_sounds[5][3] = {
+char *gun_shoot_sounds[6][3] = {
+	// None
+	{ "" },
 	// Disruptor
 	{ "" },					
 	// Revolver
@@ -173,6 +178,8 @@ void DrawSectionTransition();
 
 Color weap_tint = WHITE;
 
+PlayerGun *pg_self_ptr = NULL;
+
 void PlayerGunInit(
 	PlayerGun *player_gun,
 	Entity *player,
@@ -185,6 +192,8 @@ void PlayerGunInit(
 	InputHandler *input
 	) 
 {
+	pg_self_ptr = player_gun;
+
 	gun_refs.world_cam = world_cam;
 	gun_refs.ap = ap;
 
@@ -220,7 +229,11 @@ void PlayerGunInit(
 
 	//player->comp_weapon.id = WEAP_DISRUPTOR;
 	//player_gun->current_gun = WEAP_DISRUPTOR;
-	player_gun->current_gun = WEAP_REVOLVER;
+	//
+	//player_gun->current_gun = WEAP_REVOLVER;
+	//curr_gun = &weapons[player_gun->current_gun];
+	
+	player_gun->current_gun = WEAP_NONE;
 	curr_gun = &weapons[player_gun->current_gun];
 
 	player_gun->model = models[player_gun->current_gun];
@@ -238,9 +251,12 @@ void PlayerGunInit(
 	gun_refs.input = input;
 
 	init_t = 0.0f;
+	
+	weap_unlocked[WEAP_NONE] = 1;
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
+
 	init_t -= dt;
 	if(init_t > 0)
 		return;
@@ -296,7 +312,6 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 	curr_gun->cooldown -= dt;
 
 	int scroll = 0;
-
 	if(recoil <= 1.0f && !reload_active) {
 		if(USE_MWHEEL)
 			scroll = GetMouseWheelMove();
@@ -308,13 +323,24 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 			scroll = +1;
 	}
 
-	int next_gun = player_gun->current_gun + scroll;
-	player_gun->current_gun = (next_gun % 2 == 0) ? WEAP_DISRUPTOR : WEAP_REVOLVER;
-	//gun_refs.player->comp_weapon = weapons[player_gun->current_gun];
+	int unlocked = 0;
+	for(int i = 1; i < 6; i++) {
+		if(weap_unlocked[i])
+			unlocked++;
+	} 
 
-	//gun_refs.player->comp_weapon.id = (gun_refs.player->comp_weapon.id + scroll) % 2;
-	//player_gun->current_gun = gun_refs.player->comp_weapon.id;
-	//gun_refs.player->comp_weapon = weapons[gun_refs.player->comp_weapon.id];
+	if(unlocked <= 1) {
+		scroll = 0;
+	} else {
+		weap_unlocked[0] = 0;
+
+		int next_gun = (player_gun->current_gun + scroll + 6) % 6;
+		while(!weap_unlocked[next_gun]) {
+			next_gun = (next_gun + scroll + 6) % 6;
+		}
+
+		player_gun->current_gun = next_gun;
+	}
 
 	curr_gun = &weapons[player_gun->current_gun];
 	gun_refs.player->comp_weapon = *curr_gun;
@@ -324,19 +350,22 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 
 	switch(player_gun->current_gun) {
 		case WEAP_PISTOL:
-			PlayerGunUpdatePistol(player_gun, dt);
+			if(weap_unlocked[WEAP_PISTOL]) PlayerGunUpdatePistol(player_gun, dt);
 			break;
 
 		case WEAP_SHOTGUN:
-			PlayerGunUpdateShotgun(player_gun, dt);
+			if(weap_unlocked[WEAP_SHOTGUN]) PlayerGunUpdateShotgun(player_gun, dt);
 			break;
 
 		case WEAP_REVOLVER:
-			PlayerGunUpdateRevolver(player_gun, dt);
+			if(weap_unlocked[WEAP_REVOLVER])  PlayerGunUpdateRevolver(player_gun, dt);
 			break;
 
 		case WEAP_DISRUPTOR:
-		 	PlayerGunUpdateDisruptor(player_gun, dt);
+		 	if(weap_unlocked[WEAP_DISRUPTOR]) PlayerGunUpdateDisruptor(player_gun, dt);
+			break;
+
+		case WEAP_SMG:
 			break;
 	}	
 
@@ -527,7 +556,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		weap_tint.a = 255;
 
 		BeginMode3D(player_gun->cam);
-		DrawModel(models[player_gun->current_gun], draw_pos, scale, weap_tint);
+		if(weap_unlocked[player_gun->current_gun]) DrawModel(models[player_gun->current_gun], draw_pos, scale, weap_tint);
 		EndMode3D();
 	}
 
@@ -548,6 +577,7 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 	}; 
 
 	short draw_crosshair = gun_refs.conf->draw_crosshair;
+
 	float crosshair_alpha = 1.0f;
 	Color crosshair_color = WHITE;
 
@@ -683,7 +713,7 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
 	//Vector3 trail_start = trace_start;
 	Vector3 right = Vector3CrossProduct(ct->forward, UP);
-	trail_start = Vector3Add(trail_start, Vector3Scale(right, 3.5f));
+	trail_start = Vector3Add(trail_start, Vector3Scale(right, 1.5f));
 
 	//Vector3 trail_end = Vector3Add(trail_start, Vector3Scale(ct->forward, Vector3Distance(ct->position, point)));
 	Vector3 trail_end = point;
@@ -697,6 +727,8 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	if(dist >= 20)
 		vEffectsAddTrail(gun_refs.effect_manager, trail_start, trail_end);
 	*/
+
+	vEffectsAddTracer(gun_refs.effect_manager, trail_start, trail_end);
 
 	curr_gun->in_clip--;
 	if(curr_gun->in_clip <= 0 && curr_gun->ammo > 0) {
@@ -746,7 +778,19 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 
 	ct->forward = player_ent->comp_transform.forward;
 	
-	ct->position = Vector3Add(ct->position, Vector3Scale(ct->forward, 10));
+	// ----------------------------------------------------------------------------------------
+	BvhTraceData tr = TraceDataEmpty();
+	BvhTracePointEx((Ray) { ct->position, ct->forward }, sect, &sect->bvh[2], 0, &tr, 10);
+
+	BvhTraceData temp_tr = TraceDataEmpty();
+	BvhTraceHullGroups((Ray) { ct->position, ct->forward }, sect, &temp_tr, 10, 0, 2);
+	
+	if(temp_tr.distance < tr.distance)
+		tr = temp_tr;
+
+	if(!tr.hit)
+		ct->position = Vector3Add(ct->position, Vector3Scale(ct->forward, 10));
+	// ----------------------------------------------------------------------------------------
 
 	float updot = Vector3DotProduct(UP, ct->forward);
 
@@ -856,6 +900,23 @@ void SendAmmoPickupEvent(int pickup_type) {
 	}	
 }
 
+void SendUnlockPickupEvent(int pickup_type) {
+	switch(pickup_type) {
+		case ENT_UNLOCK_BUG:
+			weap_unlocked[WEAP_DISRUPTOR] = 1;
+			pg_self_ptr->current_gun = WEAP_DISRUPTOR;
+			gun_refs.handler->ents[gun_refs.handler->bug_id].comp_ai.state = BUG_DEFAULT;
+			break;
+
+		case ENT_UNLOCK_REVOLVER:
+			weap_unlocked[WEAP_REVOLVER] = 1;
+			pg_self_ptr->current_gun = WEAP_REVOLVER;
+			reload_active = true;
+			reload_sound_set = false;
+			break;
+	}
+}
+
 // * NOTE: 
 // To be replaced and moved to ui.c
 void DrawSectionTransition() {
@@ -896,13 +957,14 @@ void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun) {
 	weap_data->sway = sway;
 
 	// Write animation state for each weapon
-	for(short i = 0; i < 5; i++) {
+	for(short i = 0; i < 6; i++) {
 		weap_data->weapons[i] = weapons[i];
 
 		weap_data->anim_curr_frame[i] = anim_states[i].curr_frame;
 		weap_data->anim_anim_id[i] = anim_states[i].anim_id;
 		weap_data->anim_acc[i] = anim_states[i].acc;
 		weap_data->anim_loop_count[i] = anim_states[i].loop_count;
+		weap_data->unlocked[i] = weap_unlocked[i];
 	}
 }
 
@@ -915,13 +977,15 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
 	sway = weap_data->sway;
 
 	// Read animation state for each weapon
-	for(short i = 0; i < 5; i++) {
+	for(short i = 0; i < 6; i++) {
 		weapons[i] = weap_data->weapons[i];
 		
 		anim_states[i].curr_frame = weap_data->anim_curr_frame[i];
 		anim_states[i].anim_id = weap_data->anim_anim_id[i];
 		anim_states[i].acc = weap_data->anim_acc[i];
 		anim_states[i].loop_count = weap_data->anim_loop_count[i];
+
+		weap_unlocked[i] = weap_data->unlocked[i];
 
 		anim_Apply(&anim_states[i], &models[i], &anims[i]);
 

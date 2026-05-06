@@ -8,6 +8,7 @@
 #include "kbsp.h"
 #include "../include/log_message.h"
 #include "audioplayer.h"
+#include "lit.h"
 
 #define BUG_MAX_BOUNCES 			16
 #define BUG_MAX_RECALL_BOUNCES		16
@@ -262,7 +263,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	Ray ray = (Ray) { .position = ct->position, .direction = DOWN };	
 
 	BvhTraceData tr = TraceDataEmpty();	
-	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
+ 	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
 	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 
 	i16 ent_id = -1;
@@ -271,6 +272,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 			continue;
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
+		//BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
 		//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, ct->bounds, &temp_tr, 8 + 1 + EPSILON);
 
@@ -279,7 +281,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 
 			ent_id = sect->bvh_hullgroups[j].ent_id;
 			if(ent_id > 0) {
-				if(handler->ents[ent_id].type == ENT_DOOR) {
+				if(handler->ents[ent_id].type == ENT_DOOR && tr.normal.z >= 1.0f ) {
 					Entity *lift_ent = &handler->ents[ent_id];
 					lift_ent->flags |= BUG_ON_PLATFORM;		
 					bug_on_plat = true;
@@ -287,6 +289,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 			}
 		}
 
+		/*
 		if(temp_tr.hit)
 			continue;
 
@@ -303,6 +306,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 				}
 			}
 		}
+		*/
 	}
 	
 	if(!tr.hit) {
@@ -367,17 +371,18 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 
 		// Update ray
 		Ray ray = (Ray) { .position = dest, .direction = Vector3Normalize(move) };
-
+		
 		// Trace geometry 
 		BvhTraceData tr = TraceDataEmpty();
 		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
 
-		for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
+		for(int j = 1; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 				continue;
-			
+
 			BvhTraceData temp_tr = TraceDataEmpty();
 			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, Vector3Length(move));
+		
 			if(temp_tr.distance < tr.distance) {
 				tr = temp_tr;
 			}
@@ -412,6 +417,9 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		}
 
 		if(other_ent->type == ENT_DOOR)
+			use_ent = false;
+
+		if(other_ent->type == ENT_FORCEFIELD)
 			use_ent = false;
 
 		if(launch_timer >= 0.1f || bug_ent->flags & BUG_RECALL)
@@ -688,7 +696,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			}
 		}
 
-		if(ct->on_ground) {
+		if(ct->on_ground || (ent->flags & BUG_ON_SWITCH)) {
 			ai->state = BUG_LANDED;
 			ct->velocity = Vector3Zero();
 			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
@@ -935,7 +943,7 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 		} break;
 
 		case ENT_MAINTAINER: {
-			ai->disrupt_timer = 500;
+			ai->disrupt_timer = 100;
 
 		} break;
 
@@ -943,6 +951,14 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 
 		} break;
 	}
+	
+	PointLight pl = (PointLight) {
+		.color = PURPLE,
+		.position = ent->comp_transform.position,
+		.radius = 64,
+		.timer = 0.5f
+	};
+	AddPointlight(pl);
 
 	//handler->ents[handler->bug_id].flags |= BUG_DISRUPTED_ENEMY;
 }

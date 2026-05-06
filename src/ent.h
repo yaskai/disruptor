@@ -138,6 +138,7 @@ enum weapon_types : u8 {
 	WEAP_DISRUPTOR,
 	WEAP_TURRET
 	*/
+	WEAP_NONE,
 	WEAP_DISRUPTOR,
 	WEAP_REVOLVER,
 	WEAP_PISTOL,
@@ -195,6 +196,9 @@ enum ENT_TYPES : u8 {
 	ENT_DOOR				=  18,
 	ENT_LADDER				=  19,
 	ENT_GLASS				=  20,
+	ENT_UNLOCK_BUG			=  21,
+	ENT_UNLOCK_REVOLVER		=  22,
+	ENT_UNLOCK_SMG			=  23,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {
@@ -302,7 +306,7 @@ typedef struct {
 	vEffect_Manager *effect_manager;
 	AudioPlayer *ap;
 
-	TextObject *text_objs;
+	TextObject text_objs[16];
 
 	Shader ent_shader;
 	EntShaderLocs ent_shader_locs;
@@ -460,7 +464,8 @@ void DebugDrawEntText(EntityHandler *handler, Camera3D cam);
 enum BUG_STATES : u8 {
 	BUG_DEFAULT     = 0,		// Default state, attached to player
 	BUG_LAUNCHED    = 1,		// In air
-	BUG_LANDED		= 2			// On ground/enemy
+	BUG_LANDED		= 2,		// On ground/enemy
+	BUG_AWAIT		= 4,
 };
 
 // Bug flags
