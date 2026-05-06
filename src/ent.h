@@ -234,6 +234,8 @@ typedef struct {
 	int bsp_model;
 
 	u16 id;
+	u16 flags;
+
 	i16 cell_id;
 
 	u16 trigger_id;
@@ -242,7 +244,6 @@ typedef struct {
 	u8 trigger_state;
 
 	i8 type;
-	u8 flags;
 
 } Entity;
 
@@ -536,10 +537,10 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-#define DOOR_OPENING 		0x10
-#define DOOR_CLOSING 		0x20
-#define PLAYER_ON_PLATFORM	0x40
-#define BUG_ON_PLATFORM		0x80
+#define DOOR_OPENING 		0x010
+#define DOOR_CLOSING 		0x020
+#define PLAYER_ON_PLATFORM	0x040
+#define BUG_ON_PLATFORM		0x100
 void DoorUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 // ----------------------------------------------------------------------------------------------------------------------------

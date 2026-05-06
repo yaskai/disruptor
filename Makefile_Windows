@@ -29,6 +29,7 @@ all: directories $(TARGET)
 # Link, using explicit path to libraylib.a (no -lraylib)
 $(TARGET): $(OBJS) 
 	$(CC) $^ -o $@ $(RAYLIB_LIB) $(LDFLAGS)
+	cp /usr/x86_64-w64-mingw32/bin/libwinpthread-1.dll .
 
 # Compile .c to .o in build/
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | directories

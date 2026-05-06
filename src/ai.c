@@ -12,7 +12,7 @@
 #define AI_TICKRATE 6.0f
 float ai_tick = 0.0f;
 
-#define MEELEE_RANGE (38.0f*38.0f)
+#define MEELEE_RANGE (48.0f*48.0f)
 
 const bool AI_LOG = false;
 
@@ -806,7 +806,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 		// Small affordance to account for spatial partition structure (+32)
 		BvhTraceData tr = TraceDataEmpty();
 		//BvhTracePointEx(ray, sect, bvh, 0, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds));
-		BvhTracePointPro(ray, sect, bvh, 0, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds), COLL_IGNORE_VIS);
+		//BvhTracePointPro(ray, sect, bvh, 0, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds), COLL_IGNORE_VIS);
+		BvhTraceHullGroups(ray, sect, &tr, ent_tr.dist + BoundsToRadius(player_ent->comp_transform.bounds), (COLL_IGNORE_VIS), 0);
 
 		// Player hitbox collision closer than possible surface collision.
 		// No obstruction, player is visible 

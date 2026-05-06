@@ -567,14 +567,15 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		if(!ct->on_ground && !(ent->flags & BUG_ON_SWITCH)) { 
 			float grav = (bug_bounce > 0) ? BUG_GRAV * 1.1f : BUG_GRAV;
 			ct->velocity.z -= grav * dt;
+		} 
+
+		if(!(ent->flags & BUG_ON_SWITCH)) {
+			pmTraceData pm = (pmTraceData) {0};
+			Vector3 prev_pos = ct->position;
+			bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
+			ct->velocity = pm.end_vel;
+			ct->position = pm.end_pos;
 		}
-
-		pmTraceData pm = (pmTraceData) {0};
-
-		Vector3 prev_pos = ct->position;
-		bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
-		ct->velocity = pm.end_vel;
-		ct->position = pm.end_pos;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------
@@ -699,6 +700,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		if(ct->on_ground || (ent->flags & BUG_ON_SWITCH)) {
 			ai->state = BUG_LANDED;
 			ct->velocity = Vector3Zero();
+
 			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
 				ai->state = BUG_LAUNCHED;
 				ct->on_ground = false;
@@ -812,6 +814,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 				bug_target_picked = true;
 
 				ent->flags &= ~BUG_DISRUPTED_ENEMY;
+				ent->flags &= ~BUG_ON_SWITCH;
 
 				ent->comp_ai.targ_data.ent_id = handler->player_id;
 				
@@ -932,7 +935,7 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 		case ENT_TURRET: {
 			ai->disrupt_timer = 100;
 			ai->task_state.timer = 0;
-			ent->comp_weapon.ammo = 60;
+			ent->comp_weapon.ammo = 100;
 			ent->comp_weapon.cooldown = 0;
 			ai->task_state.task_id = TASK_FIRE_WEAPON;
 

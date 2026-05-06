@@ -43,6 +43,26 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 			coll_flags |= COLL_IGNORE_VIS;
 		}
 
+		if(strcmp(mip->name, "{rustmaskwall") == 0) { 
+			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
+
+		if(strcmp(mip->name, "{rustfloor") == 0) { 
+			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
+
+		if(strcmp(mip->name, "{mask_wall") == 0) { 
+			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
+
+		if(strcmp(mip->name, "{mask_floor") == 0) { 
+			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
+
 		if(strcmp(mip->name, "{ff") == 0) {
 			coll_flags |= COLL_IGNORE_BULLET;
 			coll_flags |= COLL_IGNORE_VIS;
@@ -1035,7 +1055,7 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 
 			// Using vector subtraction to get distance,
 			// doing this in case I want to integrate actual level geometry later 
-			Vector3 v = Vector3Subtract(node_A->position, node_B->position);
+			Vector3 v = Vector3Subtract(node_B->position, node_A->position);
 			float length = Vector3LengthSqr(v);	
 
 			// Don't build edges if nodes are too far apart
@@ -1055,6 +1075,13 @@ void BuildNavEdges(NavGraph *navgraph, MapSection *sect) {
 			if(tr.fraction < 1.0f) {
 				continue;
 			}
+
+			BvhTraceData bvh_tr = TraceDataEmpty(); 
+			Ray ray = (Ray) { .position = node_A->position, .direction = Vector3Normalize(v) };
+			BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &bvh_tr, Vector3Distance(node_A->position, node_B->position));
+			
+			if(bvh_tr.hit)
+				continue;
 
 			// Don't build edges if line between nodes are obstructed by level geometry
 
@@ -1545,7 +1572,9 @@ void MapUpdateBvhOffsets(MapSection *sect) {
 
 void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max_dist, u8 ignore_flags, u8 hull_id) {
 	Vector3 ray_pos = ray.position;
+
 	BvhTraceData tr = TraceDataEmpty();
+	BvhTracePointPro(ray, sect, &sect->bvh[hull_id], 0, &tr, max_dist, ignore_flags);
 
 	for(int i = 0; i < sect->bvh_hullgroup_count; i++) {
 		Bvh_HullGroup *hg = &sect->bvh_hullgroups[i];
@@ -1560,7 +1589,7 @@ void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max
 		BvhTraceData temp_tr = TraceDataEmpty();
 		BvhTracePointPro(ray, sect, bvh, 0, &temp_tr, max_dist, ignore_flags);
 
-		if(temp_tr.hit && temp_tr.distance < tr.distance)
+		if(temp_tr.distance < tr.distance)
 			tr = temp_tr;	
 	}
 

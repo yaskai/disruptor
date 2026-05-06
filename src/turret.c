@@ -38,7 +38,7 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 	}
 
 	if(ai->input_mask & AI_INPUT_SELF_GLITCHED) {
-		float angle_max = 70, angle_min = -angle_max;
+		float angle_max = 60, angle_min = -angle_max;
 
 		ai->task_state.timer = 0;		
 		ai->task_state.task_id = TASK_FIRE_WEAPON;
@@ -48,7 +48,8 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 		
 		//ct->targ_look.z = Lerp(ct->targ_look.z, GetRandomValue(-20, 20) * 0.01f, dt);
 		ct->targ_look.z = Lerp(ct->targ_look.z, sinf(ai->disrupt_timer * 0.25f) + 0.1f, dt);
-		ct->targ_look.z = Clamp(ct->targ_look.z, -0.23f, 0.65f);
+		//ct->targ_look.z = Clamp(ct->targ_look.z, -0.23f, 0.65f);
+		ct->targ_look.z = Clamp(ct->targ_look.z, -0.13f, 0.25f);
 
 		if(ent->comp_weapon.ammo > 0) {
 			ct->forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
@@ -170,7 +171,8 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 	
 	// Add bullet trail effect
 	float dist = Vector3Distance(trace_start, trail_end);
-	vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
+	//vEffectsAddTrail(handler->effect_manager, trace_start, trail_end);
+	vEffectsAddTracer(handler->effect_manager, trace_start, trail_end);
 
 	weap->cooldown = 0.055f;
 	weap->ammo--;

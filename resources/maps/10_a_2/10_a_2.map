@@ -2697,7 +2697,7 @@
 // entity 17
 {
 "classname" "nav_node"
-"origin" "692 36 -628"
+"origin" "692 36 -636"
 }
 // entity 18
 {
@@ -2707,7 +2707,7 @@
 // entity 19
 {
 "classname" "nav_node"
-"origin" "900 244 -628"
+"origin" "900 244 -612"
 }
 // entity 20
 {
@@ -2727,81 +2727,36 @@
 // entity 23
 {
 "classname" "nav_node"
-"origin" "692 412 -588"
+"origin" "532 412 -580"
 }
 // entity 24
-{
-"classname" "nav_node"
-"origin" "612 412 -572"
-}
-// entity 25
-{
-"classname" "nav_node"
-"origin" "532 412 -572"
-}
-// entity 26
 {
 "classname" "info_maintainer_spawn"
 "origin" "896 32 -632"
 "enum_id" "2"
 "angle" "0"
 }
-// entity 27
-{
-"classname" "nav_node"
-"origin" "532 292 -572"
-}
-// entity 28
-{
-"classname" "nav_node"
-"origin" "460 292 -572"
-}
-// entity 29
-{
-"classname" "nav_node"
-"origin" "436 212 -572"
-}
-// entity 30
-{
-"classname" "nav_node"
-"origin" "532 156 -572"
-}
-// entity 31
-{
-"classname" "nav_node"
-"origin" "468 140 -572"
-}
-// entity 32
-{
-"classname" "nav_node"
-"origin" "444 116 -572"
-}
-// entity 33
-{
-"classname" "nav_node"
-"origin" "444 44 -572"
-}
-// entity 34
+// entity 25
 {
 "classname" "text_object"
 "origin" "512 272 -576"
 "text" "[LMB] shoot"
 }
-// entity 35
+// entity 26
 {
 "classname" "pickup_ammo_revolver"
 "origin" "172 -92 -644"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 36
+// entity 27
 {
 "classname" "pickup_health"
 "origin" "188 -60 -644"
 "angle" "60"
 "enum_id" "5"
 }
-// entity 37
+// entity 28
 {
 "classname" "light"
 "origin" "640 -40 -536"
@@ -2812,7 +2767,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 38
+// entity 29
 {
 "classname" "light"
 "origin" "760 -40 -536"
@@ -2823,7 +2778,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 39
+// entity 30
 {
 "classname" "light"
 "origin" "880 -40 -536"
@@ -2834,7 +2789,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 40
+// entity 31
 {
 "classname" "light"
 "origin" "376 -40 -536"
@@ -2845,7 +2800,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 41
+// entity 32
 {
 "classname" "light"
 "origin" "264 -40 -536"
@@ -2856,7 +2811,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 42
+// entity 33
 {
 "classname" "light"
 "origin" "168 -40 -536"
@@ -2867,7 +2822,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 43
+// entity 34
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -2880,7 +2835,7 @@
 ( 784 -136 -648 ) ( 784 -136 -640 ) ( 784 -8 -640 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 44
+// entity 35
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -2893,7 +2848,7 @@
 ( 784 -136 -648 ) ( 784 -136 -640 ) ( 784 -8 -640 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 45
+// entity 36
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -2906,7 +2861,7 @@
 ( 224 -488 -560 ) ( 224 -600 -648 ) ( 224 -600 -560 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 46
+// entity 37
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -2919,7 +2874,7 @@
 ( 672 -720 -648 ) ( 672 -608 -648 ) ( 672 -608 -656 ) {rustmaskwall 0 0 0 0.2 0.2
 }
 }
-// entity 47
+// entity 38
 {
 "classname" "info_switch"
 "origin" "664 -704 -720"
@@ -2929,7 +2884,7 @@
 "trigger_group" "1"
 "trigger_type" "0"
 }
-// entity 48
+// entity 39
 {
 "classname" "func_forcefield"
 "on_trigger" "3"
@@ -2947,7 +2902,7 @@
 ( 528 -632 -544 ) ( 528 -728 -640 ) ( 528 -728 -544 ) {ff 0 0 0 1 1
 }
 }
-// entity 49
+// entity 40
 {
 "classname" "light"
 "origin" "744 -704 -688"
@@ -2958,7 +2913,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 50
+// entity 41
 {
 "classname" "light"
 "origin" "512 -720 -552"
@@ -2969,7 +2924,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 51
+// entity 42
 {
 "classname" "light"
 "origin" "512 -720 -552"
@@ -2980,7 +2935,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 52
+// entity 43
 {
 "classname" "light"
 "origin" "512 -720 -552"
@@ -2991,7 +2946,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 53
+// entity 44
 {
 "classname" "light"
 "origin" "512 -720 -592"
@@ -3002,7 +2957,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 54
+// entity 45
 {
 "classname" "light"
 "origin" "512 -720 -632"
@@ -3013,37 +2968,37 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 55
+// entity 46
 {
 "classname" "info_switch"
-"origin" "880 -480 -624"
+"origin" "1152 -496 -672"
 "angle" "0"
 "enum_id" "10"
 "trigger_condition" "2"
 "trigger_group" "4"
 "trigger_type" "0"
 }
-// entity 56
+// entity 47
 {
 "classname" "info_switch"
-"origin" "896 -496 -624"
+"origin" "1136 -496 -672"
 "angle" "0"
 "enum_id" "10"
 "trigger_condition" "2"
 "trigger_group" "4"
 "trigger_type" "0"
 }
-// entity 57
+// entity 48
 {
 "classname" "info_switch"
-"origin" "912 -512 -624"
+"origin" "1120 -496 -672"
 "angle" "0"
 "enum_id" "10"
 "trigger_condition" "2"
 "trigger_group" "4"
 "trigger_type" "0"
 }
-// entity 58
+// entity 49
 {
 "classname" "info_maintainer_spawn"
 "origin" "1560 -488 -624"
@@ -3053,47 +3008,47 @@
 "trigger_group" "4"
 "on_trigger" "2"
 }
-// entity 59
+// entity 50
 {
 "classname" "nav_node"
 "origin" "1332 -692 -620"
 }
-// entity 60
+// entity 51
 {
 "classname" "nav_node"
 "origin" "1292 -564 -620"
 }
-// entity 61
+// entity 52
 {
 "classname" "nav_node"
 "origin" "1164 -180 -652"
 }
-// entity 62
+// entity 53
 {
 "classname" "nav_node"
 "origin" "1324 -188 -620"
 }
-// entity 63
+// entity 54
 {
 "classname" "nav_node"
-"origin" "1340 -380 -604"
+"origin" "1340 -380 -620"
 }
-// entity 64
+// entity 55
 {
 "classname" "nav_node"
 "origin" "1228 -180 -620"
 }
-// entity 65
+// entity 56
 {
 "classname" "nav_node"
 "origin" "1156 -516 -676"
 }
-// entity 66
+// entity 57
 {
 "classname" "nav_node"
-"origin" "1524 -348 -604"
+"origin" "1524 -348 -620"
 }
-// entity 67
+// entity 58
 {
 "classname" "light"
 "origin" "240 -704 -664"
@@ -3104,97 +3059,97 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 68
+// entity 59
 {
 "classname" "pickup_ammo_revolver"
 "origin" "1268 -364 -588"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 69
+// entity 60
 {
 "classname" "dsp_node"
 "origin" "516 420 -540"
 "enum_id" "15"
 }
-// entity 70
+// entity 61
 {
 "classname" "dsp_node"
 "origin" "692 420 -540"
 "enum_id" "15"
 }
-// entity 71
+// entity 62
 {
 "classname" "dsp_node"
 "origin" "804 420 -540"
 "enum_id" "15"
 }
-// entity 72
+// entity 63
 {
 "classname" "dsp_node"
 "origin" "892 420 -540"
 "enum_id" "15"
 }
-// entity 73
+// entity 64
 {
 "classname" "dsp_node"
 "origin" "892 292 -540"
 "enum_id" "15"
 }
-// entity 74
+// entity 65
 {
 "classname" "dsp_node"
 "origin" "892 180 -540"
 "enum_id" "15"
 }
-// entity 75
+// entity 66
 {
 "classname" "dsp_node"
 "origin" "892 60 -540"
 "enum_id" "15"
 }
-// entity 76
+// entity 67
 {
 "classname" "dsp_node"
 "origin" "804 60 -540"
 "enum_id" "15"
 }
-// entity 77
+// entity 68
 {
 "classname" "dsp_node"
 "origin" "268 -676 -596"
 "enum_id" "15"
 }
-// entity 78
+// entity 69
 {
 "classname" "dsp_node"
 "origin" "748 -596 -596"
 "enum_id" "15"
 }
-// entity 79
+// entity 70
 {
 "classname" "dsp_node"
 "origin" "260 -668 -684"
 "enum_id" "15"
 }
-// entity 80
+// entity 71
 {
 "classname" "dsp_node"
 "origin" "260 -564 -684"
 "enum_id" "15"
 }
-// entity 81
+// entity 72
 {
 "classname" "dsp_node"
 "origin" "444 -668 -684"
 "enum_id" "15"
 }
-// entity 82
+// entity 73
 {
 "classname" "nav_node"
 "origin" "1460 -492 -620"
 }
-// entity 83
+// entity 74
 {
 "classname" "info_maintainer_spawn"
 "origin" "1752 -544 -624"
@@ -3204,22 +3159,22 @@
 "trigger_group" "4"
 "on_trigger" "2"
 }
-// entity 84
+// entity 75
 {
 "classname" "nav_node"
 "origin" "1724 -348 -604"
 }
-// entity 85
+// entity 76
 {
 "classname" "nav_node"
 "origin" "1740 -516 -604"
 }
-// entity 86
+// entity 77
 {
 "classname" "nav_node"
 "origin" "1156 -340 -676"
 }
-// entity 87
+// entity 78
 {
 "classname" "light"
 "origin" "1680 -440 -576"
@@ -3230,7 +3185,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 88
+// entity 79
 {
 "classname" "light"
 "origin" "1792 -440 -576"
@@ -3241,7 +3196,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 89
+// entity 80
 {
 "classname" "light"
 "origin" "1792 -536 -576"
@@ -3252,7 +3207,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 90
+// entity 81
 {
 "classname" "light"
 "origin" "1680 -536 -576"
@@ -3263,7 +3218,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 91
+// entity 82
 {
 "classname" "light"
 "origin" "1792 -672 -576"
@@ -3274,7 +3229,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 92
+// entity 83
 {
 "classname" "light"
 "origin" "1680 -672 -576"
@@ -3285,7 +3240,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 93
+// entity 84
 {
 "classname" "light"
 "origin" "1680 -800 -576"
@@ -3296,7 +3251,7 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 94
+// entity 85
 {
 "classname" "light"
 "origin" "1792 -800 -576"
@@ -3307,20 +3262,115 @@
 "style" "0"
 "impulse" "0"
 }
-// entity 95
+// entity 86
 {
 "classname" "level_end"
 "origin" "1736 -984 -680"
 "goto" "10_a_3"
 }
-// entity 96
+// entity 87
 {
 "classname" "info_player_return"
 "origin" "1728 -608 -624"
 "enum_id" "0"
 "angle" "90"
 }
+// entity 88
+{
+"classname" "info_switch"
+"origin" "1168 -496 -672"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "4"
+"trigger_type" "0"
+}
+// entity 89
+{
+"classname" "info_switch"
+"origin" "1168 -240 -672"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "4"
+"trigger_type" "0"
+}
+// entity 90
+{
+"classname" "info_switch"
+"origin" "1152 -240 -672"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "4"
+"trigger_type" "0"
+}
+// entity 91
+{
+"classname" "info_switch"
+"origin" "1136 -240 -672"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "4"
+"trigger_type" "0"
+}
+// entity 92
+{
+"classname" "info_switch"
+"origin" "1120 -240 -672"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "4"
+"trigger_type" "0"
+}
+// entity 93
+{
+"classname" "nav_node"
+"origin" "1164 -276 -668"
+}
+// entity 94
+{
+"classname" "nav_node"
+"origin" "1292 -692 -620"
+}
+// entity 95
+{
+"classname" "nav_node"
+"origin" "1460 -244 -620"
+}
+// entity 96
+{
+"classname" "nav_node"
+"origin" "900 132 -628"
+}
 // entity 97
+{
+"classname" "nav_node"
+"origin" "796 36 -636"
+}
+// entity 98
+{
+"classname" "nav_node"
+"origin" "652 412 -580"
+}
+// entity 99
+{
+"classname" "nav_node"
+"origin" "444 212 -580"
+}
+// entity 100
+{
+"classname" "nav_node"
+"origin" "532 348 -580"
+}
+// entity 101
+{
+"classname" "nav_node"
+"origin" "484 164 -588"
+}
+// entity 102
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
@@ -3328,7 +3378,7 @@
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
 }
-// entity 98
+// entity 103
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

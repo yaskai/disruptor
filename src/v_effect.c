@@ -139,25 +139,16 @@ void vEffectsAddTrail(vEffect_Manager *manager, Vector3 start, Vector3 end) {
 }
 
 void vEffectsAddImpactDecal(vEffect_Manager *manager, Vector3 position, Vector3 normal) {
-	u8 id = 0;
-	for(u8 i = 0; i < V_EFFECT_MAX_IMPACT_DECALS; i++) {
-		vEffect_ImpactDecal *dec = &manager->impact_decals[i];
-
-		if(!dec->active) { 
-			id = i;
-			break;
-		}
-	}
-
 	vEffect_ImpactDecal new_dec = (vEffect_ImpactDecal) {
 		.q = QuaternionFromVector3ToVector3( (Vector3) { 0, 1, 0 }, normal),
 		.position = position,
 		.normal = normal,
 		.texture_id = 0,
-		.active = true,
+		.active = true
 	};
 
-	manager->impact_decals[id] = new_dec;
+	manager->impact_decals[manager->impact_id] = new_dec;
+	manager->impact_id = (manager->impact_id + 1) % V_EFFECT_MAX_IMPACT_DECALS;
 }
 
 void vEffectsAddTracer(vEffect_Manager *manager, Vector3 start, Vector3 end) {
@@ -187,3 +178,4 @@ void vEffectsAddTracer(vEffect_Manager *manager, Vector3 start, Vector3 end) {
 	manager->tracers[id] = new_tracer;
 	manager->tracer_count++;
 }
+

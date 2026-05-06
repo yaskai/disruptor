@@ -319,7 +319,7 @@ void BvhConstruct(MapSection *sect, BvhTree *bvh, Vector3 volume, TriPool *tri_p
 	Message("bvh_construct()", ANSI_BLUE);
 	if(GetLogState()) {
 		printf("tri_pool info:\n");
-		printf("-> count %d:\n", tri_pool->count);
+		printf("-> tri count %d:\n", tri_pool->count);
 	}
 
 	/*
@@ -376,11 +376,13 @@ void BvhConstruct(MapSection *sect, BvhTree *bvh, Vector3 volume, TriPool *tri_p
 	BvhNode *ptr = realloc(bvh->nodes, sizeof(BvhNode) * bvh->capacity);
 	bvh->nodes = ptr;
 
+	/*
 	for(int i = 1; i < bvh->count; i++) {
 		BvhNode *node = &bvh->nodes[i];
 		node->bounds.min = Vector3Subtract(node->bounds.min, shape_half);
 		node->bounds.max = Vector3Add(node->bounds.max, shape_half);
 	}
+	*/
 }
 
 // Unload BVH tree
@@ -470,6 +472,13 @@ float FindBestSplit(MapSection *sect, BvhTree *bvh, BvhNode *node, short *axis, 
 
 // Recursively split BVH nodes 
 void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
+	//Message("BvhNodeSubdivide()", ANSI_BLUE);
+
+	if(node_id < 0 || node_id >= bvh->count) {
+		MessageDiagInt("WARNING: node id is out of bounds", node_id, ANSI_YELLOW);
+		return;
+	}
+
 	BvhNode *node = &bvh->nodes[node_id];
 
 	// Determine split position and axis

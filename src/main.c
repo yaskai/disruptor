@@ -9,7 +9,7 @@ enum PLATFORMS : u8 {
 	WIN64	= 1,
 	MACOS	= 2
 }; 
-u8 platform = LINUX;
+u8 platform = WIN64;
 
 unsigned int plat_flags[3] = {
 	// Linux

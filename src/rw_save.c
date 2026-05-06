@@ -201,7 +201,7 @@ u8 rw_WriteEntData(EntityHandler *ent_handler, char *file_path) {
 		fwrite(&ent->trigger_state, sizeof(u8), 1, pF);
 		// Flags & type:
 		fwrite(&ent->type, sizeof(i8), 1, pF);
-		fwrite(&ent->flags, sizeof(u8), 1, pF);
+		fwrite(&ent->flags, sizeof(u16), 1, pF);
 		// Anim state:
 		fwrite(&ent->anim_state.curr_frame, sizeof(int), 1, pF);
 		fwrite(&ent->anim_state.anim_id, sizeof(int), 1, pF);
@@ -252,7 +252,7 @@ u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path) {
 
 		// ID and flags
 		fread(&ent->type, sizeof(i8), 1, pF);
-		fread(&ent->flags, sizeof(u8), 1, pF);
+		fread(&ent->flags, sizeof(u16), 1, pF);
 
 		// Anim state:
 		fread(&ent->anim_state.curr_frame, sizeof(int), 1, pF);
@@ -275,6 +275,8 @@ u8 rw_WriteEffectData(vEffect_Manager *eff_manager, char *file_path) {
 	for(u8 i = 0; i < V_EFFECT_MAX_TRACERS; i++)		fwrite(&eff_manager->tracers[i], sizeof(vEffectTracer), 1, pF);
 	for(u8 i = 0; i < V_EFFECT_MAX_PARTICLES; i++)		fwrite(&eff_manager->particles[i], sizeof(vEffectParticle), 1, pF);
 
+	fwrite(&eff_manager->impact_id, sizeof(u8), 1, pF);
+
 	fclose(pF);
 	return 1;
 }
@@ -292,6 +294,8 @@ u8 rw_ReadEffectData(vEffect_Manager *eff_manager, char *file_path) {
 	for(u8 i = 0; i < V_EFFECT_MAX_IMPACT_DECALS; i++)	fread(&eff_manager->impact_decals[i], sizeof(vEffect_ImpactDecal), 1, pF);
 	for(u8 i = 0; i < V_EFFECT_MAX_TRACERS; i++)		fread(&eff_manager->tracers[i], sizeof(vEffectTracer), 1, pF);
 	for(u8 i = 0; i < V_EFFECT_MAX_PARTICLES; i++)		fread(&eff_manager->particles[i], sizeof(vEffectParticle), 1, pF);
+
+	fread(&eff_manager->impact_id, sizeof(u8), 1, pF);
 
 	fclose(pF);
 	return 1;

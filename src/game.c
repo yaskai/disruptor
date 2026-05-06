@@ -189,6 +189,9 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 
 	HandlerSetPtrGun(&game->player_gun);
 
+	for(int i = 0; i < 64; i++)
+		game->effect_manager.impact_decals[i].active = false;
+
 	char *path_dup = calloc(strlen(path), 1);
 	memcpy(path_dup, path, strlen(path));
 	char *sep = strrchr(path_dup, '/');
@@ -296,6 +299,7 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	game->flags |= FLAG_GAME_STARTED;
 
 	GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+	game->input_handler.mouse_delta = Vector2Zero();
 
 	/*
 	printf("bvh hg count: %d\n", game->test_section.bvh_hullgroup_count);

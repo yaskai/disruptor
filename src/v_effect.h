@@ -56,6 +56,8 @@ typedef struct {
 	float timer;
 
 	u8 model_id;
+
+	bool active;
 	
 } vEffectParticle;
 
@@ -68,8 +70,9 @@ typedef struct {
 	vEffectTracer tracers[V_EFFECT_MAX_TRACERS];
 	vEffectParticle particles[V_EFFECT_MAX_PARTICLES];
 
+	u8 impact_id;
+
 	u8 trail_count;
-	u8 impact_decal_count;
 	u8 tracer_count;
 	u8 particle_count;
 

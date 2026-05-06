@@ -5,6 +5,8 @@
 #include "../include/log_message.h"
 #include <stdio.h>
 
+Texture2D bug_plat_tex[2];
+
 #define TRIGGERED 0x01
 
 // -------------------------------------------------
@@ -64,6 +66,9 @@ OnTriggerFunc on_trigger_funcs[] = {
 EntityHandler *ptr_handler_switch;
 
 void SwitchSetup(EntityHandler *handler) {
+	bug_plat_tex[0] = LoadTexture("resources/textures/bug_plat_uv_00.png");
+	bug_plat_tex[1] = LoadTexture("resources/textures/bug_plat_uv_01.png");
+
 	ptr_handler_switch = handler;
 
 	for(int i = 0; i < handler->count; i++) {
@@ -126,7 +131,7 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 
 			case TRIGGER_COND_COLL_BUG: {
 				if(ent->type == ENT_DISRUPTOR) {
-					ent->flags &= ~BUG_ON_SWITCH;
+					//ent->flags &= ~BUG_ON_SWITCH;
 
 					if(!(ent->flags & ENT_COLLIDERS))
 						continue;

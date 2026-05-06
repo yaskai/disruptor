@@ -177,14 +177,14 @@ ___
 ___
 * *Visual Effects*
 
-** (-) bullet trails
+** (x) bullet trails
 *** (x) turret 
-*** (-) player guns /using the same as turret for now but should be changed/
+*** (x) player guns /using the same as turret for now but should be changed/
 
-** (-) bullet hole decals
+** (x) bullet hole decals
 *** (x) struct 
 *** (x) manager
-*** (-) rendering 
+*** (x) rendering 
 
 ** (-) bullet impact particles 
 *** (-) struct 

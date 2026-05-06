@@ -711,9 +711,10 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	);
 
 	Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
-	//Vector3 trail_start = trace_start;
 	Vector3 right = Vector3CrossProduct(ct->forward, UP);
 	trail_start = Vector3Add(trail_start, Vector3Scale(right, 1.5f));
+	if(Vector3DotProduct(ct->velocity, right) < 0)
+		trail_start = Vector3Add(trail_start, Vector3Scale(right, 1.5f));
 
 	//Vector3 trail_end = Vector3Add(trail_start, Vector3Scale(ct->forward, Vector3Distance(ct->position, point)));
 	Vector3 trail_end = point;
@@ -914,40 +915,17 @@ void SendUnlockPickupEvent(int pickup_type) {
 			reload_active = true;
 			reload_sound_set = false;
 			break;
+
+		case ENT_UNLOCK_SMG:
+			weap_unlocked[WEAP_SMG] = 1;
+			reload_active = true;
+			reload_sound_set = false;
+			break;
 	}
 }
 
 // * NOTE: 
 // To be replaced and moved to ui.c
-void DrawSectionTransition() {
-	DrawTextEx(
-		hud_font,
-		"MISSION STATUS: COMPLETE",
-		(Vector2) { 0, 0 },
-		80, 
-		1, 
-		PURPLE
-	);
-
-	DrawTextEx(
-		hud_font,
-		"PRESS [Y] TO PLAY AGAIN",
-		(Vector2) { 0, 100 },
-		80, 
-		1, 
-		PURPLE
-	);
-
-	DrawTextEx(
-		hud_font,
-		"PRESS [ESC] TO EXIT",
-		(Vector2) { 0, 200 },
-		80, 
-		1, 
-		PURPLE
-	);
-}
-
 void PlayerGunOnSave(rw_GlobalData *data, PlayerGun *player_gun) {
 	rw_PlayerWeaponData *weap_data = &data->player_weap_data;
 
