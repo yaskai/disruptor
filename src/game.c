@@ -77,7 +77,7 @@ void GameInit(Game *game, Config *conf) {
 
 	game->_gsave_state = (rw_GlobalData) {0};
 
-	SetLogState(0);
+	SetLogState(1);
 
 	game->flags = 0;
 
@@ -516,7 +516,7 @@ void RenderMainLayer(Game *game, float dt) {
 	// Render transparent level geometry
 	DrawMapTranslucent(&game->test_section, game->camera.position);
 	// Draw player (for debug only)
-	PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
+	//PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
 
 	EndMode3D();
 
@@ -609,6 +609,7 @@ void RenderDebugLayer(Game *game) {
 	//DebugDrawNavGraphsText(&game->test_section, game->camera_debug, dbg_window_size);
 	//DebugDrawEntText(&game->ent_handler, game->camera_debug);
 	PlayerDebugText(&game->ent_handler.ents[game->ent_handler.player_id]);
+	PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
 	EndTextureMode();
 }
 

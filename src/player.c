@@ -10,6 +10,7 @@
 #include "player_gun.h"
 #include "pm.h"
 #include "lit.h"
+#include "../include/log_message.h"
 
 #define PLAYER_MAX_PITCH (88.0f * DEG2RAD)
 #define PLAYER_SPEED 190.0f
@@ -84,6 +85,65 @@ float cam_zmod = 16.0f;
 #define STEP_SOUND_INTERVAL 75.0f
 float step_sound_timer;
 char *plr_step_sounds[2] = { "plr_step2", "plr_step3" };
+
+Vector3 interact_debug_point;
+void PlayerInteract(EntityHandler *handler, MapSection *sect, Entity *player) {
+	Message("PlayerInteract()", ANSI_BLUE);
+
+	comp_Transform *ct = &player->comp_transform;
+
+	Vector3 point = Vector3Add(ct->position, Vector3Scale(ct->forward, 8));
+
+	EntGrid *grid = &handler->grid;
+	EntGridCell *cell = &handler->grid.cells[CellCoordsToId(Vec3ToCoords(point, grid), grid)];
+	
+	i16 id = -1;
+	for(i16 i = 0; i < cell->ent_count; i++) {
+		Entity *other = &handler->ents[cell->ents[i]];
+
+		if(other->type == ENT_DISRUPTOR)
+			continue;
+
+		if(other->type == ENT_PLAYER)
+			continue;
+
+		if(!CheckCollisionBoxes(ct->bounds, other->comp_transform.bounds))
+			continue;
+
+		Vector3 d = Vector3Normalize(Vector3Subtract(BoxCenter(other->comp_transform.bounds), point));
+		if(Vector3DotProduct(ct->forward, d) < 0)
+			continue;
+
+		id = other->id;
+	}
+
+
+	if(id <= 0)
+		return;
+
+	Entity *other = &handler->ents[id];
+	
+	switch(other->type) {
+		case ENT_LADDER:
+			on_ladder = true;
+			player->comp_ai.targ_data.ent_id = id;
+
+			
+			Vector3 center = BoxCenter(other->comp_transform.bounds);
+			float scale = (ct->position.z > other->comp_transform.bounds.max.z) ? 1.5f : 1.0f;
+			scale = 1.0f;
+
+			Vector2 offset = (Vector2) {
+				center.x + (other->comp_ai.targ_data.position.x * scale),	
+				center.y + (other->comp_ai.targ_data.position.y * scale),	
+			};
+
+			ct->position.x = offset.x;
+			ct->position.y = offset.y;
+			
+			break;
+	}
+}
 
 // Check if player can stand back up when releasing crouch input
 bool pm_StandCheck(comp_Transform *ct) {
@@ -216,7 +276,7 @@ void pm_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *p
 				// Ladder check
 				Entity *brush_ent = &handler->ents[hg->ent_id];
 				if(brush_ent->type == ENT_LADDER) {
-					on_ladder = true;
+					//on_ladder = true;
 				}
 			}
 		}		
@@ -433,11 +493,28 @@ void PlayerUpdate(Entity *player, float dt) {
 			step_sound_timer = STEP_SOUND_INTERVAL;
 		}
 	}
+
+	if(ptr_input->actions[ACTION_INTERACT].state == INPUT_PRESSED) {
+		PlayerInteract(ptr_ent_handler, ptr_sect, player);
+	}
+	
+	if(on_ladder) {
+		if(!CheckCollisionBoxes(player->comp_transform.bounds, ptr_ent_handler->ents[player->comp_ai.targ_data.ent_id].comp_transform.bounds)) {
+			player->comp_ai.targ_data.ent_id = -1;
+			player->comp_transform.velocity.z = 10.0f;
+			on_ladder = false;
+		}
+	}
 }
 
 void PlayerDraw(Entity *player) {
-	//PlayerDisplayDebugInfo(player);
+	PlayerDisplayDebugInfo(player);
 	//DrawBoundingBox(player->comp_transform.bounds, RED);
+	/*
+	if(on_ladder) {
+		DrawBoundingBox(player->comp_transform.bounds, RED);
+	}
+	*/
 }
 
 void PlayerDamage(Entity *player, short amount) {
@@ -447,12 +524,24 @@ void PlayerDie(Entity *player) {
 }
 
 void PlayerDisplayDebugInfo(Entity *player) {
-	DrawBoundingBox(player->comp_transform.bounds, RED);
+	comp_Transform *ct = &player->comp_transform;
+	
+	DrawBoundingBox(player->comp_transform.bounds, BLUE);
 	if(player->comp_ai.curr_navnode_id > -1 && player->comp_ai.navgraph_id > -1) {
 		NavGraph *graph = &ptr_sect->navgraphs[player->comp_ai.navgraph_id];
 		NavNode *node = &graph->nodes[player->comp_ai.curr_navnode_id];
 
 		DrawSphere(node->position, 10, WHITE);
+	}
+
+	DrawLine3D(ct->position, Vector3Add(ct->position, Vector3Scale(ct->forward, 20)), GREEN);
+
+	EntGrid *grid = &ptr_ent_handler->grid;
+	EntGridCell *cell = &ptr_ent_handler->grid.cells[CellCoordsToId(Vec3ToCoords(ct->position, grid), grid)];
+
+	for(i16 i = 0; i < cell->ent_count; i++) {
+		Entity *other = &ptr_ent_handler->ents[cell->ents[i]];
+		DrawBoundingBox(other->comp_transform.bounds, WHITE);		
 	}
 
 	/*
@@ -514,7 +603,7 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	// 1. Categorize position
 	ct->on_ground = pm_CheckGround(ct, ct->position);
 
-	if(input->actions[ACTION_CROUCH].state == 1) 
+	if(input->actions[ACTION_CROUCH].state == 1 && !on_ladder) 
 		crouch = true;
 	
 	// 2. Get wishdir
@@ -690,6 +779,13 @@ u8 pm_CheckGround(comp_Transform *ct, Vector3 position) {
 		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
 			continue;
 
+		/*
+		if(bsp->hull_groups[j].ent_id >= 1) {
+			if(ptr_ent_handler->ents[bsp->hull_groups[j].ent_id].type == ENT_LADDER)
+				continue;
+		}
+		*/
+
 		u8 hull_id = (crouch) ? 2 : 1;
 		Bsp_Hull *hull = &bsp->hull_groups[j].hulls[hull_id];
 
@@ -793,23 +889,26 @@ void pm_Accelerate(comp_Transform *ct, Vector3 wish_dir, float wish_speed, float
 #define PLAYER_GRAV 980.0f
 void pm_ApplyGravity(comp_Transform *ct, float dt) {
 	if(on_ladder) {
-		float forward_amnt = Vector3DotProduct(ct->velocity, ct->forward);
+		Entity *player = &ptr_ent_handler->ents[ptr_ent_handler->player_id];
+		Entity *ladder = &ptr_ent_handler->ents[player->comp_ai.targ_data.ent_id];
 
-		if(forward_amnt >= EPSILON) {
-			ct->velocity.x = 0.0f;
-			ct->velocity.y = 0.0f;
+		ct->velocity = Vector3Zero();
+
+		//if(forward_amnt >= EPSILON) {
+		if(ptr_input->actions[ACTION_MOVE_U].state == INPUT_DOWN) {
 			ct->velocity.z = 200.0f;
 		}
 
-		if(forward_amnt <= -EPSILON) {
-			ct->velocity.x = 0.0f;
-			ct->velocity.y = 0.0f;
+		if(ptr_input->actions[ACTION_MOVE_D].state == INPUT_DOWN) {
+			if(player->comp_transform.bounds.min.z - 0.1f < ladder->comp_transform.bounds.min.z) {
+				on_ladder = false;
+			}
+
 			ct->velocity.z = -200.0f;
 		}
 		
-		//return;
+		return;
 	}
-
 
 	if(ct->on_ground) {
 		//ct->velocity.z = 0;
@@ -819,7 +918,7 @@ void pm_ApplyGravity(comp_Transform *ct, float dt) {
 	if(!on_ladder)
 		ct->velocity.z -= (PLAYER_GRAV * dt); 
 
-	on_ladder = false;
+	//on_ladder = false;
 }
 
 #define MIN_TRACE_DIST (0.0333f)
@@ -1075,13 +1174,19 @@ u8 pm_ClipVelocity(Vector3 in, Vector3 normal, Vector3 *out, float bounce, u8 bl
 
 // Handle jump
 void pm_Jump(comp_Transform *ct, InputHandler *input) {
-	if(!ct->on_ground) return;
+	if(!ct->on_ground && !on_ladder) return;
 
 	Vector3 horizontal_velocity = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 
 	if(input->actions[ACTION_JUMP].state == 2) {
 		bool jump = true;
 		float mult = 1.0f;
+
+		if(on_ladder) {
+			on_ladder = !on_ladder;
+			mult = 0.85f;
+			//return;
+		}
 
 		if(crouch) {
 			if(!pm_StandCheck(ct)) jump = false;

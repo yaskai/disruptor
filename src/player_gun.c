@@ -390,9 +390,6 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 
 		if(IsKeyPressed(KEY_Q)) 
 			scroll = -1;
-
-		if(IsKeyPressed(KEY_E))
-			scroll = +1;
 	}
 
 	int unlocked = 0;

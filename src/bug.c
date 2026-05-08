@@ -268,6 +268,11 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 		if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 			continue;
+
+		/*
+		if(handler->ents[sect->bvh_hullgroups[j].ent_id].type == ENT_LADDER)
+			continue;
+		*/
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
@@ -284,6 +289,26 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 				}
 			}
 		}
+
+		if(temp_tr.hit)
+			continue;
+
+		temp_tr = TraceDataEmpty();
+		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
+		
+		if(temp_tr.distance < tr.distance) {
+			tr = temp_tr;
+
+			ent_id = sect->bvh_hullgroups[j].ent_id;
+			if(ent_id > 0) {
+				if(handler->ents[ent_id].type == ENT_DOOR && tr.normal.z >= 1.0f ) {
+					Entity *lift_ent = &handler->ents[ent_id];
+					lift_ent->flags |= BUG_ON_PLATFORM;		
+					bug_on_plat = true;
+				}
+			}
+		}
+
 	}
 	
 	if(!tr.hit) {
@@ -356,6 +381,11 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		for(int j = 1; j < sect->bvh_hullgroup_count; j++) {
 			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 				continue;
+
+			/*
+			if(handler->ents[sect->bvh_hullgroups[j].ent_id].type == ENT_LADDER)
+				continue;
+			*/
 
 			BvhTraceData temp_tr = TraceDataEmpty();
 			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, Vector3Length(move));
@@ -511,7 +541,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	if(ai->state == BUG_DEFAULT) {
 		disrupt_used = false;
 
-		ct->position = player_ent->comp_transform.position;
+		//ct->position = player_ent->comp_transform.position;
+		ct->position = Vector3Zero();
 		ct->velocity = Vector3Zero();
 
 		ent->flags &= ~ENT_COLLIDERS;	
@@ -612,6 +643,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 			if(enemy_ent->type == ENT_FORCEFIELD) {
 				continue;
 			}
+
+			if(enemy_ent->type == ENT_LADDER)
+				continue;
 
 			if(enemy_ent->flags & ENT_IS_PICKUP)
 				continue;

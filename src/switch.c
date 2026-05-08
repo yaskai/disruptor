@@ -66,8 +66,10 @@ OnTriggerFunc on_trigger_funcs[] = {
 EntityHandler *ptr_handler_switch;
 
 void SwitchSetup(EntityHandler *handler) {
-	bug_plat_tex[0] = LoadTexture("resources/textures/bug_plat_uv_00.png");
-	bug_plat_tex[1] = LoadTexture("resources/textures/bug_plat_uv_01.png");
+	if(!IsTextureValid(bug_plat_tex[0])) {
+		bug_plat_tex[0] = LoadTexture("resources/textures/plat_uv_00.png");
+		bug_plat_tex[1] = LoadTexture("resources/textures/plat_uv_01.png");
+	}
 
 	ptr_handler_switch = handler;
 
@@ -89,6 +91,9 @@ void SwitchSetup(EntityHandler *handler) {
 
 		if(ent->trigger_condition == TRIGGER_COND_COLL_BUG) {
 			ent->model = LoadModel("resources/models/bug_plat_00.glb");
+
+			for(int i = 0; i < ent->model.materialCount; i++)
+				ent->model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = bug_plat_tex[0];
 
 			ent->comp_transform.bounds = (BoundingBox) {
 				Vector3Subtract(ent->comp_transform.bounds.min, Vector3Scale(BODY_VOLUME_SMALL, 0.5f)),
@@ -132,7 +137,6 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 			case TRIGGER_COND_COLL_BUG: {
 				if(ent->type == ENT_DISRUPTOR) {
 					//ent->flags &= ~BUG_ON_SWITCH;
-
 					if(!(ent->flags & ENT_COLLIDERS))
 						continue;
 
@@ -149,6 +153,9 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 
 					if(!collide)
 						switch_ent->trigger_state &= ~TRIGGERED;
+
+					if(switch_ent->flags & TRIGGERED) {
+					}
 				}
 
 			} break;
@@ -211,6 +218,15 @@ void DoTrigger(EntityHandler *handler, Entity *switch_ent) {
 			continue;
 
 		on_trigger_funcs[obj->on_trigger](obj);
+	}
+
+	if(switch_ent->trigger_condition == TRIGGER_COND_COLL_BUG) {
+	short tex = 0;
+		if(switch_ent->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture.id == bug_plat_tex[0].id)
+			tex = 1;
+		
+		for(int i = 0; i < switch_ent->model.materialCount; i++)
+			switch_ent->model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = bug_plat_tex[tex];
 	}
 
 	switch_ent->trigger_state |= TRIGGERED;

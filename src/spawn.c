@@ -409,6 +409,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
 			ent.model.materials[0].shader = handler->ent_shader;
 			ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
+			ent.comp_transform.bounds.min = Vector3Subtract(ent.comp_transform.bounds.min, Vector3Scale((Vector3) {1, 1, 0}, 16));
+			ent.comp_transform.bounds.max = Vector3Add(ent.comp_transform.bounds.max, Vector3Scale((Vector3) {1, 1, 0}, 16));
 
 			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
 			ent.comp_ai.speed = 700;
@@ -416,6 +418,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
 
 			ent.flags &= ~ENT_COLLIDERS;
+			//ent.flags |= ENT_COLLIDERS;
 
 		} break;
 

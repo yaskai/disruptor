@@ -27,6 +27,18 @@ void EntHandlerPassRwState(rw_GlobalData *data) { _hgd = data; }
 PlayerGun *handler_ptr_player_gun;
 void HandlerSetPtrGun(PlayerGun *player_gun) { handler_ptr_player_gun = player_gun; }
 
+#define ENT_GRAV 980.0f
+void ent_ApplyGravity(comp_Transform *ct, float dt) {
+	if(ct->on_ground) {
+		//ct->velocity.z = 0;
+		return;
+	}
+
+	ct->velocity.z -= (ENT_GRAV * dt); 
+
+	//on_ladder = false;
+}
+
 void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *pm, float dt, EntityHandler *handler) {
 	MapSection *sect = ptr_handler_sect;
 
@@ -796,35 +808,8 @@ void RenderBrushEntities(EntityHandler *handler) {
 			continue;
 		}
 
-		//if(ent->type == ENT_DOOR) {
-			//EntDrawLitModel(handler, ent, 1.0f, 10.0f);
-			//continue;
-		//}
-
 		if(ent->type == ENT_DOOR) {
-			/*
-			Color light_color = lit_SampleLightGrid(&ptr_handler_sect->bsp_data, ent->comp_transform.position);
-
-			Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;
-			SetShaderValue(handler->ent_shader, handler->ent_shader_locs.locs[LC_VIEW_POS], &view_pos, SHADER_UNIFORM_VEC3);
-
-			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], &ent->comp_transform.position, SHADER_UNIFORM_VEC3, 3);
-			SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], &light_color, SHADER_UNIFORM_VEC3, 3);
-			*/
 			EntDrawLitModelEx(handler, ent, Vector3Zero(), 1.0f, Vector3Zero(), 0, 0);
-
-			if(ent->bsp_model != 4)
-				continue;
-
-			if(ent->id == 11) {
-				DrawBoundingBox(ent->comp_transform.bounds, RED);
-
-				BoundingBox test_box = ptr_handler_sect->bvh_hullgroups[ent->bsp_model].bvh->nodes[2].bounds;
-				//test_box = BoxTranslate(test_box, Vector3Subtract(BoxCenter(test_box), ptr_handler_sect->bvh_hullgroups[ent->bsp_model].origin));
-				test_box = BoxTranslate(test_box, Vector3Subtract(BoxCenter(test_box), ptr_handler_sect->bvh_hullgroups[ent->bsp_model].bvh[2].origin));
-				DrawBoundingBox(test_box, GREEN);
-			}
-			//EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light)
 			continue;
 		}
 
@@ -855,7 +840,7 @@ EntTraceData EntTraceDataEmpty() {
 	};
 }
 
-Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sender, EntTraceData *trace_data) {
+Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, i16 sender, EntTraceData *trace_data) {
 	EntGrid *grid = &handler->grid;
 	Coords cell = Vec3ToCoords(ray.position, grid); 
 
@@ -890,6 +875,14 @@ Vector3 TraceEntities(Ray ray, EntityHandler *handler, float max_dist, u16 sende
 			// Skip collision checks with shooting entity  
 			if(ent->id == sender)
 				continue;
+			
+			if(sender == handler->player_id) {
+				if(ent->id == handler->bug_id)
+					continue;
+
+				if(ent->id == handler->player_id)
+					continue;
+			}
 
 			if(!(ent->flags & ENT_ACTIVE))
 				continue;
@@ -1289,7 +1282,10 @@ void EntMove(Entity *ent, MapSection *sect, EntityHandler *handler, float dt) {
 
 	//ct->on_ground = pm_CheckGround(ct, ct->position);
 	ct->on_ground = ent_CheckGround(ct, ct->position, sect); 
-	pm_ApplyGravity(ct, dt);
+
+	//pm_ApplyGravity(ct, dt);
+	ent_ApplyGravity(ct, dt);
+
 	if(ct->on_ground)
 		ct->velocity.z = 0;
 
