@@ -180,6 +180,8 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			ent.flags |= ( ENT_COLLIDERS ); 
 
 			ent.model = handler->base_ent_models[ENT_TURRET];
+			for(int i = 0; i < ent.model.materialCount; i++)
+				ent.model.materials[i].shader = handler->ent_shader;
 
 			//ent.comp_transform.position.y -= 20;
 			ent.comp_transform.position.z -= 18;
@@ -480,6 +482,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 
 	ent.comp_transform.start_forward = ent.comp_transform.forward;
 	ent.comp_transform.targ_look = ent.comp_transform.start_forward;
+	ent.comp_transform.yaw = spawn_point->angle * DEG2RAD;
 	if(spawn_point->start_active) ent.flags |= (ENT_ACTIVE);
 
 	ent.comp_ai.navgraph_id = -1;

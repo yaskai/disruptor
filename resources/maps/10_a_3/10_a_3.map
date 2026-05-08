@@ -1720,16 +1720,6 @@
 }
 // entity 4
 {
-"classname" "info_switch"
-"origin" "-624 -808 256"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "3"
-"trigger_group" "2"
-"trigger_type" "0"
-}
-// entity 5
-{
 "classname" "func_detail_fence"
 // brush 0
 {
@@ -1741,7 +1731,7 @@
 ( -608 -816 280 ) ( -608 -320 280 ) ( -608 -320 248 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 6
+// entity 5
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -1754,25 +1744,25 @@
 ( -64 -16 296 ) ( -64 -344 256 ) ( -64 -344 296 ) {fence00 0 0 0 0.2 0.2
 }
 }
-// entity 7
+// entity 6
 {
 "classname" "nav_node"
 "origin" "20 -260 244"
 "flags" "0"
 }
-// entity 8
+// entity 7
 {
 "classname" "nav_node"
 "origin" "-292 308 244"
 "flags" "1"
 }
-// entity 9
+// entity 8
 {
 "classname" "nav_node"
 "origin" "20 -44 244"
 "flags" "0"
 }
-// entity 10
+// entity 9
 {
 "classname" "info_switch"
 "origin" "-80 32 256"
@@ -1782,7 +1772,7 @@
 "trigger_group" "1"
 "trigger_type" "0"
 }
-// entity 11
+// entity 10
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -1806,7 +1796,7 @@
 ( -96 -668 112 ) ( -96 -670 112 ) ( -96 -670 240 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 12
+// entity 11
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -1830,7 +1820,7 @@
 ( -200 -816 112 ) ( -200 -760 112 ) ( -200 -760 56 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 13
+// entity 12
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -1854,7 +1844,7 @@
 ( -144 -672 112 ) ( -200 -760 56 ) ( -200 -760 112 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 14
+// entity 13
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -1878,7 +1868,7 @@
 ( -200 -816 256 ) ( -200 -760 256 ) ( -200 -760 192 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 15
+// entity 14
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -1902,7 +1892,7 @@
 ( -144 -672 256 ) ( -200 -760 192 ) ( -200 -760 256 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 16
+// entity 15
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -1926,66 +1916,66 @@
 ( -96 -672 256 ) ( -96 -667.7049960624655 256 ) ( -96 -667.7049960624682 192 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 17
+// entity 16
 {
 "classname" "pickup_ammo_revolver"
 "origin" "-12 -724 212"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 18
+// entity 17
 {
 "classname" "pickup_ammo_revolver"
 "origin" "12 -732 212"
 "enum_id" "8"
 "angle" "70"
 }
-// entity 19
+// entity 18
 {
 "classname" "checkpoint"
 "origin" "32 -368 80"
 }
-// entity 20
+// entity 19
 {
 "classname" "level_back"
 "origin" "32 288 -16"
 "goto" "10_a_2"
 }
-// entity 21
+// entity 20
 {
 "classname" "checkpoint"
 "origin" "32 -368 80"
 "enum_id" "0"
 "angle" "0"
 }
-// entity 22
+// entity 21
 {
 "classname" "info_player_start"
 "origin" "24 -312 80"
 "angle" "270"
 "enum_id" "0"
 }
-// entity 23
+// entity 22
 {
 "classname" "nav_node"
 "origin" "20 268 244"
 "flags" "0"
 }
-// entity 24
+// entity 23
 {
 "classname" "checkpoint"
 "origin" "96 -688 232"
 "enum_id" "0"
 "angle" "0"
 }
-// entity 25
+// entity 24
 {
 "classname" "info_turret_spawn"
 "origin" "-132 -756 140"
 "enum_id" "1"
 "angle" "45"
 }
-// entity 26
+// entity 25
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -1998,21 +1988,21 @@
 ( -64 -800 176 ) ( -64 -680 176 ) ( -64 -680 112 ) {glass00 0 0 0 1 1
 }
 }
-// entity 27
+// entity 26
 {
 "classname" "pickup_health"
 "origin" "84 -796 60"
 "angle" "300"
 "enum_id" "5"
 }
-// entity 28
+// entity 27
 {
 "classname" "pickup_ammo_revolver"
 "origin" "108 -780 60"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 29
+// entity 28
 {
 "classname" "func_forcefield"
 "on_trigger" "3"
@@ -2030,7 +2020,7 @@
 ( 80 104 320 ) ( 80 96 224 ) ( 80 96 320 ) {ff 0 0 0 1 1
 }
 }
-// entity 30
+// entity 29
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -2054,19 +2044,19 @@
 ( -48 8 304 ) ( -48 -56 248 ) ( -48 -56 304 ) ind_st1_blu1 0 0 0 1 1
 }
 }
-// entity 31
+// entity 30
 {
 "classname" "nav_node"
 "origin" "-580 -20 252"
 "flags" "0"
 }
-// entity 32
+// entity 31
 {
 "classname" "nav_node"
 "origin" "-580 108 244"
 "flags" "1"
 }
-// entity 33
+// entity 32
 {
 "classname" "info_regulator_spawn"
 "origin" "-608 272 248"
@@ -2076,83 +2066,93 @@
 "on_trigger" "2"
 "start_active" "0"
 }
-// entity 34
+// entity 33
 {
 "classname" "nav_node"
 "origin" "-580 260 244"
 "flags" "0"
 }
-// entity 35
+// entity 34
 {
 "classname" "nav_node"
 "origin" "-460 260 244"
 "flags" "0"
 }
-// entity 36
+// entity 35
 {
 "classname" "nav_node"
 "origin" "-580 -124 252"
 "flags" "0"
 }
-// entity 37
+// entity 36
 {
 "classname" "info_maintainer_spawn"
 "origin" "16 304 248"
 "enum_id" "2"
 "angle" "180"
 }
-// entity 38
+// entity 37
 {
 "classname" "nav_node"
 "origin" "-292 260 244"
 "flags" "0"
 }
-// entity 39
+// entity 38
 {
 "classname" "nav_node"
 "origin" "-228 84 252"
 "flags" "1"
 }
-// entity 40
+// entity 39
 {
 "classname" "nav_node"
 "origin" "-228 -52 252"
 "flags" "0"
 }
-// entity 41
+// entity 40
 {
 "classname" "pickup_ammo_revolver"
 "origin" "-236 -148 228"
 "enum_id" "8"
 "angle" "0"
 }
-// entity 42
+// entity 41
 {
 "classname" "nav_node"
 "origin" "-308 -52 252"
 "flags" "0"
 }
-// entity 43
+// entity 42
 {
 "classname" "nav_node"
 "origin" "-452 -228 252"
 "flags" "0"
 }
-// entity 44
+// entity 43
 {
 "classname" "nav_node"
 "origin" "-452 -148 252"
 "flags" "1"
 }
-// entity 45
+// entity 44
 {
 "classname" "nav_node"
 "origin" "-580 -220 252"
 "flags" "0"
 }
-// entity 46
+// entity 45
 {
 "classname" "nav_node"
 "origin" "-308 -220 252"
 "flags" "1"
+}
+// entity 46
+{
+"classname" "info_switch"
+"origin" "-624 -808 256"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "3"
+"trigger_group" "2"
+"trigger_type" "0"
 }

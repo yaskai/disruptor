@@ -67,4 +67,6 @@ void AP_SetGlobalVolume(AudioPlayer *ap, int volume);
 void AP_Pause(AudioPlayer *ap);
 void AP_Resume(AudioPlayer *ap);
 
+void AP_StopAll(AudioPlayer *ap);
+
 #endif

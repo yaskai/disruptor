@@ -198,6 +198,14 @@ void InitPointLights(LightHandler *lh) {
 	ent_shader_locs_set = false;
 }
 
+void ClosePointLights(LightHandler *lh) {
+	for(int i = 0; i < MAX_POINT_LIGHTS; i++) {
+		lh->point_lights[i] = (PointLight) {0};
+	}
+
+	ent_shader_locs_set = false;
+}
+
 void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt) {
 	if(!ent_shader_locs_set) {
 		ent_handler->ent_shader_locs.pl_locs[LC_PL_ENABLED] 	= GetShaderLocation(ent_handler->ent_shader, "pl_enabled");

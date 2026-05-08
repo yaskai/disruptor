@@ -4,6 +4,7 @@
 #include "raymath.h"
 #include "../include/log_message.h"
 #include "audioplayer.h"
+#include "lit.h"
 
 // When turret is hit
 // * NOTE:
@@ -47,9 +48,10 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 		angle = Clamp(angle, angle_min, angle_max);
 		
 		//ct->targ_look.z = Lerp(ct->targ_look.z, GetRandomValue(-20, 20) * 0.01f, dt);
-		ct->targ_look.z = Lerp(ct->targ_look.z, sinf(ai->disrupt_timer * 0.25f) + 0.1f, dt);
+		//ct->targ_look.z = Lerp(ct->targ_look.z, sinf(ai->disrupt_timer * 0.25f) + 0.1f, dt);
 		//ct->targ_look.z = Clamp(ct->targ_look.z, -0.23f, 0.65f);
-		ct->targ_look.z = Clamp(ct->targ_look.z, -0.13f, 0.25f);
+		//ct->targ_look.z = Clamp(ct->targ_look.z, -0.13f, 0.25f);
+		ct->targ_look.z = Lerp(ct->targ_look.z, 0.0f, dt*5);
 
 		if(ent->comp_weapon.ammo > 0) {
 			ct->forward = Vector3RotateByAxisAngle(ent->comp_transform.targ_look, UP, angle);		
@@ -96,7 +98,7 @@ void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float d
 }
 
 // Draw logic for turret
-void TurretDraw(Entity *ent) {
+void TurretDraw(Entity *ent, EntityHandler *handler) {
 	comp_Transform *ct = &ent->comp_transform;
 
 	float yaw = atan2f(ct->forward.x, -ct->forward.y);
@@ -110,8 +112,13 @@ void TurretDraw(Entity *ent) {
 	mat_gun = MatrixMultiply(mat_gun, MatrixRotateX(90*DEG2RAD));
 	mat_gun = MatrixMultiply(mat_gun, MatrixTranslate(ct->position.x, ct->position.y, ct->position.z));
 
+	/*
 	DrawMesh(ent->model.meshes[1], ent->model.materials[1], mat_gun);
 	DrawMesh(ent->model.meshes[0], ent->model.materials[1], mat_base);
+	*/
+
+	EntDrawLitMesh(handler, ent, 1, 1, mat_gun, 100);
+	EntDrawLitMesh(handler, ent, 0, 1, mat_base, 100);
 
 	//DrawBoundingBox(ent->comp_transform.bounds, RED);
 }
@@ -182,6 +189,15 @@ void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt
 		RayCollision near_coll = GetRayCollisionSphere(ray, handler->ents[handler->player_id].comp_transform.position, 96);
 		if(near_coll.hit)
 			AP_ReqNearBulletSound(handler->ap, near_coll.point, dir);
+
+		PointLight pl = (PointLight) {
+			.position = Vector3Add(trace_start, Vector3Scale(dir, 5)),
+			.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.25f),
+			.timer = 0.2f,
+			.active = 1,
+			.radius = 150,
+		};
+		AddPointlight(pl);
 	}
 }
 

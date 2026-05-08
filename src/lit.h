@@ -28,6 +28,7 @@ typedef struct {
 
 void InitPointLights(LightHandler *lh);
 void ManagePointLights(Bsp_Data *bsp, EntityHandler *ent_handler, float dt);
+void ClosePointLights(LightHandler *lh);
 
 void AddPointlight(PointLight point_light);
 

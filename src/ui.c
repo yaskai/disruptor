@@ -136,7 +136,7 @@ void ui_TitleUpdate(UiHandler *ui) {
 	float width = 250;
 	float height = 90;
 	float left = 128;
-	float top = 1080 * 0.25f;
+	float top = ui->conf->window_height * 0.25f;
 
 	ui->cursor_pos = GetMousePosition();
 
@@ -174,7 +174,7 @@ void ui_PauseUpdate(UiHandler *ui) {
 
 	float width = 250;
 	float height = 90;
-	float top = 1080 * 0.33f;
+	float top = ui->conf->window_height * 0.33f;
 
 	if(ui_Button(ui, (Rectangle) { 128, top, width, height }, "Resume", false))
 		ui->flags |= UI_TOGGLE_REQ;
@@ -195,7 +195,17 @@ void ui_PauseUpdate(UiHandler *ui) {
 		ui->active_tab = (ui->active_tab == TAB_OPTIONS) ? TAB_NONE : TAB_OPTIONS;
 	}
 
+	/*
 	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 4), width, height }, "Exit", false)) {
+		ui->flags |= UI_EXIT_GAME_REQ;
+	}
+	*/
+
+	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 4), width, height }, "New Game", false)) {
+		ui->flags |= UI_START_GAME_REQ;
+	}
+
+	if(ui_Button(ui, (Rectangle) { 128, top + ((height+20) * 5), width, height }, "Exit", false)) {
 		ui->flags |= UI_EXIT_GAME_REQ;
 	}
 

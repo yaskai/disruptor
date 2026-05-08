@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "player_gun.h"
@@ -130,13 +131,83 @@ comp_Weapon weapons[] = {
 	},
 };
 
+void ResetPlayerWeapons() {
+	comp_Weapon player_weaps[6] = {
+		// None
+		(comp_Weapon) {0},
+
+		// Disruptor
+		(comp_Weapon) {
+			.id = WEAP_DISRUPTOR,
+			.damage = 0,
+
+			.clip_size = 0,
+			.in_clip = 0,
+			.ammo = 0,
+
+			.reload_time_amnt = 100,
+			.reload_timer = 0,
+		},
+		// Revolver
+		(comp_Weapon) {
+			.id = WEAP_REVOLVER,
+			.damage = 4,
+
+			.clip_size = 6,
+			.in_clip = 0,
+			.ammo = 12,
+			//.ammo = 999,
+
+			.reload_time_amnt = 8,
+			.reload_timer = 0,
+		},
+		// Pistol
+		(comp_Weapon) {
+			.id = WEAP_PISTOL,
+			.damage = 1,
+
+			.clip_size = 12,
+			.in_clip = 12,
+			.ammo = 24,
+
+			.reload_time_amnt = 2,
+			.reload_timer = 0,
+		},
+		// Shotgun
+		(comp_Weapon) {
+			.id = WEAP_SHOTGUN,
+			.damage = 3,
+
+			.clip_size = 8,
+			.in_clip = 8,
+			.ammo = 24,
+
+			.reload_time_amnt = 4,
+			.reload_timer = 0,
+		},
+		// SMG
+		(comp_Weapon) {
+			.id = WEAP_SMG,
+			.damage = 3,
+			.clip_size = 35,
+			.in_clip = 35,
+			.ammo = 70, 	
+			.reload_time_amnt = 5,
+			.reload_timer = 0
+		},
+	};
+
+	memcpy(weapons, player_weaps, sizeof(player_weaps) / sizeof(player_weaps[0]));
+}
+
 Model models[6];
 Matrix gun_matrix;
 
 ModelAnimation anims[6];
+int num_anims[6];
 AnimState anim_states[6];
-bool weap_unlocked[6];
 
+bool weap_unlocked[6];
 bool reload_active = false;
 bool reload_sound_set = false;
 
@@ -192,6 +263,8 @@ void PlayerGunInit(
 	InputHandler *input
 	) 
 {
+	//ResetPlayerWeapons();
+
 	pg_self_ptr = player_gun;
 
 	gun_refs.world_cam = world_cam;
@@ -213,8 +286,7 @@ void PlayerGunInit(
 	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_01.glb");
 	models[WEAP_SMG] = LoadModel("resources/models/weapons/smg_00.glb");
 
-	int rev_num_anims = 0;
-	anims[WEAP_REVOLVER] = *LoadModelAnimations("resources/models/weapons/rev_00_e.glb", &rev_num_anims);
+	anims[WEAP_REVOLVER] = *LoadModelAnimations("resources/models/weapons/rev_00_e.glb", &num_anims[WEAP_REVOLVER]);
 	anim_states[WEAP_REVOLVER] = anim_Init(models[WEAP_REVOLVER]);
 	anim_Switch(&anim_states[WEAP_REVOLVER], 0);
 
@@ -753,9 +825,9 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	PointLight pl = (PointLight) {
 		.position = Vector3Add(gun_refs.world_cam->position, Vector3Scale(d, 5)),
 		.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.75f),
-		.timer = 0.1f,
+		.timer = 0.25f,
 		.active = 1,
-		.radius = 600,
+		.radius = 1000,
 	};
 	AddPointlight(pl);
 }
@@ -970,5 +1042,18 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun) {
 		if(anim_states[i].curr_frame ^ anim_states[i].anim_id)
 			reload_active = true;
 	}
+}
+
+void PlayerGunClose(PlayerGun *player_gun) {
+	for(int i = 1; i < 6; i++) {
+		//if(IsModelAnimationValid(models[i], anims[i])) UnloadModelAnimations(&anims[i], num_anims[i]);
+		//if(IsModelValid(models[i])) UnloadModel(models[i]);
+		anim_Close(&anim_states[i]);
+
+		weap_unlocked[i] = 0;
+	}
+
+	weap_unlocked[0] = 1;
+	player_gun->current_gun = WEAP_NONE;
 }
 

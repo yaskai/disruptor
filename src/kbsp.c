@@ -411,6 +411,8 @@ void UnloadBsp(Bsp_Data *data) {
 	if(data->lm_rgb)		free(data->lm_rgb);
 	if(data->lm.uvs)		free(data->lm.uvs);
 	if(data->lm_oct_raw)	free(data->lm_oct_raw);
+
+	data->num_models = 0;
 }
 
 Bsp_Hull Bsp_BuildHull(Bsp_Data *data, int hull_index) {

@@ -291,9 +291,17 @@ void AP_SetGlobalVolume(AudioPlayer *ap, int volume) {
 }
 
 void AP_Pause(AudioPlayer *ap) {
+	ma_engine_stop(&_ma_engine);
 }
 
 void AP_Resume(AudioPlayer *ap) {
+	ma_engine_start(&_ma_engine);
+}
+
+void AP_StopAll(AudioPlayer *ap) {
+	for(int i = 0; i < ap->sound_hashmap.count; i++) {
+		ma_sound_stop(&sounds[HashFetch(&ap->sound_hashmap, ap->sound_hashmap.nodes[i].key)]);
+	}
 }
 
 

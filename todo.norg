@@ -123,6 +123,7 @@ ___
 ** (_) -diegetic elements for Bug-
 ** (x) proper HUD separation/handling
 ** (x) loading indicator
+** (-) loadout display
 
 ___
 * (-) *AI*
@@ -221,5 +222,13 @@ ___
 ** (x) game state serialization
 
 ** (x) iterative map section loading 
+
+___
+
+* *To Fix*
+
+** Disrupt does not chain
+** Data unload (double free somewhere??)
+** Ladders, switch to E (interact) -> w/s (climb up/down)
 
 ___

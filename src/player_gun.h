@@ -58,4 +58,7 @@ void PlayerGunOnLoad(rw_GlobalData *data, PlayerGun *player_gun);
 void HandlerSetPtrGun(PlayerGun *player_gun);
 void PlayerGunSetMouseDelta(Vector2 md);
 
+void PlayerGunClose(PlayerGun *player_gun);
+void ResetPlayerWeapons();
+
 #endif

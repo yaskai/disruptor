@@ -4,6 +4,7 @@
 #include "config.h"
 #include "game.h"
 
+// Should be ifdef
 enum PLATFORMS : u8 {
 	LINUX	= 0,
 	WIN64	= 1,

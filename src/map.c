@@ -1011,6 +1011,8 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 }
 
 void SectFreeBrushData(MapSection *sect) {
+	
+
 	for(int i = 0; i < rbrush_list.count; i++) {
 		UnloadModel(rbrush_list.render_brushes[i].model);
 	}
@@ -1595,4 +1597,5 @@ void BvhTraceHullGroups(Ray ray, MapSection *sect, BvhTraceData *data, float max
 
 	*data = tr;
 }
+
 

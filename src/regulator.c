@@ -102,9 +102,9 @@ void RegulatorFireWeapon(Entity *ent, EntityHandler *handler, MapSection *sect, 
 		PointLight pl = (PointLight) {
 			.position = Vector3Add(trace_start, Vector3Scale(dir, 5)),
 			.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.25f),
-			.timer = 0.1f,
+			.timer = 0.2f,
 			.active = 1,
-			.radius = 100,
+			.radius = 150,
 		};
 		AddPointlight(pl);
 	}

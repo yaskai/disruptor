@@ -399,7 +399,7 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 // ----------------------------------------------------------------------------------------------------------------------------
 // **** Enemies **** 
 void TurretUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
-void TurretDraw(Entity *ent);
+void TurretDraw(Entity *ent, EntityHandler *handler);
 void TurretShoot(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 void MaintainerUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
@@ -534,6 +534,8 @@ void DoTrigger(EntityHandler *handler, Entity *switch_ent);
 
 void EntDrawLitModel(EntityHandler *handler, Entity *ent, float scale, short min_light);
 void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float scale, Vector3 axis, float angle, short min_light);
+
+void EntDrawLitMesh(EntityHandler *handler, Entity *ent, int mesh_id, int material_id, Matrix matrix, short min_light);
 
 // ----------------------------------------------------------------------------------------------------------------------------
 

@@ -125,7 +125,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 						vis = false;
 				}
 
-				if(!vis)
+				if(!vis && enemy_ent->type > 0)
 					continue;
 
 				// Set target to closest candidate
@@ -145,7 +145,6 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	if(ct->velocity.z < 0)
 		ct->velocity.z *= -0.6f;		
-
 
 	// Set forward direction, only really used for model's rotation
 	Vector3 hdir = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
@@ -264,7 +263,6 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 
 	BvhTraceData tr = TraceDataEmpty();	
  	BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, 1 + EPSILON);
-	//BvhBoxSweep(ray, sect, &sect->bvh[0], 0, ent->comp_transform.bounds, &tr, 8 + 1 + EPSILON);
 
 	i16 ent_id = -1;
 	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
@@ -272,9 +270,7 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 			continue;
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
-		//BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
-		//BvhBoxSweep(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, ct->bounds, &temp_tr, 8 + 1 + EPSILON);
 
 		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
@@ -288,25 +284,6 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 				}
 			}
 		}
-
-		/*
-		if(temp_tr.hit)
-			continue;
-
-		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
-		if(temp_tr.distance < tr.distance) {
-			tr = temp_tr;
-
-			ent_id = sect->bvh_hullgroups[j].ent_id;
-			if(ent_id > 0) {
-				if(handler->ents[ent_id].type == ENT_DOOR) {
-					Entity *lift_ent = &handler->ents[ent_id];
-					lift_ent->flags |= BUG_ON_PLATFORM;		
-					bug_on_plat = true;
-				}
-			}
-		}
-		*/
 	}
 	
 	if(!tr.hit) {

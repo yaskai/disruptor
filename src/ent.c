@@ -367,7 +367,7 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, Aud
 	handler->ap = ap;
 
 	handler->count = 0;
-	handler->capacity = 128;
+	handler->capacity = 1024;
 	handler->ents = calloc(handler->capacity, sizeof(Entity));
 	handler->player_id = 0;
 
@@ -376,7 +376,7 @@ void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, Aud
 	LoadEntityBaseAnims();
 	LoadEntWeapons(handler);
 
-	handler->ai_tick = 0;
+	handler->ai_tick = AI_TICK_RATE;
 	handler->autosave_tick = 0;
 
 	EntGridInit(handler);
@@ -415,6 +415,7 @@ void EntHandlerClose(EntityHandler *handler) {
 	if(handler->checkpoint_list.cells)
 		free(handler->checkpoint_list.cells);
 
+	handler->projectile_count = 0;
 	handler->checkpoint_list.count = 0;
 	handler->count = 0;
 	handler->text_obj_count = 0;
@@ -436,7 +437,6 @@ RenderList render_list = {0};
 // Render list will be swapped out for different system.
 // Current implementation is more expensive than just drawing the entities.
 // Could be swapped out for some sort of trace + hashing thing...
-
 void UpdateRenderList(EntityHandler *handler, MapSection *sect) {
 	render_list.count = 0;
 }
@@ -692,7 +692,7 @@ void RenderEntities(EntityHandler *handler, float dt) {
 
 		switch(ent->type) {
 			case ENT_TURRET:
-				TurretDraw(ent);
+				TurretDraw(ent, handler);
 				break;
 
 			case ENT_MAINTAINER:
@@ -1733,5 +1733,56 @@ void EntDrawLitModelEx(EntityHandler *handler, Entity *ent, Vector3 pos, float s
 	}
 
 	DrawModelEx(ent->model, pos, axis, angle, Vector3Scale(Vector3One(), scale), WHITE);
+}
+
+void EntDrawLitMesh(EntityHandler *handler, Entity *ent, int mesh_id, int material_id, Matrix matrix, short min_light) {
+	Bsp_Data *bsp = &ptr_handler_sect->bsp_data;
+	comp_Transform *ct = &ent->comp_transform;
+
+	float h = BoxExtent(GetModelBoundingBox(ent->model)).z;
+
+	Vector3 center = ct->position;
+	if(ent->bsp_model) {
+		BoundingBox model_bounds = (BoundingBox) {
+			*(Vector3*) bsp->models[ent->bsp_model].mins,
+			*(Vector3*) bsp->models[ent->bsp_model].maxs
+		};
+
+		center = BoxCenter(model_bounds);
+		center = Vector3Add(center, Vector3Scale(Vector3Add(ct->position, ct->prev_pos), 0.5f));
+	};
+
+	Vector3 points[3] = {
+		Vector3Add(ct->position, Vector3Scale(UP, h)),
+		center,
+		Vector3Add(ct->position, Vector3Scale(DOWN, h*0.5f))
+	};
+
+	Color light_colors[3] = {0};
+	for(short i = 0; i < 3; i++)
+		light_colors[i] = lit_SampleLightGrid(bsp, points[i]);
+
+	float light_pos[9];
+	for(short i = 0; i < 3; i++) {
+		light_pos[i*3+0] = points[i].x;
+		light_pos[i*3+1] = points[i].y;
+		light_pos[i*3+2] = points[i].z;
+	}
+
+	float light_clr[9];
+	for(short i = 0; i < 3; i++) {
+		light_clr[i*3+0] = Clamp(light_colors[i].r, min_light, 255.0f) / 255.0f;
+		light_clr[i*3+1] = Clamp(light_colors[i].g, min_light, 255.0f) / 255.0f;
+		light_clr[i*3+2] = Clamp(light_colors[i].b, min_light, 255.0f) / 255.0f;
+	}
+
+	Vector3 view_pos = handler->ents[handler->player_id].comp_transform.position;
+	SetShaderValue(handler->ent_shader, handler->ent_shader_locs.locs[LC_VIEW_POS], &view_pos, SHADER_UNIFORM_VEC3);
+
+	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_POS], light_pos, SHADER_UNIFORM_VEC3, 3);
+	SetShaderValueV(handler->ent_shader, handler->ent_shader_locs.locs[LC_LIGHT_CLR], light_clr, SHADER_UNIFORM_VEC3, 3);
+	SetShaderValueMatrix(handler->ent_shader, handler->ent_shader_locs.locs[LC_MODEL_MAT], matrix);
+
+	DrawMesh(ent->model.meshes[mesh_id], ent->model.materials[material_id], matrix);
 }
 

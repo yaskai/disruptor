@@ -590,16 +590,24 @@ void MapSectionClose(MapSection *sect) {
 			free(sect->navgraphs[i].edges);
 	}
 
-	/*
+	if(sect->navgraphs)
+		free(sect->navgraphs);
+	
 	if(sect->base_navgraph.nodes)
 		free(sect->base_navgraph.nodes);
 
 	if(sect->base_navgraph.edges)
 		free(sect->base_navgraph.edges);
-	*/
+
+	for(int i = 0; i < sect->bsp_data.num_models; i++) {
+		for(int j = 0; j < 3; j++)
+			BvhClose(&sect->bvh_hullgroups[i].bvh[j]);
+	}
+
+	free(sect->bvh_hullgroups);
+	sect->bvh_hullgroup_count = 0;
 
 	UnloadBsp(&sect->bsp_data);
-	//UnloadModel(sect->model);
 }
 
 // Return empty/default TraceData struct

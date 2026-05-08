@@ -63,9 +63,6 @@ PlayerDebugData player_data = {0};
 
 Material mat_default;
 
-BrushPool brush_pool = (BrushPool) {0};
-BrushPool brush_pool_exp = (BrushPool) {0};
-
 u16 tri_count = 0;
 Tri *tris;
 
@@ -88,8 +85,8 @@ void GameInit(Game *game, Config *conf) {
 }
 
 void GameClose(Game *game) {
-	//if(cap_thread_started)
-		//pthread_join(cap_thread, NULL);
+	if(cap_thread_started)
+		pthread_join(cap_thread, NULL);
 
 	// Unload render textures
 	if(IsTextureValid(game->render_target3D.texture))
@@ -183,6 +180,12 @@ void GameAudioSetup(Game *game) {
 }
 
 void GameLoadScene(Game *game, char *path, u8 flags) {
+	PlayerGunClose(&game->player_gun);
+
+	AP_StopAll(&game->audio_player);
+
+	ClosePointLights(&game->lh);
+
 	DisableCursor();
 
 	game->flags &= ~FLAG_LOAD_COMPLETE;
@@ -323,6 +326,19 @@ void GameUpdate(Game *game, float dt) {
 	if(game->ui.flags & UI_EXIT_GAME_REQ)
 		game->flags |= FLAG_EXIT_REQUEST;
 
+	if(game->ui.flags & UI_START_GAME_REQ) {
+		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+		StartNewGame(game);
+		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+		SetMousePosition(0, 0);
+		GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
+		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
+		game->ui.flags &= ~UI_START_GAME_REQ;
+		game->ui.flags = 0;
+
+		return;
+	}
+
 	if(game->ui.flags & UI_LOAD_SAVE_REQ) {
 		if(strcmp(game->ui.map_name, game->_gsave_state.map)) {
 			BeginDrawing();
@@ -369,9 +385,6 @@ void GameUpdate(Game *game, float dt) {
 		game->ui.flags &= ~UI_TOGGLE_REQ;
 	}
 
-	if(!(game->flags & FLAG_GAME_STARTED)) {
-		return;
-	}
 
 	if(game->ent_handler.flags & AT_LEVEL_END) {
 		screen_cap = true;
@@ -440,7 +453,7 @@ void GameUpdate(Game *game, float dt) {
 		*/
 		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
 
-	} else {
+	} else if (game->flags & FLAG_GAME_STARTED && !(game->ui.flags & UI_START_GAME_REQ)) {
 		PollInput(&game->input_handler);
 
 		MapUpdateBvhOffsets(&game->test_section);
@@ -735,12 +748,24 @@ void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point) {
 }
 
 void StartNewGame(Game *game) {
+	if(cap_thread_started)
+		pthread_join(cap_thread, NULL);
+
+	EntHandlerClose(&game->ent_handler);
+	MapSectionClose(&game->test_section);
+	SectFreeBrushData(&game->test_section);
+
+	EntHandlerInit(&game->ent_handler, &game->effect_manager, &game->audio_player);
+	game->flags &= ~FLAG_GAME_STARTED;
 	ui_Toggle();
+	game->ui.flags = 0;
 	//GameLoadScene(game, "resources/maps/10_a", 0);
 	GameLoadScene(game, "resources/maps/10_a_1", 0);
 	//GameLoadScene(game, "resources/maps/10_a_3", 0);
 	//GameLoadScene(game, "resources/maps/10_b", 0);
 	//GameLoadScene(game, "resources/maps/10", 0);
+	game->flags |= FLAG_GAME_STARTED;
+	ResetPlayerWeapons();
 }
 
 void GameTitleScreen(Game *game) {

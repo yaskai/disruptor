@@ -4,7 +4,8 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from 10.texinfo.json...
 Loading extended content flags from 10.content.json...
-277 entities read, 70 are lights.
+WARNING: entity at (1760 -1072 -544) (info_maintainer_spawn) has empty key/value "property 1" ""
+278 entities read, 70 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -64,7 +65,7 @@ octree leafs 1905 overhead 45720 bytes
        995185 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing 10.bsp as Quake BSP bsp29
-29.577s seconds elapsed
+31.541s seconds elapsed
 0 empty lightmaps
 
 
