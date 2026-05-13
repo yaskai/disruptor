@@ -71,11 +71,6 @@ int pm_CheckHull(Vector3 point, u16 hull_id);
 
 short pm_NudgePosition(comp_Transform *ct, u16 hull_id);
 
-// * NOTE:
-// Not currently in use 
-int pm_CheckHullEx(Vector3 point, u16 node_id);
-int pm_NudgePositionEx(comp_Transform *ct, u16 node_id);
-
 void pm_AirFriction(comp_Transform *ct, float dt);
 
 // Step height

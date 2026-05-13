@@ -4,12 +4,11 @@
 #include "config.h"
 #include "game.h"
 
-// Should be ifdef
 enum PLATFORMS : u8 {
 	LINUX	= 0,
 	WIN64	= 1,
 	MACOS	= 2
-}; 
+};
 u8 platform = LINUX;
 
 unsigned int plat_flags[3] = {

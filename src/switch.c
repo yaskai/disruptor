@@ -120,7 +120,6 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 
 	for(short i = 0; i < cell->ent_count; i++) {
 		Entity *ent = &handler->ents[cell->ents[i]];
-
 		bool collide = CheckCollisionBoxes(ent->comp_transform.bounds, switch_ent->comp_transform.bounds);
 
 		switch(switch_ent->trigger_condition) {
@@ -136,7 +135,6 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 
 			case TRIGGER_COND_COLL_BUG: {
 				if(ent->type == ENT_DISRUPTOR) {
-					//ent->flags &= ~BUG_ON_SWITCH;
 					if(!(ent->flags & ENT_COLLIDERS))
 						continue;
 
@@ -153,9 +151,6 @@ void SwitchUpdate(EntityHandler *handler, Entity *switch_ent, float dt) {
 
 					if(!collide)
 						switch_ent->trigger_state &= ~TRIGGERED;
-
-					if(switch_ent->flags & TRIGGERED) {
-					}
 				}
 
 			} break;

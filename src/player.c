@@ -1291,6 +1291,7 @@ void PlayerDebugText(Entity *player) {
 	DrawText(TextFormat("graph_id: %d", player->comp_ai.navgraph_id), 16, 990, 24, RAYWHITE);
 	DrawText(TextFormat("checkpoint: %d", player_curr_checkpoint), 16, 1020, 24, RAYWHITE);
 	//DrawText(TextFormat("in hull norm: { %f, %f, %f }", dbg_hull_norm.x, dbg_hull_norm.y, dbg_hull_norm.z), 16, 1020, 24, RAYWHITE);
+	DrawText(TextFormat("bug_state: %d", ptr_ent_handler->ents[ptr_ent_handler->bug_id].comp_ai.state), 16, 1050, 24, RAYWHITE);
 }
 
 void pm_AirFriction(comp_Transform *ct, float dt) {

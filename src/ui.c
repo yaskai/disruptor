@@ -128,7 +128,7 @@ Vector2 ui_TextCenterEx(UiHandler *ui, Rectangle rec, const char *text, float fo
 }
 
 void ui_TitleUpdate(UiHandler *ui) {
-	ClearBackground(BLACK);
+	//ClearBackground(BLACK);
 
 	if(!(ui->flags & UI_ACTIVE))
 		ui_Toggle();

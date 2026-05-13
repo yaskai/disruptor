@@ -245,7 +245,6 @@ void ent_GroundMove(Entity *ent, comp_Transform *ct, Vector3 start, pmTraceData 
 
 	pmTraceData step_pm = (pmTraceData) { .end_in_solid = -1, .start_in_solid = -1, .origin = step_start, .clip_count = 0 };	
 	ent_TraceMoveEx(ent, step_start, (Vector3) { wish_vel.x, wish_vel.y, 0 }, &step_pm, dt, handler);
-	//pm_TraceMove(ct, step_start, (Vector3) { wish_vel.x, wish_vel.y, 0 }, &step_pm, dt);
 
 	float dist_base = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { base_pm.end_pos.x, base_pm.end_pos.y } );
 	float dist_step = Vector2Distance( (Vector2) { base_pm.origin.x, base_pm.origin.y }, (Vector2) { step_pm.end_pos.x, step_pm.end_pos.y } );
@@ -814,7 +813,7 @@ void RenderBrushEntities(EntityHandler *handler) {
 		}
 
 		if(ent->type == ENT_LADDER) {
-			EntDrawLitModelEx(handler, ent, Vector3Zero(), 1.0f, Vector3Zero(), 0, 0);
+			EntDrawLitModelEx(handler, ent, Vector3Zero(), 1.0f, Vector3Zero(), 0, 90);
 			continue;
 		}
 

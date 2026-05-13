@@ -142,8 +142,9 @@ u8 rw_ReadSave(EntityHandler *ent_handler, char *dir_path, rw_GlobalData *global
 
 	ent_handler->ai_tick = global_data->ai_tick;
 	
-	return (result == needed);
+	return (result == needed) ? 1 : 0;
 }
+
 
 u8 rw_WriteGlobalData(rw_GlobalData global_data, char *file_path) {
 	FILE *pF = fopen(file_path, "wb");

@@ -28,9 +28,12 @@ bool bug_target_picked = false;
 
 float bug_z_vel_prev = 0;
 
-Vector3 plr_ent_pos;
-
 bool bug_on_plat = false;
+
+void BugUpdateDefault(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
+void BugUpdateLaunched(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
+void BugUpdateLanded(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
+void BugUpdateDead(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
 // This function handles setting Bug's target as well as moving towards it. 
 void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHandler *handler, u8 *bounce, float dt) {
@@ -82,8 +85,8 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 				if(enemy_ai->input_mask & AI_INPUT_SELF_GLITCHED)
 					continue;
 
-				if(disrupt_used)
-					continue;
+				//if(disrupt_used)
+					//continue;
 
 				Vector3 to_enemy = Vector3Subtract(
 					Vector3Add(
@@ -521,9 +524,6 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 		ent->comp_ai.state = BUG_DEFAULT;
 	}
 
-	// *
-	plr_ent_pos = player_ent->comp_transform.position;
-
 	comp_Transform *ct = &ent->comp_transform;
 	comp_Ai *ai = &ent->comp_ai;
 
@@ -541,8 +541,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	if(ai->state == BUG_DEFAULT) {
 		disrupt_used = false;
 
-		//ct->position = player_ent->comp_transform.position;
-		ct->position = Vector3Zero();
+		ct->position = player_ent->comp_transform.position;
 		ct->velocity = Vector3Zero();
 
 		ent->flags &= ~ENT_COLLIDERS;	
@@ -588,266 +587,13 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 
 	// -------------------------------------------------------------------------------------------------------------
 	if(ai->state == BUG_LAUNCHED) {
-		launch_timer -= dt;
-
-		/*
-		// Check if grounded
-		ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
-
-		// Apply gravity
-		if(!ct->on_ground) { 
-			float grav = (bug_bounce > 0) ? BUG_GRAV * 1.1f : BUG_GRAV;
-			ct->velocity.z -= grav * dt;
-		}
-
-		pmTraceData pm = (pmTraceData) {0};
-	
-		Vector3 prev_pos = ct->position;
-		bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
-		ct->velocity = pm.end_vel;
-		ct->position = pm.end_pos;
-		*/
-		
-		if(launch_timer <= 0)
-			ct->velocity = Vector3ClampValue(ct->velocity, -BUG_MAX_VEL, BUG_MAX_VEL);
-
-		EntGrid *grid = &handler->grid;
-		Coords coords = Vec3ToCoords(ct->position, grid);
-		if(!CoordsInBounds(coords, &handler->grid)) {
-			ai->state = BUG_DEFAULT;
-			ct->position = player_ent->comp_transform.position;
-			return;
-		}
-
-		i16 cell_id = CellCoordsToId(coords, grid);
-		EntGridCell *cell = &grid->cells[cell_id];
-
-		for(u8 i = 0; i < cell->ent_count; i++) {
-			Entity *enemy_ent = &handler->ents[cell->ents[i]];
-
-			if(ent->flags & BUG_RECALL)
-				continue;
-
-			if(enemy_ent->type == ENT_PLAYER)
-				continue;
-
-			if(enemy_ent->type == ENT_DISRUPTOR)
-				continue;
-
-			if(enemy_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)
-				continue;
-
-			if(enemy_ent->comp_ai.state == STATE_DEAD)
-				continue;
-
-			if(enemy_ent->type == ENT_FORCEFIELD) {
-				continue;
-			}
-
-			if(enemy_ent->type == ENT_LADDER)
-				continue;
-
-			if(enemy_ent->flags & ENT_IS_PICKUP)
-				continue;
-
-			if(enemy_ent->type == ENT_SWITCH) {
-				if(enemy_ent->trigger_condition != TRIGGER_COND_COLL_BUG)
-					continue;
-
-				if(enemy_ent->trigger_state || (launch_timer > 0.0f && (ent->flags & BUG_RECALL)))
-					continue;
-			}
-
-			bool height_check =
-				(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 48);
-
-			if(bug_bounce == 0) {
-				height_check = true;
-			}
-
-			if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !disrupt_used) {
-				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check && !(ent->flags & BUG_RECALL)) {
-					ct->on_ground = true;
-					ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
-					ai->targ_data.ent_id = enemy_ent->id;
-					ct->forward = enemy_ent->comp_transform.forward;
-					//ent->comp_health.damage_cooldown = 10;
-					ct->velocity = Vector3Zero();
-
-					/*
-					if(enemy_ent->type == ENT_SWITCH && enemy_ent->trigger_condition == TRIGGER_COND_COLL_BUG)
-						ent->model.transform = enemy_ent->model.transform;
-						*/
-
-					break;
-				}
-			}
-
-			if(bug_target_picked) {
-				// **
-				// Purpose of this block is to reduce likelihood of Bug overshooting it's target.
-				// Works in most cases
-				Vector3 hvel = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
-				Vector3 self_xy = (Vector3) { ct->position.x, ct->position.y, 0 }; 
-				Vector3 targ_xy = (Vector3) { enemy_ent->comp_transform.position.x, enemy_ent->comp_transform.position.y, 0 }; 
-				if(Vector3Distance(self_xy, targ_xy) <= 16.0f && height_check) {
-					Vector3 to_targ = Vector3Subtract(targ_xy, self_xy);
-
-					float into = Vector3DotProduct(to_targ, Vector3Normalize(hvel));
-					if(into <= -0.5f) {
-						hvel = Vector3Subtract(hvel, Vector3Scale(to_targ, into));
-					}
-
-					ct->velocity.x = hvel.x;
-					ct->velocity.y = hvel.y;
-
-					// Apply some extra gravity, to fall more into target
-					ct->velocity.z -= (BUG_GRAV) * dt;
-				}
-				// **
-			}
-		}
-
-		if(ct->on_ground || (ent->flags & BUG_ON_SWITCH)) {
-			ai->state = BUG_LANDED;
-			ct->velocity = Vector3Zero();
-
-			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
-				ai->state = BUG_LAUNCHED;
-				ct->on_ground = false;
-				ent->flags &= ~BUG_DISRUPTED_ENEMY;
-				bug_bounce = 0;
-				bug_target_picked = true;
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-			}
-		}
-
-		launch_timer -= dt;
+		BugUpdateLaunched(ent, handler, sect, dt);
 	}
 	// -------------------------------------------------------------------------------------------------------------
 
 	// -------------------------------------------------------------------------------------------------------------
 	if(ai->state == BUG_LANDED) {
-		bool can_recall = true;
-		ct->velocity = Vector3Zero();
-		
-		// Check if there is an enemy to disrupt
-		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL) && !disrupt_used && !(ent->flags & BUG_ON_SWITCH)) {
-			i16 cell_id = CellCoordsToId(coords, grid);
-			EntGridCell *cell = &grid->cells[cell_id];
-
-			for(u8 i = 0; i < cell->ent_count; i++) {
-				Entity *enemy_ent = &handler->ents[cell->ents[i]];
-
-				if(enemy_ent->type == ENT_PLAYER)
-					continue;
-
-				if(enemy_ent->type == ENT_DISRUPTOR)
-					continue;
-
-				if(!enemy_ent->comp_ai.component_valid)
-					continue;
-
-				if(enemy_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)
-					continue;
-
-				if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds)) {
-					DisruptEntity(handler, enemy_ent->id, sect);	
-					ent->flags |= BUG_DISRUPTED_ENEMY;
-					disrupt_used = true;
-					break;
-				}
-
-				if(!CheckCollisionSpheres(ct->position, 128, enemy_ent->comp_transform.position, 196))
-					continue;
-
-				bug_bounce = (BUG_MAX_BOUNCES >> 1);
-				ent->comp_ai.state = BUG_LAUNCHED;
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-			}
-		}
-
-		if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->targ_data.ent_id > -1 && ai->targ_data.ent_id < handler->count
-		   && !(ent->flags & BUG_RECALL) && disrupt_used) {
-			Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];			
-
-			bool do_recall = (stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED);
-			bool recall_to_player = false;
-
-			if(stick_ent->comp_ai.component_valid && !(stick_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
-				do_recall = true;
-				recall_to_player = true;
-			}
-
-			// Bounce off enemy when it dies
-			if(do_recall) {
-				AP_RequestSound(handler->ap, "recall");
-
-				ai->state = BUG_LAUNCHED;
-				ai->targ_data.ent_id = -1;
-
-				bug_bounce = 0;
-				bug_target_picked = false;
-
-				if(!recall_to_player) { 
-					ent->flags &= ~BUG_DISRUPTED_ENEMY;
-					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-				}
-
-				if(ai->targ_data.ent_id == -1 || recall_to_player) {
-					ai->targ_data.ent_id = handler->player_id;
-					bug_target_picked = true;
-					BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-				}
-
-			}
-
-			if(!recall_to_player)
-				ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
-		}
-
-		// * NOTE:
-		// Remove later
-		// This is here for retrieval "puzzle" in alpha build 
-		//if((ent->flags & BUG_DISRUPTED_ENEMY) && fabsf(player_ent->comp_transform.position.z - ct->position.z) >= 175.0f) 
-		if((ent->flags) & BUG_DISRUPTED_ENEMY)
-			can_recall = false;
-
-		// Recall
-		if(can_recall) {
-			if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-				//AP_SetSoundPosition(handler->ap, "recall1", ct->position, 0);
-				//AP_RequestSound(handler->ap, "recall1");
-				AP_SetSoundPosition(handler->ap, "click", ct->position, 0);
-				AP_RequestSound(handler->ap, "click");
-
-				bug_bounce = 0;
-				bug_target_picked = true;
-
-				ent->flags &= ~BUG_DISRUPTED_ENEMY;
-				ent->flags &= ~BUG_ON_SWITCH;
-
-				ent->comp_ai.targ_data.ent_id = handler->player_id;
-				
-				float dist_add = 80.0f + (Vector3Distance(player_ent->comp_transform.position, ct->position) * 0.1f);
-				dist_add = Clamp(dist_add, 0, 300);
-				ct->velocity.z += dist_add;
-
-				if(ct->position.z < player_ent->comp_transform.position.z - 32)
-					ct->velocity.z += 150.0f;
-
-				ent->comp_ai.state = BUG_LAUNCHED;
-				ent->flags |= BUG_RECALL;
-
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-
-				launch_timer = 0.49f;
-
-				//return;
-			}
-		}
-
-		launch_timer -= dt;
+		BugUpdateLanded(ent, handler, sect, dt);
 	}
 	// -------------------------------------------------------------------------------------------------------------
 	
@@ -857,8 +603,9 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	if(ent->flags & BUG_RECALL)
 		pickup_radius *= 1.25f;
 
-	if(ent->flags & BUG_DISRUPTED_ENEMY) {
-		pickup_radius = 0.0f;
+	if(ent->flags & BUG_DISRUPTED_ENEMY && !(ent->flags & BUG_RECALL)) {
+		 pickup_radius = 0.0f;
+
 		if(ai->targ_data.ent_id > -1) {
 			if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
 				ai->targ_data.ent_id = -1;
@@ -881,14 +628,7 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	// -------------------------------------------------------------------------------------------------------------
 
 	if(ai->state == STATE_DEAD) {
-		// Pickup dead
-		if(CheckCollisionBoxes(ct->bounds, player_ent->comp_transform.bounds)) {
-			ai->state = BUG_DEFAULT;
-		}
-
-		bug_cooldown -= dt;
-		if(bug_cooldown <= 0) 
-			ai->state = BUG_DEFAULT;
+		BugUpdateDead(ent, handler, sect, dt);
 	}
 }
 
@@ -980,5 +720,299 @@ void DisruptEntity(EntityHandler *handler, u16 ent_id, MapSection *sect) {
 // *TODO:
 void OnHitBug(Entity *ent, short damage, Vector3 bullet_pos) {
 	// ...
+}
+
+void BugUpdateDefault(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
+}
+
+void BugUpdateLaunched(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
+	Entity *player_ent = &handler->ents[handler->player_id];
+
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+	comp_Health *health = &ent->comp_health;
+
+	launch_timer -= dt;
+
+	/*
+	// Check if grounded
+	ct->on_ground = bug_CheckGround(ent, ct, ct->position, sect, &bug_bounce, handler, dt);
+
+	// Apply gravity
+	if(!ct->on_ground) { 
+		float grav = (bug_bounce > 0) ? BUG_GRAV * 1.1f : BUG_GRAV;
+		ct->velocity.z -= grav * dt;
+	}
+
+	pmTraceData pm = (pmTraceData) {0};
+
+	Vector3 prev_pos = ct->position;
+	bug_TraceMove(ent, ct->position, ct->velocity, &pm, dt, sect, handler);
+	ct->velocity = pm.end_vel;
+	ct->position = pm.end_pos;
+	*/
+	
+	if(launch_timer <= 0)
+		ct->velocity = Vector3ClampValue(ct->velocity, -BUG_MAX_VEL, BUG_MAX_VEL);
+
+	EntGrid *grid = &handler->grid;
+	Coords coords = Vec3ToCoords(ct->position, grid);
+	if(!CoordsInBounds(coords, &handler->grid)) {
+		ai->state = BUG_DEFAULT;
+		ct->position = player_ent->comp_transform.position;
+		return;
+	}
+
+	i16 cell_id = CellCoordsToId(coords, grid);
+	EntGridCell *cell = &grid->cells[cell_id];
+
+	for(u8 i = 0; i < cell->ent_count; i++) {
+		Entity *enemy_ent = &handler->ents[cell->ents[i]];
+
+		if(ent->flags & BUG_RECALL)
+			continue;
+
+		if(enemy_ent->type == ENT_PLAYER)							continue;
+		if(enemy_ent->type == ENT_DISRUPTOR)						continue;
+		if(enemy_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)	continue;
+		if(enemy_ent->comp_ai.state == STATE_DEAD)					continue;
+		if(enemy_ent->type == ENT_FORCEFIELD) 						continue;
+		if(enemy_ent->type == ENT_LADDER) 							continue;
+		if(enemy_ent->flags & ENT_IS_PICKUP)						continue;
+
+		if(enemy_ent->type == ENT_SWITCH) {
+			if(enemy_ent->trigger_condition != TRIGGER_COND_COLL_BUG)
+				continue;
+
+			if(enemy_ent->trigger_state || (launch_timer > 0.0f && (ent->flags & BUG_RECALL)))
+				continue;
+		}
+
+		bool height_check =
+			(ct->position.z >= enemy_ent->comp_transform.position.z - 16 && ct->position.z < enemy_ent->comp_transform.position.z + 48);
+
+		if(bug_bounce == 0) {
+			height_check = true;
+		}
+
+		if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !disrupt_used) {
+			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds) && height_check && !(ent->flags & BUG_RECALL)) {
+				ct->on_ground = true;
+				ct->position = BoxCenter(enemy_ent->comp_health.bug_box);
+				ai->targ_data.ent_id = enemy_ent->id;
+				ct->forward = enemy_ent->comp_transform.forward;
+				//ent->comp_health.damage_cooldown = 10;
+				ct->velocity = Vector3Zero();
+
+				/*
+				if(enemy_ent->type == ENT_SWITCH && enemy_ent->trigger_condition == TRIGGER_COND_COLL_BUG)
+					ent->model.transform = enemy_ent->model.transform;
+					*/
+
+				break;
+			}
+		}
+
+		if(bug_target_picked) {
+			// **
+			// Purpose of this block is to reduce likelihood of Bug overshooting it's target.
+			// Works in most cases
+			Vector3 hvel = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
+			Vector3 self_xy = (Vector3) { ct->position.x, ct->position.y, 0 }; 
+			Vector3 targ_xy = (Vector3) { enemy_ent->comp_transform.position.x, enemy_ent->comp_transform.position.y, 0 }; 
+			if(Vector3Distance(self_xy, targ_xy) <= 16.0f && height_check) {
+				Vector3 to_targ = Vector3Subtract(targ_xy, self_xy);
+
+				float into = Vector3DotProduct(to_targ, Vector3Normalize(hvel));
+				if(into <= -0.5f) {
+					hvel = Vector3Subtract(hvel, Vector3Scale(to_targ, into));
+				}
+
+				ct->velocity.x = hvel.x;
+				ct->velocity.y = hvel.y;
+
+				// Apply some extra gravity, to fall more into target
+				ct->velocity.z -= (BUG_GRAV) * dt;
+			}
+			// **
+		}
+	}
+
+	if(ct->on_ground || (ent->flags & BUG_ON_SWITCH)) {
+		ai->state = BUG_LANDED;
+		ct->velocity = Vector3Zero();
+
+		if(handler->ents[ai->targ_data.ent_id].comp_ai.state == STATE_DEAD) {
+			ai->state = BUG_LAUNCHED;
+			ct->on_ground = false;
+			ent->flags &= ~BUG_DISRUPTED_ENEMY;
+			bug_bounce = 0;
+			bug_target_picked = true;
+			BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+		}
+	}
+
+	launch_timer -= dt;
+}
+
+void BugUpdateLanded(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
+	Entity *player_ent = &handler->ents[handler->player_id];
+
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+	comp_Health *health = &ent->comp_health;
+
+	bool can_recall = true;
+	ct->velocity = Vector3Zero();
+
+	EntGrid *grid = &handler->grid;
+	Coords coords = Vec3ToCoords(ct->position, grid);
+	
+	// Check if there is an enemy to disrupt
+	if(!(ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL) && !disrupt_used && !(ent->flags & BUG_ON_SWITCH)) {
+		i16 cell_id = CellCoordsToId(coords, grid);
+		EntGridCell *cell = &grid->cells[cell_id];
+
+		for(u8 i = 0; i < cell->ent_count; i++) {
+			Entity *enemy_ent = &handler->ents[cell->ents[i]];
+
+			if(enemy_ent->type == ENT_PLAYER)
+				continue;
+
+			if(enemy_ent->type == ENT_DISRUPTOR)
+				continue;
+
+			if(!enemy_ent->comp_ai.component_valid)
+				continue;
+
+			if(enemy_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)
+				continue;
+
+			if(CheckCollisionBoxes(ct->bounds, enemy_ent->comp_transform.bounds)) {
+				DisruptEntity(handler, enemy_ent->id, sect);	
+				ent->flags |= BUG_DISRUPTED_ENEMY;
+				disrupt_used = true;
+				if(enemy_ent->type == ENT_TURRET) {
+					ct->velocity = Vector3Zero();
+					ct->on_ground = true;
+					bug_bounce = BUG_MAX_BOUNCES;
+				}
+				break;
+			}
+
+			if(!CheckCollisionSpheres(ct->position, 128, enemy_ent->comp_transform.position, 196))
+				continue;
+
+			bug_bounce = (BUG_MAX_BOUNCES >> 1);
+			ent->comp_ai.state = BUG_LAUNCHED;
+			BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+		}
+	}
+
+	//if((ent->flags & BUG_DISRUPTED_ENEMY) && !(ent->flags & BUG_RECALL) && disrupt_used) {
+	if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->targ_data.ent_id > -1 && ai->targ_data.ent_id < handler->count && 
+			!(ent->flags & BUG_RECALL) && disrupt_used)
+	{
+		Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];			
+
+		bool do_recall = (stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED);
+		bool recall_to_player = false;
+
+		if(stick_ent->comp_ai.component_valid && !(stick_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
+			do_recall = true;
+			recall_to_player = true;
+		}
+
+		// Bounce off enemy when it dies
+		if(do_recall) {
+			AP_RequestSound(handler->ap, "recall");
+
+			ai->state = BUG_LAUNCHED;
+			ai->targ_data.ent_id = -1;
+
+			bug_bounce = 0;
+			bug_target_picked = false;
+
+			if(!recall_to_player) { 
+				ent->flags &= ~BUG_DISRUPTED_ENEMY;
+				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+
+				return;
+			}
+
+			if(ai->targ_data.ent_id == -1 || recall_to_player) {
+				ai->targ_data.ent_id = handler->player_id;
+				bug_target_picked = true;
+				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+
+				return;
+			}
+
+		}
+
+		if(!recall_to_player)
+			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
+	}
+
+	// * NOTE:
+	// Remove later
+	// This is here for retrieval "puzzle" in alpha build 
+	//if((ent->flags & BUG_DISRUPTED_ENEMY) && fabsf(player_ent->comp_transform.position.z - ct->position.z) >= 175.0f) 
+	if((ent->flags) & BUG_DISRUPTED_ENEMY)
+		can_recall = false;
+
+	// Recall
+	if(can_recall) {
+		if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+			//AP_SetSoundPosition(handler->ap, "recall1", ct->position, 0);
+			//AP_RequestSound(handler->ap, "recall1");
+			AP_SetSoundPosition(handler->ap, "click", ct->position, 0);
+			AP_RequestSound(handler->ap, "click");
+
+			bug_bounce = 0;
+			bug_target_picked = true;
+			//disrupt_used = false;
+
+			ent->flags &= ~BUG_DISRUPTED_ENEMY;
+			ent->flags &= ~BUG_ON_SWITCH;
+
+			ent->comp_ai.targ_data.ent_id = handler->player_id;
+			
+			float dist_add = 80.0f + (Vector3Distance(player_ent->comp_transform.position, ct->position) * 0.1f);
+			dist_add = Clamp(dist_add, 0, 300);
+			ct->velocity.z += dist_add;
+
+			if(ct->position.z < player_ent->comp_transform.position.z - 32)
+				ct->velocity.z += 150.0f;
+
+			ent->comp_ai.state = BUG_LAUNCHED;
+			ent->flags |= BUG_RECALL;
+
+			BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+
+			launch_timer = 0.49f;
+
+			//return;
+		}
+	}
+
+	launch_timer -= dt;
+}
+
+void BugUpdateDead(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) {
+	Entity *player_ent = &handler->ents[handler->player_id];
+
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Ai *ai = &ent->comp_ai;
+
+	// Pickup dead
+	if(CheckCollisionBoxes(ct->bounds, player_ent->comp_transform.bounds)) {
+		ai->state = BUG_DEFAULT;
+	}
+
+	bug_cooldown -= dt;
+	if(bug_cooldown <= 0) 
+		ai->state = BUG_DEFAULT;
+
 }
 

@@ -10,6 +10,7 @@
 
 #define AUTOSAVE_TICKRATE (5.0f)
 #define IS_AUTOSAVE	0x01
+
 typedef struct {
 	time_t time_stamp;
 	char map[64];
@@ -61,6 +62,9 @@ u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path);
 
 u8 rw_WriteEffectData(vEffect_Manager *eff_manager, char *file_path);
 u8 rw_ReadEffectData(vEffect_Manager *eff_manager, char *file_path);
+
+u8 rw_WritePlayerData(char *file_path);
+u8 rw_ReadPlayerData(char *file_path);
 
 void EntHandlerPassRwState(rw_GlobalData *data);
 

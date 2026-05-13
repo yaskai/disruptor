@@ -761,18 +761,16 @@ void BvhTracePointEx(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTr
 }
 
 void BvhTracePointPro(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhTraceData *data, float max_dist, u8 ignore_flags) {
-	if(bvh->count == 0)
-		return;
+	if(!bvh->count) return;
 
 	BvhNode *node = &bvh->nodes[node_id];
-
 	RayCollision coll;
 
 	if(node_id == 0) {
 		ray.position = Vector3Subtract(ray.position, bvh->origin);
 		coll = GetRayCollisionBox(ray, node->bounds);
 
-		if(!coll.hit)
+		if(!coll.hit) 
 			return;
 	};
 
@@ -783,7 +781,7 @@ void BvhTracePointPro(Ray ray, MapSection *sect, BvhTree *bvh, u16 node_id, BvhT
 		if(tri.collision_flags & ignore_flags)
 			continue;
 
-		if(Vector3DotProduct(ray.direction, tri.normal) >= 0)
+		if(Vector3DotProduct(ray.direction, tri.normal) >= 0) 
 			continue;
 		
 		coll = GetRayCollisionTriangle(ray, tri.vertices[0], tri.vertices[1], tri.vertices[2]);

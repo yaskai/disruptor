@@ -5,21 +5,21 @@
 #define TEXT_GREEN (Color) { 98, 234, 201, 255 }
 #define TEXT_ORANGE (Color) { 255, 165, 80, 255 }
 
-int *hud_cp = NULL;
+int *hud_cpoints = NULL;
 
 void HudInit(Hud *hud, Config *conf, EntityHandler *handler, PlayerGun *player_gun) {
 	hud->conf = conf;
 	hud->handler = handler;
 	hud->player_gun = player_gun;
 
-	hud_cp = malloc((96 + 32) * sizeof(int));
+	hud_cpoints = malloc((96 + 32) * sizeof(int));
 	for(int i = 0; i < 96; i++)
-		hud_cp[i] = 32 + i;
+		hud_cpoints[i] = 32 + i;
 
-	hud_cp[96] = 0xf21e;
-	hud_cp[97] = 0xf05f6;
-	hud_cp[98] = 0xf0b7a;
-	hud->font = LoadFontEx("resources/fonts/shuretech.ttf", 64, hud_cp, 99);
+	hud_cpoints[96] = 0xf21e;
+	hud_cpoints[97] = 0xf05f6;
+	hud_cpoints[98] = 0xf0b7a;
+	hud->font = LoadFontEx("resources/fonts/shuretech.ttf", 64, hud_cpoints, 99);
 	SetTextureFilter(hud->font.texture, TEXTURE_FILTER_TRILINEAR);
 
 	hud->font_size = 80.0f;
@@ -51,9 +51,8 @@ void HudUpdate(Hud *hud, float dt) {
 	for(i16 i = 0; i < hud->handler->text_obj_count; i++) {
 		TextObject *text_obj = &hud->handler->text_objs[i];
 
-		if(CheckCollisionSpheres(player_pos, 64, text_obj->position, 64)) {
+		if(CheckCollisionSpheres(player_pos, 64, text_obj->position, 64))
 			text_obj_id = i;
-		}
 	}
 
 	if(text_obj_id > -1)

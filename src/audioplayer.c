@@ -299,9 +299,7 @@ void AP_Resume(AudioPlayer *ap) {
 }
 
 void AP_StopAll(AudioPlayer *ap) {
-	for(int i = 0; i < ap->sound_hashmap.count; i++) {
+	for(int i = 0; i < ap->sound_hashmap.count; i++) 
 		ma_sound_stop(&sounds[HashFetch(&ap->sound_hashmap, ap->sound_hashmap.nodes[i].key)]);
-	}
 }
-
 

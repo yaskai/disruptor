@@ -79,4 +79,3 @@ void ConfigParseLine(Config *conf, char *line, u8 *block, u8 print);
 void ConfigPrintComment(char *comment);
 
 #endif
-

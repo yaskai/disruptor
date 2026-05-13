@@ -29,12 +29,10 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	Bsp_Header header = {0};
 	fread(&header, sizeof(header), 1, pF);
 
-	/*
 	if(header.version != BSP_VERSION) {
 		MessageError("ERROR: BSP version mismatch", NULL);
 		return data;
 	}
-	*/
 
 	if(print_output)
 		printf("%d\n", header.version);
@@ -49,7 +47,6 @@ Bsp_Data LoadBsp(char *path, bool print_output) {
 	if(print_output) {
 		Message("-------- ENTITY DATA --------", ANSI_GREEN);
 		MessageDiagInt("bytes", ents_lump.file_size, ANSI_YELLOW);
-		//printf("%s\n", data.ent_str);
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -1130,6 +1127,8 @@ Model BspModelToRenderModel(Bsp_Data *bsp, int submodel_id) {
 	Bsp_Miptex *mip = &bsp->miptex[surface->texture_id];
 	int tex_id = HashFetch(&material_hashmap, mip->name);
 	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = materials[tex_id].maps[MATERIAL_MAP_DIFFUSE].texture;
+	model.materials[0].maps[MATERIAL_MAP_METALNESS].texture = bsp->lm.tex;
+	model.materials[0].shader = bsp->lm_shader;
 
 	char pref[3];
 	memcpy(pref, mip->name, sizeof(pref));

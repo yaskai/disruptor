@@ -228,7 +228,7 @@ ___
 * *To Fix*
 
 ** Disrupt does not chain
-** Data unload (double free somewhere??)
-** Ladders, switch to E (interact) -> w/s (climb up/down)
+** (x) Data unload (double free somewhere??)
+** (x) Ladders, switch to E (interact) -> w/s (climb up/down)
 
 ___

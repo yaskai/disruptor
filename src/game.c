@@ -69,6 +69,8 @@ Tri *tris;
 Model sphere_model;
 float delta_time = 0;
 
+Texture2D start_screen_tex;
+
 void GameInit(Game *game, Config *conf) {
 	game->conf = conf;	
 
@@ -82,6 +84,8 @@ void GameInit(Game *game, Config *conf) {
 	game->flags = 0;
 
 	game_self_ptr = game;
+
+	game->splash_timer = 10.0f;
 }
 
 void GameClose(Game *game) {
@@ -172,6 +176,8 @@ void GameRenderSetup(Game *game) {
 
 	//save_rt = LoadRenderTexture(540/2, 360/2);
 	save_rt = LoadRenderTexture(640, 360);
+
+	start_screen_tex = LoadTexture("resources/textures/splash3.png"); 
 }
 
 void GameAudioSetup(Game *game) {
@@ -708,7 +714,7 @@ void GameDraw(Game *game, float dt) {
 	}
 
 	int fps = GetFPS();
-	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 	//EntDebugText();
 
 	EndDrawing();
@@ -770,7 +776,6 @@ void StartNewGame(Game *game) {
 }
 
 void GameTitleScreen(Game *game) {
-	//game->input_handler.skip_frames = 5;
 	game->input_handler.mouse_delta = (Vector2) { 0, 0 };
 	ui_TitleUpdate(&game->ui);
 
@@ -788,5 +793,19 @@ void GameTitleScreen(Game *game) {
 
 	if(game->ui.flags & UI_EXIT_GAME_REQ)
 		game->flags |= FLAG_EXIT_REQUEST;
+}
+
+void GameStartupScreen(Game *game) {
+	float t = GetTime();
+	SetShaderValue(game->hud.text_shader, GetShaderLocation(game->hud.text_shader, "time"), &t, SHADER_UNIFORM_FLOAT);
+
+	BeginDrawing();
+	BeginShaderMode(game->hud.text_shader);
+
+	DrawTextEx(game->ui.font, "DISRUPTOR", (Vector2) { 512, 0 }, 128, 1, WHITE);
+	DrawTexture(start_screen_tex, VIRT_W * 0.5f - (start_screen_tex.width * 0.5f), 128, WHITE);	
+	
+	EndShaderMode();
+	EndDrawing();
 }
 

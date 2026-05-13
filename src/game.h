@@ -48,6 +48,8 @@ typedef struct {
 
 	LightHandler lh;
 
+	float splash_timer;
+
 	u8 flags;
 
 } Game;
@@ -65,5 +67,7 @@ void GameDraw(Game *game, float dt);
 
 void StartNewGame(Game *game);
 void GameTitleScreen(Game *game);
+
+void GameStartupScreen(Game *game);
 
 #endif
