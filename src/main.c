@@ -66,10 +66,7 @@ int main() {
 	GameAudioSetup(&game);
 
 	// Disable exit key (raylib defaults to escape key)
-	// * NOTE: 
-	// Overwritten back to ESC until UI/menus are implemented
 	SetExitKey(KEY_NULL);
-
 	// Disable cursor,
 	// prevents drawing cursor image and aiming issues
 	DisableCursor();
@@ -83,7 +80,7 @@ int main() {
 	return 0;
 }
 
-// Main loop, called every frame
+// Main loop, called every frame until app exit
 void GameTick(bool *exit, Game *game) {
 	while(!(*exit)) {
 		*exit = ( (game->flags & FLAG_EXIT_REQUEST) || WindowShouldClose() );

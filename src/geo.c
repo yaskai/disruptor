@@ -172,7 +172,7 @@ BoxNormals BoxGetFaceNormals(BoundingBox box) {
 		float z = (1 << i & 0x04) ? 1 : 0;
 
 		normals.n[i] = (Vector3) { x, y, z }; 
-		normals.n[3 + i] = Vector3Scale(normals.n[i], -1);
+		normals.n[3+i] = Vector3Scale(normals.n[i], -1);
 	}
 
 	return normals;
@@ -555,20 +555,6 @@ void BvhNodeSubdivide(MapSection *sect, BvhTree *bvh, u16 node_id) {
 	BvhNodeSubdivide(sect, bvh, child_lft);
 	BvhNodeSubdivide(sect, bvh, child_rgt);
 }
-
-// Initialize map section,
-// Load geometry, materials, construct BVH, etc.  
-/*
-void MapSectionInit(MapSection *sect, Model model) {
-	sect->model = model;
-	sect->tris = ModelToTris(model, &sect->tri_count, &sect->tri_ids);
-
-	BvhConstruct(sect, &sect->bvh[0], Vector3Zero(), NULL);
-	BvhConstruct(sect, &sect->bvh[1], BODY_VOLUME_MEDIUM, NULL);
-
-	sect->flags = (MAP_SECT_LOADED);
-}
-*/
 
 // Unload map section data
 void MapSectionClose(MapSection *sect) {

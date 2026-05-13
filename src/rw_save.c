@@ -269,6 +269,7 @@ u8 rw_ReadEntData(EntityHandler *ent_handler, char *file_path) {
 
 u8 rw_WriteEffectData(vEffect_Manager *eff_manager, char *file_path) {
 	Message("rw_WriteEffectData()", ANSI_BLUE);
+
 	FILE *pF = fopen(file_path, "wb");
 
 	for(u8 i = 0; i < V_EFFECT_MAX_TRAILS; i++)			fwrite(&eff_manager->trails[i], sizeof(vEffect_Trail), 1, pF);

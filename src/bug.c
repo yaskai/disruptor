@@ -628,6 +628,8 @@ void BugUpdate(Entity *ent, EntityHandler *handler, MapSection *sect, float dt) 
 	// -------------------------------------------------------------------------------------------------------------
 
 	if(ai->state == STATE_DEAD) {
+		ai->state = BUG_DEFAULT;
+		return;
 		BugUpdateDead(ent, handler, sect, dt);
 	}
 }
