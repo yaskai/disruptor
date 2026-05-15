@@ -281,8 +281,6 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
 
 		if(temp_tr.distance < tr.distance) {
-			tr = temp_tr;
-
 			ent_id = sect->bvh_hullgroups[j].ent_id;
 			if(ent_id > 0) {
 				if(handler->ents[ent_id].type == ENT_DOOR && tr.normal.z >= 1.0f ) {
@@ -290,28 +288,13 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 					lift_ent->flags |= BUG_ON_PLATFORM;		
 					bug_on_plat = true;
 				}
+
+				if(!(handler->ents[ent_id].flags & ENT_ACTIVE))
+					continue;
 			}
-		}
 
-		if(temp_tr.hit)
-			continue;
-
-		temp_tr = TraceDataEmpty();
-		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, 8 + 1 + EPSILON);
-		
-		if(temp_tr.distance < tr.distance) {
 			tr = temp_tr;
-
-			ent_id = sect->bvh_hullgroups[j].ent_id;
-			if(ent_id > 0) {
-				if(handler->ents[ent_id].type == ENT_DOOR && tr.normal.z >= 1.0f ) {
-					Entity *lift_ent = &handler->ents[ent_id];
-					lift_ent->flags |= BUG_ON_PLATFORM;		
-					bug_on_plat = true;
-				}
-			}
 		}
-
 	}
 	
 	if(!tr.hit) {
@@ -382,16 +365,13 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 		BvhTracePointEx(ray, sect, &sect->bvh[2], 0, &tr, Vector3Length(move));
 
 		for(int j = 1; j < sect->bvh_hullgroup_count; j++) {
-			if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
-				continue;
+			Bvh_HullGroup *hg = &sect->bvh_hullgroups[j];
 
-			/*
-			if(handler->ents[sect->bvh_hullgroups[j].ent_id].type == ENT_LADDER)
+			if(!(hg->flags & HULLGROUP_ACTIVE))	
 				continue;
-			*/
 
 			BvhTraceData temp_tr = TraceDataEmpty();
-			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, Vector3Length(move));
+			BvhTracePointEx(ray, sect, &hg->bvh[2], 0, &temp_tr, Vector3Length(move));
 		
 			if(temp_tr.distance < tr.distance) {
 				tr = temp_tr;
@@ -401,7 +381,7 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 				continue;
 
 			temp_tr = TraceDataEmpty();
-			BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[0], 0, &temp_tr, Vector3Length(move));
+			BvhTracePointEx(ray, sect, &hg->bvh[0], 0, &temp_tr, Vector3Length(move));
 			if(temp_tr.distance < tr.distance) {
 				tr = temp_tr;
 			}
@@ -915,7 +895,9 @@ void BugUpdateLanded(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 	if((ent->flags & BUG_DISRUPTED_ENEMY) && ai->targ_data.ent_id > -1 && ai->targ_data.ent_id < handler->count && 
 			!(ent->flags & BUG_RECALL) && disrupt_used)
 	{
-		Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];			
+		Entity *stick_ent = &handler->ents[ai->targ_data.ent_id];
+		if(stick_ent->comp_ai.state == STATE_DEAD)
+			disrupt_used = false;
 
 		bool do_recall = (stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED);
 		bool recall_to_player = false;

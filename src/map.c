@@ -312,9 +312,10 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 
 				if(!model_incremented) {
 					if( strncmp(curr_entspawn->classname, "func_forcefield", strlen("func_forcefield")) == 0 ||
-						strncmp(curr_entspawn->classname, "func_door", strlen("func_door")) == 0 ||
-						strncmp(curr_entspawn->classname, "func_lift", strlen("func_lift")) == 0 || 
-						strncmp(curr_entspawn->classname, "func_glass", strlen("func_glass")) == 0) {
+						strncmp(curr_entspawn->classname, "func_door", strlen("func_door")) 			== 0 ||
+						strncmp(curr_entspawn->classname, "func_lift", strlen("func_lift")) 			== 0 || 
+						strncmp(curr_entspawn->classname, "func_glass", strlen("func_glass")) 			== 0 ||
+						strncmp(curr_entspawn->classname, "func_ladder", strlen("func_ladder"))			== 0) {
 
 						curr_model_id++;
 						model_incremented = true;
@@ -443,15 +444,6 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 			brush->bounds.max = Vector3Max(brush->bounds.max, brush->verts[j]);
 		}
 	}
-
-	/*
-	for(int i = 0; i < brush_pool->count-1; i++) {
-		if(strcmp(brush_pool->brushes[i].tex_name, "{ff")) {
-			brush_pool->brushes[i] = brush_pool->brushes[i+1];
-			brush_pool->count--;
-		}
-	}
-	*/
 
 	if(GetLogState()) {
 		Message("--------------- [ ENTITIES ] -----------------", ANSI_GREEN);

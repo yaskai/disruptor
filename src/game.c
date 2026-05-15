@@ -310,7 +310,6 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	GetMouseDelta();	// Clears existing delta, needed to make camera not move on start
 	game->input_handler.mouse_delta = Vector2Zero();
 
-	/*
 	printf("bvh hg count: %d\n", game->test_section.bvh_hullgroup_count);
 	printf("bsp hg count: %d\n", game->test_section.bsp_data.num_models);
 
@@ -322,7 +321,6 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	printf("player_id: %d\n", game->ent_handler.player_id);
 	printf("bug_id: %d\n", game->ent_handler.bug_id);
 	printf("sect ptr (src) %p\n", &game->test_section);
-	*/
 }
 
 void GameUpdate(Game *game, float dt) {
@@ -608,6 +606,14 @@ void RenderDebugLayer(Game *game) {
 	}
 
 	DebugDrawNavGraphs(&game->test_section, sphere_model);
+
+	for(int i = 0; i < game->test_section.bvh_hullgroup_count; i++) {
+		Bvh_HullGroup *hg = &game->test_section.bvh_hullgroups[i];
+		if(!(hg->flags & HULLGROUP_ACTIVE))
+			continue;
+
+		DrawBoundingBox(hg->bvh[0].nodes[0].bounds, RED);
+	}
 
 	EndMode3D();
 
