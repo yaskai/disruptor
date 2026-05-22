@@ -460,7 +460,6 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 		case ENT_UNLOCK_REVOLVER: {
 			ent.flags |= ENT_IS_PICKUP;
 
-			//ent.model = LoadModel("resources/models/weapons/bug_01.glb");
 			ent.model = LoadModel("resources/models/weapons/rev_00_e.glb");
 			for(int i = 0; i < ent.model.materialCount; i++) 
 				ent.model.materials[i].shader = handler->ent_shader;
@@ -473,6 +472,48 @@ Entity SpawnEntity(EntSpawn *spawn_point, EntityHandler *handler, Bsp_Data *bsp)
 			};
 
 			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+			ent.comp_ai.component_valid = false;
+
+		} break;
+
+		case ENT_UNLOCK_SMG: {
+			ent.flags |= ENT_IS_PICKUP;
+			ent.model = LoadModel("resources/models/weapons/smg_00.glb");
+
+			for(int i = 0; i < ent.model.materialCount; i++) 
+				ent.model.materials[i].shader = handler->ent_shader;
+
+			//ent.model.transform = MatrixMultiply(MatrixRotateX(90*DEG2RAD), MatrixRotateY(90*DEG2RAD));
+
+			ent.comp_transform.bounds = (BoundingBox) {
+				.min = (Vector3) { -4, -4, -4 },
+				.max = (Vector3) {  4,  4,  4 }
+			};
+
+			ent.comp_transform.bounds = BoxTranslate(ent.comp_transform.bounds, ent.comp_transform.position);
+			ent.comp_ai.component_valid = false;
+
+		} break;
+
+		case ENT_BOX: {
+			ent.model = BspModelToRenderModel(bsp, ent.bsp_model);
+			ent.model.materials[0].shader = handler->ent_shader;
+			ent.comp_transform.bounds = GetModelBoundingBox(ent.model);
+			
+			ent.comp_transform.bounds.min = Vector3Add(ent.comp_transform.bounds.min, Vector3Scale(Vector3One(), -4));
+			ent.comp_transform.bounds.max = Vector3Add(ent.comp_transform.bounds.max, Vector3Scale(Vector3One(),  4));
+
+			ent.comp_ai.targ_data.position = spawn_point->targ_offset;
+
+			bsp->hull_groups[ent.bsp_model].ent_id = ent.id;
+
+			//ent.flags &= ~ENT_COLLIDERS;
+			ent.flags |= ENT_COLLIDERS;
+
+			ent.comp_health.component_valid = true;
+			ent.comp_health.hit_box = ent.comp_transform.bounds;
+			ent.comp_health.on_hit = ON_HIT_BOX;  
+
 			ent.comp_ai.component_valid = false;
 
 		} break;

@@ -152,10 +152,12 @@ bool pm_StandCheck(comp_Transform *ct) {
 	Bsp_TraceData tr = Bsp_TraceDataEmpty();
 	float fraction = FLT_MAX;
 
-	Vector3 check =  ct->position;
+	Vector3 check = ct->position;
 	//Vector3 check = Vector3Subtract(ct->position, Vector3Scale(Vector3Normalize(ct->velocity), 8.0f));
 	Vector3 stand = check;
 	stand.z += 32.0f;
+
+	Bsp_RecursiveTraceEx(&bsp->hull_groups[0].hulls[2], bsp->hull_groups[0].hulls[2].first_node, 0, 1, check, stand, &tr);
 
 	for(int j = 0; j < bsp->num_models; j++) {
 		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
@@ -179,7 +181,10 @@ bool pm_StandCheck(comp_Transform *ct) {
 		return false;
 	}
 
-	stand.z = ct->position.z + 2;
+	stand.z = ct->position.z + 3;
+
+	tr = Bsp_TraceDataEmpty();
+	Bsp_RecursiveTraceEx(&bsp->hull_groups[0].hulls[1], bsp->hull_groups[0].hulls[1].first_node, 0, 1, check, stand, &tr);
 
 	for(int j = 0; j < bsp->num_models; j++) {
 		if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
@@ -381,6 +386,7 @@ void CheckForPickups(Entity *player, EntityHandler *handler, i16 cell_id) {
 
 			case ENT_UNLOCK_BUG:
 			case ENT_UNLOCK_REVOLVER:
+			case ENT_UNLOCK_SMG:
 				SendUnlockPickupEvent(ent->type);
 				break;
 		}

@@ -794,6 +794,8 @@ void AiCheckInputs(Entity *ent, EntityHandler *handler, MapSection *sect) {
 	Vector3 to_player = Vector3Normalize(Vector3Subtract(player_ent->comp_transform.position, eye_pos));
 	float d_to_player = Vector3LengthSqr(to_player);
 
+	ai->input_mask &= ~AI_INPUT_BUMP_WALL;
+
 	// Player is in ai's sight cone
 	if(Vector3DotProduct(ct->forward, to_player) >= ai->sight_cone && d_to_player <= 1000.0f) { 
 		// Check for obstructions

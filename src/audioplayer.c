@@ -129,6 +129,8 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "plr_step2")],	MA_FALSE);
 	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "plr_step3")],	MA_FALSE);
 
+	ma_sound_set_spatialization_enabled(&sounds[HashFetch(&ap->sound_hashmap, "cg1")], MA_FALSE);
+
 	for(int i = 0; i < ap->sound_count; i++) {
 		ma_sound_set_min_distance(&sounds[i], 96.0f);
 		ma_sound_set_max_distance(&sounds[i], 2500.0f);
@@ -206,6 +208,7 @@ void AP_LoadNeeded(AudioPlayer *ap, char *directory) {
 	ma_sound_start(&sounds[HashFetch(&ap->sound_hashmap, "ff_loop")]);
 
 	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "click")], 2.0f);
+	ma_sound_set_volume(&sounds[HashFetch(&ap->sound_hashmap, "box_break")], 10.0f);
 
 	for(int i = 0; i < 5; i++) {
 		ma_sound *sound = &sounds[HashFetch(&ap->sound_hashmap, bullet_near_sounds[i])];

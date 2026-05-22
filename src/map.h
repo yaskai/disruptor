@@ -131,7 +131,7 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 
 void UpdateMapMeshList(MapSection *sect, Camera3D cam);
 void DrawMap(MapSection *sect, Vector3 pos);
-void DrawMapTranslucent(MapSection *sect, Vector3 pos);
+void DrawMapTranslucent(MapSection *sect, Camera3D cam);
 
 void DSP_AudioSetup(Bsp_Data *bsp, AudioPlayer *ap, SpawnList *spawn_list);
 void DSP_UpdateBlend(MapSection *sect, AudioPlayer *ap, Vector3 pos, float dt);

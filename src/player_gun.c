@@ -10,6 +10,7 @@
 #include "config.h"
 #include "audioplayer.h"
 #include "lit.h"
+#include "../include/log_message.h"
 
 #define USE_MWHEEL (true)
 
@@ -36,6 +37,9 @@ float gun_angle = 0;
 #define DISRUPTOR_REST_ANGLE_REST 2.5f
 
 #define DISRUPTOR_THROW_FORCE 450.0f
+
+#define SMG_REST (Vector3) { -0.85f, -1.75f, 5.5f } 
+#define SMG_ANGLE_REST 0.5f
 
 float recoil = 0.0f;
 float cam_recoil = 0.0f;
@@ -106,6 +110,8 @@ comp_Weapon weapons[] = {
 
 		.reload_time_amnt = 2,
 		.reload_timer = 0,
+
+		.spread = 5,
 	},
 	// Shotgun
 	(comp_Weapon) {
@@ -127,7 +133,8 @@ comp_Weapon weapons[] = {
 		.in_clip = 35,
 		.ammo = 70, 	
 		.reload_time_amnt = 5,
-		.reload_timer = 0
+		.reload_timer = 0,
+		.spread = 10
 	},
 };
 
@@ -223,7 +230,7 @@ char *gun_shoot_sounds[6][3] = {
 	// Shotgun
 	{ "" },
 	// SMG
-	{ "" },
+	{ "cg1" },
 };
 
 enum CROSSHAIR_IDS : short {
@@ -280,11 +287,9 @@ void PlayerGunInit(
 
 	models[WEAP_PISTOL] 	= LoadModel("resources/models/weapons/pistol_00.glb");
 	models[WEAP_SHOTGUN] 	= LoadModel("resources/models/weapons/pistol_00.glb");
-	//models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00.glb");
 	models[WEAP_REVOLVER] 	= LoadModel("resources/models/weapons/rev_00_e.glb");
-	//models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_00.glb");
 	models[WEAP_DISRUPTOR] 	= LoadModel("resources/models/weapons/bug_01.glb");
-	models[WEAP_SMG] = LoadModel("resources/models/weapons/smg_00.glb");
+	models[WEAP_SMG] = LoadModel("resources/models/weapons/smg_01.glb");
 
 	anims[WEAP_REVOLVER] = *LoadModelAnimations("resources/models/weapons/rev_00_e.glb", &num_anims[WEAP_REVOLVER]);
 	anim_states[WEAP_REVOLVER] = anim_Init(models[WEAP_REVOLVER]);
@@ -328,7 +333,6 @@ void PlayerGunInit(
 }
 
 void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
-
 	init_t -= dt;
 	if(init_t > 0)
 		return;
@@ -375,11 +379,8 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 
 	//Vector2 md = GetMouseDelta();
 	Vector2 md = gun_refs.input->mouse_delta;
-	if(fabsf(md.x) >= 1.5f)
-		sway.x += (md.x * dt * 0.025f);
-
-	if(fabsf(md.y) >= 1.5f)
-		sway.y += (md.y * dt * 0.025f);
+	sway.x += (md.x * (dt*10));
+	sway.y += (md.y * (dt*10));
 
 	curr_gun->cooldown -= dt;
 
@@ -435,6 +436,7 @@ void PlayerGunUpdate(PlayerGun *player_gun, float dt) {
 			break;
 
 		case WEAP_SMG:
+			if(weap_unlocked[WEAP_SMG]) PlayerGunUpdateSMG(player_gun, dt);		
 			break;
 	}	
 
@@ -479,16 +481,8 @@ void PlayerGunUpdateShotgun(PlayerGun *player_gun, float dt) {
 }
 
 void PlayerGunUpdateRevolver(PlayerGun *player_gun, float dt) {
-	//if(reload_active)
-		//return;
-
 	//float angle_targ = Clamp((recoil*1.0f) + gun_rot, -30, 60.0f);
 	float recoil_angle = Clamp((recoil*10.35f), -30, 40.0f);
-
-	/*
-	if(freeze_frame)
-		recoil_angle = 0;
-		*/
 
 	gun_angle = recoil_angle;
 	gun_angle = Clamp(gun_angle, REVOLVER_ANGLE_REST, 30.0f);
@@ -554,6 +548,54 @@ void PlayerGunUpdateDisruptor(PlayerGun *player_gun, float dt) {
 }
 
 void PlayerGunUpdateSMG(PlayerGun *player_gun, float dt) {
+	//float angle_targ = Clamp((recoil*1.0f) + gun_rot, -30, 60.0f);
+	float recoil_angle = Clamp((recoil*10.35f), -30, 40.0f);
+
+	gun_angle = recoil_angle;
+	gun_angle = Clamp(gun_angle, SMG_ANGLE_REST, 30.0f);
+
+	//mat = MatrixRotateX(-recoil_angle * DEG2RAD);
+	mat = MatrixRotateX(-gun_angle * DEG2RAD);
+	mat = MatrixMultiply(mat, MatrixRotateY(SMG_ANGLE_REST * DEG2RAD));
+
+	//float friction_targ = (recoil_angle >= 25.0f) ? 7.9f : 20.5f;
+	float friction_targ = 10.0f;
+	if(gun_angle >= 35.0f && recoil >= 80.0f) friction_targ *= 0.85f;
+	friction = Lerp(friction, friction_targ, dt);
+
+	recoil -= (recoil * friction) * dt; 
+	if(recoil <= -EPSILON) recoil = 0;
+
+	if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+		PlayerShootSMG(player_gun, gun_refs.handler, gun_refs.sect);
+	}
+
+	gun_pos = SMG_REST;
+	//float rest_ofs = (recoil * 0.04f);
+	float rest_ofs = ((recoil*10) * 0.065f);
+
+	//float rest_ofs = (recoil * 0.0554f);
+	rest_ofs = Clamp(rest_ofs, 0.0f, 10.0f); 	
+	gun_pos.z = SMG_REST.z - (rest_ofs * 2);
+	//gun_pos.y = SMG_REST.y + (rest_ofs*0.11f);
+
+	//player_gun->cam.target.y = Lerp(player_gun->cam.target.y, -rest_ofs*0.2f, 5*dt);
+	//player_gun->cam.position.y = player_gun->cam.target.y;
+	//player_gun->cam.position.y = Lerp(player_gun->cam.target.y, rest_ofs*0.5f, 30*dt);
+
+	models[WEAP_SMG].transform = mat;
+
+	//float lerp_t = (recoil_angle < 50) ? 30 : 30; 
+	//float lerp_t = (recoil >= 80.0f) ? 15 : 10; 
+	//cam_recoil = Lerp(cam_recoil, recoil*0.0016f, dt*lerp_t);
+	//cam_recoil = Lerp(cam_recoil, recoil*0.0013f, dt*lerp_t);
+	//cam_recoil = Lerp(cam_recoil, recoil*0.0035f, dt*lerp_t);
+	//cam_recoil = Lerp(cam_recoil, fmaxf(recoil*0.006f, (gun_angle*0.001f)), dt*lerp_t);
+	//cam_recoil = Lerp(cam_recoil, fmaxf(recoil*0.019f, (gun_angle*0.001f)), dt*lerp_t);
+	//cam_recoil = Clamp(cam_recoil, 0.0f, 0.33f);
+	//PlayerSetRecoilInput(gun_refs.player, cam_recoil);
+
+	freeze_frame = false;
 }
 
 void PlayerGunDraw(PlayerGun *player_gun) {
@@ -569,16 +611,26 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		}
 	}
 
-	if(player_gun->current_gun == WEAP_REVOLVER) {
+	if(player_gun->current_gun && player_gun->current_gun != WEAP_DISRUPTOR) {
 		BeginBlendMode(BLEND_ADDITIVE);
-		if(curr_gun->cooldown > 0) {
+		if(curr_gun->cooldown >= 0.05f) {
 			//DrawTexture(muz_flash, 1920/2, 1080/2, WHITE);
-			Vector3 world_pos = REVOLVER_REST;
+
+			Vector3 world_pos;
+			switch(curr_gun->id) {
+				case WEAP_REVOLVER: 	world_pos = REVOLVER_REST;  	break;
+				case WEAP_SMG:			world_pos = SMG_REST;			break;
+			}
+			
 			world_pos.x += 0.1f;
 			world_pos.y += 1.25f;
 			muz_pos = GetWorldToScreen(world_pos, player_gun->cam);
 			muz_pos.x -= 16;
 			muz_pos.y += 16;
+			if(curr_gun->id == WEAP_SMG) {
+				muz_pos.y += 100;
+				muz_pos.x += 60;
+			}
 			//muz_pos.y -= muz_flash.height * 0.5f;
 			//DrawTextureEx(muz_flash, muz_pos, muz_rot, 1.0f, WHITE);
 
@@ -604,15 +656,6 @@ void PlayerGunDraw(PlayerGun *player_gun) {
 		Vector3 draw_pos = Vector3Add(gun_pos, Vector3Scale( (Vector3) { 1, 0, 0 }, sway.x));
 		draw_pos = Vector3Add(draw_pos, Vector3Scale(LOCAL_UP, sway.y));
 		draw_pos.z -= sway.y * 0.01f;
-
-		/*
-		Color clr = lit_SampleLightGrid(&gun_refs.sect->bsp_data, gun_refs.player->comp_transform.position);
-		clr.r = Clamp(clr.r, 0, 255);
-		clr.g = Clamp(clr.g, 0, 255);
-		clr.b = Clamp(clr.b, 0, 255);
-		weap_tint = ColorLerp(weap_tint, clr, GetFrameTime());
-		weap_tint.a = 255;
-		*/
 
 		Vector3 sample_pos = Vector3Add(gun_refs.player->comp_transform.position, Vector3Scale(gun_refs.player->comp_transform.forward, 5.0f));
 		Color light = lit_SampleLightGrid(&gun_refs.sect->bsp_data, sample_pos);
@@ -672,6 +715,10 @@ void PlayerShoot(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect
 
 		case WEAP_REVOLVER:
 			PlayerShootRevolver(player_gun, handler, sect);
+			break;
+			
+		case WEAP_SMG:
+			PlayerShootSMG(player_gun, handler, sect);
 			break;
 
 		case WEAP_DISRUPTOR:
@@ -750,7 +797,6 @@ void PlayerShootRevolver(PlayerGun *player_gun, EntityHandler *handler, MapSecti
 	int sfx_id = GetRandomValue(0, 1);
 	AP_SetSoundPitch(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id], GetRandomValue(80, 90) * 0.01f);
 	AP_RequestSound(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id]);
-
 
 	recoil_add = false;
 	recoil = 90 + (GetRandomValue(1, 5) * 0.1f);
@@ -890,10 +936,111 @@ void PlayerShootDisruptor(PlayerGun *player_gun, EntityHandler *handler, MapSect
 }
 
 void PlayerShootSMG(PlayerGun *player_gun, EntityHandler *handler, MapSection *sect) {
+	if(reload_active)
+		return;
+
+	// Can't shoot, no ammo
+	if(curr_gun->in_clip <= 0) {
+		AP_RequestSound(gun_refs.ap, "outofammo");
+		return;
+	} 
+
+	if(curr_gun->cooldown > 0)
+		return;
+
+	//int sfx_id = GetRandomValue(0, 1);
+	//AP_SetSoundPitch(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id], GetRandomValue(80, 90) * 0.01f);
+	//AP_RequestSound(gun_refs.ap, gun_shoot_sounds[WEAP_REVOLVER][sfx_id]);
+
+	AP_SetSoundPitch(gun_refs.ap, gun_shoot_sounds[WEAP_SMG][0], GetRandomValue(100, 120) * 0.01f);
+	AP_RequestSound(gun_refs.ap, gun_shoot_sounds[WEAP_SMG][0]);
+
+	recoil_add = false;
+	//recoil = 1 + (GetRandomValue(1, 5) * 0.1f);
+	recoil += 0.5f + GetRandomValue(1, 2) * 0.1f;
+
+	curr_gun->cooldown = 0.1f;
+	muz_rot[0] = -30;
+	for(short i = 1; i < 12; i++) muz_rot[i] = muz_rot[0] + GetRandomValue(-360, 360);
+
+	comp_Transform *ct = &gun_refs.player->comp_transform;
+
+	Vector3 trace_start = ct->position;
+	trace_start.z = gun_refs.world_cam->position.z - 2;
+
+	Vector3 dir = ct->forward;
+	dir = Vector3Add(dir, (Vector3) {
+			.x = GetRandomValue(-curr_gun->spread, curr_gun->spread) * 0.01f,
+			.y = GetRandomValue(-curr_gun->spread, curr_gun->spread) * 0.01f,
+			.z = GetRandomValue(-curr_gun->spread, curr_gun->spread) * 0.01f
+	});
+	dir = Vector3Normalize(dir);
+
+	bool trace_hit = false;
+	Vector3 point = TraceBullet(
+		handler,
+		sect,
+		trace_start,
+		dir,
+		handler->player_id,
+		&trace_hit,
+		false
+	);
+
+	Vector3 trail_start = Vector3Add(trace_start, Vector3Scale(ct->forward, 12));
+	trail_start = Vector3Add(trail_start, Vector3Scale(DOWN, 2));
+
+	//Vector3 trail_end = Vector3Add(trail_start, Vector3Scale(ct->forward, Vector3Distance(ct->position, point)));
+	Vector3 trail_end = point;
+	if(!trace_hit) {
+		trail_end = Vector3Add(trail_start, Vector3Scale(ct->forward, 2000.0f));
+	}
+
+	Vector3 right = Vector3CrossProduct(ct->forward, UP);
+	trail_start = Vector3Add(trail_start, Vector3Scale(right, 3.5f));
+	if(Vector3DotProduct(ct->velocity, right) < 0) {
+		trail_start = Vector3Add(trail_start, Vector3Scale(right, 2.5f));
+		trail_end = Vector3Add(trail_end, Vector3Scale(right, 2.5f));
+	}
+
+	if(Vector3DotProduct(ct->velocity, right) > 0) {
+		trail_start = Vector3Add(trail_start, Vector3Scale(right, -1.25f));
+		trail_end = Vector3Add(trail_end, Vector3Scale(right, -1.25f));
+	}
+
+	trail_end = Vector3Add(trail_end, Vector3Scale(right, 3.5f));
+
+	float dist = Vector3Distance(trail_start, trail_end);
+	vEffectsAddTracer(gun_refs.effect_manager, trail_start, trail_end);
+
+	curr_gun->in_clip--;
+	if(curr_gun->in_clip <= 0 && curr_gun->ammo > 0) {
+		curr_gun->in_clip = 0;
+		//PlayerGunReload(player_gun, 1);
+		if(!reload_active) 
+			AP_RequestSound(gun_refs.ap, "outofammo");
+
+		reload_active = true;
+	}
+
+	Vector3 d = Vector3Normalize(Vector3Subtract(gun_refs.world_cam->position, gun_refs.world_cam->target));
+	PointLight pl = (PointLight) {
+		.position = Vector3Add(gun_refs.world_cam->position, Vector3Scale(d, 5)),
+		.color = ColorBrightness( (Color) { .r = 255, .g = 180, .b = 50, .a = 255 }, -0.75f),
+		.timer = 0.25f,
+		.active = 1,
+		.radius = 1000,
+	};
+	AddPointlight(pl);
 }
 
-
 void PlayerGunReload(PlayerGun *player_gun, float dt) {
+	if(player_gun->current_gun == WEAP_SMG) {
+		reload_active = false;
+		curr_gun->in_clip = curr_gun->clip_size;
+		return;
+	}
+
 	if(recoil > 1.0f)
 		return;
 
@@ -935,7 +1082,6 @@ void PlayerGunReload(PlayerGun *player_gun, float dt) {
 		return;
 	}
 
-
 	// Fill clip
 	int clip_refill = curr_gun->clip_size - curr_gun->in_clip;
 
@@ -967,10 +1113,16 @@ void SendAmmoPickupEvent(int pickup_type) {
 		case ENT_AMMO_REVOLVER:
 			weapons[WEAP_REVOLVER].ammo += 6;
 			break;
+
+		case ENT_AMMO_SMG:
+			weapons[WEAP_SMG].ammo += 30;
+			break;
 	}	
 }
 
 void SendUnlockPickupEvent(int pickup_type) {
+	MessageDiagInt("SendUnlockPickupEvent()", pickup_type, ANSI_BLUE);
+
 	switch(pickup_type) {
 		case ENT_UNLOCK_BUG:
 			weap_unlocked[WEAP_DISRUPTOR] = 1;
@@ -987,8 +1139,9 @@ void SendUnlockPickupEvent(int pickup_type) {
 
 		case ENT_UNLOCK_SMG:
 			weap_unlocked[WEAP_SMG] = 1;
-			reload_active = true;
-			reload_sound_set = false;
+			pg_self_ptr->current_gun = WEAP_SMG;
+			//reload_active = true;
+			//reload_sound_set = false;
 			break;
 	}
 }

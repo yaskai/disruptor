@@ -68,6 +68,11 @@ Tri *TrisFromBspModel(Bsp_Data *bsp, u16 *out_count, int model_id) {
 			coll_flags |= COLL_IGNORE_VIS;
 		}
 
+		if(strcmp(mip->name, "{ind_fnc1") == 0) {
+			coll_flags |= COLL_IGNORE_BULLET;
+			coll_flags |= COLL_IGNORE_VIS;
+		}
+
 		/*
 		if(mip->name[0] == '{')
 			coll_flags |= COLL_IGNORE_VIS;
@@ -315,7 +320,8 @@ void LoadMapFile(BrushPool *brush_pool, char *path, SpawnList *spawn_list) {
 						strncmp(curr_entspawn->classname, "func_door", strlen("func_door")) 			== 0 ||
 						strncmp(curr_entspawn->classname, "func_lift", strlen("func_lift")) 			== 0 || 
 						strncmp(curr_entspawn->classname, "func_glass", strlen("func_glass")) 			== 0 ||
-						strncmp(curr_entspawn->classname, "func_ladder", strlen("func_ladder"))			== 0) {
+						strncmp(curr_entspawn->classname, "func_ladder", strlen("func_ladder"))			== 0 ||
+						strncmp(curr_entspawn->classname, "func_box", strlen("func_box"))				== 0) {
 
 						curr_model_id++;
 						model_incremented = true;
@@ -1413,17 +1419,50 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 	}
 }
 
-void DrawMapTranslucent(MapSection *sect, Vector3 pos) {
-	int ff_count = 0;
-	int ff_ids[128] = {0};
+void DrawMapTranslucent(MapSection *sect, Camera3D cam) {
+	Vector3 pos = cam.position;
+	Vector3 dir = Vector3Normalize(Vector3Subtract(cam.target, cam.position));
 
-	rlDisableDepthMask();
+	// Measure approximate depth
+	float depth[translucent_rbrush_list.count];
 	for(int i = 0; i < translucent_rbrush_list.count; i++) {
 		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[i];
-		if(rbrush->flags & RBRUSH_FORCEFIELD) {
-			ff_ids[ff_count++] = i;	
-			continue;
+		BoundingBox aabb = GetModelBoundingBox(rbrush->model);
+
+		Vector3 n = (Vector3) {
+			Clamp(pos.x, aabb.min.x, aabb.max.x),
+			Clamp(pos.y, aabb.min.y, aabb.max.y),
+			Clamp(pos.z, aabb.min.z, aabb.max.z)
+		};
+		depth[i] = Vector3DotProduct(dir, Vector3Subtract(n, pos));
+	}
+
+	// Sort brushes by depth 
+	int sorted_ids[translucent_rbrush_list.count];
+	for(int i = 0; i < translucent_rbrush_list.count; i++) 
+		sorted_ids[i] = i;
+
+	for(int i = 1; i < translucent_rbrush_list.count; i++) {
+		float d = depth[i];
+		int id = sorted_ids[i];
+		int j = i - 1;
+		while(j >= 0 && depth[j] < d) {
+			depth[j+1] = depth[j];
+			sorted_ids[j+1] = sorted_ids[j];
+			j--;
 		}
+		depth[j+1] = d;
+		sorted_ids[j+1] = id;
+	}
+
+	// Draw brushes
+	rlDisableDepthMask();
+	for(int i = 0; i < translucent_rbrush_list.count; i++) {
+		int idx = sorted_ids[i];
+
+		RenderBrush *rbrush = &translucent_rbrush_list.render_brushes[idx];
+		if(rbrush->flags & RBRUSH_FORCEFIELD) 
+			continue;
 
 		Color light = lit_SampleLightGrid(&sect->bsp_data, BoxCenter(GetModelBoundingBox(rbrush->model)));
 		DrawModel(rbrush->model, Vector3Zero(), 1, light);

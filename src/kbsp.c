@@ -1049,6 +1049,8 @@ RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_coun
 
 		render_brushes[i].model.materials[0].maps[1].texture = bsp->lm.tex;
 		render_brushes[i].model.materials[0].shader = bsp->lm_shader;
+
+		render_brushes[i].aabb = GetModelBoundingBox(render_brushes[i].model);
 	}
 
 	free(tri_counts);

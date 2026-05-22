@@ -7,86 +7,87 @@ Input file: /home/kai/projects/disruptor/resources/maps/10_a_1/10_a_1.map
 Output file: /home/kai/projects/disruptor/resources/maps/10_a_1/10_a_1.bsp
 
 INFO: using built-in palette.
-     52 entities
-     31 unique textures
-    161 texinfos
-    640 unique planes
+     53 entities
+     32 unique textures
+    164 texinfos
+    642 unique planes
 
 INFO: world extents calculated to 5608 units
-      228 brushes
-    1,420 sides
+      229 brushes
+    1,426 sides
        31 side bevels
 
             0 texture frames added
 Processing hull 0...
-      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
     214 SOLID brushes
       7 SKY brushes
-    225 brushes total
-    1,402 visible sides
-INFO: calculating BSP for 225 brushes with 1402 sides
-      225 brushes
-    1,396 visible faces
+    226 brushes total
+    1,408 visible sides
+INFO: calculating BSP for 226 brushes with 1408 sides
+      226 brushes
+    1,402 visible faces
         6 non-visible faces
-    784 nodes
-    784 expensive split nodes
-    785 leaves
+    787 nodes
+    787 expensive split nodes
+    788 leaves
       1 SOLID | SKY leafs
-      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
     282 SOLID leafs
      86 SKY leafs
-    412 EMPTY leafs
-    785 leafs total
+    414 EMPTY leafs
+    788 leafs total
     22 max tree height
     13 avg tree height
-    4,008 tree portals
+    4,025 tree portals
     60 outside leaves
     0 detail filled leafs
-    225 brushes
-    804 visible faces
-    598 non-visible faces
-    872 nodes
+    226 brushes
+    809 visible faces
+    599 non-visible faces
+    875 nodes
     173 non-visible nodes
-    872 expensive split nodes
-    873 leaves
+    875 expensive split nodes
+    876 leaves
       1 SOLID | SKY leafs
-      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
     296 SOLID leafs
     101 SKY leafs
-    471 EMPTY leafs
-    873 leafs total
+    473 EMPTY leafs
+    876 leafs total
     22 max tree height
     13 avg tree height
-    4,320 tree portals
+    4,337 tree portals
     117 outside leaves
     0 detail filled leafs
-    4,320 tree portals
-    3,478 sides visible
-    1,832 makefaces
-      385 merged
-      537 subdivided
+    4,337 tree portals
+    3,528 sides visible
+    1,853 makefaces
+      395 merged
+      536 subdivided
     46 nodes pruned
-      459 player-occupiable leaves
+      462 player-occupiable leaves
       457 clusters of leaves
     1,117 vis portals
+fixing up cluster at 2024 524 -452
 fixing up cluster at 1456 260 -452
 fixing up cluster at 552 212 -480
 fixing up cluster at 884 -212 -480
 fixing up cluster at 1632 -312 -492
       1 SOLID | SKY leafs
-      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
-    354 EMPTY leafs
+      5 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    356 EMPTY leafs
     101 SKY leafs
     367 SOLID leafs
-    827 leafs total
+    830 leafs total
     22 max tree height
     13 avg tree height
-    1,853 edges added by tjunctions
-    1,820 faces optimized through MWT
-    5,496 triangles computed from MWT
-      433 faces created via optimization of MWT triangles
-    5,266 edges
-    2,345 faces
+    1,857 edges added by tjunctions
+    1,830 faces optimized through MWT
+    5,520 triangles computed from MWT
+      435 faces created via optimization of MWT triangles
+    5,338 edges
+    2,357 faces
 Processing hull 1...
 Processing hull 2...
 Writing 10_a_1.bsp as Quake BSP bsp29
@@ -94,21 +95,21 @@ Wrote 10_a_1.bsp
 
 count   lump name    byte size 
       4 models              256
-    501 planes            10020
-   2657 vertexes          31884
-    844 nodes             20256
-    120 texinfos           4800
-   2363 faces             47260
-   2301 clipnodes         18408
-    481 leafs             13468
-   2842 marksurfaces       5684
-   5303 edges             21212
-  10350 surfedges         41400
-     31 textures        9333140
+    502 planes            10040
+   2664 vertexes          31968
+    847 nodes             20328
+    123 texinfos           4920
+   2375 faces             47500
+   2302 clipnodes         18416
+    484 leafs             13552
+   2860 marksurfaces       5720
+   5375 edges             21500
+  10398 surfedges         41592
+     32 textures        9682116
         lightdata             0
         visdata               0
         entdata            6792
 
-0.305s seconds elapsed
+0.312s seconds elapsed
 
 

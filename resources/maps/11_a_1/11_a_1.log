@@ -1,0 +1,168 @@
+---- qbsp / ericw-tools 2.0.0-alpha10-72-g67e9fd3b-dirty ----
+
+--- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
+
+Input file: /home/kai/projects/disruptor/resources/maps/11_a_1/11_a_1.map
+Output file: /home/kai/projects/disruptor/resources/maps/11_a_1/11_a_1.bsp
+
+INFO: using built-in palette.
+     72 entities
+     30 unique textures
+    162 texinfos
+    732 unique planes
+
+INFO: world extents calculated to 5832 units
+      269 brushes
+    1,698 sides
+       66 side bevels
+
+            0 texture frames added
+Processing hull 0...
+      1 MIST | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+     15 DETAIL_WALL | DETAIL brushes
+     20 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+      7 SKY brushes
+    190 SOLID brushes
+    233 brushes total
+    1,482 visible sides
+INFO: calculating BSP for 233 brushes with 1482 sides
+      233 brushes
+    1,482 visible faces
+    1,032 nodes
+    1,032 expensive split nodes
+    1,033 leaves
+        1 MIST | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+        5 SOLID | DETAIL_WALL leafs
+       22 DETAIL_WALL | DETAIL leafs
+       58 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      302 SOLID leafs
+       15 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
+       98 SKY leafs
+      532 EMPTY leafs
+    1,033 leafs total
+    24 max tree height
+    14 avg tree height
+    5,209 tree portals
+    94 outside leaves
+    0 detail filled leafs
+    233 brushes
+    929 visible faces
+    553 non-visible faces
+    1,118 nodes
+      227 non-visible nodes
+    1,118 expensive split nodes
+    1,119 leaves
+        1 MIST | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+        5 SOLID | DETAIL_WALL leafs
+       23 DETAIL_WALL | DETAIL leafs
+       52 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      341 SOLID leafs
+       18 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
+      117 SKY leafs
+      562 EMPTY leafs
+    1,119 leafs total
+    23 max tree height
+    13 avg tree height
+    5,506 tree portals
+    146 outside leaves
+    0 detail filled leafs
+    5,506 tree portals
+    4,846 sides visible
+    2,463 makefaces
+      867 merged
+      735 subdivided
+    122 nodes pruned
+      586 player-occupiable leaves
+      469 clusters of leaves
+    1,302 vis portals
+fixing up cluster at 64 204.68629150102043 560.6862915010157
+fixing up cluster at -28 200.68629150102055 551.3137084989794
+fixing up cluster at -28 204.68629150101623 532.6862915010162
+fixing up cluster at 64 152 572
+fixing up cluster at -28 152 540
+fixing up cluster at 64 100 560.6862915010155
+fixing up cluster at -28 103.31370849898977 551.3137084989899
+fixing up cluster at -28 100 532.6862915010151
+fixing up cluster at 348 296 480
+fixing up cluster at 12 204.6862915010282 523.313708498972
+fixing up cluster at 12 204.68629150101248 495.9999999999947
+fixing up cluster at 12 204.6862915010188 463.9999999999746
+fixing up cluster at 12 200.68629150101555 440.68629150101555
+fixing up cluster at -440 152 484
+fixing up cluster at 64 147.3137084989794 479.31370849899014
+fixing up cluster at 64 151.31370849898286 479.31370849899014
+fixing up cluster at 64 147.31370849898485 484
+fixing up cluster at 64 147.31370849898184 479.31370849899014
+fixing up cluster at -272 151.99999999999824 475.31370849899014
+fixing up cluster at 128 432 356
+fixing up cluster at 128 412 300
+fixing up cluster at 296 88 380
+fixing up cluster at 4 276 284
+fixing up cluster at 24 72 420
+fixing up cluster at 24 -56 420
+fixing up cluster at 24 -184 420
+fixing up cluster at 24 -312 420
+fixing up cluster at 24 -440 420
+fixing up cluster at 400 -568 276
+fixing up cluster at 400 -708 372
+fixing up cluster at 380 -568 284
+fixing up cluster at 320 -568 296
+fixing up cluster at 304 -568 300
+fixing up cluster at 292 -568 304
+fixing up cluster at 240 -568 316
+fixing up cluster at 380 -676 372
+fixing up cluster at 316 -676 372
+fixing up cluster at 380 -784 264
+fixing up cluster at 316.00000000000045 -784 248
+fixing up cluster at 296 -708 368
+fixing up cluster at 240 -708 368
+fixing up cluster at 224 -676 372
+fixing up cluster at 212 -676 320
+fixing up cluster at -72 432 356
+fixing up cluster at -72 412 300
+fixing up cluster at -72 -740 144
+fixing up cluster at -276 356 320
+fixing up cluster at -440 232 344
+      2 SOLID | DETAIL_WALL leafs
+      1 MIST | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      1 SOLID | DETAIL_WALL | WINDOW | MIRROR_INSIDE_SET leafs
+     52 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+    416 EMPTY leafs
+     17 SOLID | WINDOW | MIRROR_INSIDE_SET leafs
+    117 SKY leafs
+    391 SOLID leafs
+    997 leafs total
+    23 max tree height
+    13 avg tree height
+    2,064 edges added by tjunctions
+    2,202 faces optimized through MWT
+    6,533 triangles computed from MWT
+      612 faces created via optimization of MWT triangles
+    6,757 edges
+    2,862 faces
+Processing hull 1...
+Processing hull 2...
+Writing 11_a_1.bsp as Quake BSP bsp29
+Wrote 11_a_1.bsp
+
+count   lump name    byte size 
+      5 models              320
+    546 planes            10920
+   3461 vertexes          41532
+   1089 nodes             26136
+    128 texinfos           5120
+   3078 faces             61560
+   2550 clipnodes         20400
+    684 leafs             19152
+   4087 marksurfaces       8174
+   7190 edges             28760
+  13169 surfedges         52676
+     30 textures        8918884
+        lightdata             0
+        visdata               0
+        entdata            6487
+
+0.432s seconds elapsed
+
+

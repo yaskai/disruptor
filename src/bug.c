@@ -406,11 +406,9 @@ void bug_TraceMove(Entity *bug_ent, Vector3 start, Vector3 wish_vel, pmTraceData
 			use_ent = false;
 		}
 
-		if(other_ent->type == ENT_DOOR)
-			use_ent = false;
-
-		if(other_ent->type == ENT_FORCEFIELD)
-			use_ent = false;
+		if(other_ent->type == ENT_DOOR)			use_ent = false;
+		if(other_ent->type == ENT_FORCEFIELD)	use_ent = false;
+		if(other_ent->type == ENT_BOX)			use_ent = false;
 
 		if(launch_timer >= 0.1f || bug_ent->flags & BUG_RECALL)
 			use_ent = false;
@@ -956,6 +954,10 @@ void BugUpdateLanded(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 			bug_bounce = 0;
 			bug_target_picked = true;
 			//disrupt_used = false;
+			
+			if(ent->flags & BUG_ON_SWITCH && Vector3Distance(ct->position, player_ent->comp_transform.position) >= 200.0f) {
+				ct->velocity.z += 150.0f;
+			}
 
 			ent->flags &= ~BUG_DISRUPTED_ENEMY;
 			ent->flags &= ~BUG_ON_SWITCH;

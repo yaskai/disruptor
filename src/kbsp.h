@@ -15,6 +15,7 @@ typedef struct {
 	BoundingBox aabb;
 
 	int id;
+	int brush_id;
 	u8 flags;
 
 } RenderBrush;

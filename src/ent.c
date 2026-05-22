@@ -79,7 +79,6 @@ void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *
 		Bsp_RecursiveTraceEx(hull, hull->first_node, 0, 1, dest, Vector3Add(dest, move), &tr);
 		fraction = tr.fraction;	
 
-		/*
 		for(int j = 0; j < 1; j++) {
 			if(!(bsp->hull_groups[j].flags & HULLGROUP_ACTIVE))
 				continue;
@@ -98,7 +97,6 @@ void ent_TraceMoveEx(Entity *ent, Vector3 start, Vector3 wish_vel, pmTraceData *
 				fraction = hull_frac;
 			}
 		}		
-		*/
 
 		// Repeat trace steps for entity collisions,
 		// if entity hit is closer, use that collision for clipping plane 
@@ -325,6 +323,7 @@ OnHitFunc on_hit_funcs[] = {
 	&OnHitRegulator,
 	&OnHitBug,
 	&OnHitSwitch,
+	&OnHitBox,
 };
 
 int shader_holo_t_loc;
@@ -754,13 +753,15 @@ void RenderEntities(EntityHandler *handler, float dt) {
 				break;
 
 			case ENT_UNLOCK_BUG:
-				EntDrawLitModel(handler, ent, 3.0f, 100);
-				//DrawModel(handler->ents[handler->bug_id].model, ent->comp_transform.position, 3.0f, WHITE);
-				break;
-
 			case ENT_UNLOCK_REVOLVER:
 				EntDrawLitModel(handler, ent, 3.0f, 100);
 				break;
+
+			case ENT_UNLOCK_SMG:
+				EntDrawLitModel(handler, ent, 1.0f, 100);
+			
+			case ENT_BOX:
+				EntDrawLitModel(handler, ent, 1.0f, 50);
 		}
 	}
 
@@ -1781,3 +1782,15 @@ void EntDrawLitMesh(EntityHandler *handler, Entity *ent, int mesh_id, int materi
 	DrawMesh(ent->model.meshes[mesh_id], ent->model.materials[material_id], matrix);
 }
 
+void OnHitBox(Entity *ent, short damage, Vector3 bullet_pos) {
+	comp_Transform *ct = &ent->comp_transform;
+	comp_Health *health = &ent->comp_health;
+
+	ent->comp_transform.bounds = (BoundingBox) {0};
+	ent->comp_health.hit_box = (BoundingBox) {0};
+
+	ent->flags = 0;
+
+	AP_SetSoundPosition(ptr_handler_self->ap, "box_break", ct->position, 0);
+	AP_RequestSound(ptr_handler_self->ap, "box_break");
+}

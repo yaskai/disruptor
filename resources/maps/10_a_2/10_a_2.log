@@ -7,9 +7,9 @@ Input file: /home/kai/projects/disruptor/resources/maps/10_a_2/10_a_2.map
 Output file: /home/kai/projects/disruptor/resources/maps/10_a_2/10_a_2.bsp
 
 INFO: using built-in palette.
-    116 entities
-     36 unique textures
-    139 texinfos
+    117 entities
+     39 unique textures
+    148 texinfos
     630 unique planes
 
 INFO: world extents calculated to 5608 units
@@ -68,7 +68,7 @@ INFO: calculating BSP for 274 brushes with 1675 sides
     3,869 sides visible
     1,981 makefaces
       492 merged
-      719 subdivided
+      656 subdivided
     102 nodes pruned
       568 player-occupiable leaves
       541 clusters of leaves
@@ -93,11 +93,11 @@ fixing up cluster at 220 -484 -604
     21 max tree height
     13 avg tree height
     1,760 edges added by tjunctions
-    2,098 faces optimized through MWT
-    5,988 triangles computed from MWT
+    2,035 faces optimized through MWT
+    5,862 triangles computed from MWT
       481 faces created via optimization of MWT triangles
-    5,896 edges
-    2,599 faces
+    5,710 edges
+    2,536 faces
 Processing hull 1...
 Processing hull 2...
 Writing 10_a_2.bsp as Quake BSP bsp29
@@ -106,20 +106,20 @@ Wrote 10_a_2.bsp
 count   lump name    byte size 
       3 models              192
     457 planes             9140
-   3224 vertexes          38688
+   3125 vertexes          37500
    1090 nodes             26160
-    108 texinfos           4320
-   2785 faces             55700
+    110 texinfos           4400
+   2722 faces             54440
    2987 clipnodes         23896
     646 leafs             18088
-   3264 marksurfaces       6528
-   6269 edges             25076
-  11950 surfedges         47800
-     36 textures       10517700
+   3201 marksurfaces       6402
+   6083 edges             24332
+  11698 surfedges         46792
+     39 textures       11564628
         lightdata             0
         visdata               0
-        entdata           10089
+        entdata           10238
 
-0.316s seconds elapsed
+0.354s seconds elapsed
 
 

@@ -199,6 +199,8 @@ enum ENT_TYPES : u8 {
 	ENT_UNLOCK_BUG			=  21,
 	ENT_UNLOCK_REVOLVER		=  22,
 	ENT_UNLOCK_SMG			=  23,
+	ENT_AMMO_SMG			=  24,
+	ENT_BOX					=  25,
 };
 
 enum ON_TRIGGER_EVENT_TYPES : u8 {
@@ -486,6 +488,16 @@ void AlertMaintainers(EntityHandler *handler, u16 disrupted_id);
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
+enum ON_HIT_FUNCS : i8 {
+	ON_HIT_PLAYER,
+	ON_HIT_BUG,
+	ON_HIT_TURRET,
+	ON_HIT_MAINTAINER,
+	ON_HIT_REGULATOR,
+	ON_HIT_SWITCH,
+	ON_HIT_BOX,
+};
+
 void OnHitEnt(Entity *ent, short damage, Vector3 bullet_pos);
 void OnHitPlayer(Entity *ent, short damage, Vector3 bullet_pos);
 void OnHitBug(Entity *ent, short damage, Vector3 bullet_pos);
@@ -493,6 +505,7 @@ void OnHitTurret(Entity *ent, short damage, Vector3 bullet_pos);
 void OnHitMaintainer(Entity *ent, short damage, Vector3 bullet_pos);
 void OnHitRegulator(Entity *ent, short damage, Vector3 bullet_pos);
 void OnHitSwitch(Entity *ent, short damage, Vector3 bullet_pos);
+void OnHitBox(Entity *ent, short damage, Vector3 bullet_pos);
 
 void DoFix(Entity *ent);
 void OnFixTurret(Entity *ent);

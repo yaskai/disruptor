@@ -518,7 +518,7 @@ void RenderMainLayer(Game *game, float dt) {
 	// Render dynamic brush entities
 	RenderBrushEntities(&game->ent_handler);
 	// Render transparent level geometry
-	DrawMapTranslucent(&game->test_section, game->camera.position);
+	DrawMapTranslucent(&game->test_section, game->camera);
 	// Draw player (for debug only)
 	//PlayerDraw(&game->ent_handler.ents[game->ent_handler.player_id]);
 
@@ -565,7 +565,7 @@ void RenderDebugLayer(Game *game) {
 	// Render entities
 	RenderEntities(&game->ent_handler, GetFrameTime());
 	// Render transparent level geometry
-	DrawMapTranslucent(&game->test_section, game->camera.position);
+	DrawMapTranslucent(&game->test_section, game->camera);
 	// Render dynamic brush entities
 	RenderBrushEntities(&game->ent_handler);
 	// Draw player (for debug only)
@@ -772,11 +772,10 @@ void StartNewGame(Game *game) {
 	game->flags &= ~FLAG_GAME_STARTED;
 	ui_Toggle();
 	game->ui.flags = 0;
-	//GameLoadScene(game, "resources/maps/10_a", 0);
-	GameLoadScene(game, "resources/maps/10_a_1", 0);
-	//GameLoadScene(game, "resources/maps/10_a_3", 0);
-	//GameLoadScene(game, "resources/maps/10_b", 0);
-	//GameLoadScene(game, "resources/maps/10", 0);
+	//GameLoadScene(game, "resources/maps/10_a_1", 0);
+	GameLoadScene(game, "resources/maps/11_a_2", 0);
+	SendUnlockPickupEvent(ENT_UNLOCK_BUG);
+	SendUnlockPickupEvent(ENT_UNLOCK_REVOLVER);
 	game->flags |= FLAG_GAME_STARTED;
 	ResetPlayerWeapons();
 }
