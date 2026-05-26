@@ -35,6 +35,63 @@ void BugUpdateLaunched(Entity *ent, EntityHandler *handler, MapSection *sect, fl
 void BugUpdateLanded(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 void BugUpdateDead(Entity *ent, EntityHandler *handler, MapSection *sect, float dt);
 
+i16 BugFindTarget(Entity *bug_ent, MapSection *sect, EntityHandler *handler) {
+	comp_Transform *ct = &bug_ent->comp_transform;	
+	comp_Ai *ai = &bug_ent->comp_ai;
+
+	EntGrid *grid = &handler->grid;
+	Coords coords = Vec3ToCoords(ct->position, grid);
+	
+	Coords cell_coords[] = {
+		coords,
+		(Coords) { coords.c - 1, coords.r - 1, coords.t, },
+		(Coords) { coords.c + 0, coords.r - 1, coords.t, },
+		(Coords) { coords.c + 1, coords.r - 1, coords.t, },
+		(Coords) { coords.c - 1, coords.r + 0, coords.t, },
+		(Coords) { coords.c + 1, coords.r + 0, coords.t, },
+		(Coords) { coords.c - 1, coords.r + 1, coords.t, },
+		(Coords) { coords.c + 0, coords.r + 1, coords.t, },
+		(Coords) { coords.c + 1, coords.r + 1, coords.t, },
+	};
+	short adj_count = sizeof(cell_coords) / sizeof(cell_coords[0]);
+
+	float closest = FLT_MAX;
+	i16 other_id = -1;
+
+	for(short i = 0; i < adj_count; i++) {
+		if(!CoordsInBounds(cell_coords[i], grid))
+			continue;
+
+		EntGridCell *cell = &grid->cells[CellCoordsToId(cell_coords[i], grid)];
+
+		for(short j = 0; j < cell->ent_count; j++) {
+			Entity *other = &handler->ents[cell->ents[j]];
+			
+			comp_Transform *other_ct = &other->comp_transform;
+			comp_Ai *other_ai = &other->comp_ai;
+
+			if(!(other->flags & ENT_ACTIVE))					continue;
+			if(!other_ai->component_valid)						continue;
+			if(other_ai->input_mask & AI_INPUT_SELF_GLITCHED) 	continue;
+			if(other_ai->state == STATE_DEAD) 					continue;
+			
+			Vector3 to_other = Vector3Subtract(Vector3Add(other->comp_health.bug_point, other_ct->position), ct->position); 
+			float dist = Vector3Length(to_other);
+
+			// Other is too far away
+			if(dist > 250.0f)
+				continue;
+
+			if(dist < closest) {
+				closest = dist;
+				other_id = other->id;
+			}
+		}
+	}
+
+	return other_id;
+}
+
 // This function handles setting Bug's target as well as moving towards it. 
 void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHandler *handler, u8 *bounce, float dt) {
 	EntGrid *grid = &handler->grid;
@@ -42,105 +99,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	// Find target if not set already 
 	if(!bug_target_picked) {
-		// Search in nearby grid cells
-		Coords cell_coords[] = {
-			coords,
-			(Coords) { coords.c - 1, coords.r - 1, coords.t, },
-			(Coords) { coords.c + 0, coords.r - 1, coords.t, },
-			(Coords) { coords.c + 1, coords.r - 1, coords.t, },
-			(Coords) { coords.c - 1, coords.r + 0, coords.t, },
-			(Coords) { coords.c + 1, coords.r + 0, coords.t, },
-			(Coords) { coords.c - 1, coords.r + 1, coords.t, },
-			(Coords) { coords.c + 0, coords.r + 1, coords.t, },
-			(Coords) { coords.c + 1, coords.r + 1, coords.t, },
-		};
-		short adj_count = sizeof(cell_coords) / sizeof(cell_coords[0]);
-		
-		float closest = FLT_MAX;
-		i16 enemy_id = -1;
-
-		for(u8 j = 0; j < adj_count; j++) {
-			if(!CoordsInBounds(cell_coords[j], grid))
-				continue;
-
-			i16 cell_id = CellCoordsToId(cell_coords[j], grid);
-			EntGridCell *cell = &grid->cells[cell_id];
-
-			for(u8 i = 0; i < cell->ent_count; i++) {
-				Entity *enemy_ent = &handler->ents[cell->ents[i]];
-				comp_Ai *enemy_ai = &enemy_ent->comp_ai;
-
-				// **
-				// Skip things that are not valid targets
-				// (dead entities, player, self, etc.)
-				if(enemy_ai->state == STATE_DEAD)
-					continue;
-
-				if(!(enemy_ent->flags & ENT_ACTIVE))
-					continue;
-				
-				if(!enemy_ai->component_valid)
-					continue;
-
-				if(enemy_ai->input_mask & AI_INPUT_SELF_GLITCHED)
-					continue;
-
-				//if(disrupt_used)
-					//continue;
-
-				Vector3 to_enemy = Vector3Subtract(
-					Vector3Add(
-						Vector3Add(
-							Vector3Scale(enemy_ent->comp_transform.velocity, dt),
-							enemy_ent->comp_transform.position), enemy_ent->comp_health.bug_point),
-					ct->position
-				);	
-
-				float dist = Vector3Length(to_enemy);
-
-				// Too far
-				if(dist > 250.0f)
-					continue;
-
-				if(to_enemy.z <= -60.0f)
-					continue;
-
-				BvhTraceData tr = TraceDataEmpty();
-				Ray ray = (Ray) { .position = ct->position, .direction = Vector3Normalize(to_enemy) };
-				/*
-				BvhTracePointEx(ray, sect, &sect->bvh[0], 0, &tr, dist);
-				if(tr.hit) {
-					continue;
-				}
-				*/
-				
-				bool vis = true;
-				for(short k = 0; k < sect->bvh_hullgroup_count; k++) {
-					Bvh_HullGroup *hull = &sect->bvh_hullgroups[k];
-
-					if(!(hull->flags & HULLGROUP_ACTIVE))
-						continue;
-
-					BvhTraceData temp_tr = TraceDataEmpty();
-					BvhTracePointEx(ray, sect, &hull->bvh[2], 0, &temp_tr, Vector3Length(to_enemy));
-
-					if(temp_tr.hit)
-						vis = false;
-				}
-
-				if(!vis && enemy_ent->type > 0)
-					continue;
-
-				// Set target to closest candidate
-				if(dist < closest) {
-					closest = dist;
-					enemy_id = enemy_ent->id;
-					bug_target_picked = true;
-				}
-			}
-		}
-
-		bug_ent->comp_ai.targ_data.ent_id = enemy_id;
+		bug_ent->comp_ai.targ_data.ent_id = BugFindTarget(bug_ent, sect, handler);
 	} 
 
 	// Increment bounce count
@@ -243,22 +202,7 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 	if(ct->velocity.z < 130.0f)
 		ct->velocity.z = 130.0f;
 
-	/*
-	float ceil_z = ct->velocity.z * 1.5f;
-	Ray ceil_ray = (Ray) { .position = ct->position, .direction = UP };
-	BvhTraceData ceil_tr = TraceDataEmpty();
-	BvhTracePointEx(ceil_ray, sect, &sect->bvh[BVH_BOX_SMALL], 0, &ceil_tr, ceil_z);
-	if(ceil_tr.distance < ct->position.z + ct->velocity.z) {
-		float over = (ct->position.z + ct->velocity.z) - ceil_tr.distance;
-		float len = Vector3Length(ct->velocity);
-		ct->velocity.z -= over * 0.5f;
-		ct->velocity.x += copysignf(fmaxf(1.0f, over*0.007f), ct->velocity.x); 
-		ct->velocity.y += copysignf(fmaxf(1.0f, over*0.007f), ct->velocity.y); 
-	} 
-	*/
-
 	ct->forward = Vector3Normalize( (Vector3) { ct->velocity.x, ct->velocity.y, 0 } );
-
 }
 
 u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection *sect, u8 *bounce, EntityHandler *handler, float dt) {
@@ -271,11 +215,6 @@ u8 bug_CheckGround(Entity *ent, comp_Transform *ct, Vector3 position, MapSection
 	for(int j = 0; j < sect->bvh_hullgroup_count; j++) {
 		if(!(sect->bvh_hullgroups[j].flags & HULLGROUP_ACTIVE))	
 			continue;
-
-		/*
-		if(handler->ents[sect->bvh_hullgroups[j].ent_id].type == ENT_LADDER)
-			continue;
-		*/
 		
 		BvhTraceData temp_tr = TraceDataEmpty();
 		BvhTracePointEx(ray, sect, &sect->bvh_hullgroups[j].bvh[2], 0, &temp_tr, 8 + 1 + EPSILON);
@@ -900,39 +839,44 @@ void BugUpdateLanded(Entity *ent, EntityHandler *handler, MapSection *sect, floa
 		bool do_recall = (stick_ent->comp_ai.state == STATE_DEAD || stick_ent->comp_ai.state == STATE_DISABLED);
 		bool recall_to_player = false;
 
-		if(stick_ent->comp_ai.component_valid && !(stick_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED)) {
+		/*
+		if(stick_ent->comp_ai.component_valid && (!(stick_ent->comp_ai.input_mask & AI_INPUT_SELF_GLITCHED))) {
 			do_recall = true;
 			recall_to_player = true;
 		}
-
-		// Bounce off enemy when it dies
-		if(do_recall) {
+		*/
+		
+		i16 new_targ = BugFindTarget(ent, sect, handler);
+		if(do_recall && new_targ == -1) {
 			AP_RequestSound(handler->ap, "recall");
 
-			ai->state = BUG_LAUNCHED;
-			ai->targ_data.ent_id = -1;
+			bug_bounce = 0;
+			ai->targ_data.ent_id = handler->player_id;
+			bug_target_picked = true;
+			BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+			disrupt_used = false;
+			ent->flags &= ~BUG_DISRUPTED_ENEMY;
+			ent->comp_ai.state = BUG_LAUNCHED;
+			launch_timer = 0.49f;
+
+			return;
+
+		} else if(do_recall && new_targ > -1) {
+			AP_RequestSound(handler->ap, "recall");
 
 			bug_bounce = 0;
-			bug_target_picked = false;
-
-			if(!recall_to_player) { 
-				ent->flags &= ~BUG_DISRUPTED_ENEMY;
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-
-				return;
-			}
-
-			if(ai->targ_data.ent_id == -1 || recall_to_player) {
-				ai->targ_data.ent_id = handler->player_id;
-				bug_target_picked = true;
-				BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
-
-				return;
-			}
+			ai->targ_data.ent_id = new_targ;
+			bug_target_picked = true;
+			BugBounce(ent, ct, sect, handler, &bug_bounce, dt);
+			disrupt_used = false;
+			ent->flags &= ~BUG_DISRUPTED_ENEMY;
+			ent->comp_ai.state = BUG_LAUNCHED;
+			launch_timer = 0.49f;
+			return;
 
 		}
 
-		if(!recall_to_player)
+		if((recall_to_player ^ do_recall) == 0)
 			ct->position = Vector3Add(stick_ent->comp_transform.position, stick_ent->comp_health.bug_point);
 	}
 
