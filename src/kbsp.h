@@ -16,6 +16,8 @@ typedef struct {
 
 	int id;
 	int brush_id;
+	int leaf_id;
+
 	u8 flags;
 
 } RenderBrush;
@@ -23,6 +25,7 @@ typedef struct {
 typedef struct {
 	RenderBrush *render_brushes;
 	int *ids;
+	u8 *vis_list;
 
 	int count;
 	int cap;
@@ -399,7 +402,7 @@ int Bsp_FindLeaf(Bsp_Data *bsp, Vector3 point);
 bool Bsp_LeafVisible(Bsp_Data *bsp, int curr_leaf, int test_leaf);
 
 Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
-RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count);
+RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, int leaf_id, int *out_count);
 
 Model BspModelToRenderModel(Bsp_Data *bsp, int submodel_id);
 

@@ -794,10 +794,11 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	//rbrush_list.render_brushes = malloc(sizeof(RenderBrush) * rbrush_list.cap);
 	rbrush_list.render_brushes = calloc(rbrush_list.cap, sizeof(RenderBrush));
 	rbrush_list.ids = malloc(sizeof(int) * rbrush_list.cap);
+	rbrush_list.vis_list = calloc(rbrush_list.cap, 1);
 
 	for(int i = 0; i < sect.bsp_data.models[0].num_leafs; i++) {
 		int temp_count = 0;
-		RenderBrush *temp_brushes = BspLeafToRenderBrushes(&sect.bsp_data, &sect.bsp_data.leaves[i], &temp_count); 
+		RenderBrush *temp_brushes = BspLeafToRenderBrushes(&sect.bsp_data, i, &temp_count); 
 
 		for(int j = 0; j < temp_count; j++) {
 			rbrush_list.render_brushes[rbrush_list.count + j] = temp_brushes[j];
@@ -810,6 +811,7 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 	rbrush_list.cap = rbrush_list.count;
 	rbrush_list.render_brushes = realloc(rbrush_list.render_brushes, sizeof(RenderBrush) * rbrush_list.cap);
 	rbrush_list.ids = realloc(rbrush_list.ids, sizeof(int) * rbrush_list.cap);
+	rbrush_list.vis_list = realloc(rbrush_list.vis_list, rbrush_list.cap);
 	// -------------------------------------------------------------------------------
 
 	// Load .map file, collision, physics, ai logic, etc. 
@@ -1009,11 +1011,11 @@ MapSection BuildMapSect(char *path, SpawnList *spawn_list) {
 }
 
 void SectFreeBrushData(MapSection *sect) {
-	
+	if(rbrush_list.vis_list)
+		free(rbrush_list.vis_list);
 
-	for(int i = 0; i < rbrush_list.count; i++) {
+	for(int i = 0; i < rbrush_list.count; i++) 
 		UnloadModel(rbrush_list.render_brushes[i].model);
-	}
 
 	for(int i = 0; i < translucent_rbrush_list.count; i++)
 		UnloadModel(translucent_rbrush_list.render_brushes[i].model);
@@ -1398,6 +1400,38 @@ void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size)
 	}
 }
 
+void UpdateVisList(MapSection *sect, Vector3 pos) {
+	Bsp_Data *bsp = &sect->bsp_data;
+
+	i32 curr_leaf = Bsp_FindLeaf(bsp, pos);
+	Bsp_Leaf *leaf = &bsp->leaves[curr_leaf];
+
+	if(leaf->visofs < 0) {
+		// No vis data for leaf, render everything
+		memset(rbrush_list.vis_list, 1, bsp->num_leaves);
+		return;
+	}
+
+	u8 *vis = bsp->vis + leaf->visofs;
+	u32 leafnum = 1;
+
+	while(leafnum < bsp->num_leaves) {
+		if(*vis == 0) {
+			++vis;
+			u32 run = (u32)(*vis) * 8;
+			++vis;
+			u32 count = (run < bsp->num_leaves - leafnum) ? run : (bsp->num_leaves - leafnum);
+			leafnum += run;
+		} else {
+			u8 byte = *vis++;
+			for(i32 bit = 0; bit < 8 && leafnum < bsp->num_leaves; bit++, leafnum++)
+				rbrush_list.vis_list[leafnum] = (byte >> bit) & 1;
+		}
+	}
+
+	rbrush_list.vis_list[curr_leaf] = 1;
+} 
+
 #define TRANSLUCENT_MAX	128
 int translucent_count = 0;
 int translucent_ids[TRANSLUCENT_MAX] = {0};
@@ -1406,6 +1440,7 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 
 	translucent_count = 0;
 	
+	/*
 	int curr_leaf = Bsp_FindLeaf(&sect->bsp_data, pos);
 	for(int i = 0; i < rbrush_list.count; i++) {
 		if(!Bsp_LeafVisible(&sect->bsp_data, curr_leaf, rbrush_list.ids[i])) 
@@ -1415,6 +1450,19 @@ void DrawMap(MapSection *sect, Vector3 pos) {
 			continue;
 		}
 
+		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
+	}
+	*/
+
+	UpdateVisList(sect, pos);
+	for(int i = 0; i < rbrush_list.count; i++) {
+		RenderBrush *rb = &rbrush_list.render_brushes[i];
+		// Skip non-visible leaves
+		if(!rbrush_list.vis_list[rb->leaf_id]) continue;
+		// Skip specified flags
+		if(rb->flags & RBRUSH_TRANSLUCENT) {
+			continue;
+		}
 		DrawModel(rbrush_list.render_brushes[i].model, Vector3Zero(), 1, WHITE);
 	}
 }

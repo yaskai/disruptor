@@ -130,6 +130,7 @@ void DebugDrawNavGraphs(MapSection *sect, Model model);
 void DebugDrawNavGraphsText(MapSection *sect, Camera3D cam, Vector2 window_size);
 
 void UpdateMapMeshList(MapSection *sect, Camera3D cam);
+void UpdateVisList(MapSection *sect, Vector3 pos);
 void DrawMap(MapSection *sect, Vector3 pos);
 void DrawMapTranslucent(MapSection *sect, Camera3D cam);
 

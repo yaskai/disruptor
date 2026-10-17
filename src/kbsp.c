@@ -877,7 +877,9 @@ Model *BspLeafToModels(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
 	return models;
 }
 
-RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_count) {
+RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, int leaf_id, int *out_count) {
+	Bsp_Leaf *leaf = &bsp->leaves[leaf_id];
+
 	int max_tex_id = 0; 
 	for(int i = 0; i < leaf->num_faces; i++) {
 		int face_id = bsp->lfaces[leaf->first_face + i];	
@@ -1005,6 +1007,7 @@ RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, Bsp_Leaf *leaf, int *out_coun
 
 	for(int i = 0; i < used; i++) {
 		render_brushes[i] = (RenderBrush) {0};
+		render_brushes[i].leaf_id = leaf_id;
 
 		int tex_id = tex_slot_ids[i];
 
