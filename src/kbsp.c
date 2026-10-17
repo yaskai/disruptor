@@ -992,7 +992,6 @@ RenderBrush *BspLeafToRenderBrushes(Bsp_Data *bsp, int leaf_id, int *out_count) 
 					continue;
 				}
 
-
 				float lm_u = Vector3DotProduct(tri.vertices[k], lmd->vs) + lmd->dist_s;
 				float lm_v = Vector3DotProduct(tri.vertices[k], lmd->vt) + lmd->dist_t;
 				mesh->texcoords2[*vert_id*2+0] = (uv_rec->x + lm_u + 0.5f) / bsp->lm.tex.width;

@@ -11,6 +11,7 @@
 #include "lit.h"
 #include "hud.h"
 #include "ui.h"
+#include "cam.h"
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -18,6 +19,8 @@
 #define FLAG_EXIT_REQUEST	0x01
 #define FLAG_LOAD_COMPLETE 	0x02
 #define FLAG_GAME_STARTED 	0x04
+
+#define TICKRATE (1.0f / 66.0f)
 
 typedef struct {
 	AudioPlayer audio_player;
@@ -48,6 +51,11 @@ typedef struct {
 
 	LightHandler lh;
 
+	Cam_Controller cc;
+
+	// Simulation accumulator
+	float acc;
+
 	float splash_timer;
 
 	u8 flags;
@@ -63,7 +71,8 @@ void GameAudioSetup(Game *game);
 void GameLoadScene(Game *game, char *path, u8 flags);
 
 void GameUpdate(Game *game, float dt);
-void GameDraw(Game *game, float dt);
+void GameTick(Game *game, float dt);
+void GameDraw(Game *game, float dt, float alpha);
 
 void StartNewGame(Game *game);
 void GameTitleScreen(Game *game);

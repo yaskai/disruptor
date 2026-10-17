@@ -130,7 +130,6 @@ void PlayerInteract(EntityHandler *handler, MapSection *sect, Entity *player) {
 		case ENT_LADDER:
 			on_ladder = true;
 			player->comp_ai.targ_data.ent_id = id;
-
 			
 			Vector3 center = BoxCenter(other->comp_transform.bounds);
 			float scale = (ct->position.z > other->comp_transform.bounds.max.z) ? 1.5f : 1.0f;
@@ -448,12 +447,17 @@ void PlayerUpdate(Entity *player, float dt) {
 	}
 
 	if(!player_dead) {
+		// [cc change]
+		/*
 		ptr_cam->position.x = player->comp_transform.position.x;
 		ptr_cam->position.y = player->comp_transform.position.y;
+		*/
 
 		//float z_mod = (crouch) ? 0 : 16;
 		//z_mod = 16;
 
+		// [cc change]
+		/*
 		if(!step_frame) {
 			//ptr_cam->position.z = Lerp(ptr_cam->position.z, player->comp_transform.position.z + 12, dt * 100);
 			ptr_cam->position.z = player->comp_transform.position.z + cam_zmod;
@@ -462,7 +466,7 @@ void PlayerUpdate(Entity *player, float dt) {
 			if(fabsf(ptr_cam->position.z - (player->comp_transform.position.z + cam_zmod)) <= 0.75f) 
 				step_frame = false;
 		}
-
+		*/
 	}
 
 	// Update position + velocity
@@ -475,8 +479,8 @@ void PlayerUpdate(Entity *player, float dt) {
 
 	player->comp_health.damage_cooldown -= dt;
 
-	if(!player_dead)
-		cam_Adjust(&player->comp_transform, dt);
+	// [cc change]
+	//if(!player_dead) cam_Adjust(&player->comp_transform, dt);
 
 	if(!player->comp_transform.on_ground)
 		step_frame = false;
@@ -519,6 +523,11 @@ void PlayerUpdate(Entity *player, float dt) {
 			on_ladder = false;
 		}
 	}
+
+	if(crouch)
+		player->comp_transform.flags |= CT_CROUCH;
+	else 
+		player->comp_transform.flags &= ~CT_CROUCH;
 }
 
 void PlayerDraw(Entity *player) {
@@ -736,7 +745,8 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 
 	// Copy forward to player transform for camera to use
 	ct->forward = forward;			
-	ptr_cam->target = Vector3Add(ptr_cam->position, ct->forward);
+	// [cc change]
+	//ptr_cam->target = Vector3Add(ptr_cam->position, ct->forward);
 
 	forward = clipZ(forward);
 	forward = Vector3Normalize(forward);
@@ -1192,7 +1202,7 @@ void pm_Jump(comp_Transform *ct, InputHandler *input) {
 
 	Vector3 horizontal_velocity = (Vector3) { ct->velocity.x, ct->velocity.y, 0 };
 
-	if(input->actions[ACTION_JUMP].state == 2) {
+	if(input->actions[ACTION_JUMP].state == INPUT_DOWN) {
 		bool jump = true;
 		float mult = 1.0f;
 
@@ -1368,8 +1378,9 @@ void SpawnPlayer(Entity *ent, Vector3 position, Vector3 fwd) {
 
 	ent->comp_transform.targ_look = fwd;
 
-	ptr_cam->position = ent->comp_transform.position;
-	ptr_cam->target = Vector3Add(ent->comp_transform.position, ent->comp_transform.forward);
+	// [cc change]
+	//ptr_cam->position = ent->comp_transform.position;
+	//ptr_cam->target = Vector3Add(ent->comp_transform.position, ent->comp_transform.forward);
 
 	cam_bob = 0;
 	cam_tilt = 0;

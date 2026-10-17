@@ -85,6 +85,7 @@ void GameInit(Game *game, Config *conf) {
 
 	game_self_ptr = game;
 
+	game->acc = 0.0f;
 	game->splash_timer = 10.0f;
 }
 
@@ -321,11 +322,32 @@ void GameLoadScene(Game *game, char *path, u8 flags) {
 	printf("player_id: %d\n", game->ent_handler.player_id);
 	printf("bug_id: %d\n", game->ent_handler.bug_id);
 	printf("sect ptr (src) %p\n", &game->test_section);
+
+	game->cc = cc_Init(&game->camera, game->ent_handler.player_id);
 }
 
 void GameUpdate(Game *game, float dt) {
-	//if(IsKeyPressed(KEY_ESCAPE))
-		//game->flags |= FLAG_EXIT_REQUEST;
+	bool pause = (game->flags & UI_ACTIVE);
+	
+	if(!pause) {
+		PollInput(&game->input_handler);
+		// Accumulate
+		game->acc += dt;
+		// Do Tick
+		while(game->acc >= TICKRATE) {
+			GameTick(game, TICKRATE);
+			game->acc -= TICKRATE;
+		}
+	}
+
+	// Measure alpha,
+	// used for interpolating positions during rendering 
+	float alpha = game->acc / TICKRATE;
+	/*
+	if (game->flags & FLAG_GAME_STARTED && !(game->ui.flags & UI_START_GAME_REQ) && !(game->flags & UI_ACTIVE)) {
+		EntPerFrameUpdate(&game->ent_handler);
+	} 
+	*/
 
 	if(game->ui.flags & UI_EXIT_GAME_REQ)
 		game->flags |= FLAG_EXIT_REQUEST;
@@ -389,7 +411,6 @@ void GameUpdate(Game *game, float dt) {
 		game->ui.flags &= ~UI_TOGGLE_REQ;
 	}
 
-
 	if(game->ent_handler.flags & AT_LEVEL_END) {
 		screen_cap = true;
 
@@ -449,23 +470,6 @@ void GameUpdate(Game *game, float dt) {
 
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
 
-	if(game->ui.flags & UI_ACTIVE) {
-		/*
-		BeginTextureMode(game->render_target2D);
-		ui_PauseUpdate(&game->ui);
-		EndTextureMode();
-		*/
-		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
-
-	} else if (game->flags & FLAG_GAME_STARTED && !(game->ui.flags & UI_START_GAME_REQ)) {
-		PollInput(&game->input_handler);
-
-		MapUpdateBvhOffsets(&game->test_section);
-		UpdateEntities(&game->ent_handler, &game->test_section, dt);
-		AP_Update(&game->audio_player, dt);
-		DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
-		PlayerGunUpdate(&game->player_gun, dt);
-	}
 
 	if((game->ent_handler.flags & AUTOSAVE_REQUEST) ^ (game->ui.flags & UI_SAVE_GAME_REQ)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
@@ -475,6 +479,21 @@ void GameUpdate(Game *game, float dt) {
 		game->ui.flags &= ~UI_SAVE_GAME_REQ;
 
 		screen_cap = true;
+	}
+
+	GameDraw(game, dt, alpha);
+}
+
+void GameTick(Game *game, float dt) {
+	if(game->ui.flags & UI_ACTIVE) { 
+		game->input_handler.mouse_delta = (Vector2) { 0, 0 };
+	} else if (game->flags & FLAG_GAME_STARTED && !(game->ui.flags & UI_START_GAME_REQ)) {
+
+		MapUpdateBvhOffsets(&game->test_section);
+		TickEntities(&game->ent_handler, &game->test_section, dt);
+		AP_Update(&game->audio_player, dt);
+		DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
+		PlayerGunUpdate(&game->player_gun, dt);
 	}
 }
 
@@ -625,7 +644,7 @@ void RenderDebugLayer(Game *game) {
 	EndTextureMode();
 }
 
-void GameDraw(Game *game, float dt) {
+void GameDraw(Game *game, float dt, float alpha) {
 	bool pause = false;
 
 	if(game->flags & FLAG_GAME_STARTED) {
@@ -635,6 +654,7 @@ void GameDraw(Game *game, float dt) {
 			EndTextureMode();
 
 		} else {
+			cc_Resolve(&game->cc, &game->ent_handler, alpha);
 			RenderMainLayer(game, dt);
 			RenderGunLayer(game);
 			RenderDebugLayer(game);

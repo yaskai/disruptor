@@ -453,8 +453,19 @@ void UpdateRenderList(EntityHandler *handler, MapSection *sect) {
 
 float prev_pos_tick = 0.0f;
 
+/*
+void EntPerFrameUpdate(EntityHandler *handler) {
+	for(u16 i = 0; i < handler->count; i++) {
+		Entity *ent = &handler->ents[i];
+		ent->comp_transform.prev_pos = ent->comp_transform.position;
+	}
+}
+*/
+
 // Entity update loop, called once per frame, every frame
-void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
+// * NOTE: change this comment ^ ^ ^ 
+// Game is now tick based... 
+void TickEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	if(!ptr_handler_self)
 		ptr_handler_self = handler;
 
@@ -464,6 +475,13 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 	//if(handler->flags & AT_LEVEL_END)
 		//return;
 
+	// * NOTE:
+	// Not sure what this was supposed to do.
+	// Maybe prevent doing grid checks too often? 
+	// Seems useless now and messes with new tick system & frame interpolation,
+	// so I'm removing it...
+	// 
+	/*
 	prev_pos_tick -= dt;
 	if(prev_pos_tick < 0.0f) {
 		for(u16 i = 0; i < handler->count; i++) {
@@ -472,6 +490,12 @@ void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt) {
 		}
 
 		prev_pos_tick = 4*dt;
+	}
+	*/
+
+	for(u16 i = 0; i < handler->count; i++) {
+		Entity *ent = &handler->ents[i];
+		ent->comp_transform.prev_pos = ent->comp_transform.position;
 	}
 
 	UpdateEntityShaders(handler);

@@ -33,7 +33,7 @@ void StartupScreen(Config *conf, Game *game) {
 	EndDrawing();
 }
 
-void GameTick(bool *exit, Game *game);
+void GameRun(bool *exit, Game *game);
 void OnExit(Config *conf, Game *game);
 
 int main() {
@@ -73,7 +73,7 @@ int main() {
 
 	// Run main game loop
 	bool exit = false;
-	GameTick(&exit, &game);
+	GameRun(&exit, &game);
 
 	// App shutdown
 	OnExit(&conf, &game);
@@ -81,13 +81,13 @@ int main() {
 }
 
 // Main loop, called every frame until app exit
-void GameTick(bool *exit, Game *game) {
+void GameRun(bool *exit, Game *game) {
 	while(!(*exit)) {
 		*exit = ( (game->flags & FLAG_EXIT_REQUEST) || WindowShouldClose() );
 		float dt = GetFrameTime(); 	
 
 		GameUpdate(game, dt);
-		GameDraw(game, dt);
+		//GameDraw(game, dt);
 	}
 }
 

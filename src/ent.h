@@ -69,6 +69,7 @@ Vector3 CoordsToVec3(Coords coords, EntGrid *grid);
 
 bool CoordsInBounds(Coords coords, EntGrid *grid);
 
+#define CT_CROUCH	0x01
 typedef struct {
 	BoundingBox bounds;
 
@@ -96,6 +97,8 @@ typedef struct {
 	i32 last_ground_surface;
 
 	short on_ground;
+
+	u8 flags;
 
 } comp_Transform;
 
@@ -347,7 +350,8 @@ void LoadEntityBaseModels(EntityHandler *handler);
 void EntHandlerInit(EntityHandler *handler, vEffect_Manager *effect_manager, AudioPlayer *ap);
 void EntHandlerClose(EntityHandler *handler);
 
-void UpdateEntities(EntityHandler *handler, MapSection *sect, float dt);
+void EntPerFrameUpdate(EntityHandler *handler);
+void TickEntities(EntityHandler *handler, MapSection *sect, float dt);
 void RenderEntities(EntityHandler *handler, float dt);
 
 void RenderBrushEntities(EntityHandler *handler);
