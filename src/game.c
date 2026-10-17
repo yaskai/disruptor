@@ -720,7 +720,7 @@ void GameDraw(Game *game, float dt) {
 	}
 
 	int fps = GetFPS();
-	//DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
+	DrawText(TextFormat("fps: %d", fps), 4, 4, 32, RAYWHITE);
 	//EntDebugText();
 
 	EndDrawing();
@@ -772,10 +772,10 @@ void StartNewGame(Game *game) {
 	game->flags &= ~FLAG_GAME_STARTED;
 	ui_Toggle();
 	game->ui.flags = 0;
-	//GameLoadScene(game, "resources/maps/10_a_1", 0);
-	GameLoadScene(game, "resources/maps/11_a_2", 0);
-	SendUnlockPickupEvent(ENT_UNLOCK_BUG);
-	SendUnlockPickupEvent(ENT_UNLOCK_REVOLVER);
+	GameLoadScene(game, "resources/maps/10_a_1", 0);
+	//GameLoadScene(game, "resources/maps/11_a_3", 0);
+	//SendUnlockPickupEvent(ENT_UNLOCK_BUG);
+	//SendUnlockPickupEvent(ENT_UNLOCK_REVOLVER);
 	game->flags |= FLAG_GAME_STARTED;
 	ResetPlayerWeapons();
 }

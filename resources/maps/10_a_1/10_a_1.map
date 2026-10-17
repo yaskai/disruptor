@@ -1875,110 +1875,6 @@
 }
 // entity 7
 {
-"classname" "info_switch"
-"origin" "1400 -504 -592"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 8
-{
-"classname" "info_switch"
-"origin" "1392 -480 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 9
-{
-"classname" "info_switch"
-"origin" "1400 -456 -592"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 10
-{
-"classname" "info_switch"
-"origin" "1392 -432 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 11
-{
-"classname" "info_switch"
-"origin" "1256 -496 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 12
-{
-"classname" "info_switch"
-"origin" "1256 -472 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 13
-{
-"classname" "info_switch"
-"origin" "1256 -448 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 14
-{
-"classname" "info_switch"
-"origin" "1256 -424 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 15
-{
-"classname" "func_door"
-"on_trigger" "4"
-"trigger_group" "1"
-"start_active" "1"
-"start_open" "0"
-"enum_id" "18"
-"targ_x" "0"
-"targ_y" "0"
-"targ_z" "112"
-"speed" "700"
-"_phong" "0"
-"_phong_angle" "88"
-// brush 0
-{
-( 1296 -416 -512 ) ( 1296 -512 -512 ) ( 1296 -512 -600 ) ind_st1_blu1 0 0 0 1 1
-( 1296 -512 -512 ) ( 1304 -512 -512 ) ( 1304 -512 -600 ) ind_st1_blu1 0 0 0 1 1
-( 1304 -512 -600 ) ( 1304 -416 -600 ) ( 1296 -416 -600 ) ind_st1_blu1 0 0 0 1 1
-( 1296 -416 -512 ) ( 1304 -416 -512 ) ( 1304 -512 -512 ) ind_st1_blu1 0 0 0 1 1
-( 1304 -416 -600 ) ( 1304 -416 -512 ) ( 1296 -416 -512 ) ind_st1_blu1 0 0 0 1 1
-( 1304 -512 -512 ) ( 1304 -416 -512 ) ( 1304 -416 -600 ) ind_st1_blu1 0 0 0 1 1
-}
-}
-// entity 16
-{
 "classname" "func_detail_fence"
 // brush 0
 {
@@ -1990,7 +1886,7 @@
 ( 1032 -208 -440 ) ( 1032 -216 -520 ) ( 1032 -216 -440 ) {glass00 0 0 0 1 1
 }
 }
-// entity 17
+// entity 8
 {
 "classname" "info_switch"
 "origin" "128 -968 -512"
@@ -2000,14 +1896,14 @@
 "trigger_group" "5"
 "trigger_type" "0"
 }
-// entity 18
+// entity 9
 {
 "classname" "unlock_bug"
 "origin" "876 -316 -516"
 "enum_id" "21"
 "angle" "0"
 }
-// entity 19
+// entity 10
 {
 "classname" "info_switch"
 "origin" "640 -320 -504"
@@ -2017,7 +1913,7 @@
 "trigger_group" "7"
 "trigger_type" "0"
 }
-// entity 20
+// entity 11
 {
 "classname" "func_door"
 "on_trigger" "4"
@@ -2041,33 +1937,13 @@
 ( 320 -1104 -512 ) ( 320 -1088 -512 ) ( 320 -1088 -600 ) ind_door1_teal2 160 0 0 1 1
 }
 }
-// entity 21
+// entity 12
 {
 "classname" "text_object"
 "origin" "256 -1024 -584"
 "text" "[RMB] recall"
 }
-// entity 22
-{
-"classname" "info_switch"
-"origin" "1256 -520 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 23
-{
-"classname" "info_switch"
-"origin" "1256 -400 -576"
-"angle" "0"
-"enum_id" "10"
-"trigger_condition" "2"
-"trigger_group" "1"
-"trigger_type" "0"
-}
-// entity 24
+// entity 13
 {
 "classname" "func_detail_fence"
 // brush 0
@@ -2079,6 +1955,130 @@
 ( 1760 528 -400 ) ( 1568 528 -472 ) ( 1760 528 -472 ) {ind_g1_blk1 0 0 0 1 1
 ( 1760 528 -400 ) ( 1760 520 -472 ) ( 1760 520 -400 ) {ind_g1_blk1 0 0 0 1 1
 }
+}
+// entity 14
+{
+"classname" "info_switch"
+"origin" "1392 -480 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 15
+{
+"classname" "info_switch"
+"origin" "1392 -432 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 16
+{
+"classname" "info_switch"
+"origin" "1256 -400 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 17
+{
+"classname" "info_switch"
+"origin" "1256 -424 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 18
+{
+"classname" "info_switch"
+"origin" "1256 -448 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 19
+{
+"classname" "info_switch"
+"origin" "1256 -472 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 20
+{
+"classname" "info_switch"
+"origin" "1256 -496 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 21
+{
+"classname" "info_switch"
+"origin" "1256 -520 -576"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 22
+{
+"classname" "func_door"
+"on_trigger" "4"
+"trigger_group" "1"
+"start_active" "1"
+"start_open" "0"
+"enum_id" "18"
+"targ_x" "0"
+"targ_y" "0"
+"targ_z" "112"
+"speed" "700"
+"_phong" "0"
+"_phong_angle" "88"
+// brush 0
+{
+( 1296 -416 -512 ) ( 1296 -512 -512 ) ( 1296 -512 -600 ) ind_st1_blu1 0 0 0 1 1
+( 1296 -512 -512 ) ( 1304 -512 -512 ) ( 1304 -512 -600 ) ind_st1_blu1 0 0 0 1 1
+( 1304 -512 -600 ) ( 1304 -416 -600 ) ( 1296 -416 -600 ) ind_st1_blu1 0 0 0 1 1
+( 1296 -416 -512 ) ( 1304 -416 -512 ) ( 1304 -512 -512 ) ind_st1_blu1 0 0 0 1 1
+( 1304 -416 -600 ) ( 1304 -416 -512 ) ( 1296 -416 -512 ) ind_st1_blu1 0 0 0 1 1
+( 1304 -512 -512 ) ( 1304 -416 -512 ) ( 1304 -416 -600 ) ind_st1_blu1 0 0 0 1 1
+}
+}
+// entity 23
+{
+"classname" "info_switch"
+"origin" "1400 -504 -592"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
+}
+// entity 24
+{
+"classname" "info_switch"
+"origin" "1400 -456 -592"
+"angle" "0"
+"enum_id" "10"
+"trigger_condition" "2"
+"trigger_group" "1"
+"trigger_type" "0"
 }
 // entity 25
 {

@@ -99,8 +99,9 @@ void BugBounce(Entity *bug_ent, comp_Transform *ct, MapSection *sect, EntityHand
 
 	// Find target if not set already 
 	if(!bug_target_picked) {
-		bug_ent->comp_ai.targ_data.ent_id = BugFindTarget(bug_ent, sect, handler);
-	} 
+		 bug_ent->comp_ai.targ_data.ent_id = BugFindTarget(bug_ent, sect, handler);
+		 if(bug_ent->comp_ai.targ_data.ent_id > -1) bug_target_picked = true;
+	}
 
 	// Increment bounce count
 	(*bounce)++;

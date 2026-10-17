@@ -1,0 +1,107 @@
+---- qbsp / ericw-tools 2.0.0-alpha10-72-g67e9fd3b-dirty ----
+
+--- Options Summary ---
+    "forcegoodtree" was set to "1" (from command line)
+
+Input file: /home/kai/disruptor/resources/maps/outro/outro.map
+Output file: /home/kai/disruptor/resources/maps/outro/outro.bsp
+
+INFO: using built-in palette.
+     7 entities
+     4 unique textures
+    10 texinfos
+    76 unique planes
+
+INFO: world extents calculated to 5896 units
+    16 brushes
+    96 sides
+
+            0 texture frames added
+Processing hull 0...
+     4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL brushes
+     6 SOLID brushes
+     6 SKY brushes
+    16 brushes total
+    96 visible sides
+INFO: calculating BSP for 16 brushes with 96 sides
+    16 brushes
+    96 visible faces
+    118 nodes
+    118 expensive split nodes
+    119 leaves
+      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      6 SOLID leafs
+     60 SKY leafs
+     49 EMPTY leafs
+    119 leafs total
+    23 max tree height
+    15 avg tree height
+    550 tree portals
+    27 outside leaves
+    0 detail filled leafs
+    16 brushes
+    41 visible faces
+    55 non-visible faces
+    181 nodes
+    114 non-visible nodes
+    181 expensive split nodes
+    182 leaves
+      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+      6 SOLID leafs
+     66 SKY leafs
+    106 EMPTY leafs
+    182 leafs total
+    12 max tree height
+     9 avg tree height
+    799 tree portals
+    84 outside leaves
+    0 detail filled leafs
+    799 tree portals
+    256 sides visible
+    157 makefaces
+     52 merged
+     65 subdivided
+     92 player-occupiable leaves
+     86 clusters of leaves
+    216 vis portals
+fixing up cluster at 584 -1124 12
+fixing up cluster at -280 -768 12
+fixing up cluster at -864 -1124 12
+      4 WINDOW | MIRROR_INSIDE_SET | TRANSLUCENT | DETAIL leafs
+     22 EMPTY leafs
+     66 SKY leafs
+     90 SOLID leafs
+    182 leafs total
+    12 max tree height
+     9 avg tree height
+    152 edges added by tjunctions
+    145 faces optimized through MWT
+    442 triangles computed from MWT
+     44 faces created via optimization of MWT triangles
+    458 edges
+    189 faces
+Processing hull 1...
+Processing hull 2...
+Writing outro.bsp as Quake BSP bsp29
+Wrote outro.bsp
+
+count   lump name    byte size 
+      1 models               64
+     44 planes              880
+    229 vertexes           2748
+    181 nodes              4344
+      8 texinfos            320
+    189 faces              3780
+     12 clipnodes            96
+     93 leafs              2604
+    233 marksurfaces        466
+    459 edges              1836
+    820 surfedges          3280
+      4 textures         471108
+        lightdata             0
+        visdata               0
+        entdata             618
+
+0.028s seconds elapsed
+
+

@@ -107,6 +107,9 @@ void PlayerInteract(EntityHandler *handler, MapSection *sect, Entity *player) {
 		if(other->type == ENT_PLAYER)
 			continue;
 
+		if(other->type == ENT_SWITCH && other->trigger_condition != TRIGGER_COND_INTERACT)
+			continue;
+
 		if(!CheckCollisionBoxes(ct->bounds, other->comp_transform.bounds))
 			continue;
 
@@ -141,6 +144,11 @@ void PlayerInteract(EntityHandler *handler, MapSection *sect, Entity *player) {
 			ct->position.x = offset.x;
 			ct->position.y = offset.y;
 			
+			break;
+
+		case ENT_SWITCH:
+			DoTrigger(handler, other);
+
 			break;
 	}
 }
@@ -1297,7 +1305,8 @@ void PlayerDebugText(Entity *player) {
 	DrawText(TextFormat("graph_id: %d", player->comp_ai.navgraph_id), 16, 990, 24, RAYWHITE);
 	DrawText(TextFormat("checkpoint: %d", player_curr_checkpoint), 16, 1020, 24, RAYWHITE);
 	//DrawText(TextFormat("in hull norm: { %f, %f, %f }", dbg_hull_norm.x, dbg_hull_norm.y, dbg_hull_norm.z), 16, 1020, 24, RAYWHITE);
-	DrawText(TextFormat("bug_state: %d", ptr_ent_handler->ents[ptr_ent_handler->bug_id].comp_ai.state), 16, 1050, 24, RAYWHITE);
+	//DrawText(TextFormat("bug_state: %d", ptr_ent_handler->ents[ptr_ent_handler->bug_id].comp_ai.state), 16, 1050, 24, RAYWHITE);
+	DrawText(TextFormat("bug_target: %d", ptr_ent_handler->ents[ptr_ent_handler->bug_id].comp_ai.targ_data.ent_id), 16, 1050, 24, RAYWHITE);
 }
 
 void pm_AirFriction(comp_Transform *ct, float dt) {

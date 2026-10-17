@@ -4,7 +4,7 @@ BSP is version Quake BSP bsp29
 INFO: using built-in palette.
 Loading extended texinfo flags from 11_a_2.texinfo.json...
 Loading extended content flags from 11_a_2.content.json...
-54 entities read, 26 are lights.
+62 entities read, 33 are lights.
 .lit colored light output requested on command line.
 BSPX colored light output requested on command line.
 BSPX light directions output requested on command line.
@@ -38,33 +38,33 @@ BSPX light directions output requested on command line.
 Embree_TraceInit: Embree version: 4.4.0
 Embree_TraceInit: 
 	0 sky faces
-	1307 solid faces
+	1361 solid faces
 	10 filtered faces
 	0 shadow-casting skip faces
-SetupLights: 26 initial lights
-SetupLights: 26 after surface lights
-SetupLights: 26 after jittering
-Final count: 26 lights, 129 suns in use.
+SetupLights: 33 initial lights
+SetupLights: 33 after surface lights
+SetupLights: 33 after jittering
+Final count: 33 lights, 129 suns in use.
        48 dirtmap vectors
 0 surface light points in use.
 map uses color: true
-lightmap size (total): 959224
+lightmap size (total): 991368
 Lighting Completed.
 
 Writing 11_a_2.lit
 DECOUPLED_LM BSPX lump written
      32 32 32 lightgrid_dist
-     44 62 30 grid_size
+     65 62 30 grid_size
      -928 -1624 296 grid_mins
-     464 360 1256 grid_maxs
+     1152 360 1256 grid_maxs
      1 num_styles
-octree stored 17272 grid nodes + 64568 occluded = 81840 total, full stored 81840 (octree is 21.104595 percent)
-octree nodes size: 5808 bytes (132 * 44)
-octree leafs 656 overhead 15744 bytes
-        88065 bytes LIGHTGRID_OCTREE
+octree stored 17288 grid nodes + 103612 occluded = 120900 total, full stored 120900 (octree is 14.299421 percent)
+octree nodes size: 4400 bytes (100 * 44)
+octree leafs 440 overhead 10560 bytes
+        83397 bytes LIGHTGRID_OCTREE
 0 switchable light styles (32 max)
 Writing 11_a_2.bsp as Quake BSP bsp29
-2.723s seconds elapsed
+2.354s seconds elapsed
 0 empty lightmaps
 
 

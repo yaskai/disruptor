@@ -1,0 +1,22 @@
+---- vis / ericw-tools 2.0.0-alpha10 ----
+
+--- Options Summary ---
+
+LoadBSPFile: 'outro.bsp'
+BSP is version Quake BSP bsp29
+INFO: using built-in palette.
+Loading extended texinfo flags from outro.texinfo.json...
+    92 leafs
+    86 clusters
+   216 portals
+Calculating Base Vis:
+Calculating Full Vis:
+Expanding clusters...
+average leafs visible: 48
+c_noclip: 0
+c_chains: 20420
+visdatasize:1092  compressed from 1104
+Writing outro.bsp as Quake BSP bsp29
+0.01s elapsed
+
+
