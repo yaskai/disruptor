@@ -719,8 +719,30 @@ void pm_Move(Entity *ent, comp_Transform *ct, InputHandler *input, EntityHandler
 	}
 }
 
+void PlayerMouseLook(comp_Transform *ct, InputHandler *input, float dt) {
+	// Update pitch, yaw, roll	
+	// (in the case of the player, these are the same for both player entity and the camera)
+	ct->pitch -= input->mouse_delta.y;
+	ct->yaw -= input->mouse_delta.x;
+
+	// Clamp pitch to *almost* 90 degrees in both directions, 
+	// prevents jitter/direction flipping
+	ct->pitch = Clamp(ct->pitch, -PLAYER_MAX_PITCH, PLAYER_MAX_PITCH);
+
+	// Get look direction from angles  
+	Vector3 look = Vector3Normalize( (Vector3) {
+		.x = cosf(ct->yaw) * cosf(ct->pitch),
+		.y = (sinf(ct->yaw) * cosf(ct->pitch)),
+		.z = sinf(ct->pitch),
+	} );
+
+	ct->forward = look;			
+	ct->targ_look = look;
+}
+
 // Take input, apply to velocity
 Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
+	/*
 	// Update pitch, yaw, roll	
 	// (in the case of the player, these are the same for both player entity and the camera)
 	ct->pitch -= input->mouse_delta.y;
@@ -751,6 +773,7 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	forward = clipZ(forward);
 	forward = Vector3Normalize(forward);
 	right = Vector3CrossProduct(forward, UP);
+	*/
 
 	// Get move input from keys
 	// index 0 = towards, index 1 = away
@@ -768,9 +791,10 @@ Vector3 pm_GetWishDir(comp_Transform *ct, InputHandler *input) {
 	// Convert input to vectors
 	// Y component must be removed and vector normalized
 	// Forward:
-	Vector3 wish_forw = Vector3Scale(forward, input_forw[0] - input_forw[1]);
+	Vector3 wish_forw = Vector3Scale(ct->forward, input_forw[0] - input_forw[1]);
 
 	// Side: 
+	Vector3 right = Vector3CrossProduct(ct->forward, UP);
 	Vector3 wish_side = Vector3Scale(right, input_side[0] - input_side[1]);
 
 	// ** NOTE:

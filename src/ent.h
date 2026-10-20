@@ -397,6 +397,8 @@ void PlayerMove(Entity *player, float dt);
 
 void PlayerSetRecoilInput(Entity *player, float recoil_input);
 
+void PlayerMouseLook(comp_Transform *ct, InputHandler *input, float dt);
+
 // ----------------------------------------------------------------------------------------------------------------------------
 
 void ProcessEntity(EntSpawn *spawn_point, EntityHandler *handler, NavGraph *nav_graph, Bsp_Data *bsp);

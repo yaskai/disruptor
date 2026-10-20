@@ -343,11 +343,19 @@ void GameUpdate(Game *game, float dt) {
 	// Measure alpha,
 	// used for interpolating positions during rendering 
 	float alpha = game->acc / TICKRATE;
-	/*
-	if (game->flags & FLAG_GAME_STARTED && !(game->ui.flags & UI_START_GAME_REQ) && !(game->flags & UI_ACTIVE)) {
-		EntPerFrameUpdate(&game->ent_handler);
-	} 
-	*/
+
+	// Some per-frame updates (not in fixed game tick)
+	if(game->flags & FLAG_GAME_STARTED) {
+		bool exec = true;
+		
+		if(game->ui.flags & UI_START_GAME_REQ) 	exec = false;
+		if(game->ui.flags & UI_ACTIVE)			exec = false;
+
+		if(exec) {
+			PlayerGunUpdate(&game->player_gun, dt);
+			PlayerMouseLook(&game->ent_handler.ents[game->ent_handler.player_id].comp_transform, &game->input_handler, dt);
+		}
+	}
 
 	if(game->ui.flags & UI_EXIT_GAME_REQ)
 		game->flags |= FLAG_EXIT_REQUEST;
@@ -493,7 +501,6 @@ void GameTick(Game *game, float dt) {
 		TickEntities(&game->ent_handler, &game->test_section, dt);
 		AP_Update(&game->audio_player, dt);
 		DSP_UpdateBlend(&game->test_section, &game->audio_player, game->camera.position, dt);
-		PlayerGunUpdate(&game->player_gun, dt);
 	}
 }
 

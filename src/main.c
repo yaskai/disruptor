@@ -87,7 +87,6 @@ void GameRun(bool *exit, Game *game) {
 		float dt = GetFrameTime(); 	
 
 		GameUpdate(game, dt);
-		//GameDraw(game, dt);
 	}
 }
 
