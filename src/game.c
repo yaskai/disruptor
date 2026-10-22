@@ -19,6 +19,7 @@ Shader blur_shader;
 
 Vector2 mouse_pause_position;
 
+bool virt_cam_follow = true;
 void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point);
 void EndScreen(Game *game, float dt);
 
@@ -478,7 +479,6 @@ void GameUpdate(Game *game, float dt) {
 
 	VirtCameraControls(&game->camera_debug, dt, game->ent_handler.ents[game->ent_handler.player_id].comp_transform.position);
 
-
 	if((game->ent_handler.flags & AUTOSAVE_REQUEST) ^ (game->ui.flags & UI_SAVE_GAME_REQ)) {
 		PlayerGunOnSave(&game->_gsave_state, &game->player_gun);
 		rw_WriteSaveNew(&game->ent_handler, game->_gsave_state.map, game->_gsave_state);
@@ -783,7 +783,11 @@ void VirtCameraControls(Camera3D *cam, float dt, Vector3 target_point) {
 	cam->position = Vector3Add(cam->position, movement);
 	cam->target = Vector3Add(cam->target, movement);
 	
-	if(IsKeyDown(KEY_M))
+	//if(IsKeyDown(KEY_M))
+	if(IsKeyPressed(KEY_M)) 
+		virt_cam_follow = !virt_cam_follow;
+
+	if(virt_cam_follow)
 		cam->target = target_point;
 }
 
